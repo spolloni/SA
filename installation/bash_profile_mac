@@ -1,0 +1,31 @@
+
+# Setting PATH for Python 2.7
+export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:${PATH}"
+
+# MacPorts Installer addition on 2016-02-04_at_23:02:36: adding an appropriate PATH variable for use with MacPorts.
+export PATH="/opt/local/bin:/opt/local/sbin:${PATH}"
+
+# Use StatTransfer from the command line.
+export PATH="/Applications/StatTransfer13/StatTransfer.app/Contents/MacOS:${PATH}"
+
+# Use Stata from the command line.
+export PATH="/Applications/Stata/StataMP.app/Contents/MacOS:${PATH}"
+
+# Use Homebrew's python. 
+export PATH="/usr/local/opt/python/libexec/bin:${PATH}"
+
+# Set PythonPath to use use QGIS w/python.
+export PYTHONPATH="/usr/local/opt/qgis2/lib/python2.7/site-packages:${PYTHONPATH}"
+export PYTHONPATH="/usr/local/lib/qt-4/python2.7/site-packages:${PYTHONPATH}"
+
+# Set PythonPath to use use Processing Toolbox w/python.
+export PYTHONPATH="/usr/local/Cellar/qgis2/2.18.10/QGIS.app/Contents/MacOS/../Resources/python/plugins:${PYTHONPATH}"
+
+# Set NECESSARY environment variables.
+export HB=$(brew --prefix)
+export QGIS_HB_PREFIX=${HB}/opt/qgis2
+export QGIS_BUNDLE=${QGIS_HB_PREFIX}/QGIS.app/Contents
+export QGIS_PREFIX_PATH=${QGIS_BUNDLE}/MacOS
+export GDAL_DRIVER_PATH=${HB}/lib/gdalplugins
+export GDAL_DATA=${HB}/opt/gdal2/share/gdal
+export GRASS_PREFIX=${HB}/opt/grass7/grass-base

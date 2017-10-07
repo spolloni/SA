@@ -1,0 +1,20 @@
+- Install Python
+
+- Install PIP for packages
+
+- Install QGIS + SAGA
+	* if on mac, make sure all dependencies are set in $PATH and $PYTHONPATH
+	* will need to attach Processing toolbox to $PYTHONPATH
+	----> find location in plugins/Manage and install plugins scroll down to processing. **NOTE: path should be to plugins, not to processing!
+	* on linus, SAGA attachment to QGIS is tricky:
+	https://gis.stackexchange.com/questions/224617/problem-getting-saga-activated-in-ubuntu-qgis-2-18-2
+	----> follow procedure by Nez
+
+- Install all scientific computing with pip 
+	* HDBSCAN installation requires cython 
+
+- Install Stata. 
+	* License is server agnostic
+	* add to path everywhere. 
+	---> in mac, bash_profile and sublime bash
+	---> in linux, .profile and .bashrc

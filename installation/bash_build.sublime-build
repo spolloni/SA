@@ -1,0 +1,16 @@
+{
+    "cmd"       : ["bash", "$file"],
+    "selector"  : "source.shell",
+    "path"      : "/usr/local/opt/python/libexec/bin:/Applications/Stata/StataMP.app/Contents/MacOS:/Applications/StatTransfer13/StatTransfer.app/Contents/MacOS:/opt/local/bin:/opt/local/sbin:/Library/Frameworks/Python.framework/Versions/2.7/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/TeX/texbin",
+    "env":
+			{
+    			"PYTHONPATH":"/usr/local/opt/qgis2/lib/python2.7/site-packages:/usr/local/lib/qt-4/python2.7/site-packages:/usr/local/Cellar/qgis2/2.18.10/QGIS.app/Contents/MacOS/../Resources/python/plugins",
+    			"HB": "/usr/local",
+				"QGIS_HB_PREFIX"   : "/usr/local/opt/qgis2",
+				"QGIS_BUNDLE"      : "/usr/local/opt/qgis2/QGIS.app/Contents",
+				"QGIS_PREFIX_PATH" : "/usr/local/opt/qgis2/QGIS.app/Contents/MacOS",
+				"GDAL_DRIVER_PATH" : "/usr/local/lib/gdalplugins",
+				"GDAL_DATA"        : "/usr/local/opt/gdal2/share/gdal",
+				"GRASS_PREFIX"     : "/usr/local/opt/grass7/grass-base",
+			},
+}
