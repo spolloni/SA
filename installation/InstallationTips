@@ -1,6 +1,12 @@
 - Install Python
+	*Linux: sudo apt-get install python
+	*Mac: brew install python
 
 - Install PIP for packages
+	*Linux: sudo apt-get install python-pip
+	*Mac: brew install ???
+
+- Install Sublime Text on Linux
 
 - Install QGIS + SAGA
 	* if on mac, make sure all dependencies are set in $PATH and $PYTHONPATH
@@ -18,3 +24,18 @@
 	* add to path everywhere. 
 	---> in mac, bash_profile and sublime bash
 	---> in linux, .profile and .bashrc
+
+- Install pysqlite.
+	* On linux: "sudo apt-get install libsqlite3-dev" then
+		pip install pysqlite
+
+- ODBC setup.
+	* Mac:
+		- brew install unixodbc
+		- get sqlite3 driver at http://www.ch-werner.de/sqliteodbc/
+		- files are: ~/.odbcinst.ini ~/.odbc.ini and for sytem:
+			/Library/ODBC/odbcinst.ini  /Library/ODBC/odbc.ini 
+		  stata only reads use
+		- follow this: http://db.rstudio.com/best-practices/drivers/
+
+

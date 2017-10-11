@@ -54,8 +54,6 @@ if [ $STEP_2 = 1 ]; then
 	echo "..."
 	cd "${PWD}/subcode"
     StataMP -e do lightstone_merge.do $PWD $MAIN
-    #StataMP do lightstone_merge.do $PWD $MAIN
-    #python gps2ea.py "${GENERATED}/TRANS.csv" "${GENERATED}/TRANS.shp" "${RAW}/EA_SA.shp"
     cd ..
     echo "..."
 	echo "... Step two: DONE"
