@@ -56,7 +56,8 @@ def add_trans(input,database):
         ea_code             VARCHAR(10),
         first_iregdate      VARCHAR(10),
         owner_type          VARCHAR(30),
-        prevowner_type      VARCHAR(30));
+        prevowner_type      VARCHAR(30)
+        );
         '''
     rowsqry = '''
         INSERT INTO transactions
@@ -86,7 +87,9 @@ def add_erven(input,database):
         postcode         SMALLINT(4),                 
         unit             SMALLINT(4),  
         prob_residential VARCHAR(10),               
-        prob_res_small   VARCHAR(20)); 
+        prob_res_small   VARCHAR(20),
+        PRIMARY KEY (property_id)
+        ); 
         '''
     rowsqry = '''
         INSERT INTO erven
@@ -118,7 +121,9 @@ def add_bonds(input,database):
         purchase_price  BIGINT(12),    
         first_pvt_reg   VARCHAR(10),   
         amt_switched    VARCHAR(10),  
-        living_units    SMALLINT );  
+        living_units    SMALLINT,
+        PRIMARY KEY (ea_code,property_id,bond_number)
+        );  
         '''
     rowsqry = '''
         INSERT INTO bonds

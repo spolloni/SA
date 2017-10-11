@@ -8,7 +8,7 @@ main.py
 '''
 
 from pysqlite2 import dbapi2 as sql
-from pycode.lightstone2sql import add_trans, add_erven, add_bonds
+from subcode.lightstone2sql import add_trans, add_erven, add_bonds
 import os 
 
 # switchboard
@@ -21,10 +21,26 @@ gendata = project + 'Generated/LIGHTSTONE/'
 if not os.path.exists(gendata):
     os.makedirs(gendata)
 
-# import txt files into SQL tables
+#############################################
+# STEP 1:  import txt files into SQL tables #
+#############################################
 if IMPORT ==1:
-    add_trans(rawdata+'TRAN_DATA_1205.txt',gendata+'lighstone.db')
-    add_erven(rawdata+'TRAN_DATA_1205.txt',gendata+'lighstone.db')
-    add_bonds(rawdata+'TRAN_DATA_1205.txt',gendata+'lighstone.db')
+
+    print '\n'," Importing Lighstone TXTs into SQL... "
+
+    add_trans(rawdata+'TRAN_DATA_1205.txt',gendata+'lightstone.db')
+    print " - Transactions table: done! "
+
+    add_erven(rawdata+'ERF_DATA_1205.txt',gendata+'lightstone.db')
+    print " - Erven table: done! "
+
+    add_bonds(rawdata+'BOND_DATA_1205.txt',gendata+'lightstone.db')
+    print " - Bond table: done! "
+
+
+
+
+
+
 
 
