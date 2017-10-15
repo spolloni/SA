@@ -8,6 +8,7 @@ lightstone2sql.py
 '''
 
 from pysqlite2 import dbapi2 as sql
+import subprocess
 
 def addtable2db(input,database,tablename,namesqry,rowsqry):
 
@@ -39,7 +40,7 @@ def add_trans(input,database):
     tablename = 'transactions'
     namesqry  = '''
         CREATE TABLE transactions (
-        munic_name          VARCHAR(50),
+        munic_name          VARCHAR(50), 
         suburb              VARCHAR(50),
         suburb_id           SMALLINT(4),
         property_id         INT(8),
@@ -67,6 +68,48 @@ def add_trans(input,database):
 
     addtable2db(input,database,tablename,namesqry,rowsqry)
 
+    dofile = "subcode/trans_id.do"
+    cmd = ["stata-mp", "do", dofile]
+    subprocess.call(cmd)
+
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute('''DROP TABLE transactions;''')
+    cur.execute('''
+        CREATE TABLE transactions (
+            munic_name          VARCHAR (30),
+            suburb              VARCHAR (39),
+            suburb_id           INTEGER,
+            property_id         INTEGER,
+            transaction_id      VARCHAR (11) PRIMARY KEY,
+            ipurchdate          VARCHAR (8),
+            purch_yr            VARCHAR (4),
+            purch_mo            VARCHAR (2),
+            purch_day           VARCHAR (2),
+            iregdate            VARCHAR (8),
+            purch_price         INTEGER,
+            bond_number         VARCHAR (16),
+            seller_name         VARCHAR (68),
+            buyer_name          VARCHAR (68),
+            buyer_id            VARCHAR (13),
+            seller_id           VARCHAR (13),
+            title_deed_no       VARCHAR (16),
+            properties_on_title INTEGER,
+            ea_code             VARCHAR (8),
+            prov_code           VARCHAR (1),
+            mun_code            VARCHAR (2),
+            first_iregdate      VARCHAR (8),
+            owner_type          VARCHAR (23),
+            prevowner_type      VARCHAR (23)
+        );
+        ''')
+    cur.execute('''
+        INSERT INTO transactions SELECT * FROM temp;
+        ''')
+    cur.execute('''DROP TABLE temp;''') 
+    con.commit()
+    con.close()
+
 def add_erven(input,database):
 
     tablename = 'erven'
@@ -78,7 +121,7 @@ def add_erven(input,database):
         suburb           VARCHAR(50),             
         suburb_id        SMALLINT(4),              
         property_id      INT(8),              
-        erf_size         BIGINT(12),             
+        erf_size         INTEGER,            
         erf_key          VARCHAR(50),              
         latitude         numeric(7,5),              
         longitude        numeric(7,5),              
