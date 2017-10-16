@@ -6,7 +6,7 @@ main.py
     - step 1. import lighstone data into SQLite DB
     - step 2. select sample and flag RDP.
     - step 3. assign RPP to spatial cluster.
-    - step 4. assign non-RDP to events.
+    - step 4. find distance for non-RDP.
 
 '''
 
@@ -17,9 +17,9 @@ import os, subprocess
 
 #############################################
 # switchboard                               
-_1_IMPORT  = 0                              
-_2_FLAGRDP = 0                              
-_3_CLUSTER = 1                              
+_1_IMPORT  = 1                             
+_2_FLAGRDP = 1                              
+_3_CLUSTER = 1                            
 algo = 1 # 1=dbscan, 2=hdbscan              
 par1 = 0.002                                
 par2 = 5                                    
@@ -84,6 +84,9 @@ if _3_CLUSTER ==1:
 
     spatial_cluster(qry,algo,par1,par2,gendata+'lightstone.db')
 
+#############################################
+# STEP 4:  Distance to RDP for non-RDP      #
+#############################################
 
 
 

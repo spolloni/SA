@@ -96,7 +96,6 @@ prisiz_filter "replace rdp_ls = 0";
 replace rdp_ls = 0 if purch_price > 600000 & n == N;
 by property_id: egen ever_rdp_ls = max(rdp_ls);
 keep if minpurchyr>2001 & minpurchyr<2012;
-drop if erf_size==.;
 
 *********************;
 * First-pass Method *;

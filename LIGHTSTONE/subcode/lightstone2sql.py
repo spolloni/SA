@@ -15,7 +15,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry):
     con = sql.connect(database)
     cur = con.cursor()
 
-    cur.execute(''' DROP TABLE IF EXISTS %s ;''' % tablename)
+    cur.execute("DROP TABLE IF EXISTS %s ;" % tablename)
     cur.execute(namesqry)
 
     with open(input, "r") as f:
@@ -34,6 +34,9 @@ def addtable2db(input,database,tablename,namesqry,rowsqry):
 
     con.commit()
     con.close()
+
+    return
+
 
 def add_trans(input,database):
 
@@ -68,13 +71,15 @@ def add_trans(input,database):
 
     addtable2db(input,database,tablename,namesqry,rowsqry)
 
+    # create unique ID in stata
     dofile = "subcode/trans_id.do"
     cmd = ["stata-mp", "do", dofile]
     subprocess.call(cmd)
 
+    # push back to DB
     con = sql.connect(database)
     cur = con.cursor()
-    cur.execute('''DROP TABLE transactions;''')
+    cur.execute("DROP TABLE transactions;")
     cur.execute('''
         CREATE TABLE transactions (
             munic_name          VARCHAR (30),
@@ -103,12 +108,13 @@ def add_trans(input,database):
             prevowner_type      VARCHAR (23)
         );
         ''')
-    cur.execute('''
-        INSERT INTO transactions SELECT * FROM temp;
-        ''')
-    cur.execute('''DROP TABLE temp;''') 
+    cur.execute("INSERT INTO transactions SELECT * FROM temp;")
+    cur.execute("DROP TABLE temp;") 
     con.commit()
     con.close()
+
+    return
+
 
 def add_erven(input,database):
 
@@ -142,6 +148,21 @@ def add_erven(input,database):
 
     addtable2db(input,database,tablename,namesqry,rowsqry)
 
+    # Add Geometry
+    con = sql.connect(database)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("SELECT InitSpatialMetaData();")
+    cur = con.cursor()
+    cur.execute("DELETE FROM erven WHERE latitude='';")
+    cur.execute("DELETE FROM erven WHERE erf_size='';")
+    cur.execute("SELECT AddGeometryColumn ('erven','geometry',4326,'POINT',2,1);")
+    cur.execute("UPDATE erven SET geometry=MakePoint(longitude,latitude, 4326);")
+    con.commit()
+    con.close()
+
+    return
+
 def add_bonds(input,database):
 
     tablename = 'bonds'
@@ -173,6 +194,8 @@ def add_bonds(input,database):
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
-
+    
     addtable2db(input,database,tablename,namesqry,rowsqry)
+
+    return
 

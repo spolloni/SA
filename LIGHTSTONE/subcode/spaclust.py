@@ -22,7 +22,7 @@ def spatial_cluster(qry,algo,par1,par2,database):
     cur = con.cursor()
 
     # clear table and query
-    cur.execute(''' DROP TABLE IF EXISTS rdp_clusters ;''' )
+    cur.execute("DROP TABLE IF EXISTS rdp_clusters ;")
     cur.execute(qry)
     mat = np.array(cur.fetchall())
     print "    ... data has been queried! "
