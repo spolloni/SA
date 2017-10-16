@@ -5,7 +5,8 @@ main.py
     
     - step 1. import lighstone data into SQLite DB
     - step 2. select sample and flag RDP.
-    - step 3. assign to spatial cluster.
+    - step 3. assign RPP to spatial cluster.
+    - step 4. assign non-RDP to events.
 
 '''
 
@@ -15,13 +16,13 @@ from subcode.spaclust import spatial_cluster
 import os, subprocess
 
 #############################################
-# switchboard                               #
-_1_IMPORT  = 0                              #
-_2_FLAGRDP = 0                              #
-_3_CLUSTER = 1                              #
-    algo = 1    # 1=dbscan, 2=hdbscan       #
-    par1 = 1                                #
-    par2 = 2                                #
+# switchboard                               
+_1_IMPORT  = 0                              
+_2_FLAGRDP = 0                              
+_3_CLUSTER = 1                              
+algo = 1 # 1=dbscan, 2=hdbscan              
+par1 = 0.002                                
+par2 = 5                                    
 #############################################
 
 # set directories 
@@ -51,7 +52,7 @@ if _1_IMPORT ==1:
     print '\n'," - Bond table: done! "'\n'
 
 #############################################
-# STEP 2:  RDP properties flagging          #
+# STEP 2:  flag RDP properties              #
 #############################################
 if _2_FLAGRDP ==1:
 
@@ -81,7 +82,7 @@ if _3_CLUSTER ==1:
         WHERE B.rdp_ls=1;
         '''
 
-    spatial_cluster(qry,algo,par1,par2)
+    spatial_cluster(qry,algo,par1,par2,gendata+'lightstone.db')
 
 
 
