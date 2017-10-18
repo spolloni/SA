@@ -156,8 +156,10 @@ def add_erven(input,database):
     cur = con.cursor()
     cur.execute("DELETE FROM erven WHERE latitude='';")
     cur.execute("DELETE FROM erven WHERE erf_size='';")
-    cur.execute("SELECT AddGeometryColumn ('erven','geometry',4326,'POINT',2,1);")
-    cur.execute("UPDATE erven SET geometry=MakePoint(longitude,latitude, 4326);")
+    #cur.execute("SELECT AddGeometryColumn ('erven','geometry',4326,'POINT',2,1);")
+    #cur.execute("UPDATE erven SET geometry=MakePoint(longitude,latitude, 4326);")
+    cur.execute("SELECT AddGeometryColumn ('erven','geometry',2046,'POINT',2,1);")
+    cur.execute("UPDATE erven SET geometry=ST_Transform(MakePoint(LONGITUDE,LATITUDE,4326),2046);")
     con.commit()
     con.close()
 

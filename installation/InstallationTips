@@ -6,8 +6,6 @@
 	*Linux: sudo apt-get install python-pip
 	*Mac: brew install ???
 
-- Install Sublime Text on Linux
-
 - Install QGIS + SAGA
 	* if on mac, make sure all dependencies are set in $PATH and $PYTHONPATH
 	* will need to attach Processing toolbox to $PYTHONPATH
@@ -24,6 +22,7 @@
 	* add to path everywhere. 
 	---> in mac, bash_profile and sublime bash
 	---> in linux, .profile and .bashrc
+	https://download.stata.com/download/linux64_13/
 
 - Install pysqlite.
 	* On linux: "sudo apt-get install libsqlite3-dev" then

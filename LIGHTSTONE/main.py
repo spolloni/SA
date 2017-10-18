@@ -17,12 +17,13 @@ import os, subprocess
 
 #############################################
 # switchboard                               
-_1_IMPORT  = 1                             
-_2_FLAGRDP = 1                              
-_3_CLUSTER = 1                            
+_1_IMPORT   = 1                             
+_2_FLAGRDP  = 1                              
+_3_CLUSTER  = 1                            
 algo = 1 # 1=dbscan, 2=hdbscan              
 par1 = 0.002                                
-par2 = 5                                    
+par2 = 5 
+_4_DISTANCE = 0                                    
 #############################################
 
 # set directories 
