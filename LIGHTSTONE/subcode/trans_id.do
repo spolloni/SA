@@ -25,10 +25,10 @@ by property_id ipurchdate: keep if _n == _N;
 * create unique ID; 
 by property_id: gen n = _n;
 tostring n, replace;
-tostring property_id, gen(transaction_id);
-replace transaction_id = transaction_id + "_" + n;
+tostring property_id, gen(trans_id);
+replace trans_id = trans_id + "_" + n;
 drop n;
-label var transaction_id "";
+label var trans_id "";
 
 * insert back into database; 
 odbc insert, table("temp") create;

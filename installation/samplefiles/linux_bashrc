@@ -119,3 +119,4 @@ fi
 # STEFANO ADD-ONS:
 export PATH="$PATH:/usr/local/stata13/"
 export PYTHONPATH="$PYTHONPATH:/usr/share/qgis/python/plugins/" 
+export DISPLAY=:99

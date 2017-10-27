@@ -10,10 +10,12 @@
 	* if on mac, make sure all dependencies are set in $PATH and $PYTHONPATH
 	* will need to attach Processing toolbox to $PYTHONPATH
 	----> find location in plugins/Manage and install plugins scroll down to processing. **NOTE: path should be to plugins, not to processing!
-	* on linus, SAGA attachment to QGIS is tricky:
-	https://gis.stackexchange.com/questions/224617/problem-getting-saga-activated-in-ubuntu-qgis-2-18-2
-	----> follow procedure by Nez
-
+	* on linus, SAGA attachment to QGIS is tricky. ALSO MAKE SURE FAKE X SERVER IS INSTALLED!! 
+		https://gis.stackexchange.com/questions/224617/problem-getting-saga-activated-in-ubuntu-qgis-2-18-2
+		----> follow procedure by Nez
+		*https://docs.qgis.org/2.18/en/docs/training_manual/qgis_server/install.html
+		*http://www.itopen.it/qgis-server-setup-notes/
+	
 - Install all scientific computing with pip 
 	* HDBSCAN installation requires cython 
 
@@ -27,6 +29,7 @@
 - Install pysqlite.
 	* On linux: "sudo apt-get install libsqlite3-dev" then
 		pip install pysqlite
+		sudo apt install sqlite3
 
 - ODBC setup.
 	* Mac:

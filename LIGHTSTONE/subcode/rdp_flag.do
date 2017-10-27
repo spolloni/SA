@@ -5,7 +5,7 @@ set more off
 local qry = "
 	SELECT A.property_id, A.purch_yr, A.purch_mo, A.purch_day,
 		   A.seller_name, A.buyer_name, A.purch_price,
-	       A.transaction_id, B.erf_size
+	       A.trans_id, B.erf_size
 	FROM transactions AS A
 	INNER JOIN erven AS B
 	ON A.property_id = B.property_id
@@ -106,6 +106,6 @@ by property_id: egen ever_rdp_fp = max(rdp_fp);
 ************************;
 * close and push to DB *;
 ************************;
-keep transaction_id *rdp*;
+keep trans_id *rdp*;
 odbc insert, table("rdp") create;
 exit, STATA clear;  

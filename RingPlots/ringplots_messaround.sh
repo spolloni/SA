@@ -16,10 +16,10 @@
 #                                                           #
 #--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#
 
-STEP_1=0
-STEP_2=0
-STEP_3=0
-STEP_4=1
+STEP_1=1
+STEP_2=1
+STEP_3=1
+STEP_4=0
 
 ############# MAIN PATH ###########################################
 MAIN="/Users/stefanopolloni/GoogleDrive/Year4/SouthAfrica_Analysis"

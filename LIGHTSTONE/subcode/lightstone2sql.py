@@ -31,7 +31,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry):
                     cur.execute(rowsqry, row)
                 except sql.ProgrammingError:
                     pass
-
+    cur.execute("CREATE INDEX property_ind_{} ON {} (property_id);".format(tablename,tablename))
     con.commit()
     con.close()
 
@@ -72,8 +72,8 @@ def add_trans(input,database):
     addtable2db(input,database,tablename,namesqry,rowsqry)
 
     # create unique ID in stata
-    dofile = "subcode/trans_id.do"
-    cmd = ["stata-mp", "do", dofile]
+    dofile = 'subcode/trans_id.do'
+    cmd = ['stata-mp', 'do', dofile]
     subprocess.call(cmd)
 
     # push back to DB
@@ -86,7 +86,7 @@ def add_trans(input,database):
             suburb              VARCHAR (39),
             suburb_id           INTEGER,
             property_id         INTEGER,
-            transaction_id      VARCHAR (11) PRIMARY KEY,
+            trans_id            VARCHAR (11) PRIMARY KEY,
             ipurchdate          VARCHAR (8),
             purch_yr            VARCHAR (4),
             purch_mo            VARCHAR (2),
@@ -109,7 +109,9 @@ def add_trans(input,database):
         );
         ''')
     cur.execute("INSERT INTO transactions SELECT * FROM temp;")
-    cur.execute("DROP TABLE temp;") 
+    cur.execute("DROP TABLE temp;")
+    cur.execute("CREATE INDEX prov_ind ON transactions (prov_code);")
+    cur.execute("CREATE INDEX trans_ind_tran ON transactions (trans_id);")
     con.commit()
     con.close()
 
@@ -156,10 +158,9 @@ def add_erven(input,database):
     cur = con.cursor()
     cur.execute("DELETE FROM erven WHERE latitude='';")
     cur.execute("DELETE FROM erven WHERE erf_size='';")
-    #cur.execute("SELECT AddGeometryColumn ('erven','geometry',4326,'POINT',2,1);")
-    #cur.execute("UPDATE erven SET geometry=MakePoint(longitude,latitude, 4326);")
-    cur.execute("SELECT AddGeometryColumn ('erven','geometry',2046,'POINT',2,1);")
-    cur.execute("UPDATE erven SET geometry=ST_Transform(MakePoint(LONGITUDE,LATITUDE,4326),2046);")
+    cur.execute("SELECT AddGeometryColumn ('erven','GEOMETRY',2046,'POINT',2,1);")
+    cur.execute("UPDATE erven SET GEOMETRY=ST_Transform(MakePoint(longitude,latitude,4326),2046);")
+    cur.execute("SELECT CreateSpatialIndex('erven', 'GEOMETRY');")
     con.commit()
     con.close()
 
