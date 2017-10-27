@@ -146,7 +146,7 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
         cur = con.cursor()
         qry = ''' 
               CREATE TEMPORARY TABLE trans_{} AS 
-              SELECT e.GEOMETRY, t.trans_id, r.rdp_ls
+              SELECT e.ROWID AS erowid, e.GEOMETRY, t.trans_id, r.rdp_ls
               FROM erven AS e
               JOIN transactions AS t on e.property_id = t.property_id
               JOIN rdp AS r ON t.trans_id = r.trans_id
@@ -159,27 +159,21 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
               WHERE prov_code = {};
               '''.format(i,rdp,algo,spar1,spar2,bw,i)
         cur.execute(qry)
-        qry = ''' 
+        qry1 = ''' 
               SELECT Hex(ST_AsBinary(t.GEOMETRY)) as points, t.trans_id, t.rdp_ls, b.cluster
               FROM trans_{} AS t, buff_{} AS b
-              WHERE t.ROWID IN (SELECT ROWID FROM SpatialIndex 
-              WHERE f_table_name='trans_{}' AND search_frame=b.GEOMETRY)
+              WHERE t.erowid IN (SELECT ROWID FROM SpatialIndex 
+              WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
               AND st_within(t.GEOMETRY,b.GEOMETRY);
               '''.format(i,i,i) 
-        qry = ''' 
-              SELECT  t.trans_id, t.rdp_ls, b.cluster
-              FROM trans_{} AS t
-              JOIN buff_{} AS b ON (
-                st_within(t.GEOMETRY,b.GEOMETRY) 
-                AND t.ROWID IN (
-                    SELECT ROWID 
-                    FROM SpatialIndex 
-                    WHERE f_table_name='trans_{}' 
-                    AND search_frame=b.GEOMETRY))
-              '''.format(i,i,i)
-        df = gpd.GeoDataFrame.from_postgis(qry,con,geom_col='points',
+        qry2 = ''' 
+              SELECT Hex(ST_AsBinary(t.GEOMETRY)) as points, t.trans_id, t.rdp_ls, b.cluster
+              FROM trans_{} AS t, buff_{} AS b
+              WHERE st_within(t.GEOMETRY,b.GEOMETRY);
+              '''.format(i,i,i) 
+        df = gpd.GeoDataFrame.from_postgis(qry2,con,geom_col='points',
             crs=fiona.crs.from_epsg(2046))
-        #df.to_file(driver = 'ESRI Shapefile', filename = out)
+        df.to_file(driver = 'ESRI Shapefile', filename = out)
         con.close()
         print df
 
