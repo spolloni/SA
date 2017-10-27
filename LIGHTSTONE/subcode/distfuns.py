@@ -13,16 +13,21 @@ from processing.tools import general
 import fiona, glob
 import geopandas as gpd
 
-def gp2shp(db,qry,out,espg):
+
+def gp2shp(db,qrys,geocol,out,espg):
 
     con = sql.connect(db)
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
-    cur = con.cursor()
-    df = gpd.GeoDataFrame.from_postgis(qry2,con,geom_col='points',
+    if len(qrys)>1:     
+        cur = con.cursor()
+        for qry in qrys[:-1]:
+            cur.execute(qry)
+    df = gpd.GeoDataFrame.from_postgis(qrys[-1],con,geom_col=geocol,
             crs=fiona.crs.from_epsg(espg))
     df.to_file(driver = 'ESRI Shapefile', filename = out)
     con.close()
+
 
 def selfintersect(db,dir,bw,rdp,algo,par1,par2,i):
 
@@ -122,25 +127,67 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
         #    '''.format(rdp,algo,spar1,spar2,bw)
         #out = dir+'nonrdp_{}.shp'.format(i)
 
-        qry ='''
-            SELECT e.GEOMETRY as points, t.trans_id, r.rdp_ls, b.cluster
-            FROM erven as e, rdp_buffers_{}_{}_{}_{}_{} as b
-            JOIN transactions AS t ON e.property_id = t.property_id
-            JOIN rdp AS r ON t.trans_id = r.trans_id
-            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
-            AND st_within(e.GEOMETRY,b.GEOMETRY) 
-            AND +t.prov_code={} 
-            '''.format(rdp,algo,spar1,spar2,bw,i,i)
+        #qry ='''
+        #    SELECT e.GEOMETRY as points, t.trans_id, r.rdp_ls, b.cluster
+        #    FROM erven as e, rdp_buffers_{}_{}_{}_{}_{} as b
+        #    JOIN transactions AS t ON e.property_id = t.property_id
+        #    JOIN rdp AS r ON t.trans_id = r.trans_id
+        #    WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+        #            WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
+        #    AND st_within(e.GEOMETRY,b.GEOMETRY) 
+        #    AND +t.prov_code={} AND +b.prov_code={} 
+        #    '''.format(rdp,algo,spar1,spar2,bw,i,i)
+        #out = dir+'nonrdp_{}.shp'.format(i)
+
         out = dir+'nonrdp_{}.shp'.format(i)
+        con = sql.connect(db)
+        con.enable_load_extension(True)
+        con.execute("SELECT load_extension('mod_spatialite');")
+        cur = con.cursor()
+        qry = ''' 
+              CREATE TEMPORARY TABLE trans_{} AS 
+              SELECT e.GEOMETRY, t.trans_id, r.rdp_ls
+              FROM erven AS e
+              JOIN transactions AS t on e.property_id = t.property_id
+              JOIN rdp AS r ON t.trans_id = r.trans_id
+              WHERE t.prov_code = {} AND  r.rdp_ls=0;
+              '''.format(i,i)
+        cur.execute(qry)
+        qry = ''' 
+              CREATE TEMPORARY TABLE buff_{} AS
+              SELECT * FROM rdp_buffers_{}_{}_{}_{}_{}
+              WHERE prov_code = {};
+              '''.format(i,rdp,algo,spar1,spar2,bw,i)
+        cur.execute(qry)
+        qry = ''' 
+              SELECT Hex(ST_AsBinary(t.GEOMETRY)) as points, t.trans_id, t.rdp_ls, b.cluster
+              FROM trans_{} AS t, buff_{} AS b
+              WHERE t.ROWID IN (SELECT ROWID FROM SpatialIndex 
+              WHERE f_table_name='trans_{}' AND search_frame=b.GEOMETRY)
+              AND st_within(t.GEOMETRY,b.GEOMETRY);
+              '''.format(i,i,i) 
+        qry = ''' 
+              SELECT  t.trans_id, t.rdp_ls, b.cluster
+              FROM trans_{} AS t
+              JOIN buff_{} AS b ON (
+                st_within(t.GEOMETRY,b.GEOMETRY) 
+                AND t.ROWID IN (
+                    SELECT ROWID 
+                    FROM SpatialIndex 
+                    WHERE f_table_name='trans_{}' 
+                    AND search_frame=b.GEOMETRY))
+              '''.format(i,i,i)
+        df = gpd.GeoDataFrame.from_postgis(qry,con,geom_col='points',
+            crs=fiona.crs.from_epsg(2046))
+        #df.to_file(driver = 'ESRI Shapefile', filename = out)
+        con.close()
+        print df
 
 
     # fetch data
-    if os.path.exists(out): os.remove(out)
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', out, db, '-sql "'+qry+'"']
-    subprocess.call(' '.join(cmd),shell=True)
-
-
+    #if os.path.exists(out): os.remove(out)
+    #cmd = ['ogr2ogr -f "ESRI Shapefile"', out, db, '-sql "'+qry+'"']
+    #subprocess.call(' '.join(cmd),shell=True)
 
 
 

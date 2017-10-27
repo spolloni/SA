@@ -132,7 +132,7 @@ if _4_DISTANCE ==1:
     #pp.map(part_fetch_data,range(9,-1,-1))
     #pp.close()
     #pp.join()
-    fetch_data(db,tempdir,bw,rdp,algo,par1,par2,7)
+    fetch_data(db,tempdir,bw,rdp,algo,par1,par2,3)
     
 
 
