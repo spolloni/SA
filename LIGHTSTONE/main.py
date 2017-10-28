@@ -13,7 +13,8 @@ main.py
 from pysqlite2 import dbapi2 as sql
 from subcode.lightstone2sql import add_trans, add_erven, add_bonds
 from subcode.spaclust import spatial_cluster
-from subcode.distfuns import selfintersect, merge_n_push, fetch_data
+from subcode.distfuns import selfintersect, merge_n_push
+from subcode.distfuns import fetch_data, distance_calculator
 from functools import partial
 import os, subprocess, shutil, multiprocessing 
 from multiprocessing.pool import ThreadPool as TP
@@ -117,10 +118,8 @@ if _4_DISTANCE ==1:
 
     # 4.1 buffers and self-interesctions
     #part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
-    #pp = multiprocessing.Pool(processes=workers)
+    pp = multiprocessing.Pool(processes=workers)
     #pp.map(part_selfintersect,range(9,0,-1))
-    #pp.close()
-    #pp.join()
     #print '\n'," -- Self-Intersections: done! "'\n'
 
     # 4.2 merge buffers and push to DB 
@@ -128,11 +127,11 @@ if _4_DISTANCE ==1:
     #print '\n'," -- Merge and Push Back: done! "'\n'
 
     # 4.3 Calculate distance
-    #part_fetch_data = partial(fetch_data,db,tempdir,bw,rdp,algo,par1,par2)
-    #pp.map(part_fetch_data,range(9,-1,-1))
-    #pp.close()
-    #pp.join()
-    fetch_data(db,tempdir,bw,rdp,algo,par1,par2,3)
+    part_fetch_data = partial(fetch_data,db,tempdir,bw,rdp,algo,par1,par2)
+    pp.map(part_fetch_data,range(3,0,-1))
+    #distance_calculator(tempdir)
+    pp.close()
+    pp.join()
     
 
 
