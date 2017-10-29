@@ -16,7 +16,7 @@ from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push
 from subcode.distfuns import fetch_data, dist_calc
 from functools import partial
-import os, subprocess, shutil, multiprocessing 
+import os, subprocess, shutil, multiprocessing, re
 from multiprocessing.pool import ThreadPool as TP
 import numpy as np
 
@@ -146,19 +146,36 @@ if _4_DISTANCE ==1:
     centroid_id = matrx[1][:,2][distances[0][1]].astype(np.float)
     nearest_id  = matrx[2][:,3][distances[1][1]].astype(np.float)
     trans_id    = matrx[0][matrx[0][:,3]=='0.0'][:,2]
+    print '\n'," -- Retrieve cluster IDs for distance: done! "'\n'
 
     # 4.6 Populate table and push back to DB
     con = sql.connect(db)
     cur = con.cursor()
+    spar1 = re.sub("[^0-9]", "", str(par1))
+    spar2 = re.sub("[^0-9]", "", str(par2))
+    cur.execute('''DROP TABLE IF EXISTS 
+        distance_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw))
+    cur.execute(''' CREATE TABLE distance_{}_{}_{}_{}_{} (
+            trans_id      VARCHAR(11) PRIMARY KEY,
+            centroid_dist numeric(10,10), 
+            centroid_id   INTEGER,
+            nearest_dist  numeric(10,10), 
+            nearest_id    INTEGER
+        );'''.format(rdp,algo,spar1,spar2,bw))
+    rowsqry = '''
+        INSERT INTO distance_{}_{}_{}_{}_{}
+        VALUES (?,?,?,?,?);
+        '''.format(rdp,algo,spar1,spar2,bw)
+    for i in range(len(trans_id)):
+        cur.execute(rowsqry, [trans_id[i],distances[0][0][i][0],
+           centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0]])
+    cur.execute('''CREATE INDEX dist_ind_{}_{}_{}_{}_{}
+        ON distance_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
+            algo,spar1,spar2,bw,rdp,algo,spar1,spar2,bw))
+    con.commit()
+    con.close()
+    print '\n'," -- Populate table / push to DB: done! "'\n'
     
-
-    print len(ID_centroid)
-    print len(ID_nearest)
-    print len(trans_id)
-    print len(distances[0][0])
-    print len(distances[1][0])
-    print distances[0][0]
-    print distances[1][0]
 
     # 4.7 kill parallel workers
     pp.close()

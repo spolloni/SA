@@ -51,10 +51,9 @@ def spatial_cluster(algo,par1,par2,database,suf):
     # create table 
     cur.execute('''
         CREATE TABLE rdp_clusters_{}_{}_{}_{} (
-            trans_id      VARCHAR (11) PRIMARY KEY,
-            cluster             INTEGER
-        );
-        '''.format(suf,algo,spar1,spar2))
+            trans_id      VARCHAR(11) PRIMARY KEY,
+            cluster       INTEGER
+        );'''.format(suf,algo,spar1,spar2))
 
     # fill-up table
     rowsqry = '''
@@ -63,11 +62,11 @@ def spatial_cluster(algo,par1,par2,database,suf):
         '''.format(suf,algo,spar1,spar2)
     for i in range(len(mat)):
         cur.execute(rowsqry, [mat[i][0],labels[i]])
-    print "    ... data has been pushed to DB! "
     cur.execute('''CREATE INDEX clu_ind_{}
         ON rdp_clusters_{}_{}_{}_{} (cluster);'''.format(suf,suf,algo,spar1,spar2))
     cur.execute('''CREATE INDEX trans_ind_{}
         ON rdp_clusters_{}_{}_{}_{} (trans_id);'''.format(suf,suf,algo,spar1,spar2))
+    print "    ... data has been pushed to DB! "
 
     # close-up
     con.commit()
