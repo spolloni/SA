@@ -7,11 +7,10 @@ distfuns.py
 
 from pysqlite2 import dbapi2 as sql
 import sys, csv, os, re, subprocess
-from qgis.core import *
-from processing.core.Processing import Processing
-from processing.tools import general
+from sklearn.neighbors import NearestNeighbors
 import fiona, glob
 import geopandas as gpd
+import numpy as np
 
 
 def gp2shp(db,qrys,geocol,out,espg):
@@ -95,66 +94,64 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
 
         # all RDP transactions
         qry ='''
-            SELECT B.GEOMETRY, A.trans_id, C.cluster 
-            FROM transactions AS A
-            JOIN erven AS B ON A.property_id = B.property_id
-            JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
-            WHERE C.cluster !=0
+            SELECT st_x(e.GEOMETRY) as x, st_y(e.GEOMETRY) as y,
+                   t.trans_id, c.cluster 
+            FROM erven AS e
+            JOIN transactions AS t ON e.property_id = t.property_id
+            JOIN rdp_clusters_{}_{}_{}_{} AS c ON t.trans_id = c.trans_id
+            WHERE c.cluster !=0
             '''.format(rdp,algo,spar1,spar2)
-        out = dir+'rdp_all.shp'
+        out = dir+'rdp_all.csv'
 
     if i==2:
 
         # RDP centroids, per cluster
         qry ='''
-            SELECT st_centroid(st_collect(B.GEOMETRY)), C.cluster 
-            FROM transactions AS A
-            JOIN erven AS B ON A.property_id = B.property_id
-            JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
-            WHERE C.cluster !=0
-            GROUP BY cluster
+            SELECT st_x(st_centroid(st_collect(e.GEOMETRY))) as x,
+                   st_y(st_centroid(st_collect(e.GEOMETRY))) as y , c.cluster 
+            FROM erven AS e
+            JOIN transactions AS t ON e.property_id = t.property_id
+            JOIN rdp_clusters_{}_{}_{}_{} AS c ON t.trans_id = c.trans_id
+            WHERE c.cluster !=0
+            GROUP BY c.cluster
             '''.format(rdp,algo,spar1,spar2)
-        out = dir+'rdp_mean.shp'
+        out = dir+'rdp_mean.csv'
 
     if i==3:
 
         # all transactions inside buffers
         qry ='''
-            SELECT e.GEOMETRY, t.trans_id, r.rdp_ls, b.cluster
-            FROM erven as e, rdp_buffers_{}_{}_{}_{}_{} as b
+            SELECT st_x(e.GEOMETRY) AS x, st_y(e.GEOMETRY) AS y,
+                   t.trans_id, r.rdp_ls, b.cluster
+            FROM erven AS e, rdp_buffers_{}_{}_{}_{}_{} AS b
             JOIN transactions AS t ON e.property_id = t.property_id
             JOIN rdp AS r ON t.trans_id = r.trans_id
             WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
             AND st_within(e.GEOMETRY,b.GEOMETRY) 
             '''.format(rdp,algo,spar1,spar2,bw)
-        out = dir+'prenonrdp.shp'
+        out = dir+'prenonrdp.csv'
 
     # fetch data
-    if os.path.exists(out): os.remove(out)
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', out, db, '-sql "'+qry+'"']
-    subprocess.call(' '.join(cmd),shell=True)
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+    cur.execute(qry)
+    mat = np.array(cur.fetchall())
+    con.close()
 
-    return 
+    return mat
 
 
-def distance_calculator(dir):
+def dist_calc(in_mat,targ_mat):
 
-    # filter for non-rdp
-    if os.path.exists(dir+'nonrdp.shp'): os.remove(dir+'nonrdp.shp')
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', dir+'nonrdp.shp',dir+'prenonrdp.shp',
-            '-select trans_id,cluster', '-where "rdp_ls = 0"']
-    subprocess.call(' '.join(cmd),shell=True)
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(targ_mat)
+    dist, ind = nbrs.kneighbors(in_mat)
 
-    # distance matrix
-    APP = QgsApplication([], False)
-    APP.initQgis()
-    Processing.initialize()
-    general.runalg('qgis:distancematrix',dir+'nonrdp.shp','trans_id',
-                     dir+'rdp_all.shp','trans_id',0,1,dir+'nrdp2nearest.csv')
-    general.runalg('qgis:distancematrix',dir+'nonrdp.shp','trans_id',
-                     dir+'rdp_mean.shp','cluster',0,1,dir+'nrdp2mean.csv')
-    APP.exit()
+    return [dist,ind]
+
+   
 
 
 

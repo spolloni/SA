@@ -14,10 +14,11 @@ from pysqlite2 import dbapi2 as sql
 from subcode.lightstone2sql import add_trans, add_erven, add_bonds
 from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push
-from subcode.distfuns import fetch_data, distance_calculator
+from subcode.distfuns import fetch_data, dist_calc
 from functools import partial
 import os, subprocess, shutil, multiprocessing 
 from multiprocessing.pool import ThreadPool as TP
+import numpy as np
 
 #############################################
 
@@ -116,9 +117,11 @@ if _4_DISTANCE ==1:
 
     print '\n'," Calculating distances for non-RDP... ",'\n'
 
+    # 4.0 instantiate parallel workers
+    pp = multiprocessing.Pool(processes=workers)
+
     # 4.1 buffers and self-interesctions
     #part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
-    pp = multiprocessing.Pool(processes=workers)
     #pp.map(part_selfintersect,range(9,0,-1))
     #print '\n'," -- Self-Intersections: done! "'\n'
 
@@ -126,14 +129,41 @@ if _4_DISTANCE ==1:
     #merge_n_push(db,tempdir,bw,rdp,algo,par1,par2)
     #print '\n'," -- Merge and Push Back: done! "'\n'
 
-    # 4.3 Calculate distance
+    # 4.3 fetch rdp, rdp centroids, & non-rdp
     part_fetch_data = partial(fetch_data,db,tempdir,bw,rdp,algo,par1,par2)
-    pp.map(part_fetch_data,range(3,0,-1))
-    #distance_calculator(tempdir)
+    matrx = pp.map(part_fetch_data,range(3,0,-1))
+    print '\n'," -- Data fetch: done! "'\n'
+
+    # 4.4 calculate distances
+    inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
+    targ_centroid  = matrx[1][:,:2].astype(np.float)
+    targ_nearest   = matrx[2][:,:2].astype(np.float)
+    part_dist_calc = partial(dist_calc,inmat)
+    distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest])
+    print '\n'," -- Distance calculation: done! "'\n'
+
+    # 4.5 retrieve IDs
+    centroid_id = matrx[1][:,2][distances[0][1]].astype(np.float)
+    nearest_id  = matrx[2][:,3][distances[1][1]].astype(np.float)
+    trans_id    = matrx[0][matrx[0][:,3]=='0.0'][:,2]
+
+    # 4.6 Populate table and push back to DB
+    con = sql.connect(db)
+    cur = con.cursor()
+    
+
+    print len(ID_centroid)
+    print len(ID_nearest)
+    print len(trans_id)
+    print len(distances[0][0])
+    print len(distances[1][0])
+    print distances[0][0]
+    print distances[1][0]
+
+    # 4.7 kill parallel workers
     pp.close()
     pp.join()
     
-
 
 
 
