@@ -14,7 +14,7 @@ from pysqlite2 import dbapi2 as sql
 from subcode.lightstone2sql import add_trans, add_erven, add_bonds
 from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push
-from subcode.distfuns import fetch_data, dist_calc
+from subcode.distfuns import fetch_data, dist_calc, push_dist2db
 from functools import partial
 import os, subprocess, shutil, multiprocessing, re
 from multiprocessing.pool import ThreadPool as TP
@@ -31,8 +31,8 @@ tempdir = gendata + 'temp/'
 if not os.path.exists(gendata):
     os.makedirs(gendata)
 
-#shutil.rmtree(tempdir,ignore_errors=True)
-#os.makedirs(tempdir)
+shutil.rmtree(tempdir,ignore_errors=True)
+os.makedirs(tempdir)
 
 db = gendata+'lightstone.db'
 workers = int(multiprocessing.cpu_count()-1)
@@ -121,13 +121,13 @@ if _4_DISTANCE ==1:
     pp = multiprocessing.Pool(processes=workers)
 
     # 4.1 buffers and self-interesctions
-    #part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
-    #pp.map(part_selfintersect,range(9,0,-1))
-    #print '\n'," -- Self-Intersections: done! "'\n'
+    part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
+    pp.map(part_selfintersect,range(9,0,-1))
+    print '\n'," -- Self-Intersections: done! "'\n'
 
     # 4.2 merge buffers and push to DB 
-    #merge_n_push(db,tempdir,bw,rdp,algo,par1,par2)
-    #print '\n'," -- Merge and Push Back: done! "'\n'
+    merge_n_push(db,tempdir,bw,rdp,algo,par1,par2)
+    print '\n'," -- Merge and Push Back: done! "'\n'
 
     # 4.3 fetch rdp, rdp centroids, & non-rdp
     part_fetch_data = partial(fetch_data,db,tempdir,bw,rdp,algo,par1,par2)
@@ -142,41 +142,10 @@ if _4_DISTANCE ==1:
     distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest])
     print '\n'," -- Distance calculation: done! "'\n'
 
-    # 4.5 retrieve IDs
-    centroid_id = matrx[1][:,2][distances[0][1]].astype(np.float)
-    nearest_id  = matrx[2][:,3][distances[1][1]].astype(np.float)
-    trans_id    = matrx[0][matrx[0][:,3]=='0.0'][:,2]
-    print '\n'," -- Retrieve cluster IDs for distance: done! "'\n'
-
-    # 4.6 Populate table and push back to DB
-    con = sql.connect(db)
-    cur = con.cursor()
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-    cur.execute('''DROP TABLE IF EXISTS 
-        distance_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw))
-    cur.execute(''' CREATE TABLE distance_{}_{}_{}_{}_{} (
-            trans_id      VARCHAR(11) PRIMARY KEY,
-            centroid_dist numeric(10,10), 
-            centroid_id   INTEGER,
-            nearest_dist  numeric(10,10), 
-            nearest_id    INTEGER
-        );'''.format(rdp,algo,spar1,spar2,bw))
-    rowsqry = '''
-        INSERT INTO distance_{}_{}_{}_{}_{}
-        VALUES (?,?,?,?,?);
-        '''.format(rdp,algo,spar1,spar2,bw)
-    for i in range(len(trans_id)):
-        cur.execute(rowsqry, [trans_id[i],distances[0][0][i][0],
-           centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0]])
-    cur.execute('''CREATE INDEX dist_ind_{}_{}_{}_{}_{}
-        ON distance_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
-            algo,spar1,spar2,bw,rdp,algo,spar1,spar2,bw))
-    con.commit()
-    con.close()
+    # 4.5 retrieve IDs, opulate table and push back to DB
+    push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw)
     print '\n'," -- Populate table / push to DB: done! "'\n'
     
-
     # 4.7 kill parallel workers
     pp.close()
     pp.join()

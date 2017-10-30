@@ -151,6 +151,48 @@ def dist_calc(in_mat,targ_mat):
 
     return [dist,ind]
 
+def push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw):
+
+    spar1 = re.sub("[^0-9]", "", str(par1))
+    spar2 = re.sub("[^0-9]", "", str(par2))
+
+    # Retrieve cluster IDS 
+    centroid_id = matrx[1][:,2][distances[0][1]].astype(np.float)
+    nearest_id  = matrx[2][:,3][distances[1][1]].astype(np.float)
+    trans_id    = matrx[0][matrx[0][:,3]=='0.0'][:,2]
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    
+    cur.execute('''DROP TABLE IF EXISTS 
+        distance_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw))
+
+    cur.execute(''' CREATE TABLE distance_{}_{}_{}_{}_{} (
+            trans_id      VARCHAR(11) PRIMARY KEY,
+            centroid_dist numeric(10,10), 
+            centroid_id   INTEGER,
+            nearest_dist  numeric(10,10), 
+            nearest_id    INTEGER
+        );'''.format(rdp,algo,spar1,spar2,bw))
+
+    rowsqry = '''
+        INSERT INTO distance_{}_{}_{}_{}_{}
+        VALUES (?,?,?,?,?);
+        '''.format(rdp,algo,spar1,spar2,bw)
+
+    for i in range(len(trans_id)):
+        cur.execute(rowsqry, [trans_id[i],distances[0][0][i][0],
+           centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0]])
+
+    cur.execute('''CREATE INDEX dist_ind_{}_{}_{}_{}_{}
+        ON distance_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
+            algo,spar1,spar2,bw,rdp,algo,spar1,spar2,bw))
+
+    con.commit()
+    con.close()
+
+    return
+
    
 
 
