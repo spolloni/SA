@@ -168,11 +168,11 @@ def push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw):
         distance_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw))
 
     cur.execute(''' CREATE TABLE distance_{}_{}_{}_{}_{} (
-            trans_id      VARCHAR(11) PRIMARY KEY,
-            centroid_dist numeric(10,10), 
-            centroid_id   INTEGER,
-            nearest_dist  numeric(10,10), 
-            nearest_id    INTEGER
+            trans_id         VARCHAR(11) PRIMARY KEY,
+            centroid_dist    numeric(10,10), 
+            centroid_cluster INTEGER,
+            nearest_dist     numeric(10,10), 
+            nearest_cluster  INTEGER
         );'''.format(rdp,algo,spar1,spar2,bw))
 
     rowsqry = '''

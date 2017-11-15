@@ -51,11 +51,11 @@ algo = 1
 par1 = 0.002                                
 par2 = 10 
 
-_4_DISTANCE = 0 
+_4_DISTANCE = 1 
 rdp = 'ls' 
 bw  = 600   
 
-_5_PLOTS___ = 1 
+_5_PLOTS___ = 0 
 
 #############################################
 # STEP 1:  import txt files into SQL tables #
@@ -164,11 +164,17 @@ if _4_DISTANCE ==1:
 
 if _5_PLOTS___ == 1:
 
-    dofile = "subcode/rdp_flag.do"
-    cmd = ['stata-mp', 'do', dofile]
+    sbw   = str(bw)
+    salgo = str(algo)
+    spar1 = re.sub("[^0-9]", "", str(par1))
+    spar2 = re.sub("[^0-9]", "", str(par2))
+
+    dofile = "subcode/plot_gradients.do"
+    cmd = ['stata-mp','do',dofile, sbw, rdp, salgo, spar1, spar2]
     subprocess.call(cmd)
 
     print '\n'," -- RDP flagging: done! ",'\n'
+
 
 
 
