@@ -20,9 +20,10 @@ import os, subprocess, shutil, multiprocessing, re
 from multiprocessing.pool import ThreadPool as TP
 import numpy as np
 
-#############################################
+#################
+# ENV SETTINGS  # 
+#################
 
-# set directories and globals
 project = os.getcwd()[:os.getcwd().rfind('Code')]
 rawdata = project + 'Raw/DEEDS/'
 gendata = project + 'Generated/LIGHTSTONE/'
@@ -37,26 +38,30 @@ os.makedirs(tempdir)
 db = gendata+'lightstone.db'
 workers = int(multiprocessing.cpu_count()-1)
 
-#############################################
-# switchboard 
+################
+# SWITCHBOARD  # 
+################
 
-_1_IMPORT   = 0 
+_1_IMPORT__ = 0 
 
-_2_FLAGRDP  = 0
+_2_FLAGRDP_ = 0
 
-_3_CLUSTER  = 0 
-algo = 1  # 1=dbscan, 2=hdbscan              
+_3_CLUSTER_ = 0 
+algo = 1         
 par1 = 0.002                                
 par2 = 10 
 
-_4_DISTANCE = 1 
+_4_DISTANCE = 0 
 rdp = 'ls' 
 bw  = 600   
+
+_5_PLOTS___ = 1 
 
 #############################################
 # STEP 1:  import txt files into SQL tables #
 #############################################
-if _1_IMPORT ==1:
+
+if _1_IMPORT__ ==1:
 
     print '\n'," Importing Lighstone TXTs into SQL... ",'\n'
 
@@ -75,7 +80,8 @@ if _1_IMPORT ==1:
 #############################################
 # STEP 2:  flag RDP properties              #
 #############################################
-if _2_FLAGRDP ==1:
+
+if _2_FLAGRDP_ ==1:
 
     print '\n'," Identifying sample and RDP properties... ",'\n'
 
@@ -98,7 +104,8 @@ if _2_FLAGRDP ==1:
 #############################################
 # STEP 3:  Cluster RDP properties           #
 #############################################
-if _3_CLUSTER ==1:
+
+if _3_CLUSTER_ ==1:
 
     print '\n'," Clustering RDP properties... ",'\n'
 
@@ -113,6 +120,7 @@ if _3_CLUSTER ==1:
 #############################################
 # STEP 4:  Distance to RDP for non-RDP      #
 #############################################
+
 if _4_DISTANCE ==1:
 
     print '\n'," Calculating distances for non-RDP... ",'\n'
@@ -142,14 +150,27 @@ if _4_DISTANCE ==1:
     distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest])
     print '\n'," -- Distance calculation: done! "'\n'
 
-    # 4.5 retrieve IDs, opulate table and push back to DB
+    # 4.5 retrieve IDs, populate table and push back to DB
     push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw)
     print '\n'," -- Populate table / push to DB: done! "'\n'
     
     # 4.7 kill parallel workers
     pp.close()
     pp.join()
-    
+
+#############################################
+# STEP 5:  Make Gradient Plots              #
+#############################################
+
+if _5_PLOTS___ == 1:
+
+    dofile = "subcode/rdp_flag.do"
+    cmd = ['stata-mp', 'do', dofile]
+    subprocess.call(cmd)
+
+    print '\n'," -- RDP flagging: done! ",'\n'
+
+
 
 
 
