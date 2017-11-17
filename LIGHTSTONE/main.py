@@ -27,10 +27,12 @@ import numpy as np
 project = os.getcwd()[:os.getcwd().rfind('Code')]
 rawdata = project + 'Raw/DEEDS/'
 gendata = project + 'Generated/LIGHTSTONE/'
+outdir  = project + 'Output/LIGHTSTONE/'
 tempdir = gendata + 'temp/'
 
-if not os.path.exists(gendata):
-    os.makedirs(gendata)
+for p in [gendata,outdir]:
+    if not os.path.exists(gendata):
+        os.makedirs(gendata)
 
 shutil.rmtree(tempdir,ignore_errors=True)
 os.makedirs(tempdir)
@@ -47,15 +49,24 @@ _1_IMPORT__ = 0
 _2_FLAGRDP_ = 0
 
 _3_CLUSTER_ = 0 
-algo = 1         
-par1 = 0.002                                
-par2 = 10 
+algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
+par1 = 0.002     # Parameter setting #1 for Clustering                          
+par2 = 10        # Parameter setting #2 for Clustering 
 
-_4_DISTANCE = 1 
-rdp = 'ls' 
-bw  = 600   
+_4_DISTANCE = 0 
+rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
+bw  = 600        # bandwidth for clusters
 
-_5_PLOTS___ = 0 
+_5_a_PLOTS_ = 0 
+typ = 'nearest'  # distance to nearest or centroid?
+_5_b_PLOTS_ = 1 
+fr1 = 50         # percent constructed on mode year
+fr2 = 70         # percent constructed +-1 mode year
+top = 99         # per cluster outlier remover (top)
+bot = 1          # per cluster outlier remover (bottom)
+mcl = 50         # minimum cluster size to keep
+tw  = 5          # take observations within `tw' years  
+res = 0          # =1 if keep rdp resale
 
 #############################################
 # STEP 1:  import txt files into SQL tables #
@@ -162,18 +173,39 @@ if _4_DISTANCE ==1:
 # STEP 5:  Make Gradient Plots              #
 #############################################
 
-if _5_PLOTS___ == 1:
+salgo = str(algo)
+spar1 = re.sub("[^0-9]", "", str(par1))
+spar2 = re.sub("[^0-9]", "", str(par2))
+sbw   = str(bw)
+sfr1  = str(fr1)
+sfr2  = str(fr2)
+stop  = str(top)
+sbot  = str(bot)
+smcl  = str(mcl)
+stw   = str(tw)
+sres  = str(res)
 
-    sbw   = str(bw)
-    salgo = str(algo)
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
+if _5_a_PLOTS_ == 1:
 
-    dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',dofile, sbw, rdp, salgo, spar1, spar2]
+    dofile = "subcode/export2gradplot.do"
+    cmd = ['stata-mp','do',dofile,rdp,salgo,
+                spar1,spar2,sbw,typ,gendata]
     subprocess.call(cmd)
 
-    print '\n'," -- RDP flagging: done! ",'\n'
+if _5_b_PLOTS_ == 1:
+
+    output = outdir+"gradplots/RDP{}_{}_alg{}_".format(rdp,typ,algo)
+    output = output+"{}_{}_bw{}_fr{}_{}_".format(spar1,spar2,bw,sfr1,sfr2)
+    output = output+"tb{}_{}_m{}_tw{}_res{}".format(stop,sbot,smcl,stw,sres)
+    shutil.rmtree(output,ignore_errors=True)
+    os.makedirs(output)
+
+    dofile = "subcode/plot_gradients.do"
+    cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,
+            typ,sfr1,sfr2,stop,sbot,smcl,stw,gendata,output]
+    subprocess.call(cmd)
+
+    print '\n'," -- Price Gradient Plots: done! ",'\n'
 
 
 
