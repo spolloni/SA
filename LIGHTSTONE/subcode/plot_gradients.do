@@ -17,11 +17,12 @@ local top  = "`9'";
 local bot  = "`10'";
 local mcl  = "`11'";
 local tw   = "`12'";
-local data = "`13'";
+local res  = "`13'";
+local data = "`14'";
 
 global bin = 20;
 
-cd "`14'";
+cd "`15'";
 
 cap program drop plotreg;
 program plotreg;
@@ -91,7 +92,7 @@ gen fracrdp = numrdp/denomrdp;
 * Keep non-rdp;
 drop if `type'_dist==0;
 drop if rdp_ls==1;
-drop if ever_rdp_ls==1;
+if `res'==0{; drop if ever_rdp_ls==1; };
 
 *select clusters and time-window;
 keep if abs(purch_yr -mod_yr) <= `tw'; 

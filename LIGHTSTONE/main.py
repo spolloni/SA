@@ -202,7 +202,7 @@ if _5_b_PLOTS_ == 1:
 
     dofile = "subcode/plot_gradients.do"
     cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,
-            typ,sfr1,sfr2,stop,sbot,smcl,stw,gendata,output]
+            typ,sfr1,sfr2,stop,sbot,smcl,stw,sres,gendata,output]
     subprocess.call(cmd)
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'
