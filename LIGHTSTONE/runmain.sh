@@ -1,6 +1,8 @@
 #!/bin/bash
 
 git status
+echo "Running main.py on AWS Server at $(date +%H:%M--%h%m)"
+git commit -a -m "Running main.py on AWS Server at $(date +%H:%M--%h%m)"
 
 #ssh -i "/Users/stefanopolloni/SAkey.pem" \
 #ubuntu@ec2-18-216-131-130.us-east-2.compute.amazonaws.com \
@@ -15,4 +17,4 @@ git status
 # run main.py
 
 
-EOF
+#EOF
