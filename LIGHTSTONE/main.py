@@ -191,7 +191,7 @@ if _5_a_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile,rdp,salgo,
                 spar1,spar2,sbw,typ,gendata]
     #cmd = ['echo "$PATH"']
-    #subprocess.call(cmd,shell=True)
+    subprocess.call(cmd,shell=True)
 
 if _5_b_PLOTS_ == 1:
 
