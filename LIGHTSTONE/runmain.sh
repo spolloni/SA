@@ -23,5 +23,5 @@ git push
 #
 #EOF
 
-cd ../..
+cd ../../Output
 echo $PWD
