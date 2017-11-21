@@ -28,5 +28,5 @@ echo $PWD
 
 RPATH="/home/ubuntu/analysis/Output/LIGHTSTONE/gradplots/"
 
-#rsync -anv -e "ssh -i $HOME/SAkey.pem" \
-#ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com:$RPATH /gradplots/
+rsync -anv -e "ssh -i $HOME/SAkey.pem" \
+ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com:$RPATH /gradplots/
