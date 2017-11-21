@@ -206,7 +206,7 @@ if _5_b_PLOTS_ == 1:
 
     cwd = os.getcwd()
     print cwd 
-    subprocess.call(cmd)
+    #subprocess.call(cmd)
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'
 
