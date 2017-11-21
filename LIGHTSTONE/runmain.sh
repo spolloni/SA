@@ -23,4 +23,4 @@ git push
 #
 #EOF
 
-echo $CWD
+echo $PWD
