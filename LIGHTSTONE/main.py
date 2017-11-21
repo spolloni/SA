@@ -44,7 +44,7 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_IMPORT__ = 0 
+_1_IMPORT__ = 1 
 
 _2_FLAGRDP_ = 0
 
@@ -53,7 +53,7 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
 
-_4_DISTANCE = 1 
+_4_DISTANCE = 0 
 rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 
@@ -136,40 +136,38 @@ if _4_DISTANCE ==1:
 
     print '\n'," Calculating distances for non-RDP... ",'\n'
 
-    print workers
+    # 4.0 instantiate parallel workers
+    pp = multiprocessing.Pool(processes=workers)
 
-    ## 4.0 instantiate parallel workers
-    #pp = multiprocessing.Pool(processes=workers)
-#
-    ## 4.1 buffers and self-interesctions
-    #part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
-    #pp.map(part_selfintersect,range(9,0,-1))
-    #print '\n'," -- Self-Intersections: done! "'\n'
-#
-    ## 4.2 merge buffers and push to DB 
-    #merge_n_push(db,tempdir,bw,rdp,algo,par1,par2)
-    #print '\n'," -- Merge and Push Back: done! "'\n'
-#
-    ## 4.3 fetch rdp, rdp centroids, & non-rdp
-    #part_fetch_data = partial(fetch_data,db,tempdir,bw,rdp,algo,par1,par2)
-    #matrx = pp.map(part_fetch_data,range(3,0,-1))
-    #print '\n'," -- Data fetch: done! "'\n'
-#
-    ## 4.4 calculate distances
-    #inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
-    #targ_centroid  = matrx[1][:,:2].astype(np.float)
-    #targ_nearest   = matrx[2][:,:2].astype(np.float)
-    #part_dist_calc = partial(dist_calc,inmat)
-    #distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest])
-    #print '\n'," -- Distance calculation: done! "'\n'
-#
-    ## 4.5 retrieve IDs, populate table and push back to DB
-    #push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw)
-    #print '\n'," -- Populate table / push to DB: done! "'\n'
-    #
-    ## 4.7 kill parallel workers
-    #pp.close()
-    #pp.join()
+    # 4.1 buffers and self-interesctions
+    part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
+    pp.map(part_selfintersect,range(9,0,-1))
+    print '\n'," -- Self-Intersections: done! "'\n'
+
+    # 4.2 merge buffers and push to DB 
+    merge_n_push(db,tempdir,bw,rdp,algo,par1,par2)
+    print '\n'," -- Merge and Push Back: done! "'\n'
+
+    # 4.3 fetch rdp, rdp centroids, & non-rdp
+    part_fetch_data = partial(fetch_data,db,tempdir,bw,rdp,algo,par1,par2)
+    matrx = pp.map(part_fetch_data,range(3,0,-1))
+    print '\n'," -- Data fetch: done! "'\n'
+
+    # 4.4 calculate distances
+    inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
+    targ_centroid  = matrx[1][:,:2].astype(np.float)
+    targ_nearest   = matrx[2][:,:2].astype(np.float)
+    part_dist_calc = partial(dist_calc,inmat)
+    distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest])
+    print '\n'," -- Distance calculation: done! "'\n'
+
+    # 4.5 retrieve IDs, populate table and push back to DB
+    push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw)
+    print '\n'," -- Populate table / push to DB: done! "'\n'
+    
+    # 4.7 kill parallel workers
+    pp.close()
+    pp.join()
 
 #############################################
 # STEP 5:  Make Gradient Plots              #
