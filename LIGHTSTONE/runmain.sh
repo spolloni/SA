@@ -16,8 +16,10 @@ cd $HOME/analysis/Code
 git pull
 
 # run main.py
-cd $HOME/analysis/Code/LIGHTSTONE
-python main.py
+#cd $HOME/analysis/Code/LIGHTSTONE
+#python main.py
+
+stata-mp
 
 
 EOF
