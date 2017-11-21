@@ -22,3 +22,5 @@ ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com \
 	#echo "$LD_LIBRARY_PATH"
 
 EOF
+
+echo $CWD
