@@ -190,7 +190,7 @@ if _5_a_PLOTS_ == 1:
     dofile = "subcode/export2gradplot.do"
     cmd = ['stata-mp','do',dofile,rdp,salgo,
                 spar1,spar2,sbw,typ,gendata]
-    subprocess.call(cmd,shell=True)
+    subprocess.call(cmd)
 
 if _5_b_PLOTS_ == 1:
 
