@@ -23,6 +23,6 @@ PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 export PATH="$PATH:/usr/local/stata13/"
 # ADD GIS  processing plugins to PYTHONPATH
 export PYTHONPATH="$PYTHONPATH:/usr/share/qgis/python/plugins/" 
-# ADD display information for X serve
+# ADD display information for X server
 export DISPLAY=:99
 

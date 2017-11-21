@@ -10,7 +10,7 @@
 	* if on mac, make sure all dependencies are set in $PATH and $PYTHONPATH
 	* will need to attach Processing toolbox to $PYTHONPATH
 	----> find location in plugins/Manage and install plugins scroll down to processing. **NOTE: path should be to plugins, not to processing!
-	* on linus, SAGA attachment to QGIS is tricky. ALSO MAKE SURE FAKE X SERVER IS INSTALLED!! 
+	* on linux, SAGA attachment to QGIS is tricky. ALSO MAKE SURE FAKE X SERVER IS INSTALLED!! 
 		https://gis.stackexchange.com/questions/224617/problem-getting-saga-activated-in-ubuntu-qgis-2-18-2
 		----> follow procedure by Nez
 		*https://docs.qgis.org/2.18/en/docs/training_manual/qgis_server/install.html
@@ -31,13 +31,45 @@
 		pip install pysqlite
 		sudo apt install sqlite3
 
+- Install spatialite.
+	* On Mac:
+		- brew install spatialite-tools 
+			(requires gdal installed which comes with qgis)
+	* On Linux:
+		- sudo apt install spatialite-bin
+			(http://spatialitetalk.com/installing-on-linux/)
+
 - ODBC setup.
-	* Mac:
+	* On Mac:
 		- brew install unixodbc
 		- get sqlite3 driver at http://www.ch-werner.de/sqliteodbc/
 		- files are: ~/.odbcinst.ini ~/.odbc.ini and for sytem:
 			/Library/ODBC/odbcinst.ini  /Library/ODBC/odbc.ini 
-		  stata only reads use
+		  --->stata only reads user DBS
 		- follow this: http://db.rstudio.com/best-practices/drivers/
+		- NOTE: I suspect that iODBC is actually what is used and installed here. 
+				Seems like it may be installed by default. If the stata command 
+				"odbc li" does not return an error, no need to install unixodbc!!!!
+	* On Linux:
+		1. sudo apt-get install unixodbc-dev unixodbc-bin unixodbc
+		2. sudo ln -s /usr/lib/x86_64-linux-gnu/libodbc.so /usr/lib/libiodbc.so 
+		--> this fools stata into thinking that iODBC is installed
+		3. cd $HOME
+		4. wget http://www.ch-werner.de/sqliteodbc/sqliteodbc-0.9995.tar.gz 
+		5. tar -xvf sqliteodbc-0.9995.tar.gz
+		6. cd sqliteodbc-0.9995
+		7. sudo ./configure && sudo make && sudo make install
+		8. files fill up ~/.odbcinst.ini ~/.odbc.ini (DRIVERS ARE .so)
+		check : https://askubuntu.com/questions/708683/how-do-i-install-sqlite3-odbc-drivers-with-unixodbc
+		AND http://db.rstudio.com/best-practices/drivers/
+		AND http://www.ch-werner.de/sqliteodbc/html/index.html
+
+- Setup Git for AWS:
+	1. cd into Code folder
+	2. git init
+	3. 
+
+	LOLOLOLOL
+
 
 
