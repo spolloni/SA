@@ -19,6 +19,7 @@ git pull
 #cd $HOME/analysis/Code/LIGHTSTONE
 #python main.py
 
+echo "$PATH"
 stata-mp
 
 
