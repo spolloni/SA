@@ -17,8 +17,13 @@ git pull
 
 # run main.py
 cd $HOME/analysis/Code/LIGHTSTONE
-python main.py
+#python main.py
 
+python
+import os
+cwd = os.getcwd()
+print cwd 
+exit()
 
 
 EOF
