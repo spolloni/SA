@@ -3,10 +3,11 @@ main.py
 
     created by: sp, oct 9 2017
     
-    - _1_IMPORT:   import lighstone data into SQLite DB
-    - _2_FLAGRDP:  select sample and flag RDP.
-    - _3_CLUSTER:  assign RPP to spatial cluster.
+    - _1_IMPORT__: import lighstone data into SQLite DB
+    - _2_FLAGRDP_: select sample and flag RDP.
+    - _3_CLUSTER_: assign RPP to spatial cluster.
     - _4_DISTANCE: find distance and cluster ID for non-RDP.
+    - _5_PLOTS___: make house-price gradient plots/ regs.
 
 '''
 
@@ -53,13 +54,13 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
 
-_4_DISTANCE = 1 
+_4_DISTANCE = 0 
 rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 
-_5_a_PLOTS_ = 0 
+_5_a_PLOTS_ = 1 
 typ = 'nearest'  # distance to nearest or centroid
-_5_b_PLOTS_ = 0 
+_5_b_PLOTS_ = 1 
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
