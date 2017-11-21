@@ -66,8 +66,11 @@
 
 - Setup Git for AWS:
 	1. cd into Code folder
-	2. git init
-	3. 
+	2. git clone https://github.com/spolloni/SA . 
+		(PERIOD IS IMPORTANT HERE)
+	3. git config credential.helper store
+	4. git pull
+
 
 
 
