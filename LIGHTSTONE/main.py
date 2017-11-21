@@ -188,9 +188,9 @@ sres  = str(res)
 if _5_a_PLOTS_ == 1:
 
     dofile = "subcode/export2gradplot.do"
-    cmd = ['stata-mp','do',dofile,rdp,salgo,
-                spar1,spar2,sbw,typ,gendata]
-    #cmd = ['echo "$PATH"']
+    #cmd = ['stata-mp','do',dofile,rdp,salgo,
+    #            spar1,spar2,sbw,typ,gendata]
+    cmd = ['echo "$PATH"']
     subprocess.call(cmd)
 
 if _5_b_PLOTS_ == 1:

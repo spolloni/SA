@@ -1,3 +1,4 @@
+#!/bin/bash
 
 #push code to git
 git commit -a -m "Running main.py on AWS Server at $(date +%H:%M--%h%m)"
