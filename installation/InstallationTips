@@ -23,7 +23,7 @@
 	* License is server agnostic
 	* add to path everywhere. 
 	---> in mac, bash_profile and sublime bash
-	---> in linux, .profile and .bashrc
+	---> in linux, .profile and .bashrc AND /root/.bashrc
 	https://download.stata.com/download/linux64_13/
 	* set more off, permanently.
 	* 
