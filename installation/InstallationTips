@@ -65,7 +65,7 @@
 		AND http://www.ch-werner.de/sqliteodbc/html/index.html
 
 - Setup Git for AWS:
-	1. cd into Code folder
+	1. cd into Code folder on Server
 	2. git clone https://github.com/spolloni/SA . 
 		(PERIOD IS IMPORTANT HERE)
 	3. git config credential.helper store
