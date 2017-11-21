@@ -48,7 +48,7 @@ _1_IMPORT__ = 0
 
 _2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 1 
+_3_CLUSTER_ = 0 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
@@ -57,9 +57,9 @@ _4_DISTANCE = 0
 rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 
-_5_a_PLOTS_ = 0 
+_5_a_PLOTS_ = 1 
 typ = 'nearest'  # distance to nearest or centroid?
-_5_b_PLOTS_ = 0 
+_5_b_PLOTS_ = 1 
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
