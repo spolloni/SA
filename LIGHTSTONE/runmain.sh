@@ -17,9 +17,9 @@ git pull
 
 # run main.py
 cd $HOME/analysis/Code/LIGHTSTONE
-#python main.py
+python main.py
 
-echo "$LD_LIBRARY_PATH"
+#echo "$LD_LIBRARY_PATH"
 
 
 EOF
