@@ -16,7 +16,8 @@ cd $HOME/analysis/Code
 git pull
 
 # run main.py
-python ./LIGHTSTONE/main.py
+cd $HOME/analysis/Code/LIGHTSTONE
+python main.py
 
 
 EOF
