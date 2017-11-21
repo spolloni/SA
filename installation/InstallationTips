@@ -25,6 +25,8 @@
 	---> in mac, bash_profile and sublime bash
 	---> in linux, .profile and .bashrc
 	https://download.stata.com/download/linux64_13/
+	* set more off, permanently.
+	* 
 
 - Install pysqlite.
 	* On linux: "sudo apt-get install libsqlite3-dev" then
