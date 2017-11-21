@@ -7,7 +7,7 @@ git push
 #ssh into server
 ssh -i "/Users/stefanopolloni/SAkey.pem" \
 ubuntu@ec2-18-216-131-130.us-east-2.compute.amazonaws.com \
-'bash -s' << \EOF
+'source ~/.profile; bash -s' << \EOF
 
 #CD into code directory
 cd $HOME/analysis/Code
@@ -16,11 +16,8 @@ cd $HOME/analysis/Code
 git pull
 
 # run main.py
-#cd $HOME/analysis/Code/LIGHTSTONE
-#python main.py
-
-echo "$PATH"
-stata-mp
+cd $HOME/analysis/Code/LIGHTSTONE
+python main.py
 
 
 EOF
