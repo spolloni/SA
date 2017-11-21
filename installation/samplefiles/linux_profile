@@ -21,6 +21,8 @@ PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 # ADD stata13 to PATH
 export PATH="$PATH:/usr/local/stata13/"
+# HAVE UBUNTU FIND SPATIALITE LIBS
+export LD_LIBRARY_PATH="/usr/local/lib/" 
 # ADD GIS  processing plugins to PYTHONPATH
 export PYTHONPATH="$PYTHONPATH:/usr/share/qgis/python/plugins/" 
 # ADD display information for X server

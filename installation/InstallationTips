@@ -42,9 +42,10 @@
 		- Follow instructions in https://docs.djangoproject.com/en/1.11/ref/contrib/gis/install/spatialite/
 		- Use most current working versions instead of what django suggests. 
 		- ./configure will fail many times and it is necessary to incrementally install apps (proj4, geos and others!) and fix bugs until it runs completely. Then sudo make && sudo make install. 
-		- useful links are: https://kobablog.wordpress.com/2011/05/17/how-to-find-and-install-the-missing-file-in-ubuntu/ (apt-file search method) AND https://ubuntuforums.org/showthread.php?t=836133 (libxml2-dev is necessary).
+		- useful links are: https://kobablog.wordpress.com/2011/05/17/how-to-find-and-install-the-missing-file-in-ubuntu/ (apt-file search method) AND https://ubuntuforums.org/showthread.php?t=836133 (libxml2-dev is necessary) AND https://packages.debian.org/sid/libreadosm-dev 
 		-search for spatialite_mod in /usr/local/lib. 
-		-> only spatialitelib is necessary, not spatialite-tools (which is different than spatialite_tool)
+		-> only spatialitelib is necessary, not spatialite-tools (which is different than spatialite_tool) --- but CLI comes with spatialite-tools.
+		-> Add Libs to $PATH in .profile and .bashrc
 
 - ODBC setup.
 	* On Mac:
