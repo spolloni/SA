@@ -5,7 +5,7 @@ git commit -a -m "Running main.py on AWS Server at $(date +%H:%M--%h%m)"
 git push
 
 #ssh into server
-#ssh -i "/Users/stefanopolloni/SAkey.pem" \
+#ssh -i $HOME/SAkey.pem \
 #ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com \
 #'source ~/.profile; bash -s' << \EOF
 #
@@ -23,5 +23,10 @@ git push
 #
 #EOF
 
-cd ../../Output
+cd ../../Output/LIGHTSTONE
 echo $PWD
+
+RPATH = "/home/ubuntu/analysis/Output/LIGHTSTONE/gradplots/"
+
+rsync -anv -e "ssh -i $HOME/SAkey.pem" \
+ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com:$RPATH /gradplots/
