@@ -58,8 +58,8 @@ _4_DISTANCE = 0
 rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 
-_5_a_PLOTS_ = 1 
-typ = 'nearest'  # distance to nearest or centroid
+_5_a_PLOTS_ = 0
+typ = 'centroid'  # distance to nearest or centroid
 _5_b_PLOTS_ = 1 
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year

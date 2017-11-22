@@ -9,7 +9,7 @@ local rdp  = "`1'";
 local algo = "`2'";
 local par1 = "`3'";
 local par2 = "`4'";
-local bw   = "`5'";
+global bw  = "`5'";
 local type = "`6'";
 local fr1  = "0.`7'";
 local fr2  = "0.`8'";
@@ -47,6 +47,7 @@ program plotreg;
    (lpoly coef dist if post==1, bw(100) lc(black) lp(--)),
    xtitle("meters")
    ytitle("log-price")
+   xlabel(0(200)$bw)
    legend(order(1 "pre" 2 "post")) note("`2'");
    graphexportpdf `1', dropeps;
    restore;
@@ -55,6 +56,13 @@ end;
 
 * load data; 
 use "`data'/gradplot.dta", clear;
+
+* re-set bw if centroid;
+if "`type'"=="centroid"{;
+   sum `type'_dist;
+   global bw = `r(mean)'+`r(sd)';
+   global bw = round($bw,100);
+};
 
 * determine construction date per cluster;
 destring purch_yr purch_mo purch_day, replace;
@@ -120,29 +128,31 @@ drop if count < `mcl';
 
 * Distribution of trans;
 qui tab `type'_cluster;
-hist count if n ==1, freq 
+hist count if n ==1 & `type'_dist<$bw, freq 
 xtitle("# of transactions per cluster")
 ytitle("")
 note("Note: cleaning kept `r(r)' out of `totalclust' clusters");
 graphexportpdf summary_transperclust, dropeps;
 
 * Distribution of RDP frac;
-hist fracrdp if n ==1, freq 
+hist fracrdp if n ==1 & `type'_dist<$bw, freq 
 xtitle("% RDP transactions per cluster")
 ytitle("");
 graphexportpdf summary_rdpperclust, dropeps;
 
 * Distribution of dist;
-hist `type'_dist, freq 
+hist `type'_dist if `type'_dist<$bw, freq 
 xtitle("# of transactions per distance")
-ytitle("");
+ytitle("")
+xlabel(0(200)$bw);
 graphexportpdf summary_disthist, dropeps;
 
 * Distribution of dist pre/post;
 tw
-(hist `type'_dist if  pre1==1, start(0) width($bin) c(gs10))
-(hist `type'_dist if post1==1, start(0) width($bin) fc(none) lc(gs0)),
+(hist `type'_dist if  pre1==1 & `type'_dist<$bw , start(0) width($bin) c(gs10))
+(hist `type'_dist if post1==1 & `type'_dist<$bw, start(0) width($bin) fc(none) lc(gs0)),
 xtitle("# of transactions per distance")
+xlabel(0(200)$bw)
 legend(order(1 "pre" 2 "post")ring(0) position(2) bmargin(small));
 graphexportpdf summary_disthist2, dropeps;
 
@@ -155,42 +165,46 @@ replace purch_price= purch_price/1000000;
 gen lprice = log(purch_price);
 gen erf_size2 = erf_size^2;
 gen erf_size3 = erf_size^3;
-egen dists = cut(`type'_dist),at(0($bin)`bw');    
+egen dists = cut(`type'_dist),at(0($bin)$bw);    
 egen munic = group(munic_name);
 
 * #1 Raw-tight in logs;
 tw 
-(lpoly lprice `type'_dist if pre1==1, bw(100) lc(black))
-(lpoly lprice `type'_dist if post1==1, bw(100) lc(black) lp(--)),
+(lpoly lprice `type'_dist if pre1==1 & `type'_dist<$bw, bw(100) lc(black))
+(lpoly lprice `type'_dist if post1==1 & `type'_dist<$bw, bw(100) lc(black) lp(--)),
 xtitle("meters")
 ytitle("log-price")
+xlabel(0(200)$bw)
 legend(order(1 "pre" 2 "post"));
 graphexportpdf raw_logspm1, dropeps;
 
 * #2 Raw-tight in levels;
 tw 
-(lpoly purch_price `type'_dist if pre1==1, bw(100) lc(black))
-(lpoly purch_price `type'_dist if post1==1, bw(100) lc(black) lp(--)),
+(lpoly purch_price `type'_dist if pre1==1 & `type'_dist<$bw, bw(100) lc(black))
+(lpoly purch_price `type'_dist if post1==1 & `type'_dist<$bw, bw(100) lc(black) lp(--)),
 xtitle("meters")
 ytitle("price")
+xlabel(0(200)$bw)
 legend(order(1 "pre" 2 "post"));
 graphexportpdf raw_levspm1, dropeps;
 
 * #3 Raw-loose in logs;
 tw 
-(lpoly lprice `type'_dist if pre2==1, bw(100) lc(black))
-(lpoly lprice `type'_dist if post2==1, bw(100) lc(black) lp(--)),
+(lpoly lprice `type'_dist if pre2==1 & `type'_dist<$bw, bw(100) lc(black))
+(lpoly lprice `type'_dist if post2==1 & `type'_dist<$bw, bw(100) lc(black) lp(--)),
 xtitle("meters")
 ytitle("log-price")
+xlabel(0(200)$bw)
 legend(order(1 "pre" 2 "post"));
 graphexportpdf raw_logspm2, dropeps;
 
 * #4 Raw-loose in levels;
 tw 
-(lpoly purch_price `type'_dist if pre2==1, bw(100) lc(black))
-(lpoly purch_price `type'_dist if post2==1, bw(100) lc(black) lp(--)),
+(lpoly purch_price `type'_dist if pre2==1 & `type'_dist<$bw, bw(100) lc(black))
+(lpoly purch_price `type'_dist if post2==1 & `type'_dist<$bw, bw(100) lc(black) lp(--)),
 xtitle("meters")
 ytitle("price")
+xlabel(0(200)$bw)
 legend(order(1 "pre" 2 "post"));
 graphexportpdf raw_levspm2, dropeps;
 
