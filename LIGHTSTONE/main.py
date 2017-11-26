@@ -3,7 +3,7 @@ main.py
 
     created by: sp, oct 9 2017
     
-    - _1_IMPORT__: import lighstone data into SQLite DB
+    - _1_IMPORT__: import lightstone & BBLU data into DB.
     - _2_FLAGRDP_: select sample and flag RDP.
     - _3_CLUSTER_: assign RPP to spatial cluster.
     - _4_DISTANCE: find distance and cluster ID for non-RDP.
@@ -12,13 +12,13 @@ main.py
 '''
 
 from pysqlite2 import dbapi2 as sql
-from subcode.lightstone2sql import add_trans, add_erven, add_bonds
+from subcode.data2sql import add_trans, add_erven, add_bonds
+from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push
 from subcode.distfuns import fetch_data, dist_calc, push_dist2db
+import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
-import os, subprocess, shutil, multiprocessing, re
-from multiprocessing.pool import ThreadPool as TP
 import numpy as np
 
 #################
@@ -26,7 +26,8 @@ import numpy as np
 #################
 
 project = os.getcwd()[:os.getcwd().rfind('Code')]
-rawdata = project + 'Raw/DEEDS/'
+rawdeed = project + 'Raw/DEEDS/'
+rawbblu = project + 'Raw/BBLU/'
 gendata = project + 'Generated/LIGHTSTONE/'
 outdir  = project + 'Output/LIGHTSTONE/'
 tempdir = gendata + 'temp/'
@@ -35,9 +36,6 @@ for p in [gendata,outdir]:
     if not os.path.exists(gendata):
         os.makedirs(gendata)
 
-shutil.rmtree(tempdir,ignore_errors=True)
-os.makedirs(tempdir)
-
 db = gendata+'lightstone.db'
 workers = int(multiprocessing.cpu_count()-1)
 
@@ -45,7 +43,8 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_IMPORT__ = 0 
+_1_a_IMPORT = 0 
+_1_b_IMPORT = 1 
 
 _2_FLAGRDP_ = 0
 
@@ -59,8 +58,8 @@ rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 
 _5_a_PLOTS_ = 0
-typ = 'centroid'  # distance to nearest or centroid
-_5_b_PLOTS_ = 1 
+_5_b_PLOTS_ = 0 
+typ = 'nearest'  # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
@@ -73,21 +72,41 @@ res = 0          # =1 if keep rdp resale
 # STEP 1:  import txt files into SQL tables #
 #############################################
 
-if _1_IMPORT__ ==1:
+if _1_a_IMPORT ==1:
 
-    print '\n'," Importing Lighstone TXTs into SQL... ",'\n'
+    print '\n'," Importing Deeds data into SQL... ",'\n'
 
     if os.path.exists(db):
         os.remove(db)
 
-    add_trans(rawdata+'TRAN_DATA_1205.txt',db)
+    add_trans(rawdeed+'TRAN_DATA_1205.txt',db)
     print '\n'," - Transactions table: done! "'\n'
 
-    add_erven(rawdata+'ERF_DATA_1205.txt',db)
+    add_erven(rawdeed+'ERF_DATA_1205.txt',db)
     print '\n'," - Erven table: done! "'\n'
 
-    add_bonds(rawdata+'BOND_DATA_1205.txt',db)
+    add_bonds(rawdeed+'BOND_DATA_1205.txt',db)
     print '\n'," - Bond table: done! "'\n'
+
+if _1_b_IMPORT ==1:
+
+    print '\n'," Importing BBLU data into SQL... ",'\n'
+
+    shutil.rmtree(tempdir,ignore_errors=True)
+    os.makedirs(tempdir)
+
+    #shps = glob.glob(rawbblu+'post_rl2017/*_rl2017.shp')
+    #shps.extend(glob.glob(rawbblu+'pre/*.shp'))
+    #part_shpxtract = partial(shpxtract,tempdir)
+    #part_shpmerge  = partial(shpmerge,tempdir)
+    #pp = multiprocessing.Pool(processes=workers)
+    #pp.map(part_shpxtract,shps)
+    #pp.map(part_shpmerge,['pre','post'])
+    #pp.close()
+    #pp.join()
+    add_bblu(tempdir,db)
+
+    print '\n'," - BBLU data: done! "'\n'
 
 #############################################
 # STEP 2:  flag RDP properties              #
@@ -139,6 +158,8 @@ if _4_DISTANCE ==1:
 
     # 4.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
+    shutil.rmtree(tempdir,ignore_errors=True)
+    os.makedirs(tempdir)
 
     # 4.1 buffers and self-interesctions
     part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)

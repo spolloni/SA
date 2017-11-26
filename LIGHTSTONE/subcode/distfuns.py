@@ -8,7 +8,7 @@ distfuns.py
 from pysqlite2 import dbapi2 as sql
 import sys, csv, os, re, subprocess
 from sklearn.neighbors import NearestNeighbors
-import fiona, glob
+import fiona, glob, multiprocessing
 import geopandas as gpd
 import numpy as np
 
