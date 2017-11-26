@@ -1,14 +1,14 @@
 '''
-lightstone2sql.py
+data2sql.py
 
     created by: sp, oct 9 2017
 
-    - reads Lightstone data files 
-    - saves into sql tables
+    - reads Lightstone data files & saves into sql tables
+    - 
 '''
 
 from pysqlite2 import dbapi2 as sql
-import subprocess
+import subprocess, ntpath, glob
 
 def addtable2db(input,database,tablename,namesqry,rowsqry):
 
@@ -166,6 +166,7 @@ def add_erven(input,database):
 
     return
 
+
 def add_bonds(input,database):
 
     tablename = 'bonds'
@@ -201,4 +202,71 @@ def add_bonds(input,database):
     addtable2db(input,database,tablename,namesqry,rowsqry)
 
     return
+
+
+def shpxtract(tmp_dir,shp):
+
+    sel = '-select M_LU_CODE,S_LU_CODE,T_LU_CODE,UNITS,UNITS_EST,DOP'
+    out = tmp_dir + ntpath.basename(shp)
+    cmd = ['ogr2ogr -f "ESRI Shapefile"', out, shp, sel]
+    subprocess.call(' '.join(cmd),shell=True)
+
+    return
+
+
+def shpmerge(tmp_dir,time):
+
+    shps = glob.glob(tmp_dir+'*_rl2017.shp')
+
+    if time=='pre':
+        outfile = 'pre.shp'
+        shps = list(set(glob.glob(tmp_dir+'*.shp'))-set(shps))
+    else:
+        outfile = 'rl2017.shp'
+        
+    cmd = ['saga_cmd shapes_tools 2 -INPUT', '\;'.join(shps),
+           '-MERGED', tmp_dir+outfile] 
+    subprocess.call(' '.join(cmd),shell=True)
+
+    return
+
+
+def add_bblu(tmp_dir,database):
+
+    # push BBLU rl2017 to db
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            bblu_rl2017 (mock INT);''')
+    con.commit()
+    con.close()
+    cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+            database, tmp_dir+'rl2017.shp','-nlt POINT',
+             '-nln bblu_rl2017', '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # push BBLU rl2017 to db
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            bblu_pre (mock INT);''')
+    con.commit()
+    con.close()
+    cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+            database, tmp_dir+'pre.shp','-nlt POINT',
+             '-nln bblu_pre', '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    return
+
+
+
+
+    
+
+
+
+
+
+
 
