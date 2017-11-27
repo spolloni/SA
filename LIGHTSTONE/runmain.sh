@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#retrieve gradplots output ?
+RET_GRADPLOTS=1
+
+#retrieve sqlite database ?
+RET_DBASE=1
+
 #push code to git
 git commit -a -m "Running main.py on AWS Server at $(date +%H:%M--%h%m)"
 git push
@@ -21,9 +27,22 @@ git push
 #
 #EOF
 
-cd ../../Output/LIGHTSTONE
+if [ $RET_GRADPLOTS = 1 ]; then
 
-RPATH="/home/ubuntu/analysis/Output/LIGHTSTONE/gradplots/"
+	cd ../../Output/LIGHTSTONE
 
-rsync --update -av -e "ssh -i $HOME/SAkey.pem" \
-ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com:$RPATH gradplots/
+	RPATH="/home/ubuntu/analysis/Output/LIGHTSTONE/gradplots/"
+
+	rsync --update -av -e "ssh -i $HOME/SAkey.pem" \
+	ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com:$RPATH gradplots/
+
+fi
+
+if [ $RET_DBASE = 1 ]; then
+
+	RPATH="/home/ubuntu/analysis/Output/LIGHTSTONE/gradplots/"
+
+	rsync --update -av -e "ssh -i $HOME/SAkey.pem" \
+	ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com:$RPATH gradplots/
+
+fi
