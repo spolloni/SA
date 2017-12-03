@@ -2,7 +2,7 @@
 distfuns.py
 
     created by: sp, oct 23 2017
-    - spatial functions ditance plots
+    - spatial functions for distance calculations
 '''
 
 from pysqlite2 import dbapi2 as sql
@@ -11,7 +11,7 @@ from sklearn.neighbors import NearestNeighbors
 import fiona, glob, multiprocessing
 import geopandas as gpd
 import numpy as np
-
+import pandas as pd
 
 def gp2shp(db,qrys,geocol,out,espg):
 
@@ -26,6 +26,8 @@ def gp2shp(db,qrys,geocol,out,espg):
             crs=fiona.crs.from_epsg(espg))
     df.to_file(driver = 'ESRI Shapefile', filename = out)
     con.close()
+
+    return
 
 
 def selfintersect(db,dir,bw,rdp,algo,par1,par2,i):
@@ -42,32 +44,76 @@ def selfintersect(db,dir,bw,rdp,algo,par1,par2,i):
         WHERE A.prov_code = {} AND  C.cluster !=0
         GROUP BY cluster
         '''.format(bw,rdp,algo,spar1,spar2,i)
-    out = dir+'buff_{}.shp'.format(i)
+    out1 = dir+'buff_{}.shp'.format(i)
+    out2 = dir+'interbuff_{}.shp'.format(i)
 
     # fetch dissolved buffers
-    if os.path.exists(out): os.remove(out)
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', out, db, '-sql "'+qry+'"']
+    if os.path.exists(out1): os.remove(out1)
+    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
     subprocess.call(' '.join(cmd),shell=True)
 
     # self-intersect
-    cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', dir+'buff_{}.shp'.format(i),
-           '-ID cluster -INTERSECT', dir+'interbuff_{}.shp'.format(i)]
+    cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
+           '-ID cluster -INTERSECT', out2]
     subprocess.call(' '.join(cmd),shell=True)
 
     return
 
 
-def merge_n_push(db,dir,bw,rdp,algo,par1,par2):
+def concavehull(db,dir,sig,rdp,algo,par1,par2,i):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
     spar2 = re.sub("[^0-9]", "", str(par2))
 
+    qry ='''
+        SELECT ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(B.GEOMETRY),{}),0.01)), 
+        C.cluster, A.prov_code
+        FROM transactions AS A
+        JOIN erven AS B ON A.property_id = B.property_id
+        JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
+        WHERE A.prov_code = {} AND  C.cluster !=0
+        GROUP BY cluster
+        '''.format(sig,rdp,algo,spar1,spar2,i)
+    out1 = dir+'hull_{}.shp'.format(i)
+    out2 = dir+'edgehull_{}.shp'.format(i)
+    out3 = dir+'splitedgehull_{}.shp'.format(i)
+    out4 = dir+'coordshull_{}.csv'.format(i)
+    grid = dir+'grid_{}.shp'.format(i)
+
+    # fetch concave hulls
+    if os.path.exists(out1): os.remove(out1)
+    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # convert hulls to lines (edges)
+    cmd = ['saga_cmd shapes_lines 0 -POLYGONS', out1,'-LINES', out2]
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # split edges into many vertices  
+    cmd = ['saga_cmd shapes_lines 6 -LINES', out2, '-SPLIT', grid,
+            '-INTERSECT', out3, '-OUTPUT', '1']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # export vertices to csv
+    if os.path.exists(out4): os.remove(out4)
+    cmd = ['ogr2ogr -f "CSV"', out4, out3, '-lco GEOMETRY=AS_WKT']
+    subprocess.call(' '.join(cmd),shell=True)
+    
+    return
+
+
+def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
+
+    spar1 = re.sub("[^0-9]", "", str(par1))
+    spar2 = re.sub("[^0-9]", "", str(par2))
+    ssig  = re.sub("[^0-9]", "", str(sig))
+
     # fetch self-intersection files
-    files = glob.glob(dir+'*interbuff_*.shp')
+    files = glob.glob(dir+'interbuff_*.shp')
 
     # merge files
     cmd = ['saga_cmd shapes_tools 2 -INPUT', '\;'.join(files),
-           '-MERGED', dir+'merged.shp'] 
+           '-MERGED', dir+'buffmerged.shp'] 
     subprocess.call(' '.join(cmd),shell=True)
 
     # push to db
@@ -78,17 +124,38 @@ def merge_n_push(db,dir,bw,rdp,algo,par1,par2):
     con.commit()
     con.close()
     cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, dir+'merged.shp','-select cluster,prov_code ', '-where "cluster > 0"','-nlt PROMOTE_TO_MULTI',
+            db, dir+'buffmerged.shp','-select cluster,prov_code ', '-where "cluster > 0"','-nlt PROMOTE_TO_MULTI',
              '-nln rdp_buffers_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,bw), '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # fetch concave hull files
+    files = glob.glob(dir+'hull_*.shp')
+
+    # merge files
+    cmd = ['saga_cmd shapes_tools 2 -INPUT', '\;'.join(files),
+           '-MERGED', dir+'hullmerged.shp'] 
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # push to db
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            rdp_hulls_{}_{}_{}_{}_{} (mock INT);'''.format(rdp,algo,spar1,spar2,ssig))
+    con.commit()
+    con.close()
+    cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
+            db, dir+'hullmerged.shp','-select cluster,prov_code ', '-nlt PROMOTE_TO_MULTI',
+             '-nln rdp_hulls_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,ssig), '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
     return
 
 
-def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
+def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
     spar2 = re.sub("[^0-9]", "", str(par2))
+    ssig  = re.sub("[^0-9]", "", str(sig))
 
     if i==1:
 
@@ -101,7 +168,6 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
             JOIN rdp_clusters_{}_{}_{}_{} AS c ON t.trans_id = c.trans_id
             WHERE c.cluster !=0
             '''.format(rdp,algo,spar1,spar2)
-        out = dir+'rdp_all.csv'
 
     if i==2:
 
@@ -115,9 +181,21 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
             WHERE c.cluster !=0
             GROUP BY c.cluster
             '''.format(rdp,algo,spar1,spar2)
-        out = dir+'rdp_mean.csv'
 
     if i==3:
+
+        # all transactions inside hulls
+        qry ='''
+            SELECT t.trans_id, r.rdp_ls
+            FROM erven AS e, rdp_hulls_{}_{}_{}_{}_{} AS h
+            JOIN transactions AS t ON e.property_id = t.property_id
+            JOIN rdp AS r ON t.trans_id = r.trans_id
+            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='erven' AND search_frame=h.GEOMETRY)
+            AND st_within(e.GEOMETRY,h.GEOMETRY) 
+            '''.format(rdp,algo,spar1,spar2,ssig)
+
+    if i==4:
 
         # all transactions inside buffers
         qry ='''
@@ -130,7 +208,6 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
                     WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
             AND st_within(e.GEOMETRY,b.GEOMETRY) 
             '''.format(rdp,algo,spar1,spar2,bw)
-        out = dir+'prenonrdp.csv'
 
     # fetch data
     con = sql.connect(db)
@@ -144,6 +221,36 @@ def fetch_data(db,dir,bw,rdp,algo,par1,par2,i):
     return mat
 
 
+def comb_coordinates(dir,i):
+
+    # load ogr2ogr exported csv
+    df = pd.read_csv(dir+'coordshull_{}.csv'.format(i))
+
+    # cluster column
+    cluster = df['cluster']
+
+    # separate coordinates into own columns
+    wkt     = df['WKT'].str[12:-1]
+    wkt = wkt.str.split(',', expand=True)
+
+    # stack coordinates into one column
+    stack_df = pd.DataFrame()
+    for col in range(len(wkt.columns)):
+
+        temp_df = pd.concat([wkt[[col]],cluster],axis=1)
+        temp_df = temp_df[temp_df[col].notnull()]
+        temp_df.columns = ['xy', 'cluster']
+
+        stack_df = stack_df.append(temp_df)
+    
+    # separate x from y
+    coords = stack_df['xy'].str.split(' ', expand=True)
+    coords.columns = ['x','y']
+    coords = pd.concat([coords,stack_df['cluster']],axis=1)
+
+    return coords
+
+
 def dist_calc(in_mat,targ_mat):
 
     nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(targ_mat)
@@ -151,15 +258,20 @@ def dist_calc(in_mat,targ_mat):
 
     return [dist,ind]
 
-def push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw):
+
+def push_dist2db(db,matrx,distances,coords,labels,rdp,algo,par1,par2,bw):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
     spar2 = re.sub("[^0-9]", "", str(par2))
 
     # Retrieve cluster IDS 
-    centroid_id = matrx[1][:,2][distances[0][1]].astype(np.float)
-    nearest_id  = matrx[2][:,3][distances[1][1]].astype(np.float)
-    trans_id    = matrx[0][matrx[0][:,3]=='0.0'][:,2]
+    trans_id = pd.DataFrame(matrx[0][matrx[0][:,3]=='0.0'][:,2],columns=['tr_id'])
+    labels   = pd.DataFrame(labels,columns=['tr_id'])
+    trans_id = pd.merge(trans_id,labels,how='left',on='tr_id',
+                sort=False,indicator=True,validate='1:1').as_matrix()
+    centroid_id = matrx[2][:,2][distances[0][1]].astype(np.float)
+    nearest_id  = matrx[3][:,3][distances[1][1]].astype(np.float)
+    conhulls_id = coords[:,2][distances[2][1]].astype(np.float)
 
     con = sql.connect(db)
     cur = con.cursor()
@@ -172,17 +284,29 @@ def push_dist2db(db,matrx,distances,rdp,algo,par1,par2,bw):
             centroid_dist    numeric(10,10), 
             centroid_cluster INTEGER,
             nearest_dist     numeric(10,10), 
-            nearest_cluster  INTEGER
+            nearest_cluster  INTEGER,
+            conhulls_dist    numeric(10,10), 
+            conhulls_cluster INTEGER
         );'''.format(rdp,algo,spar1,spar2,bw))
 
     rowsqry = '''
         INSERT INTO distance_{}_{}_{}_{}_{}
-        VALUES (?,?,?,?,?);
+        VALUES (?,?,?,?,?,?,?);
         '''.format(rdp,algo,spar1,spar2,bw)
 
-    for i in range(len(trans_id)):
-        cur.execute(rowsqry, [trans_id[i],distances[0][0][i][0],
-           centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0]])
+    for i in range(len(trans_id[:,0])):
+
+        conhulls_cl = conhulls_id[i][0]
+        conhulls_di = distances[2][0][i][0]
+
+        # if trans is in hull, ignore
+        if trans_id[:,1][i] == 'both':
+            conhulls_cl = None
+            conhulls_di = None
+
+        cur.execute(rowsqry, [trans_id[:,0][i],distances[0][0][i][0],
+           centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0],
+           conhulls_di,conhulls_cl])
 
     cur.execute('''CREATE INDEX dist_ind_{}_{}_{}_{}_{}
         ON distance_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
