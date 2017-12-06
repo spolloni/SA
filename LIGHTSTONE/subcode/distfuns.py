@@ -159,6 +159,50 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
 
     if i==1:
 
+        # BBLU pre points in buffers
+        qry ='''
+            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
+            FROM bblu_pre AS p, rdp_buffers_{}_{}_{}_{}_{} AS b
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_pre' AND search_frame=b.GEOMETRY)
+            AND st_within(p.GEOMETRY,b.GEOMETRY) 
+            '''.format(rdp,algo,spar1,spar2,bw)
+
+    if i==2:
+
+        # BBLU pre points in hulls
+        qry ='''
+            SELECT p.OGC_FID
+            FROM bblu_pre AS p, rdp_hulls_{}_{}_{}_{}_{} AS h
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_pre' AND search_frame=h.GEOMETRY)
+            AND st_within(p.GEOMETRY,h.GEOMETRY) 
+            '''.format(rdp,algo,spar1,spar2,ssig)
+
+    if i==3:
+
+        # BBLU rl2017 points in buffers
+        qry ='''
+            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
+            FROM bblu_rl2017 AS p, rdp_buffers_{}_{}_{}_{}_{} AS b
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_rl2017' AND search_frame=b.GEOMETRY)
+            AND st_within(p.GEOMETRY,b.GEOMETRY) 
+            '''.format(rdp,algo,spar1,spar2,bw)
+
+    if i==4:
+
+        # BBLU rl2017 points in hulls
+        qry ='''
+            SELECT p.OGC_FID
+            FROM bblu_rl2017 AS p, rdp_hulls_{}_{}_{}_{}_{} AS h
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_rl2017' AND search_frame=h.GEOMETRY)
+            AND st_within(p.GEOMETRY,h.GEOMETRY) 
+            '''.format(rdp,algo,spar1,spar2,ssig)
+
+    if i==5:
+
         # all RDP transactions
         qry ='''
             SELECT st_x(e.GEOMETRY) as x, st_y(e.GEOMETRY) as y,
@@ -169,7 +213,7 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
             WHERE c.cluster !=0
             '''.format(rdp,algo,spar1,spar2)
 
-    if i==2:
+    if i==6:
 
         # RDP centroids, per cluster
         qry ='''
@@ -182,7 +226,7 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
             GROUP BY c.cluster
             '''.format(rdp,algo,spar1,spar2)
 
-    if i==3:
+    if i==7:
 
         # all transactions inside hulls
         qry ='''
@@ -195,7 +239,7 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
             AND st_within(e.GEOMETRY,h.GEOMETRY) 
             '''.format(rdp,algo,spar1,spar2,ssig)
 
-    if i==4:
+    if i==8:
 
         # all transactions inside buffers
         qry ='''
@@ -259,14 +303,15 @@ def dist_calc(in_mat,targ_mat):
     return [dist,ind]
 
 
-def push_dist2db(db,matrx,distances,coords,labels,rdp,algo,par1,par2,bw):
+def push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
     spar2 = re.sub("[^0-9]", "", str(par2))
+    ssig  = re.sub("[^0-9]", "", str(sig))
 
     # Retrieve cluster IDS 
     trans_id = pd.DataFrame(matrx[0][matrx[0][:,3]=='0.0'][:,2],columns=['tr_id'])
-    labels   = pd.DataFrame(labels,columns=['tr_id'])
+    labels   = pd.DataFrame(matrx[1][matrx[1][:,1]=='0.0'][:,0],columns=['tr_id'])
     trans_id = pd.merge(trans_id,labels,how='left',on='tr_id',
                 sort=False,indicator=True,validate='1:1').as_matrix()
     centroid_id = matrx[2][:,2][distances[0][1]].astype(np.float)
@@ -277,47 +322,102 @@ def push_dist2db(db,matrx,distances,coords,labels,rdp,algo,par1,par2,bw):
     cur = con.cursor()
     
     cur.execute('''DROP TABLE IF EXISTS 
-        distance_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw))
+        distance_nrdp_{}_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw,ssig))
 
-    cur.execute(''' CREATE TABLE distance_{}_{}_{}_{}_{} (
+    cur.execute(''' CREATE TABLE distance_nrdp_{}_{}_{}_{}_{}_{} (
             trans_id         VARCHAR(11) PRIMARY KEY,
             centroid_dist    numeric(10,10), 
             centroid_cluster INTEGER,
             nearest_dist     numeric(10,10), 
             nearest_cluster  INTEGER,
             conhulls_dist    numeric(10,10), 
-            conhulls_cluster INTEGER
-        );'''.format(rdp,algo,spar1,spar2,bw))
+            conhulls_cluster INTEGER,
+            conhulls_inhull  INTEGER
+        );'''.format(rdp,algo,spar1,spar2,bw,ssig))
 
     rowsqry = '''
-        INSERT INTO distance_{}_{}_{}_{}_{}
-        VALUES (?,?,?,?,?,?,?);
-        '''.format(rdp,algo,spar1,spar2,bw)
+        INSERT INTO distance_nrdp_{}_{}_{}_{}_{}_{}
+        VALUES (?,?,?,?,?,?,?,?);
+        '''.format(rdp,algo,spar1,spar2,bw,ssig)
 
     for i in range(len(trans_id[:,0])):
 
-        conhulls_cl = conhulls_id[i][0]
-        conhulls_di = distances[2][0][i][0]
-
-        # if trans is in hull, ignore
+        inhull = 0
         if trans_id[:,1][i] == 'both':
-            conhulls_cl = None
-            conhulls_di = None
+            distances[2][0][i][0] = -distances[2][0][i][0]
+            inhull = 1
 
         cur.execute(rowsqry, [trans_id[:,0][i],distances[0][0][i][0],
            centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0],
-           conhulls_di,conhulls_cl])
+           distances[2][0][i][0],conhulls_id[i][0],inhull])
 
-    cur.execute('''CREATE INDEX dist_ind_{}_{}_{}_{}_{}
-        ON distance_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
-            algo,spar1,spar2,bw,rdp,algo,spar1,spar2,bw))
+    cur.execute('''CREATE INDEX dist_nrdpind_{}_{}_{}_{}_{}_{}
+        ON distance_nrdp_{}_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
+            algo,spar1,spar2,bw,ssig,rdp,algo,spar1,spar2,bw,ssig))
 
     con.commit()
     con.close()
 
     return
 
+
+def push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
+
+    spar1 = re.sub("[^0-9]", "", str(par1))
+    spar2 = re.sub("[^0-9]", "", str(par2))
+    ssig  = re.sub("[^0-9]", "", str(sig))
+
+    for t in ['pre','post']:
+
+        if t == 'pre':
+            int1 = 1
+            int2 = 2
+        else:
+            int1 = 0
+            int2 = 0
+
+        # Retrieve cluster IDS 
+        bblu_id  = pd.DataFrame(matrx[int(5+int2)][:,2],columns=['ogc_fid'])
+        bblu_lab = pd.DataFrame(matrx[int(4+int2)],columns=['ogc_fid'])
+        bblu_id  = pd.merge(bblu_id,bblu_lab,how='left',on='ogc_fid',
+                        sort=False,indicator=True,validate='1:1').as_matrix()
+        conhulls_id = coords[:,2][distances[int1][1]].astype(np.float)
+
+        con = sql.connect(db)
+        cur = con.cursor()
+
+        cur.execute('''DROP TABLE IF EXISTS 
+            distance_bblu{}_{}_{}_{}_{}_{}_{};'''.format(t,rdp,algo,spar1,spar2,bw,ssig))
+
+        cur.execute(''' CREATE TABLE distance_bblu{}_{}_{}_{}_{}_{}_{} (
+                OGC_FID   VARCHAR(11) PRIMARY KEY,
+                distance  numeric(10,10), 
+                cluster   INTEGER,
+                inhull    INTEGER
+            );'''.format(t,rdp,algo,spar1,spar2,bw,ssig))
+
+        rowsqry = '''
+            INSERT INTO distance_bblu{}_{}_{}_{}_{}_{}_{}
+            VALUES (?,?,?,?);
+            '''.format(t,rdp,algo,spar1,spar2,bw,ssig)
+
+        for i in range(len(bblu_id[:,0])):
+
+            inhull = 0
+            if bblu_id[:,1][i] == 'both':
+                distances[int1][0][i][0] = -distances[int1][0][i][0]
+                inhull = 1
+    
+            cur.execute(rowsqry,[bblu_id[:,0][i],distances[int1][0][i][0],
+                             conhulls_id[i][0],inhull])
+
+        cur.execute('''CREATE INDEX dist_{}ind_{}_{}_{}_{}_{}_{}
+        ON distance_bblu{}_{}_{}_{}_{}_{}_{} (OGC_FID);'''.format(t,rdp,
+            algo,spar1,spar2,bw,ssig,t,rdp,algo,spar1,spar2,bw,ssig))
+
+        con.commit()
+        con.close()
+
+    return
+
    
-
-
-

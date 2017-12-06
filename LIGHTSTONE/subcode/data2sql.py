@@ -245,7 +245,7 @@ def add_bblu(tmp_dir,database):
              '-nln bblu_rl2017', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
-    # push BBLU rl2017 to db
+    # push BBLU pre-period to db
     con = sql.connect(database)
     cur = con.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS 

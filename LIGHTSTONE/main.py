@@ -16,7 +16,8 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
-from subcode.distfuns import fetch_data, dist_calc, push_dist2db, comb_coordinates
+from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
+from subcode.distfuns import push_distNRDP2db, push_distBBLU2db
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
 import numpy as np
@@ -55,14 +56,14 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
 
-_4_DISTANCE = 1 
+_4_DISTANCE = 0
 rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 sig = 2.5        # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
-_5_b_PLOTS_ = 0 
-typ = 'nearest'  # distance to nearest or centroid
+_5_b_PLOTS_ = 1 
+typ = 'conhulls'  # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
@@ -157,7 +158,7 @@ if _3_CLUSTER_ ==1:
 
 if _4_DISTANCE ==1:
 
-    print '\n'," Calculating distances for non-RDP... ",'\n'
+    print '\n'," Calculating distances to RDP... ",'\n'
 
     # 4.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
@@ -180,32 +181,42 @@ if _4_DISTANCE ==1:
     merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
     print '\n'," -- Merge and Push Back: done! "'\n'
 
-    # 4.4 fetch rdp, rdp centroids, & non-rdp in/out of hulls
-    part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
-    matrx = pp.map(part_fetch_data,range(4,0,-1))
-    print '\n'," -- Data fetch: done! "'\n'
-    
-    # 4.5 assemble coordinates for hull edges
+    # 4.4 assemble coordinates for hull edges
     part_comb_coordinates = partial(comb_coordinates,tempdir)
     coords = pp.map(part_comb_coordinates,range(9,0,-1))
     coords = pd.concat(coords).as_matrix()
     print '\n'," -- Assemble hull coordinates: done! "'\n'
 
-    # 4.6 calculate distances
+    # 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
+    part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
+    matrx = pp.map(part_fetch_data,range(8,0,-1))
+    print '\n'," -- Data fetch: done! "'\n'
+    
+    # 4.6 calculate distances for non-rdp
     inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
-    label_inhulls = matrx[1][matrx[1][:,1]=='0.0'][:,0]
     targ_centroid = matrx[2][:,:2].astype(np.float)
     targ_nearest  = matrx[3][:,:2].astype(np.float)
     targ_conhulls = coords[:,:2].astype(np.float)
     part_dist_calc = partial(dist_calc,inmat)
     distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
-    print '\n'," -- Distance calculation: done! "'\n'
+    print '\n'," -- Non-RDP distance calculation: done! "'\n'
 
     # 4.7 retrieve IDs, populate table and push back to DB
-    push_dist2db(db,matrx,distances,coords,label_inhulls,rdp,algo,par1,par2,bw)
-    print '\n'," -- Populate table / push to DB: done! "'\n'
-    
-    # 4.8 kill parallel workers
+    push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
+    print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
+
+    # 4.8 calculate distances for BBLU points
+    inmat_rl2017 = matrx[5][:,:2].astype(np.float)
+    inmat_pre    = matrx[7][:,:2].astype(np.float)
+    part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
+    distances = pp.map(part_dist_calc,[inmat_rl2017,inmat_pre])
+    print '\n'," -- BBLU distance calculation: done! "'\n'
+
+    ## 4.9 retrieve IDs, populate table and push back to DB
+    push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
+    print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
+
+    # 4.10 kill parallel workers
     pp.close()
     pp.join()
 
@@ -216,6 +227,7 @@ if _4_DISTANCE ==1:
 salgo = str(algo)
 spar1 = re.sub("[^0-9]", "", str(par1))
 spar2 = re.sub("[^0-9]", "", str(par2))
+ssig  = re.sub("[^0-9]", "", str(sig))
 sbw   = str(bw)
 sfr1  = str(fr1)
 sfr2  = str(fr2)
@@ -229,7 +241,7 @@ if _5_a_PLOTS_ == 1:
 
     dofile = "subcode/export2gradplot.do"
     cmd = ['stata-mp','do',dofile,rdp,salgo,
-                spar1,spar2,sbw,typ,gendata]
+                spar1,spar2,sbw,ssig,typ,gendata]
     subprocess.call(cmd)
 
 if _5_b_PLOTS_ == 1:
@@ -241,7 +253,7 @@ if _5_b_PLOTS_ == 1:
     os.makedirs(output)
 
     dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,
+    cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,ssig,
             typ,sfr1,sfr2,stop,sbot,smcl,stw,sres,gendata,output]
     subprocess.call(cmd)
 

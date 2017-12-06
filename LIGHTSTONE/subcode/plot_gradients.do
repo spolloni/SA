@@ -10,19 +10,20 @@ local algo = "`2'";
 local par1 = "`3'";
 local par2 = "`4'";
 global bw  = "`5'";
-local type = "`6'";
-local fr1  = "0.`7'";
-local fr2  = "0.`8'";
-local top  = "`9'";
-local bot  = "`10'";
-local mcl  = "`11'";
-local tw   = "`12'";
-local res  = "`13'";
-local data = "`14'";
+local sig  = "`6'";
+local type = "`7'";
+local fr1  = "0.`8'";
+local fr2  = "0.`9'";
+local top  = "`10'";
+local bot  = "`11'";
+local mcl  = "`12'";
+local tw   = "`13'";
+local res  = "`14'";
+local data = "`15'";
 
 global bin = 20;
 
-cd "`15'";
+cd "`16'";
 
 cap program drop plotreg;
 program plotreg;
@@ -55,13 +56,20 @@ program plotreg;
 end;
 
 * load data; 
-use "`data'/gradplot.dta", clear;
+use "`data'/`type'_gradplot.dta", clear;
+
+drop if `type'_dist<0;
 
 * re-set bw if centroid;
 if "`type'"=="centroid"{;
    sum `type'_dist;
    global bw = `r(mean)'+`r(sd)';
    global bw = round($bw,100);
+};
+
+* re-set bw clusters if conhulls;
+if "`type'"=="conhulls"{;
+   global bw = 700;
 };
 
 * determine construction date per cluster;
@@ -91,7 +99,7 @@ foreach num in 1 2 {;
 };
 
 * RDP counter;
-bys `type'_cluster: egen numrdp  = sum(rdp_ls);
+bys `type'_cluster: egen numrdp  = sum(rdp_`rdp');
 bys `type'_cluster: gen denomrdp = _N;
 qui tab `type'_cluster;
 local totalclust = "`r(r)'";
@@ -99,8 +107,8 @@ gen fracrdp = numrdp/denomrdp;
 
 * Keep non-rdp;
 drop if `type'_dist==0;
-drop if rdp_ls==1;
-if `res'==0{; drop if ever_rdp_ls==1; };
+drop if rdp_`rdp'==1;
+if `res'==0{; drop if ever_rdp_`rdp'==1; };
 
 *select clusters and time-window;
 keep if abs(purch_yr -mod_yr) <= `tw'; 
@@ -168,6 +176,8 @@ gen erf_size3 = erf_size^3;
 egen dists = cut(`type'_dist),at(0($bin)$bw);    
 egen munic = group(munic_name);
 
+/*
+
 * #1 Raw-tight in logs;
 tw 
 (lpoly lprice `type'_dist if pre1==1 & `type'_dist<$bw, bw(100) lc(black))
@@ -208,6 +218,8 @@ xlabel(0(200)$bw)
 legend(order(1 "pre" 2 "post"));
 graphexportpdf raw_levspm2, dropeps;
 
+*/
+
 * #5 reg-adjusted in logs, tight;
 areg lprice i.dists#i.post1 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo, a(`type'_cluster);
 local note = "Note: controls for quadratic in erf size, mun-by-year, month and cluster FE.";
@@ -218,6 +230,8 @@ reg lprice i.dists#i.post1 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;
 local note = "Note: controls for quadratic in erf size, mun-by-year and month FE.";
 plotreg reg_pm1 "`note'";
 
+/*
+
 * #7 reg-adjusted in logs, loose;
 areg lprice i.dists#i.post2 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo, a(`type'_cluster);
 local note = "Note: controls for quadratic in erf size, mun-by-year, month and cluster FE.";
@@ -227,6 +241,8 @@ plotreg reg_fepm2 "`note'";
 reg lprice i.dists#i.post2 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;
 local note = "Note: controls for quadratic in erf size, mun-by-year and month FE.";
 plotreg reg_pm2 "`note'";
+
+*/
 
 *********;
 * EXIT  *;
