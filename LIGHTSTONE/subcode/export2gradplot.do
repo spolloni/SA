@@ -17,7 +17,8 @@ local qry = "
 	SELECT A.munic_name, A.purch_yr, A.purch_mo, A.purch_day,
 		    A.purch_price, A.trans_id, A.property_id, B.erf_size,
         C.rdp_`rdp', C.ever_rdp_`rdp', E.cluster, 
-        D.`type'_dist, D.`type'_cluster 
+        D.`type'_dist, D.`type'_cluster, 
+        A.seller_name, B.latitude, B.longitude
 	FROM transactions AS A
 	JOIN erven AS B ON A.property_id = B.property_id
   JOIN rdp   AS C ON A.trans_id = C.trans_id

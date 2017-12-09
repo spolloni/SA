@@ -62,8 +62,10 @@ bw  = 600        # bandwidth for clusters
 sig = 2.5        # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
-_5_b_PLOTS_ = 1 
-typ = 'conhulls'  # distance to nearest or centroid
+_5_b_PLOTS_ = 1
+_5_c_PLOTS_ = 0
+_5_d_PLOTS_ = 0 
+typ = 'nearest'  # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
@@ -258,6 +260,13 @@ if _5_b_PLOTS_ == 1:
     subprocess.call(cmd)
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'
+
+if _5_c_PLOTS_ == 1:
+
+    dofile = "subcode/bblu_export2gradplot.do"
+    cmd = ['stata-mp','do',dofile,rdp,salgo,
+                spar1,spar2,sbw,ssig,typ,gendata]
+    subprocess.call(cmd)
 
 
 
