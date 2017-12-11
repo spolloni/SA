@@ -7,13 +7,7 @@ set maxvar 32767
 
 * RUN LOCALLY?;
 global LOCAL = 1;
-
-if $LOCAL==1{;
-* where is this do-file?;
-global cd = "/Users/stefanopolloni/GoogleDrive/Year4/";
-global cd = "${cd}SouthAfrica_Analysis/Code/LIGHTSTONE/";
-cd "$cd";
-};
+if $LOCAL==1{;cd ..;};
 
 * set parameters;
 do subcode/plot_gradients_pars.do
@@ -86,6 +80,7 @@ foreach num in 1 2 {;
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen con_day  = mdy(07,02,mod_yr);
+replace con_day = mdy(01,01,mod_yr+1 ) if mod(mod_yr,1)>0;
 gen con_mo   = ym(mod_yr,07);
 format day_date %td;
 format mo_date %tm;
@@ -143,6 +138,8 @@ drop p$bot p$top;
 * drop unpopulated clusters;
 bys ${type}_cluster: egen count = count(_n);
 bys ${type}_cluster: gen n = _n;
+pause on;
+pause;
 drop if count < $mcl; 
 
 ******************;

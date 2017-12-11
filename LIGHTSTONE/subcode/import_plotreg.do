@@ -38,9 +38,7 @@ program plotreg;
       replace contin = contin+$bin;
       tw 
       (lpoly coef contin if group==0, bw(50) lc(black))
-      (lpoly coef contin if group==1, bw(50) lc(black) lp(--))
-      (sc coef contin  if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0))
-      (sc coef contin  if group==1, ms(o) msiz(small) mlc(gs0) mfc(none)),
+      (lpoly coef contin if group==1, bw(50) lc(black) lp(--)),
       xtitle("meters")
       ytitle("log-price")
       xlabel(0(200)$bw)

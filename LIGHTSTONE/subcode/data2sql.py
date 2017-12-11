@@ -237,12 +237,12 @@ def add_bblu(tmp_dir,database):
     con = sql.connect(database)
     cur = con.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS 
-            bblu_rl2017 (mock INT);''')
+            bblu_post (mock INT);''')
     con.commit()
     con.close()
     cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
             database, tmp_dir+'rl2017.shp','-nlt POINT',
-             '-nln bblu_rl2017', '-overwrite']
+             '-nln bblu_post', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
     # push BBLU pre-period to db

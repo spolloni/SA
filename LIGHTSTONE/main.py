@@ -62,8 +62,8 @@ bw  = 600        # bandwidth for clusters
 sig = 2.5        # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
-_5_b_PLOTS_ = 1
-_5_c_PLOTS_ = 0
+_5_b_PLOTS_ = 0
+_5_c_PLOTS_ = 1
 _5_d_PLOTS_ = 0 
 typ = 'nearest'  # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
@@ -263,7 +263,7 @@ if _5_b_PLOTS_ == 1:
 
 if _5_c_PLOTS_ == 1:
 
-    dofile = "subcode/bblu_export2gradplot.do"
+    dofile = "subcode/export2densityplot.do"
     cmd = ['stata-mp','do',dofile,rdp,salgo,
                 spar1,spar2,sbw,ssig,typ,gendata]
     subprocess.call(cmd)

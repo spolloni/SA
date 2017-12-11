@@ -390,6 +390,7 @@ def push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
             distance_bblu{}_{}_{}_{}_{}_{}_{};'''.format(t,rdp,algo,spar1,spar2,bw,ssig))
 
         cur.execute(''' CREATE TABLE distance_bblu{}_{}_{}_{}_{}_{}_{} (
+                STR_FID   VARCHAR(11) ,
                 OGC_FID   VARCHAR(11) PRIMARY KEY,
                 distance  numeric(10,10), 
                 cluster   INTEGER,
@@ -398,7 +399,7 @@ def push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
 
         rowsqry = '''
             INSERT INTO distance_bblu{}_{}_{}_{}_{}_{}_{}
-            VALUES (?,?,?,?);
+            VALUES (?,?,?,?,?);
             '''.format(t,rdp,algo,spar1,spar2,bw,ssig)
 
         for i in range(len(bblu_id[:,0])):
@@ -408,8 +409,8 @@ def push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
                 distances[int1][0][i][0] = -distances[int1][0][i][0]
                 inhull = 1
     
-            cur.execute(rowsqry,[bblu_id[:,0][i],distances[int1][0][i][0],
-                             conhulls_id[i][0],inhull])
+            cur.execute(rowsqry,[t+'_'+str(int(bblu_id[:,0][i])),int(bblu_id[:,0][i]),
+                distances[int1][0][i][0],conhulls_id[i][0],inhull])
 
         cur.execute('''CREATE INDEX dist_{}ind_{}_{}_{}_{}_{}_{}
         ON distance_bblu{}_{}_{}_{}_{}_{}_{} (OGC_FID);'''.format(t,rdp,
