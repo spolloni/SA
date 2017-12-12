@@ -66,7 +66,7 @@ def concavehull(db,dir,sig,rdp,algo,par1,par2,i):
     spar2 = re.sub("[^0-9]", "", str(par2))
 
     qry ='''
-        SELECT ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(B.GEOMETRY),{}),0.01)), 
+        SELECT ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(B.GEOMETRY),{}),10)), 
         C.cluster, A.prov_code
         FROM transactions AS A
         JOIN erven AS B ON A.property_id = B.property_id

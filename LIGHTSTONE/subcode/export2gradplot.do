@@ -33,7 +33,7 @@ local qry = "
 
 * load data; 
 odbc query "lightstone";
-odbc load, exec("`qry'");
+odbc load, exec("`qry'") clear;
 
 * save data;
 save "`8'`type'_gradplot.dta", replace;

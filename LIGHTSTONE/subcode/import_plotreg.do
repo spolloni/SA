@@ -57,7 +57,7 @@ program plotreg;
 
       tw 
       (connected coef contin if group==0, ms(o) msiz(small) mlc(gs0)  mfc(gs0) lc(black))
-      (connected coef contin if group==1,  ms(o) msiz(small) mlc(gs0) mfc(none) lc(black) lp(--)),
+      (connected coef contin if group==1,  ms(D) msiz(vsmall) mlc(gs0) mfc(none) lc(black) lp(--)),
       xtitle("months to event mode year")
       ytitle("log-price")
       xlabel(-`b'(12)`b')

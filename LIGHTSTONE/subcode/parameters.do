@@ -29,7 +29,7 @@ if $LOCAL == 1 {;
 	global par2 = "10";
 	global bw   = "600";
 	global sig  = "25";
-	global type = "conhulls";
+	global type = "nearest";
 	global fr1  = "0.5";
 	global fr2  = "0.7";
 	global sfr1 = "50";
@@ -42,8 +42,6 @@ if $LOCAL == 1 {;
 	global data = "/Users/stefanopolloni/GoogleDrive/";
 	global data = "${data}Year4/SouthAfrica_Analysis/Generated/LIGHTSTONE";
 	global cd   = "/Users/stefanopolloni/GoogleDrive/Year4/SouthAfrica_Analysis/";
-	global cd   = "${cd}Output/LIGHTSTONE/gradplots/RDP${rdp}_${type}_alg${algo}";
-	global cd   = "${cd}_${par1}_${par2}_bw${bw}_fr${sfr1}_${sfr2}_tb${top}";
-	global cd   = "${cd}_${bot}_m${mcl}_tw${tw}_res${res}";
+	global cd   = "${cd}Output/LIGHTSTONE/local";
 
 };

@@ -223,7 +223,7 @@ if _4_DISTANCE ==1:
     pp.join()
 
 #############################################
-# STEP 5:  Make Gradient Plots              #
+# STEP 5:  Make Gradient/Density  Plots     #
 #############################################
 
 salgo = str(algo)
@@ -267,6 +267,21 @@ if _5_c_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile,rdp,salgo,
                 spar1,spar2,sbw,ssig,typ,gendata]
     subprocess.call(cmd)
+
+if _5_d_PLOTS_ == 1:
+
+    output = outdir+"densityplots/RDP{}_{}_alg{}_".format(rdp,typ,algo)
+    output = output+"{}_{}_bw{}_fr{}_{}_".format(spar1,spar2,bw,sfr1,sfr2)
+    output = output+"tb{}_{}_m{}_tw{}_res{}".format(stop,sbot,smcl,stw,sres)
+    shutil.rmtree(output,ignore_errors=True)
+    os.makedirs(output)
+
+    dofile = "subcode/plot_density.do"
+    cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,ssig,
+            typ,sfr1,sfr2,stop,sbot,smcl,stw,sres,gendata,output]
+    subprocess.call(cmd)
+
+    print '\n'," -- Price Gradient Plots: done! ",'\n'
 
 
 

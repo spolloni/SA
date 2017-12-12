@@ -5,12 +5,16 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+*******************;
+*  PLOT GRADIENTS *;
+*******************;
+
 * RUN LOCALLY?;
 global LOCAL = 1;
 if $LOCAL==1{;cd ..;};
 
 * set parameters;
-do subcode/plot_gradients_pars.do
+do subcode/parameters.do
 `1'  `2'  `3'  `4'  `5'  `6'  `7'  `8'
 `9' `10' `11' `12' `13' `14' `15' `16'; 
 global bin   = 20;
@@ -138,8 +142,6 @@ drop p$bot p$top;
 * drop unpopulated clusters;
 bys ${type}_cluster: egen count = count(_n);
 bys ${type}_cluster: gen n = _n;
-pause on;
-pause;
 drop if count < $mcl; 
 
 ******************;
