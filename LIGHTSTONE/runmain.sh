@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# who is this?
+BRANCH="stef"
+
 #retrieve gradplots output ?
 RET_GRADPLOTS=0
 
@@ -19,7 +22,8 @@ ubuntu@ec2-18-216-234-87.us-east-2.compute.amazonaws.com \
 	cd $HOME/analysis/Code
 
 	#pull code from git 
-	git pull
+	git checkout $BRANCH
+	git pull 
 
 	# run main.py
 	cd $HOME/analysis/Code/LIGHTSTONE
