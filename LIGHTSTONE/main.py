@@ -164,59 +164,59 @@ if _4_DISTANCE ==1:
 
     # 4.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
-    shutil.rmtree(tempdir,ignore_errors=True)
-    os.makedirs(tempdir)
+    #shutil.rmtree(tempdir,ignore_errors=True)
+    #os.makedirs(tempdir)
 
     # 4.1 buffers and self-interesctions
     part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
     pp.map(part_selfintersect,range(9,0,-1))
     print '\n'," -- Self-Intersections: done! "'\n'
 
-    # 4.2 make concave hulls
-    grids = glob.glob(rawgis+'grid_*')
-    for grid in grids: shutil.copy(grid, tempdir)
-    part_concavehull = partial(concavehull,db,tempdir,sig,rdp,algo,par1,par2)
-    pp.map(part_concavehull,range(9,0,-1))
-    print '\n'," -- Concave Hulls: done! "'\n'
-
-    # 4.3 merge buffers & hulls, then push to DB 
-    merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
-    print '\n'," -- Merge and Push Back: done! "'\n'
-
-    # 4.4 assemble coordinates for hull edges
-    part_comb_coordinates = partial(comb_coordinates,tempdir)
-    coords = pp.map(part_comb_coordinates,range(9,0,-1))
-    coords = pd.concat(coords).as_matrix()
-    print '\n'," -- Assemble hull coordinates: done! "'\n'
-
-    # 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
-    part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
-    matrx = pp.map(part_fetch_data,range(8,0,-1))
-    print '\n'," -- Data fetch: done! "'\n'
-    
-    # 4.6 calculate distances for non-rdp
-    inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
-    targ_centroid = matrx[2][:,:2].astype(np.float)
-    targ_nearest  = matrx[3][:,:2].astype(np.float)
-    targ_conhulls = coords[:,:2].astype(np.float)
-    part_dist_calc = partial(dist_calc,inmat)
-    distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
-    print '\n'," -- Non-RDP distance calculation: done! "'\n'
-
-    # 4.7 retrieve IDs, populate table and push back to DB
-    push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
-    print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
-
-    # 4.8 calculate distances for BBLU points
-    inmat_rl2017 = matrx[5][:,:2].astype(np.float)
-    inmat_pre    = matrx[7][:,:2].astype(np.float)
-    part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
-    distances = pp.map(part_dist_calc,[inmat_rl2017,inmat_pre])
-    print '\n'," -- BBLU distance calculation: done! "'\n'
-
-    ## 4.9 retrieve IDs, populate table and push back to DB
-    push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
-    print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
+    ## 4.2 make concave hulls
+    #grids = glob.glob(rawgis+'grid_*')
+    #for grid in grids: shutil.copy(grid, tempdir)
+    #part_concavehull = partial(concavehull,db,tempdir,sig,rdp,algo,par1,par2)
+    #pp.map(part_concavehull,range(9,0,-1))
+    #print '\n'," -- Concave Hulls: done! "'\n'
+#
+    ## 4.3 merge buffers & hulls, then push to DB 
+    #merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
+    #print '\n'," -- Merge and Push Back: done! "'\n'
+#
+    ## 4.4 assemble coordinates for hull edges
+    #part_comb_coordinates = partial(comb_coordinates,tempdir)
+    #coords = pp.map(part_comb_coordinates,range(9,0,-1))
+    #coords = pd.concat(coords).as_matrix()
+    #print '\n'," -- Assemble hull coordinates: done! "'\n'
+#
+    ## 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
+    #part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
+    #matrx = pp.map(part_fetch_data,range(8,0,-1))
+    #print '\n'," -- Data fetch: done! "'\n'
+    #
+    ## 4.6 calculate distances for non-rdp
+    #inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
+    #targ_centroid = matrx[2][:,:2].astype(np.float)
+    #targ_nearest  = matrx[3][:,:2].astype(np.float)
+    #targ_conhulls = coords[:,:2].astype(np.float)
+    #part_dist_calc = partial(dist_calc,inmat)
+    #distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
+    #print '\n'," -- Non-RDP distance calculation: done! "'\n'
+#
+    ## 4.7 retrieve IDs, populate table and push back to DB
+    #push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
+    #print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
+#
+    ## 4.8 calculate distances for BBLU points
+    #inmat_rl2017 = matrx[5][:,:2].astype(np.float)
+    #inmat_pre    = matrx[7][:,:2].astype(np.float)
+    #part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
+    #distances = pp.map(part_dist_calc,[inmat_rl2017,inmat_pre])
+    #print '\n'," -- BBLU distance calculation: done! "'\n'
+#
+    ### 4.9 retrieve IDs, populate table and push back to DB
+    #push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
+    #print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
 
     # 4.10 kill parallel workers
     pp.close()
