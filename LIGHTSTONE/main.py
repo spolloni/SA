@@ -46,8 +46,8 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_a_IMPORT = 0 
-_1_b_IMPORT = 0 
+_1_a_IMPORT = 1 
+_1_b_IMPORT = 1 
 
 _2_FLAGRDP_ = 0
 
@@ -63,7 +63,7 @@ sig = 2.5        # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
 _5_b_PLOTS_ = 0
-_5_c_PLOTS_ = 1
+_5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
 typ = 'nearest'  # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
