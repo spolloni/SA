@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #retrieve gradplots output ?
-RET_GRADPLOTS=1
+RET_GRADPLOTS=0
 
 #retrieve sqlite database ?
-RET_DBASE=1
+RET_DBASE=0
 
 #push code to git
 git commit -a -m "Running main.py on AWS Server at $(date +%H:%M--%h%m)"
