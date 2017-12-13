@@ -46,12 +46,12 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_a_IMPORT = 1 
+_1_a_IMPORT = 0 
 _1_b_IMPORT = 0 
 
-_2_FLAGRDP_ = 0
+_2_FLAGRDP_ = 1
 
-_3_CLUSTER_ = 0 
+_3_CLUSTER_ = 1 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
