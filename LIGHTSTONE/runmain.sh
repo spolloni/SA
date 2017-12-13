@@ -15,7 +15,7 @@ git push
 
 #ssh into server
 ssh -i $HOME/SAkey.pem \
-ubuntu@ec2-13-58-82-7.us-east-2.compute.amazonaws.com \
+ubuntu@ec2-13-58-92-7.us-east-2.compute.amazonaws.com \
 'source ~/.profile; bash -s' << \EOF
 
 	#CD into code directory
