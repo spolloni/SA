@@ -168,16 +168,16 @@ if _4_DISTANCE ==1:
     #os.makedirs(tempdir)
 
     # 4.1 buffers and self-interesctions
-    part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
-    pp.map(part_selfintersect,range(9,0,-1))
-    print '\n'," -- Self-Intersections: done! "'\n'
+    #part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
+    #pp.map(part_selfintersect,range(9,0,-1))
+    #print '\n'," -- Self-Intersections: done! "'\n'
 
     ## 4.2 make concave hulls
-    #grids = glob.glob(rawgis+'grid_*')
-    #for grid in grids: shutil.copy(grid, tempdir)
-    #part_concavehull = partial(concavehull,db,tempdir,sig,rdp,algo,par1,par2)
-    #pp.map(part_concavehull,range(9,0,-1))
-    #print '\n'," -- Concave Hulls: done! "'\n'
+    grids = glob.glob(rawgis+'grid_*')
+    for grid in grids: shutil.copy(grid, tempdir)
+    part_concavehull = partial(concavehull,db,tempdir,sig,rdp,algo,par1,par2)
+    pp.map(part_concavehull,range(9,0,-1))
+    print '\n'," -- Concave Hulls: done! "'\n'
 #
     ## 4.3 merge buffers & hulls, then push to DB 
     #merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
