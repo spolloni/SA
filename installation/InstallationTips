@@ -41,6 +41,13 @@
 		- Unfortunately this needs to be compiled from source. 
 		- Follow instructions in https://docs.djangoproject.com/en/1.11/ref/contrib/gis/install/spatialite/
 		- Use most current working versions instead of what django suggests. 
+		- IMPORTANT: default installation does not come with lwgeom which is necessary for ST_MakeValid.
+		  *** workaround: use ./configure --enable-lwgeom=yes. There is a problem with this that will
+		  	  appear during "make" if not fixed. The file gg_lwgeom.c contained somewhere in tarball must be altered like this: https://www.gaia-gis.it/fossil/libspatialite/fdiff?v1=48918773ced633bc&v2=342a605d691bddc6&sbs=1
+		  	  other useful links:
+		  	  - https://gis.stackexchange.com/questions/157096/st-makevalid-is-not-working
+		  	  - https://gis.stackexchange.com/questions/87268/spatialite-azimuth-function-not-available/88418#88418
+		  	  - https://askubuntu.com/questions/87111/if-i-build-a-package-from-source-how-can-i-uninstall-or-remove-completely
 		- ./configure will fail many times and it is necessary to incrementally install apps (proj4, geos and others!) and fix bugs until it runs completely. Then sudo make && sudo make install. 
 		- useful links are: https://kobablog.wordpress.com/2011/05/17/how-to-find-and-install-the-missing-file-in-ubuntu/ (apt-file search method) AND https://ubuntuforums.org/showthread.php?t=836133 (libxml2-dev is necessary) AND https://packages.debian.org/sid/libreadosm-dev 
 		-search for spatialite_mod in /usr/local/lib. 
