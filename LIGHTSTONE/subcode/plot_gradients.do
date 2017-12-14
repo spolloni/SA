@@ -126,8 +126,11 @@ gen treatment = (${type}_dist<= $dist_tr);
 
 * select clusters and time-window;
 keep if abs(purch_yr -mod_yr) <= $tw; 
-drop if frac1 < $fr1;      
-drop if frac2 < $fr2; 
+*drop if frac1 < $fr1;      
+*drop if frac2 < $fr2; 
+
+pause on;
+pause;
 
 * basic outlier removal;
 bys ${type}_cluster: egen p$top = pctile(purch_price), p($top);
