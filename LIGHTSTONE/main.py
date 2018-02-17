@@ -46,18 +46,19 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_a_IMPORT = 1 
-_1_b_IMPORT = 1 
+_1_a_IMPORT = 0 
+_1_b_IMPORT = 0 
 
-_2_FLAGRDP_ = 1
+_2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 1 
+_3_CLUSTER_ = 0 
+rdp  = 'ls'      # fp='first-pass', ls=lighstone for rdp
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
 
 _4_DISTANCE = 1
-rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
+
 bw  = 600        # bandwidth for clusters
 sig = 2.5        # sigma factor for concave hulls
 
@@ -65,7 +66,7 @@ _5_a_PLOTS_ = 0
 _5_b_PLOTS_ = 0
 _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
-typ = 'nearest'  # distance to nearest or centroid
+typ = 'conhulls' # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
@@ -146,11 +147,7 @@ if _3_CLUSTER_ ==1:
 
     print '\n'," Clustering RDP properties... ",'\n'
 
-    part_spatial_cluster = partial(spatial_cluster,algo,par1,par2,db)
-    pp = multiprocessing.Pool(processes=workers)
-    pp.map(part_spatial_cluster,['ls','fp'])
-    pp.close()
-    pp.join()
+    spatial_cluster(algo,par1,par2,db,'ls')
 
     print '\n'," -- clustering RDP: done! "'\n'
 
@@ -172,7 +169,7 @@ if _4_DISTANCE ==1:
     pp.map(part_selfintersect,range(9,0,-1))
     print '\n'," -- Self-Intersections: done! "'\n'
 
-    ## 4.2 make concave hulls
+    # 4.2 make concave hulls
     grids = glob.glob(rawgis+'grid_*')
     for grid in grids: shutil.copy(grid, tempdir)
     part_concavehull = partial(concavehull,db,tempdir,sig,rdp,algo,par1,par2)
@@ -208,10 +205,10 @@ if _4_DISTANCE ==1:
     print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
 
     # 4.8 calculate distances for BBLU points
-    inmat_rl2017 = matrx[5][:,:2].astype(np.float)
+    inmat_post = matrx[5][:,:2].astype(np.float)
     inmat_pre    = matrx[7][:,:2].astype(np.float)
     part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
-    distances = pp.map(part_dist_calc,[inmat_rl2017,inmat_pre])
+    distances = pp.map(part_dist_calc,[inmat_post,inmat_pre])
     print '\n'," -- BBLU distance calculation: done! "'\n'
 
     ## 4.9 retrieve IDs, populate table and push back to DB

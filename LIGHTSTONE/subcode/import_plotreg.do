@@ -39,9 +39,10 @@ program plotreg;
       tw 
       (lpoly coef contin if group==0, bw(50) lc(black))
       (lpoly coef contin if group==1, bw(50) lc(black) lp(--)),
-      xtitle("meters")
+      xtitle("meters from hull border")
       ytitle("log-price")
       xlabel(0(200)$bw)
+      ylabel(-.6(.2).4)
       legend(order(1 "pre" 2 "post")) note("`3'");
       graphexportpdf `2', dropeps;
       /*(sc coef contin  if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0))
@@ -57,7 +58,7 @@ program plotreg;
 
       tw 
       (connected coef contin if group==0, ms(o) msiz(small) mlc(gs0)  mfc(gs0) lc(black))
-      (connected coef contin if group==1,  ms(D) msiz(vsmall) mlc(gs0) mfc(none) lc(black) lp(--)),
+      (connected coef contin if group==1,  ms(X) msiz(small) mlc(gs0) mfc(none) lc(black) lp(--)),
       xtitle("months to event mode year")
       ytitle("log-price")
       xlabel(-`b'(12)`b')

@@ -20,7 +20,7 @@ do subcode/parameters.do
 global bin   = 20;
 
 * import plotreg program;
-do subcode/import_plotreg.do; 
+do subcode/import_plotreg.do;
 
 * set cd;
 cd "$cd";
@@ -33,7 +33,7 @@ use "${data}/${type}_gradplot.dta", clear;
 **************************;
 *;
 drop if ${type}_dist<0;
-global dist_tr = 400;
+global dist_tr = 100;
 *;
 * re-set bw if centroid;
 if "${type}"=="centroid"{;
@@ -94,6 +94,16 @@ gen mo2con_reg = mo2con if abs(mo2con)<=12*$tw;
 replace mo2con_reg = -12*$tw-1 if mo2con_reg==.;
 replace mo2con_reg = mo2con_reg + 12*$tw+1;
 
+pause on;
+pause;
+
+*local num = 12*$tw;
+*egen mo2con_reg2 = cut(mo2con_reg),at(-`num'(3)0); 
+*egen mo2con_reg3 = cut(mo2con_reg),at(1(3)`num'); 
+*egen mo2con_reg4 = rowmax(mo2con_reg2 mo2con_reg3);
+*replace mo2con_reg4 = -12*$tw-1 if mo2con_reg4==.;
+*replace mo2con_reg4 = mo2con_reg4 + 12*$tw+1;
+
 **************************;
 * Move This Eventually *;
 local b = 12*$tw;
@@ -116,7 +126,7 @@ gen fracrdp = numrdp/denomrdp;
 * keep non-rdp;
 drop if ${type}_dist==0;
 drop if rdp_`rdp'==1;
-if $res==0{; drop if ever_rdp_$rdp==1; };
+if $res==0{; drop if ever_rdp_$rdp==1;};
 
 **************************;
 * Temporary Adjustments? *;
@@ -126,11 +136,8 @@ gen treatment = (${type}_dist<= $dist_tr);
 
 * select clusters and time-window;
 keep if abs(purch_yr -mod_yr) <= $tw; 
-*drop if frac1 < $fr1;      
-*drop if frac2 < $fr2; 
-
-pause on;
-pause;
+drop if frac1 < $fr1;      
+drop if frac2 < $fr2; 
 
 * basic outlier removal;
 bys ${type}_cluster: egen p$top = pctile(purch_price), p($top);
@@ -235,12 +242,12 @@ legend(order(1 "pre" 2 "post"));
 graphexportpdf raw_levspm2, dropeps;
 */
 
-
+/*
 * #5 reg-adjusted in logs, tight;
 areg lprice i.dists#i.post1 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo, a(${type}_cluster);
 local note = "Note: controls for quadratic in erf size, mun-by-year, month and cluster FE.";
 plotreg distplot reg_fepm1 "`note'";
-
+*/
 * #6 reg-adjusted in logs, tight no cluster FE;
 reg lprice i.dists#i.post1 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;
 local note = "Note: controls for quadratic in erf size, mun-by-year and month FE.";
@@ -263,12 +270,12 @@ plotreg distplot reg_pm2 "`note'";
 * TIME PLOTS *;
 **************;
 
-
+/*
 * #5 reg-adjusted in logs, tight;
 areg lprice i.mo2con_reg#i.treatment erf_size erf_size2 i.munic#i.purch_yr i.purch_mo, a(${type}_cluster);
 local note = "Note: controls for quadratic in erf size, mun-by-year, month and cluster FE.";
 plotreg timeplot timereg_fepm1 "`note'";
-
+*/
 
 * #6 reg-adjusted in logs, tight no cluster FE;
 reg lprice i.mo2con_reg#i.treatment erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;

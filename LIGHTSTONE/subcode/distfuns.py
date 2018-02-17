@@ -66,7 +66,7 @@ def concavehull(db,dir,sig,rdp,algo,par1,par2,i):
     spar2 = re.sub("[^0-9]", "", str(par2))
 
     qry ='''
-        SELECT ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(B.GEOMETRY),{}),10)), 
+        SELECT ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(B.GEOMETRY),{}),25)), 
         C.cluster, A.prov_code
         FROM transactions AS A
         JOIN erven AS B ON A.property_id = B.property_id
@@ -136,6 +136,11 @@ def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
            '-MERGED', dir+'hullmerged.shp'] 
     subprocess.call(' '.join(cmd),shell=True)
 
+    # add polygon perimeter and area
+    cmd = ['saga_cmd shapes_polygons 2 -POLYGONS', dir+'hullmerged.shp',
+           '-OUTPUT', dir+'hullmergedwproperties.shp'] 
+    subprocess.call(' '.join(cmd),shell=True)
+
     # push to db
     con = sql.connect(db)
     cur = con.cursor()
@@ -144,7 +149,7 @@ def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
     con.commit()
     con.close()
     cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, dir+'hullmerged.shp','-select cluster,prov_code ', '-nlt PROMOTE_TO_MULTI',
+            db, dir+'hullmergedwproperties.shp','-select cluster,prov_code,PERIMETER,AREA','-nlt PROMOTE_TO_MULTI',
              '-nln rdp_hulls_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,ssig), '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
@@ -181,23 +186,23 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
 
     if i==3:
 
-        # BBLU rl2017 points in buffers
+        # BBLU post points in buffers
         qry ='''
             SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
-            FROM bblu_rl2017 AS p, rdp_buffers_{}_{}_{}_{}_{} AS b
+            FROM bblu_post AS p, rdp_buffers_{}_{}_{}_{}_{} AS b
             WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='bblu_rl2017' AND search_frame=b.GEOMETRY)
+                    WHERE f_table_name='bblu_post' AND search_frame=b.GEOMETRY)
             AND st_within(p.GEOMETRY,b.GEOMETRY) 
             '''.format(rdp,algo,spar1,spar2,bw)
 
     if i==4:
 
-        # BBLU rl2017 points in hulls
+        # BBLU post points in hulls
         qry ='''
             SELECT p.OGC_FID
-            FROM bblu_rl2017 AS p, rdp_hulls_{}_{}_{}_{}_{} AS h
+            FROM bblu_post AS p, rdp_hulls_{}_{}_{}_{}_{} AS h
             WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='bblu_rl2017' AND search_frame=h.GEOMETRY)
+                    WHERE f_table_name='bblu_post' AND search_frame=h.GEOMETRY)
             AND st_within(p.GEOMETRY,h.GEOMETRY) 
             '''.format(rdp,algo,spar1,spar2,ssig)
 

@@ -37,8 +37,16 @@ drop if precount==0;
 drop precount;
 
 * remove clusters non-concentrated;
-*keep if frac1>=.5 & frac2>=.7;
+keep if frac1>=.7 & frac2>=.7;
 
+
+tw 
+(kdensity  distance if post ==1 & s_lu_code=="7.1")
+(kdensity  distance if post ==0 & s_lu_code=="7.1"), 
+legend(order(1 "post" 2 "pre");
+
+
+/*
 * cut and keep positive distances;
 egen dists = cut(distance),at(0($bin)$bw);  
 drop if dists ==.;
@@ -57,7 +65,11 @@ bys post dists: egen mean_`var' = mean(`var');
 bys post dists: gen n = _n;
 
 * mean for plots;
-tw (sc mean_rel_inf_resid dists if n==1 & post==1) (sc mean_rel_inf_resid dists if n==1 & post==0);
+tw 
+(sc mean_inf_resid dists if n==1 & post==1 & dists>70) 
+(sc mean_inf_resid dists if n==1 & post==0 & dists>70) ,
+legend( order( 1 "post" 2 "pre"))
+; */
 
 
 
