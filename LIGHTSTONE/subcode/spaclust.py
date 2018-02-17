@@ -56,11 +56,14 @@ def spatial_cluster(algo,par1,par2,database,suf):
     df['cl'] = df['cl'].astype('int64')
     df['mxmodyr'] = df['yr'].groupby(df['cl']).transform(lambda x: pd.Series.mode(x)[0])
     df['mnmodyr'] = df['yr'].groupby(df['cl']).transform(lambda x: pd.Series.mode(x)[-1:])
-    df['modyr'] = df[['mxmodyr','mnmodyr']].mean(axis=1)
-    df['clsiz'] = df.groupby(df['cl'])['cl'].transform('count')
-    df['close'] = np.where(abs(df['modyr']-df['yr'])<=1, 1, 0)
-    df['clsum'] = df['close'].groupby(df['cl']).transform('sum')
-    df['frac']  = df['clsum']/df['clsiz']
+    df['modyr']   = df[['mxmodyr','mnmodyr']].mean(axis=1)
+    df['clsiz']   = df.groupby(df['cl'])['cl'].transform('count')
+    df['close_1'] = np.where(abs(df['modyr']-df['yr'])<=.5, 1, 0)
+    df['close_2'] = np.where(abs(df['modyr']-df['yr'])<=1 , 1, 0)
+    df['clsum_1'] = df['close_1'].groupby(df['cl']).transform('sum')
+    df['clsum_2'] = df['close_2'].groupby(df['cl']).transform('sum')
+    df['frac_1']  = df['clsum_1']/df['clsiz']
+    df['frac_2']  = df['clsum_2']/df['clsiz']
 
     # create table 
     cur.execute('''
@@ -69,16 +72,18 @@ def spatial_cluster(algo,par1,par2,database,suf):
             cluster       INTEGER,
             cluster_siz   INTEGER,
             mode_yr       INTEGER,
-            frac          REAL
+            frac1         REAL,
+            frac2         REAL
         );'''.format(suf,algo,spar1,spar2))
 
     # fill-up table
     rowsqry = '''
         INSERT INTO rdp_clusters_{}_{}_{}_{}
-        VALUES (?, ?, ?, ?, ?);
+        VALUES (?, ?, ?, ?, ?, ?);
         '''.format(suf,algo,spar1,spar2)
     for i in range(len(mat)):
-        cur.execute(rowsqry, [df['id'][i],df['cl'][i],df['clsiz'][i],df['modyr'][i],df['frac'][i]])
+        cur.execute(rowsqry,[df['id'][i],df['cl'][i],
+            df['clsiz'][i],df['modyr'][i],df['frac_1'][i],df['frac_2'][i]])
     cur.execute('''CREATE INDEX clu_ind_{}
         ON rdp_clusters_{}_{}_{}_{} (cluster);'''.format(suf,suf,algo,spar1,spar2))
     cur.execute('''CREATE INDEX trans_ind_{}

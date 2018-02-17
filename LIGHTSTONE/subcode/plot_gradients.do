@@ -33,7 +33,7 @@ use "${data}/${type}_gradplot.dta", clear;
 **************************;
 *;
 drop if ${type}_dist<0;
-global dist_tr = 100;
+global dist_tr = 300;
 *;
 * re-set bw if centroid;
 if "${type}"=="centroid"{;
@@ -52,40 +52,19 @@ if "${type}"=="conhulls"{;
 **************************;
 **************************;
 
-* determine event year per cluster;
-destring purch_yr purch_mo purch_day, replace;
-bys cluster: egen mod_yr  = mode(purch_yr),min;
-bys cluster: egen mod_yr2 = mode(purch_yr),max;
-replace mod_yr = 0.5*(mod_yr+mod_yr2);
-bys cluster: egen denom = count(mod_yr!=.);
-gen dum1 = (abs(purch_yr-mod_yr) <= 0.5 );
-bys cluster: egen num1 = sum(dum1);
-gen dum2 = (abs(purch_yr-mod_yr) <= 1 );
-bys cluster: egen num2 = sum(dum2);
-gen frac1 = num1/denom;
-gen frac2 = num2/denom;
-drop dum* num* denom mod_yr2;
-replace ${type}_cluster=cluster if ${type}_cluster==.;
-foreach var in mod_yr frac1 frac2 {;
-   replace `var' = . if cluster ==.;
-   bys ${type}_cluster: egen max = max(`var');
-   replace `var' = max if cluster ==.;
-   drop max;
-};
-
-* separate pre/post mod_yr transactions;
+* separate pre/post mode_yr transactions;
 foreach num in 1 2 {;
-   gen pre`num' = (purch_yr < mod_yr - `num' +1 );
-   gen post`num' = (purch_yr > mod_yr + `num' -1 );
+   gen pre`num' = (purch_yr < mode_yr - `num' +1 );
+   gen post`num' = (purch_yr > mode_yr + `num' -1 );
    replace post`num' =. if post`num'==0 & pre`num'==0;
 };
 
 * create date variables and dummies;
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
-gen con_day  = mdy(07,02,mod_yr);
-replace con_day = mdy(01,01,mod_yr+1 ) if mod(mod_yr,1)>0;
-gen con_mo   = ym(mod_yr,07);
+gen con_day  = mdy(07,02,mode_yr);
+replace con_day = mdy(01,01,mode_yr+1 ) if mod(mode_yr,1)>0;
+gen con_mo   = ym(mode_yr,07);
 format day_date %td;
 format mo_date %tm;
 gen day2con = day_date - con_day;
@@ -94,15 +73,7 @@ gen mo2con_reg = mo2con if abs(mo2con)<=12*$tw;
 replace mo2con_reg = -12*$tw-1 if mo2con_reg==.;
 replace mo2con_reg = mo2con_reg + 12*$tw+1;
 
-pause on;
-pause;
-
-*local num = 12*$tw;
-*egen mo2con_reg2 = cut(mo2con_reg),at(-`num'(3)0); 
-*egen mo2con_reg3 = cut(mo2con_reg),at(1(3)`num'); 
-*egen mo2con_reg4 = rowmax(mo2con_reg2 mo2con_reg3);
-*replace mo2con_reg4 = -12*$tw-1 if mo2con_reg4==.;
-*replace mo2con_reg4 = mo2con_reg4 + 12*$tw+1;
+*keep if frac2>.7;
 
 **************************;
 * Move This Eventually *;
@@ -116,12 +87,14 @@ legend(order(1 "non-RDP" 2 "RDP")ring(0) position(2) bmargin(small));
 graphexportpdf summary_densitytime, dropeps;
 **************************;
 
+/*
 * RDP counter;
 bys ${type}_cluster: egen numrdp  = sum(rdp_$rdp);
 bys ${type}_cluster: gen denomrdp = _N;
 qui tab ${type}_cluster;
 local totalclust = "`r(r)'";
 gen fracrdp = numrdp/denomrdp;
+*/
 
 * keep non-rdp;
 drop if ${type}_dist==0;
@@ -135,7 +108,7 @@ gen treatment = (${type}_dist<= $dist_tr);
 **************************;
 
 * select clusters and time-window;
-keep if abs(purch_yr -mod_yr) <= $tw; 
+keep if abs(purch_yr -mode_yr) <= $tw; 
 drop if frac1 < $fr1;      
 drop if frac2 < $fr2; 
 
@@ -248,6 +221,7 @@ areg lprice i.dists#i.post1 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo, a(
 local note = "Note: controls for quadratic in erf size, mun-by-year, month and cluster FE.";
 plotreg distplot reg_fepm1 "`note'";
 */
+
 * #6 reg-adjusted in logs, tight no cluster FE;
 reg lprice i.dists#i.post1 erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;
 local note = "Note: controls for quadratic in erf size, mun-by-year and month FE.";
