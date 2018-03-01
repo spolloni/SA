@@ -17,10 +17,10 @@ program plotreg;
 
    };
 
+   mat a = e(b)';
    preserve;
-   parmest, fast;
-   rename parm coefname;
-   rename estimate coef; 
+   clear;
+   svmat2 a, n("coef") rnames("coefname");
    
    keep if strpos(coefname,"`contin'")>0 & strpos(coefname,"`group'") >0;
    gen dot1 = strpos(coefname,".");
@@ -42,7 +42,7 @@ program plotreg;
       xtitle("meters from hull border")
       ytitle("log-price")
       xlabel(0(200)$bw)
-      ylabel(-.6(.2).6)
+      ylabel(-.6(.2).4)
       legend(order(1 "pre" 2 "post")) note("`3'");
       graphexportpdf `2', dropeps;
       /*
@@ -75,24 +75,14 @@ program plotreg;
       replace contin = 6*(contin - 2*$tw -1);
       local b = 12*$tw;
 
-      replace contin = contin+2 if contin<0;
-      replace contin = contin-2 if contin>0;
-
       tw 
-      (rspike max95 min95 contin if group==0, lc(gs0) lw(thin)  )
-      (rspike max95 min95 contin if group==1,  lc(gs7) lw(thin))
-      (sc coef contin if group==0, ms(o)  mlc(gs0)  mfc(gs0) )
-      (sc coef contin if group==1,  ms(o)  mlc(gs0) mfc(gs16) ),
+      (sc coef contin if group==0, ms(o) msiz(small) mlc(gs0)  mfc(gs0) )
+      (sc coef contin if group==1,  ms(X) msiz(small) mlc(gs0) mfc(none) ),
       xtitle("months to event mode year")
       ytitle("log-price")
       xlabel(-`b'(12)`b')
-      ylabel(-1.5(.25)1,labsize(small))
-      legend(order(3 "far" 4 "near")) note("`3'");
+      legend(order(1 "far" 2 "near")) note("`3'");
       graphexportpdf `2', dropeps;
-      /*
-      (connected coef contin if group==0, ms(o)  mlc(gs0)  mfc(gs0))
-      (connected coef contin if group==1,  ms(o)  mlc(gs0) mfc(gs16))
-      */
 
    };
 
