@@ -250,7 +250,7 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
             JOIN rdp AS r ON t.trans_id = r.trans_id
             WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
-            AND st_within(e.GEOMETRY,b.GEOMETRY) 
+            AND st_within(e.GEOMETRY,b.GEOMETRY)
             '''.format(rdp,algo,spar1,spar2,bw)
 
     # fetch data
