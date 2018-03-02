@@ -48,7 +48,7 @@ workers = int(multiprocessing.cpu_count()-1)
 ################
 
 _1_a_IMPORT = 0 
-_1_b_IMPORT = 0 
+_1_b_IMPORT = 1 
 
 _2_FLAGRDP_ = 0
 
@@ -67,7 +67,7 @@ _5_a_PLOTS_ = 0
 _5_b_PLOTS_ = 0
 _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
-typ = 'conhulls'  # distance to nearest or centroid
+typ = 'conhulls' # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
 fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
@@ -103,16 +103,20 @@ if _1_b_IMPORT ==1:
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
 
-    shps = glob.glob(rawbblu+'post_rl2017/*_rl2017.shp')
-    shps.extend(glob.glob(rawbblu+'pre/*.shp'))
+    shps = glob.glob(rawbblu+'post_rl2017/GP*_rl2017.shp')
+    shps.extend(glob.glob(rawbblu+'pre/BBLU*.shp'))
+    shps.extend(glob.glob(rawbblu+'pre/West*.shp'))
+
+    print shps
+
     part_shpxtract = partial(shpxtract,tempdir)
     part_shpmerge  = partial(shpmerge,tempdir)
     pp = multiprocessing.Pool(processes=workers)
     pp.map(part_shpxtract,shps)
-    pp.map(part_shpmerge,['pre','post'])
+    shpmerge(tempdir,'pre')
     pp.close()
     pp.join()
-    add_bblu(tempdir,db)
+    #add_bblu(tempdir,db)
 
     print '\n'," - BBLU data: done! "'\n'
 

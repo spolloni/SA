@@ -210,6 +210,8 @@ def shpxtract(tmp_dir,shp):
 
     sel = '-select M_LU_CODE,S_LU_CODE,T_LU_CODE,UNITS,UNITS_EST,DOP'
     out = tmp_dir + ntpath.basename(shp)
+    if 'rl2017' in shp:
+        out = tmp_dir + 'post.shp'
     cmd = ['ogr2ogr -f "ESRI Shapefile"', out, shp, sel]
     subprocess.call(' '.join(cmd),shell=True)
 
@@ -224,7 +226,7 @@ def shpmerge(tmp_dir,time):
         outfile = 'pre.shp'
         shps = list(set(glob.glob(tmp_dir+'*.shp'))-set(shps))
     else:
-        outfile = 'rl2017.shp'
+        outfile = 'post.shp'
         
     cmd = ['saga_cmd shapes_tools 2 -INPUT', '\;'.join(shps),
            '-MERGED', tmp_dir+outfile] 
@@ -243,7 +245,7 @@ def add_bblu(tmp_dir,database):
     con.commit()
     con.close()
     cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
-            database, tmp_dir+'rl2017.shp','-nlt POINT',
+            database, tmp_dir+'post.shp','-nlt POINT',
              '-nln bblu_post', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
