@@ -10,7 +10,7 @@ data2sql.py
 from pysqlite2 import dbapi2 as sql
 import subprocess, ntpath, glob
 
-def addtable2db(input,database,tablename,namesqry,rowsqry):
+def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
 
     con = sql.connect(database)
     cur = con.cursor()
@@ -23,14 +23,15 @@ def addtable2db(input,database,tablename,namesqry,rowsqry):
         lines = f.read().splitlines()
         for line in lines:
             row = line.split("|")
-            try:
-                cur.execute(rowsqry, row)
-            except sql.ProgrammingError:
+            if row[ea][0] == "7":
                 try:
-                    row = [x.decode("utf-8", errors='ignore').encode("utf-8") for x in row]
                     cur.execute(rowsqry, row)
                 except sql.ProgrammingError:
-                    pass
+                    try:
+                        row = [x.decode("utf-8", errors='ignore').encode("utf-8") for x in row]
+                        cur.execute(rowsqry, row)
+                    except sql.ProgrammingError:
+                        pass
     cur.execute("CREATE INDEX property_ind_{} ON {} (property_id);".format(tablename,tablename))
     con.commit()
     con.close()
@@ -69,7 +70,7 @@ def add_trans(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-    addtable2db(input,database,tablename,namesqry,rowsqry)
+    addtable2db(input,database,tablename,namesqry,rowsqry,14)
 
     # create unique ID in stata
     dofile = 'subcode/trans_id.do'
@@ -149,7 +150,7 @@ def add_erven(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-    addtable2db(input,database,tablename,namesqry,rowsqry)
+    addtable2db(input,database,tablename,namesqry,rowsqry,1)
 
     # Add Geometry
     con = sql.connect(database)
@@ -200,7 +201,7 @@ def add_bonds(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
     
-    addtable2db(input,database,tablename,namesqry,rowsqry)
+    addtable2db(input,database,tablename,namesqry,rowsqry,3)
 
     return
 

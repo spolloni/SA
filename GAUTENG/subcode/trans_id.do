@@ -3,7 +3,7 @@ set more off
 #delimit;
 
 * load data; 
-odbc query "lightstone";
+odbc query "gauteng";
 odbc load,   table("transactions");
 
 * date vars;
