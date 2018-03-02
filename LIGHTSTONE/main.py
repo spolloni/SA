@@ -56,14 +56,14 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
 par1 = 0.002     # Parameter setting #1 for Clustering                          
 par2 = 10        # Parameter setting #2 for Clustering 
 
-_4_DISTANCE = 0
+_4_DISTANCE = 1
 rdp = 'ls'       # fp='first-pass', ls=lighstone for rdp
 bw  = 600        # bandwidth for clusters
 sig = 2.5        # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
 _5_b_PLOTS_ = 0
-_5_c_PLOTS_ = 1
+_5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
 typ = 'nearest'  # distance to nearest or centroid
 fr1 = 50         # percent constructed on mode year
@@ -214,7 +214,7 @@ if _4_DISTANCE ==1:
     distances = pp.map(part_dist_calc,[inmat_rl2017,inmat_pre])
     print '\n'," -- BBLU distance calculation: done! "'\n'
 
-    ## 4.9 retrieve IDs, populate table and push back to DB
+    # 4.9 retrieve IDs, populate table and push back to DB
     push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
     print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
 
