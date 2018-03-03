@@ -8,7 +8,7 @@ data2sql.py
 '''
 
 from pysqlite2 import dbapi2 as sql
-import subprocess, ntpath, glob
+import subprocess, ntpath, glob, pandas
 
 def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
 
@@ -220,7 +220,7 @@ def shpxtract(tmp_dir,shp):
 
 def shpmerge(tmp_dir,time):
 
-    shps = glob.glob(tmp_dir+'*_rl2017.shp')
+    shps = glob.glob(tmp_dir+'*post.shp')
 
     if time=='pre':
         outfile = 'pre.shp'
@@ -262,6 +262,61 @@ def add_bblu(tmp_dir,database):
     subprocess.call(' '.join(cmd),shell=True)
 
     return
+
+def add_cenGIS(db,source,yr):
+
+    shps = glob.glob(source+'c'+yr+'/GIS/*.shp')
+
+    if yr == "2001":
+        extra_SPs = pandas.read_csv(source+'c'+yr+'/GIS/extra_SPs.csv').SP_CODE.tolist()
+        inextra = extra_SPs[0]
+        for sp in extra_SPs[1:]:
+            inextra += 'OR SP_CODE = '+str(sp)+' '
+
+
+    for shp in shps:
+
+        geography = ntpath.basename(shp)[:ntpath.basename(shp).find('_')] 
+        tablename = geography + '_' + yr
+
+        if yr=='2011' and geography == 'WD':
+            where = '''-where "PROVINCE = 'Gauteng'"'''
+        if yr=='2011' and geography != 'WD':
+            where = '-where "PR_CODE = 7"'
+        if yr=='2001' and geography == 'PR':
+            where = '''-where "PR_NAME = 'GAUTENG'"'''
+        if yr=='2001' and geography == 'WD':
+            where = '''-where "substr(WD_CODE,1,1) = '7'"'''
+        if yr=='2001' and geography in ['SP','SAL','EA']:
+            where = '''-where "substr(SP_CODE,1,1) = '7' OR {} "'''
+
+
+
+        print geography
+        print tablename 
+        #print where
+        print ' '
+
+    print inextra
+
+        #con = sql.connect(db)
+        #cur = con.cursor()
+        #cur.execute('''CREATE TABLE IF NOT EXISTS 
+        #        {} (mock INT);'''.format(tablename))
+        #con.commit()
+        #con.close()
+#
+        #cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
+        #       db,shp,where,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+        #subprocess.call(' '.join(cmd),shell=True)
+
+    return
+
+
+
+
+
+
 
 
 

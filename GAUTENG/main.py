@@ -14,6 +14,7 @@ main.py
 from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
+from subcode.data2sql import add_cenGIS
 from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
@@ -31,7 +32,7 @@ project = os.getcwd()[:os.getcwd().rfind('Code')]
 rawdeed = project + 'Raw/DEEDS/'
 rawbblu = project + 'Raw/BBLU/'
 rawgis  = project + 'Raw/GIS/'
-rawcens = project + 'Raw/CENUS/'
+rawcens = project + 'Raw/CENSUS/'
 gendata = project + 'Generated/GAUTENG/'
 outdir  = project + 'Output/GAUTENG/'
 tempdir = gendata + 'temp/'
@@ -47,8 +48,10 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_a_IMPORT = 0 
-_1_b_IMPORT = 1 
+_1_a_IMPORT = 0  # import LIGHTSTONE
+_1_b_IMPORT = 0  # import BBLU
+_1_c_IMPORT = 1  # import CENSUS
+
 
 _2_FLAGRDP_ = 0
 
@@ -107,18 +110,30 @@ if _1_b_IMPORT ==1:
     shps.extend(glob.glob(rawbblu+'pre/BBLU*.shp'))
     shps.extend(glob.glob(rawbblu+'pre/West*.shp'))
 
-    print shps
-
     part_shpxtract = partial(shpxtract,tempdir)
-    part_shpmerge  = partial(shpmerge,tempdir)
     pp = multiprocessing.Pool(processes=workers)
     pp.map(part_shpxtract,shps)
-    shpmerge(tempdir,'pre')
     pp.close()
     pp.join()
-    #add_bblu(tempdir,db)
+
+    shpmerge(tempdir,'pre')
+    add_bblu(tempdir,db)
 
     print '\n'," - BBLU data: done! "'\n'
+
+if _1_c_IMPORT ==1:
+
+    print '\n'," Importing CENSUS data into SQL... ",'\n'
+
+    # 1.1 Import 2011 CENSUS GIS boundaries
+    #add_cenGIS(db,rawcens,'2011')
+
+    # 1.2 Import 2001 CENSUS GIS boundaries
+    add_cenGIS(db,rawcens,'2001')
+
+
+    print '\n'," - CENSUS data: done! "'\n'
+
 
 #############################################
 # STEP 2:  flag RDP properties              #
@@ -170,15 +185,13 @@ if _4_DISTANCE ==1:
     os.makedirs(tempdir)
 
     # 4.1 buffers and self-interesctions
-    part_selfintersect = partial(selfintersect,db,tempdir,bw,rdp,algo,par1,par2)
-    pp.map(part_selfintersect,range(9,0,-1))
+    selfintersect(db,tempdir,bw,rdp,algo,par1,par2)
     print '\n'," -- Self-Intersections: done! "'\n'
 
     # 4.2 make concave hulls
-    grids = glob.glob(rawgis+'grid_*')
+    grids = glob.glob(rawgis+'grid_7*')
     for grid in grids: shutil.copy(grid, tempdir)
-    part_concavehull = partial(concavehull,db,tempdir,sig,rdp,algo,par1,par2)
-    pp.map(part_concavehull,range(9,0,-1))
+    concavehull(db,tempdir,sig,rdp,algo,par1,par2)
     print '\n'," -- Concave Hulls: done! "'\n'
 
     # 4.3 merge buffers & hulls, then push to DB 
@@ -186,9 +199,7 @@ if _4_DISTANCE ==1:
     print '\n'," -- Merge and Push Back: done! "'\n'
 
     # 4.4 assemble coordinates for hull edges
-    part_comb_coordinates = partial(comb_coordinates,tempdir)
-    coords = pp.map(part_comb_coordinates,range(9,0,-1))
-    coords = pd.concat(coords).as_matrix()
+    coords = comb_coordinates(tempdir).as_matrix()
     print '\n'," -- Assemble hull coordinates: done! "'\n'
 
     # 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
