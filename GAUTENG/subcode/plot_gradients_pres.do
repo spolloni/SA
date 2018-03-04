@@ -33,7 +33,7 @@ use "${data}/${type}_gradplot.dta", clear;
 **************************;
 *;
 drop if ${type}_dist<0;
-global dist_tr = 400;
+global dist_tr = 300;
 *;
 * re-set bw if centroid;
 if "${type}"=="centroid"{;
@@ -73,20 +73,47 @@ gen mo2con_reg = mo2con if abs(mo2con)<=12*$tw;
 replace mo2con_reg = -12*$tw-1 if mo2con_reg==.;
 replace mo2con_reg = mo2con_reg + 12*$tw+1;
 
-*keep if frac2>.7;
+gen mo2con_reg6 = ceil(abs(mo2con)/6); 
+replace mo2con_reg6 = - mo2con_reg6 if mo2con<0;
+replace mo2con_reg6 = mo2con_reg6 + 2*$tw+1;
+replace mo2con_reg6 = 0 if mo2con_reg==0 | mo2con==0;
+
+sort mo2con;
+browse mo2con mo2con_reg6 mo2con_reg;
+
+
+
+
+*drop if mo2con == -9 & seller_name == "CITY OF TSHWANE METROPOLITAN MUNICIPALITY" & rdp_ls == 0;
+
+* Special Kleaner; 
+
+keep if frac2>.7;
+
+drop if seller_name=="" & rdp_ls == 0;
+drop if purch_price==. & rdp_ls == 0;
+drop if munic_name  == "CITY OF JOHANNESBURG" 
+      & seller_name == "CITY OF JOHANNESBURG"
+      &      mo2con == -4
+      &      rdp_ls == 0;
+
+drop if gov==1 & rdp_ls == 0;
+
+drop if seller_name == "NATIONAL HOUSING FINANCE CORP LTD" & rdp_ls == 0;
+drop if seller_name == "TORO YA AFRICA CONSULTANTS PTY LTD" & rdp_ls == 0;
+
 
 **************************;
 * Move This Eventually *;
 local b = 12*$tw;
 tw
 (hist mo2con if rdp_`rdp'==0 & abs(mo2con)<=12*$tw, w(1) fc(none) lc(gs0))
-(hist mo2con if rdp_`rdp'==1 & abs(mo2con)<=12*$tw, w(1) c(gs10)),
+(hist mo2con if rdp_`rdp'==1 & abs(mo2con)<=12*$tw, w(1)  c(gs10)),
 xtitle("months to event mode year")
 xlabel(-`b'(12)`b')
 legend(order(1 "non-RDP" 2 "RDP")ring(0) position(2) bmargin(small));
 graphexportpdf summary_densitytime, dropeps;
 **************************;
-
 /*
 * RDP counter;
 bys ${type}_cluster: egen numrdp  = sum(rdp_$rdp);
@@ -111,6 +138,7 @@ gen treatment = (${type}_dist<= $dist_tr);
 keep if abs(purch_yr -mode_yr) <= $tw; 
 drop if frac1 < $fr1;      
 drop if frac2 < $fr2; 
+
 
 * basic outlier removal;
 bys ${type}_cluster: egen p$top = pctile(purch_price), p($top);
@@ -243,7 +271,6 @@ plotreg distplot reg_pm2 "`note'";
 **************;
 * TIME PLOTS *;
 **************;
-
 /*
 * #5 reg-adjusted in logs, tight;
 areg lprice i.mo2con_reg#i.treatment erf_size erf_size2 i.munic#i.purch_yr i.purch_mo, a(${type}_cluster);
@@ -252,9 +279,9 @@ plotreg timeplot timereg_fepm1 "`note'";
 */
 
 * #6 reg-adjusted in logs, tight no cluster FE;
-reg lprice i.mo2con_reg#i.treatment erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;
+reg lprice i.mo2con_reg6#i.treatment erf_size erf_size2 i.munic#i.purch_yr i.purch_mo;
 local note = "Note: controls for quadratic in erf size, mun-by-year and month FE.";
-plotreg timeplot timereg_pm1 "`note'";
+plotreg timeplot6 timereg_pm1 "`note'";
 
 
 *********;

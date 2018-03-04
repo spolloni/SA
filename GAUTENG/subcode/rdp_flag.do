@@ -60,7 +60,7 @@ program gengov;
 end;
 
 * load data; 
-odbc query "lightstone";
+odbc query "gauteng";
 odbc load, exec("`qry'");
 
 ********************;

@@ -30,7 +30,7 @@ def gp2shp(db,qrys,geocol,out,espg):
     return
 
 
-def selfintersect(db,dir,bw,rdp,algo,par1,par2,i):
+def selfintersect(db,dir,bw,rdp,algo,par1,par2):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
     spar2 = re.sub("[^0-9]", "", str(par2))
@@ -41,11 +41,11 @@ def selfintersect(db,dir,bw,rdp,algo,par1,par2,i):
         FROM transactions AS A
         JOIN erven AS B ON A.property_id = B.property_id
         JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
-        WHERE A.prov_code = {} AND  C.cluster !=0
+        WHERE C.cluster !=0
         GROUP BY cluster
-        '''.format(bw,rdp,algo,spar1,spar2,i)
-    out1 = dir+'buff_{}.shp'.format(i)
-    out2 = dir+'interbuff_{}.shp'.format(i)
+        '''.format(bw,rdp,algo,spar1,spar2)
+    out1 = dir+'buff.shp'
+    out2 = dir+'interbuff.shp'
 
     # fetch dissolved buffers
     if os.path.exists(out1): os.remove(out1)
@@ -60,7 +60,7 @@ def selfintersect(db,dir,bw,rdp,algo,par1,par2,i):
     return
 
 
-def concavehull(db,dir,sig,rdp,algo,par1,par2,i):
+def concavehull(db,dir,sig,rdp,algo,par1,par2):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
     spar2 = re.sub("[^0-9]", "", str(par2))
@@ -71,14 +71,14 @@ def concavehull(db,dir,sig,rdp,algo,par1,par2,i):
         FROM transactions AS A
         JOIN erven AS B ON A.property_id = B.property_id
         JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
-        WHERE A.prov_code = {} AND  C.cluster !=0
+        WHERE C.cluster !=0
         GROUP BY cluster
-        '''.format(sig,rdp,algo,spar1,spar2,i)
-    out1 = dir+'hull_{}.shp'.format(i)
-    out2 = dir+'edgehull_{}.shp'.format(i)
-    out3 = dir+'splitedgehull_{}.shp'.format(i)
-    out4 = dir+'coordshull_{}.csv'.format(i)
-    grid = dir+'grid_{}.shp'.format(i)
+        '''.format(sig,rdp,algo,spar1,spar2)
+    out1 = dir+'hull.shp'
+    out2 = dir+'edgehull.shp'
+    out3 = dir+'splitedgehull.shp'
+    out4 = dir+'coordshull.csv'
+    grid = dir+'grid_7.shp'
 
     # fetch concave hulls
     if os.path.exists(out1): os.remove(out1)
@@ -108,15 +108,7 @@ def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
     spar2 = re.sub("[^0-9]", "", str(par2))
     ssig  = re.sub("[^0-9]", "", str(sig))
 
-    # fetch self-intersection files
-    files = glob.glob(dir+'interbuff_*.shp')
-
-    # merge files
-    cmd = ['saga_cmd shapes_tools 2 -INPUT', '\;'.join(files),
-           '-MERGED', dir+'buffmerged.shp'] 
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # push to db
+    # push buffers to db
     con = sql.connect(db)
     cur = con.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS 
@@ -124,21 +116,13 @@ def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
     con.commit()
     con.close()
     cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, dir+'buffmerged.shp','-select cluster,prov_code ', '-where "cluster > 0"','-nlt PROMOTE_TO_MULTI',
+            db, dir+'interbuff.shp','-select cluster,prov_code ', '-where "cluster > 0"','-nlt PROMOTE_TO_MULTI',
              '-nln rdp_buffers_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,bw), '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
-    # fetch concave hull files
-    files = glob.glob(dir+'hull_*.shp')
-
-    # merge files
-    cmd = ['saga_cmd shapes_tools 2 -INPUT', '\;'.join(files),
-           '-MERGED', dir+'hullmerged.shp'] 
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # add polygon perimeter and area
-    cmd = ['saga_cmd shapes_polygons 2 -POLYGONS', dir+'hullmerged.shp',
-           '-OUTPUT', dir+'hullmergedwproperties.shp'] 
+    # add hulls perimeter and area
+    cmd = ['saga_cmd shapes_polygons 2 -POLYGONS', dir+'hull.shp',
+           '-OUTPUT', dir+'hullwproperties.shp'] 
     subprocess.call(' '.join(cmd),shell=True)
 
     # push to db
@@ -149,7 +133,7 @@ def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
     con.commit()
     con.close()
     cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, dir+'hullmergedwproperties.shp','-select cluster,prov_code,PERIMETER,AREA','-nlt PROMOTE_TO_MULTI',
+            db, dir+'hullwproperties.shp','-select cluster,prov_code,PERIMETER,AREA','-nlt PROMOTE_TO_MULTI',
              '-nln rdp_hulls_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,ssig), '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
@@ -270,10 +254,10 @@ def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
     return mat
 
 
-def comb_coordinates(dir,i):
+def comb_coordinates(dir):
 
     # load ogr2ogr exported csv
-    df = pd.read_csv(dir+'coordshull_{}.csv'.format(i))
+    df = pd.read_csv(dir+'coordshull.csv')
 
     # cluster column
     cluster = df['cluster']
