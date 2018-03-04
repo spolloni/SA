@@ -48,9 +48,9 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_a_IMPORT = 0  # import LIGHTSTONE
+_1_a_IMPORT = 1  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
-_1_c_IMPORT = 1  # import CENSUS
+_1_c_IMPORT = 0  # import CENSUS
 
 
 _2_FLAGRDP_ = 0
@@ -90,13 +90,16 @@ if _1_a_IMPORT ==1:
     if os.path.exists(db):
         os.remove(db)
 
-    add_trans(rawdeed+'TRAN_DATA_1205.txt',db)
+    extra_EAs = pd.read_csv(rawcens+'c2001/GIS/extra_EAs.csv')
+    extra_EAs = [str(x) for x in extra_EAs.EA_CODE.tolist()]
+
+    add_trans(rawdeed+'TRAN_DATA_1205.txt',db,extra_EAs)
     print '\n'," - Transactions table: done! "'\n'
 
-    add_erven(rawdeed+'ERF_DATA_1205.txt',db)
+    add_erven(rawdeed+'ERF_DATA_1205.txt',db,extra_EAs)
     print '\n'," - Erven table: done! "'\n'
 
-    add_bonds(rawdeed+'BOND_DATA_1205.txt',db)
+    add_bonds(rawdeed+'BOND_DATA_1205.txt',db,extra_EAs)
     print '\n'," - Bond table: done! "'\n'
 
 if _1_b_IMPORT ==1:
@@ -126,7 +129,7 @@ if _1_c_IMPORT ==1:
     print '\n'," Importing CENSUS data into SQL... ",'\n'
 
     # 1.1 Import 2011 CENSUS GIS boundaries
-    #add_cenGIS(db,rawcens,'2011')
+    add_cenGIS(db,rawcens,'2011')
 
     # 1.2 Import 2001 CENSUS GIS boundaries
     add_cenGIS(db,rawcens,'2001')

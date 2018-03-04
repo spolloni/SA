@@ -10,7 +10,20 @@ data2sql.py
 from pysqlite2 import dbapi2 as sql
 import subprocess, ntpath, glob, pandas
 
-def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
+def check_ea(ea,extra):
+
+    ret = 0 
+
+    if ea[0] == "7":
+        ret = 1
+    if ea[:3] in ['676','688','812','882']:
+        if ea in extra:
+            ret = 1
+
+    return ret 
+
+
+def addtable2db(input,database,tablename,namesqry,rowsqry,ea,extra):
 
     con = sql.connect(database)
     cur = con.cursor()
@@ -23,7 +36,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
         lines = f.read().splitlines()
         for line in lines:
             row = line.split("|")
-            if row[ea][0] == "7":
+            if check_ea(row[ea],extra) == 1:
                 try:
                     cur.execute(rowsqry, row)
                 except sql.ProgrammingError:
@@ -39,7 +52,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
     return
 
 
-def add_trans(input,database):
+def add_trans(input,database,extra):
 
     tablename = 'transactions'
     namesqry  = '''
@@ -70,7 +83,7 @@ def add_trans(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-    addtable2db(input,database,tablename,namesqry,rowsqry,14)
+    addtable2db(input,database,tablename,namesqry,rowsqry,14,extra)
 
     # create unique ID in stata
     dofile = 'subcode/trans_id.do'
@@ -120,7 +133,7 @@ def add_trans(input,database):
     return
 
 
-def add_erven(input,database):
+def add_erven(input,database,extra):
 
     tablename = 'erven'
     namesqry  = '''
@@ -150,7 +163,7 @@ def add_erven(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-    addtable2db(input,database,tablename,namesqry,rowsqry,1)
+    addtable2db(input,database,tablename,namesqry,rowsqry,1,extra)
 
     # Add Geometry
     con = sql.connect(database)
@@ -169,7 +182,7 @@ def add_erven(input,database):
     return
 
 
-def add_bonds(input,database):
+def add_bonds(input,database,extra):
 
     tablename = 'bonds'
     namesqry  = '''
@@ -201,7 +214,7 @@ def add_bonds(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
     
-    addtable2db(input,database,tablename,namesqry,rowsqry,3)
+    addtable2db(input,database,tablename,namesqry,rowsqry,3,extra)
 
     return
 
@@ -266,49 +279,54 @@ def add_bblu(tmp_dir,database):
 def add_cenGIS(db,source,yr):
 
     shps = glob.glob(source+'c'+yr+'/GIS/*.shp')
+    s_srs = '-s_srs http://spatialreference.org/ref/epsg/4326/'
 
     if yr == "2001":
+        s_srs = '-s_srs http://spatialreference.org/ref/epsg/4148/'
         extra_SPs = pandas.read_csv(source+'c'+yr+'/GIS/extra_SPs.csv').SP_CODE.tolist()
-        inextra = extra_SPs[0]
+        inextra = 'SP_CODE = '+str(extra_SPs[0])+' '
         for sp in extra_SPs[1:]:
             inextra += 'OR SP_CODE = '+str(sp)+' '
-
 
     for shp in shps:
 
         geography = ntpath.basename(shp)[:ntpath.basename(shp).find('_')] 
         tablename = geography + '_' + yr
 
+        where = ''
         if yr=='2011' and geography == 'WD':
             where = '''-where "PROVINCE = 'Gauteng'"'''
         if yr=='2011' and geography != 'WD':
             where = '-where "PR_CODE = 7"'
         if yr=='2001' and geography == 'PR':
             where = '''-where "PR_NAME = 'GAUTENG'"'''
-        if yr=='2001' and geography == 'WD':
-            where = '''-where "substr(WD_CODE,1,1) = '7'"'''
-        if yr=='2001' and geography in ['SP','SAL','EA']:
-            where = '''-where "substr(SP_CODE,1,1) = '7' OR {} "'''
 
+        con = sql.connect(db)
+        cur = con.cursor()
+        cur.execute('''CREATE TABLE IF NOT EXISTS 
+                {} (mock INT);'''.format(tablename))
+        con.commit()
+        con.close()
 
+        cmd = ['ogr2ogr -f "SQLite" -update',s_srs,'-t_srs http://spatialreference.org/ref/epsg/2046/',
+               db,shp,where,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+        subprocess.call(' '.join(cmd),shell=True)
 
-        print geography
-        print tablename 
-        #print where
-        print ' '
+        if yr=='2001' and geography != 'PR':
+            if geography == 'WD':
+                qry = ''' DELETE FROM {} 
+                          WHERE cast(WD_CODE as TEXT) 
+                          NOT LIKE '7%';'''.format(tablename)
+            if geography in ['SP','SAL','EA']:
+                qry = ''' DELETE FROM {} 
+                          WHERE (cast(SP_CODE as TEXT) 
+                          NOT LIKE '7%') AND NOT ({}) ;'''.format(tablename,inextra)
 
-    print inextra
-
-        #con = sql.connect(db)
-        #cur = con.cursor()
-        #cur.execute('''CREATE TABLE IF NOT EXISTS 
-        #        {} (mock INT);'''.format(tablename))
-        #con.commit()
-        #con.close()
-#
-        #cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-        #       db,shp,where,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
-        #subprocess.call(' '.join(cmd),shell=True)
+            con = sql.connect(db)
+            cur = con.cursor()
+            cur.execute(qry)
+            con.commit()
+            con.close()
 
     return
 
