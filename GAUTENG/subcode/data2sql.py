@@ -8,16 +8,16 @@ data2sql.py
 '''
 
 from pysqlite2 import dbapi2 as sql
-import subprocess, ntpath, glob, pandas
+import subprocess, ntpath, glob, pandas, csv
 
-def check_ea(ea,extra):
+def check_geo(geo,extra):
 
     ret = 0 
 
-    if ea[0] == "7":
+    if geo[0] == "7":
         ret = 1
-    if ea[:3] in ['676','688','812','882']:
-        if ea in extra:
+    if geo[:3] in ['676','688','812','882']:
+        if geo in extra:
             ret = 1
 
     return ret 
@@ -36,7 +36,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry,ea,extra):
         lines = f.read().splitlines()
         for line in lines:
             row = line.split("|")
-            if check_ea(row[ea],extra) == 1:
+            if check_geo(row[ea],extra) == 1:
                 try:
                     cur.execute(rowsqry, row)
                 except sql.ProgrammingError:
@@ -276,11 +276,13 @@ def add_bblu(tmp_dir,database):
 
     return
 
+
 def add_cenGIS(db,source,yr):
 
     shps = glob.glob(source+'c'+yr+'/GIS/*.shp')
     s_srs = '-s_srs http://spatialreference.org/ref/epsg/4326/'
 
+    # make 2001-specific adjustments
     if yr == "2001":
         s_srs = '-s_srs http://spatialreference.org/ref/epsg/4148/'
         extra_SPs = pandas.read_csv(source+'c'+yr+'/GIS/extra_SPs.csv').SP_CODE.tolist()
@@ -293,6 +295,7 @@ def add_cenGIS(db,source,yr):
         geography = ntpath.basename(shp)[:ntpath.basename(shp).find('_')] 
         tablename = geography + '_' + yr
 
+        # where clause to keep just Gauteng
         where = ''
         if yr=='2011' and geography == 'WD':
             where = '''-where "PROVINCE = 'Gauteng'"'''
@@ -301,6 +304,7 @@ def add_cenGIS(db,source,yr):
         if yr=='2001' and geography == 'PR':
             where = '''-where "PR_NAME = 'GAUTENG'"'''
 
+        # create mock table for overwrite
         con = sql.connect(db)
         cur = con.cursor()
         cur.execute('''CREATE TABLE IF NOT EXISTS 
@@ -308,10 +312,12 @@ def add_cenGIS(db,source,yr):
         con.commit()
         con.close()
 
+        # push shapefile to db
         cmd = ['ogr2ogr -f "SQLite" -update',s_srs,'-t_srs http://spatialreference.org/ref/epsg/2046/',
                db,shp,where,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
         subprocess.call(' '.join(cmd),shell=True)
 
+        # delete non-Gauteng rows for 2001
         if yr=='2001' and geography != 'PR':
             if geography == 'WD':
                 qry = ''' DELETE FROM {} 
@@ -331,19 +337,88 @@ def add_cenGIS(db,source,yr):
     return
 
 
+def push_census(db,reader,colnames_ind,drop_qry,create_qry,insert_qry,extra,sp):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+
+    # drop if exist
+    cur.execute(drop_qry)
+
+    # create table
+    cur.execute(create_qry)
+
+    # add rows
+    for row in reader:
+
+        row = [k for j, k in enumerate(row) if j not in colnames_ind]
+
+        if check_geo(row[sp],extra) == 0:
+            continue
+
+        cur.execute(insert_qry,row)
+
+    con.commit()
+    con.close()
+
+    return
 
 
+def add_census(db,source,yr):
 
+    extra_SPs = []
+    if yr == '2001':
+        extra_SPs = pandas.read_csv(source+'c2001/GIS/extra_SPs.csv')
+        extra_SPs = [str(x) for x in extra_SPs.SP_CODE.tolist()]
 
+    for level in ['pers','hh']:
 
+        file = source+'c{}/{}_{}.csv'.format(yr,level,yr)
+        tablename = 'census_{}_{}'.format(level,yr)
 
+        with open(file, 'rb') as f:
 
+            reader = csv.reader(f)
+            header = reader.next()
 
-    
+            # indices to throw out (string-heavy)
+            colnames_ind = [i for i, s in enumerate(header) 
+                            if any(x in s for x in ['_NAME','_Name','_type'])]
 
+            # names of columns to keep
+            colnames = [i for j, i in enumerate(header) if j not in colnames_ind]
 
+            # indice containing SP code
+            SP  = column_trim = [i for i, s in enumerate(colnames) 
+                            if any(x in s for x in ['Subplace_Code','SP_CODE'])]
 
+            # indice containing household weight
+            WGT = column_trim = [i for i, s in enumerate(colnames) 
+                            if any(x in s for x in ['HOUSEHOLDS','WGT','Wgt','wgt'])]
 
+            # column data-types
+            coldatypes = [' INTEGER, ']*len(colnames) 
+            coldatypes[WGT[0]] = ' numeric(10,10), ' 
+            coldatypes[-1] = ' INTEGER '
 
+            # query to drop if exits
+            drop_qry = '''
+                       DROP TABLE IF EXISTS census_{}_{};
+                       '''.format(level,yr)
 
+            # query to create table
+            concat = ["{}{}".format(i,j) for i,j in zip(colnames,coldatypes)]
+            create_qry = '''
+                         CREATE TABLE census_{}_{} ({});
+                         '''.format(level,yr,''.join(concat))
 
+            # query to insert line
+            qmarks = ["?"]*len(coldatypes)
+            insert_qry = '''
+                         INSERT INTO census_{}_{} VALUES ({});
+                         '''.format(level,yr,', '.join(map(str,qmarks)))
+
+            push_census(db,reader,colnames_ind,drop_qry,create_qry,insert_qry,extra_SPs,SP[0])
+            print level+' Census '+yr+' done!'
+
+    return

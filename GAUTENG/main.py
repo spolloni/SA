@@ -14,7 +14,7 @@ main.py
 from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
-from subcode.data2sql import add_cenGIS
+from subcode.data2sql import add_cenGIS, add_census
 from subcode.spaclust import spatial_cluster
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
@@ -48,9 +48,9 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-_1_a_IMPORT = 1  # import LIGHTSTONE
+_1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
-_1_c_IMPORT = 0  # import CENSUS
+_1_c_IMPORT = 1  # import CENSUS
 
 
 _2_FLAGRDP_ = 0
@@ -129,10 +129,13 @@ if _1_c_IMPORT ==1:
     print '\n'," Importing CENSUS data into SQL... ",'\n'
 
     # 1.1 Import 2011 CENSUS GIS boundaries
-    add_cenGIS(db,rawcens,'2011')
+    #add_cenGIS(db,rawcens,'2011')
 
     # 1.2 Import 2001 CENSUS GIS boundaries
-    add_cenGIS(db,rawcens,'2001')
+    #add_cenGIS(db,rawcens,'2001')
+
+    # 1.3 Import 2011 CENSUS data
+    add_census(db,rawcens,'2001')
 
 
     print '\n'," - CENSUS data: done! "'\n'
