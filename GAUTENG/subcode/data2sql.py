@@ -12,15 +12,17 @@ import subprocess, ntpath, glob, pandas, csv
 
 def check_geo(geo,extra):
 
-    ret = 0 
+    if geo[0] not in ['6','7','8']:
+        return 0
 
     if geo[0] == "7":
-        ret = 1
+        return 1
+
     if geo[:3] in ['676','688','812','882']:
         if geo in extra:
-            ret = 1
+            return 1
 
-    return ret 
+    return 0 
 
 
 def addtable2db(input,database,tablename,namesqry,rowsqry,ea,extra):
@@ -336,34 +338,6 @@ def add_cenGIS(db,source,yr):
 
     return
 
-
-def push_census(db,reader,colnames_ind,drop_qry,create_qry,insert_qry,extra,sp):
-
-    con = sql.connect(db)
-    cur = con.cursor()
-
-    # drop if exist
-    cur.execute(drop_qry)
-
-    # create table
-    cur.execute(create_qry)
-
-    # add rows
-    for row in reader:
-
-        row = [k for j, k in enumerate(row) if j not in colnames_ind]
-
-        if check_geo(row[sp],extra) == 0:
-            continue
-
-        cur.execute(insert_qry,row)
-
-    con.commit()
-    con.close()
-
-    return
-
-
 def add_census(db,source,yr):
 
     extra_SPs = []
@@ -383,18 +357,21 @@ def add_census(db,source,yr):
 
             # indices to throw out (string-heavy)
             colnames_ind = [i for i, s in enumerate(header) 
-                            if any(x in s for x in ['_NAME','_Name','_type'])]
+                            if any(x in s for x in ['_NAME','_Name','_type','name1996','_MDB_C_'])]
 
             # names of columns to keep
             colnames = [i for j, i in enumerate(header) if j not in colnames_ind]
 
             # indice containing SP code
-            SP  = column_trim = [i for i, s in enumerate(colnames) 
-                            if any(x in s for x in ['Subplace_Code','SP_CODE'])]
+            SP = [i for i, s in enumerate(header) 
+                    if any(x in s for x in ['Subplace_Code','SP_CODE','PR_CODE_2011'])]
 
             # indice containing household weight
-            WGT = column_trim = [i for i, s in enumerate(colnames) 
-                            if any(x in s for x in ['HOUSEHOLDS','WGT','Wgt','wgt'])]
+            WGT = [i for i, s in enumerate(colnames) 
+                     if any(x in s for x in ['HOUSEHOLDS','WGT','Wgt','wgt','PESHHWEI','PESPWEIG'])]
+
+            # index columns
+            indices = [x for x in colnames if ('Code' in x or 'CODE' in x )]
 
             # column data-types
             coldatypes = [' INTEGER, ']*len(colnames) 
@@ -418,7 +395,33 @@ def add_census(db,source,yr):
                          INSERT INTO census_{}_{} VALUES ({});
                          '''.format(level,yr,', '.join(map(str,qmarks)))
 
-            push_census(db,reader,colnames_ind,drop_qry,create_qry,insert_qry,extra_SPs,SP[0])
-            print level+' Census '+yr+' done!'
+            # PUSH TO CENSUS             
+            con = sql.connect(db)
+            cur = con.cursor()
+        
+            # drop if exist
+            cur.execute(drop_qry)
+        
+            # create table
+            cur.execute(create_qry)
+        
+            # add rows
+            for row in reader:
+        
+                if check_geo(row[SP[0]],extra_SPs) == 0:
+                    continue
+        
+                row = [k for j, k in enumerate(row) if j not in colnames_ind]
+                cur.execute(insert_qry,row)
+
+            # make indices
+            for index in indices:
+                qry = '''
+                      CREATE INDEX {}_ind_{} ON {} ({});
+                      '''.format(tablename,index,tablename,index)
+                cur.execute(qry)
+        
+            con.commit()
+            con.close()
 
     return

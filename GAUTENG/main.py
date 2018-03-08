@@ -15,7 +15,8 @@ from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census
-from subcode.spaclust import spatial_cluster
+from subcode.data2sql import add_cenGIS, add_census
+from subcode.dissolve import dissolve_census
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db
@@ -130,12 +131,35 @@ if _1_c_IMPORT ==1:
 
     # 1.1 Import 2011 CENSUS GIS boundaries
     #add_cenGIS(db,rawcens,'2011')
+    #print '2011 GIS data: done!'
 
     # 1.2 Import 2001 CENSUS GIS boundaries
     #add_cenGIS(db,rawcens,'2001')
+    #print '2001 GIS data: done!'
 
-    # 1.3 Import 2011 CENSUS data
-    add_census(db,rawcens,'2001')
+    # 1.3 Import 1996 CENSUS GIS boundaries
+    #add_cenGIS(db,rawcens,'1996')
+    #print '1996 GIS data: done!'
+
+    # 1.4 Import 2011 CENSUS data
+    #add_census(db,rawcens,'2011')
+    #print '2011 Census data: done!'
+
+    # 1.5 Import 2001 CENSUS data
+    #add_census(db,rawcens,'2001')
+    #print '2001 Census data: done!'
+
+    # 1.6 Import 1996 CENSUS data
+    #add_census(db,rawcens,'1996')
+    #print '1996 Census data: done!'
+
+    # 1.7 Create Sub-Place aggregates 
+    #dissolve_census(db,'1996','ea')
+    #dissolve_census(db,'2001','sp')
+    #dissolve_census(db,'2011','sp')
+    #print 'Sub-place aggregate tables: done!'
+
+    # 1.8 Create Sub-Place aggregates for BBLU
 
 
     print '\n'," - CENSUS data: done! "'\n'
@@ -207,7 +231,6 @@ if _4_DISTANCE ==1:
     # 4.4 assemble coordinates for hull edges
     coords = comb_coordinates(tempdir).as_matrix()
     print '\n'," -- Assemble hull coordinates: done! "'\n'
-
     # 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
     part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
     matrx = pp.map(part_fetch_data,range(8,0,-1))
