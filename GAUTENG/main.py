@@ -16,7 +16,7 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census
 from subcode.data2sql import add_cenGIS, add_census
-from subcode.dissolve import dissolve_census
+from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db
@@ -52,6 +52,7 @@ workers = int(multiprocessing.cpu_count()-1)
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 1  # import CENSUS
+_1_d_IMPORT = 1  # import CENSUS
 
 
 _2_FLAGRDP_ = 0
@@ -81,7 +82,7 @@ tw  = 5          # take observations within `tw' years
 res = 0          # =1 if keep rdp resale
 
 #############################################
-# STEP 1:  import txt files into SQL tables #
+# STEP 1:   import RAW data into SQL tables #
 #############################################
 
 if _1_a_IMPORT ==1:
@@ -130,36 +131,39 @@ if _1_c_IMPORT ==1:
     print '\n'," Importing CENSUS data into SQL... ",'\n'
 
     # 1.1 Import 2011 CENSUS GIS boundaries
-    #add_cenGIS(db,rawcens,'2011')
-    #print '2011 GIS data: done!'
+    add_cenGIS(db,rawcens,'2011')
+    print '2011 GIS data: done!'
 
     # 1.2 Import 2001 CENSUS GIS boundaries
-    #add_cenGIS(db,rawcens,'2001')
-    #print '2001 GIS data: done!'
+    add_cenGIS(db,rawcens,'2001')
+    print '2001 GIS data: done!'
 
     # 1.3 Import 1996 CENSUS GIS boundaries
-    #add_cenGIS(db,rawcens,'1996')
-    #print '1996 GIS data: done!'
+    add_cenGIS(db,rawcens,'1996')
+    print '1996 GIS data: done!'
 
     # 1.4 Import 2011 CENSUS data
-    #add_census(db,rawcens,'2011')
-    #print '2011 Census data: done!'
+    add_census(db,rawcens,'2011')
+    print '2011 Census data: done!'
 
     # 1.5 Import 2001 CENSUS data
-    #add_census(db,rawcens,'2001')
-    #print '2001 Census data: done!'
+    add_census(db,rawcens,'2001')
+    print '2001 Census data: done!'
 
     # 1.6 Import 1996 CENSUS data
-    #add_census(db,rawcens,'1996')
-    #print '1996 Census data: done!'
+    add_census(db,rawcens,'1996')
+    print '1996 Census data: done!'
 
-    # 1.7 Create Sub-Place aggregates 
-    #dissolve_census(db,'1996','ea')
-    #dissolve_census(db,'2001','sp')
-    #dissolve_census(db,'2011','sp')
-    #print 'Sub-place aggregate tables: done!'
+    # 1.7 Create Sub-Place aggregates for Census
+    dissolve_census(db,'1996','ea')
+    dissolve_census(db,'2001','sp')
+    dissolve_census(db,'2011','sp')
+    print 'Sub-place census aggregate tables: done!'
 
     # 1.8 Create Sub-Place aggregates for BBLU
+    dissolve_BBLU(db,'pre','sp')
+    dissolve_BBLU(db,'post','sp')   
+    print 'Sub-place bblu aggregate tables: done!' 
 
 
     print '\n'," - CENSUS data: done! "'\n'

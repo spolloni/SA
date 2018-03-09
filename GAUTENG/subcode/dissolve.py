@@ -1,5 +1,67 @@
 from pysqlite2 import dbapi2 as sql
 
+def dissolve_BBLU(db,yr,geo):
+
+    if yr=='pre' and geo=='sp':
+        ggeo  = 'sp_code'
+        yyr   = '2001'
+    if yr=='post' and geo=='sp':
+        ggeo = 'SP_CODE'
+        yyr  = '2011'
+
+    drop_qry = '''
+               DROP TABLE IF EXISTS bblu_{}_{};
+               '''.format(yr,geo)
+
+    create_qry = ''' CREATE TABLE bblu_{}_{} AS
+
+                 SELECT B.{} as {}, 
+
+                 /* Formal Housing Count*/
+                 cast(1.00*sum(CASE 
+                    WHEN A.s_lu_code="7.1"
+                        THEN 1
+                        ELSE 0
+                    END) AS FLOAT) as formal_count,
+
+                /* Informal Housing Count*/
+                 cast(1.00*sum(CASE 
+                    WHEN A.s_lu_code="7.2"
+                        THEN 1
+                        ELSE 0
+                    END) AS FLOAT) as informal_count,
+
+                /* Relative Informal Housing */
+                 cast(1.00*sum(CASE 
+                    WHEN A.s_lu_code="7.2"
+                        THEN 1
+                        ELSE 0
+                    END)/sum(CASE 
+                    WHEN A.s_lu_code IN ("7.2","7.1")
+                        THEN 1 
+                        ELSE 0 
+                    END) AS FLOAT) as informal_percent
+
+                 FROM bblu_{} AS A, {}_{} AS B
+                 
+                 WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                         WHERE f_table_name='bblu_{}' AND search_frame=B.GEOMETRY)
+                 
+                 AND st_within(A.GEOMETRY,B.GEOMETRY) 
+                 GROUP BY {}
+                 '''.format(yr,geo,ggeo,ggeo,yr,geo,yyr,yr,ggeo)
+
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    cur.execute(drop_qry)
+    cur.execute(create_qry)
+
+    con.commit()
+    con.close()
+
 def dissolve_census(db,yr,geo):
 
     if yr=='2001' and geo=='sp':
