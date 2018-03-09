@@ -425,3 +425,32 @@ def add_census(db,source,yr):
             con.close()
 
     return
+
+
+def add_gcro(db,source):
+
+    shps = glob.glob(source+'*.shp')
+
+    for shp in shps:
+
+        if 'former' in shp:
+            tablename = 'gcro_townships'
+
+        if 'Public' in shp:
+            tablename = 'gcro_publichousing'
+
+    # create mock table for overwrite
+        con = sql.connect(db)
+        cur = con.cursor()
+        cur.execute('''CREATE TABLE IF NOT EXISTS 
+                {} (mock INT);'''.format(tablename))
+        con.commit()
+        con.close()
+
+        # push shapefile to db
+        cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+               db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+        subprocess.call(' '.join(cmd),shell=True)
+
+
+

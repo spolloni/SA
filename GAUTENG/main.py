@@ -14,8 +14,7 @@ main.py
 from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
-from subcode.data2sql import add_cenGIS, add_census
-from subcode.data2sql import add_cenGIS, add_census
+from subcode.data2sql import add_cenGIS, add_census, add_gcro
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
@@ -34,6 +33,7 @@ rawdeed = project + 'Raw/DEEDS/'
 rawbblu = project + 'Raw/BBLU/'
 rawgis  = project + 'Raw/GIS/'
 rawcens = project + 'Raw/CENSUS/'
+rawgcro = project + 'Raw/GCRO/'
 gendata = project + 'Generated/GAUTENG/'
 outdir  = project + 'Output/GAUTENG/'
 tempdir = gendata + 'temp/'
@@ -51,8 +51,8 @@ workers = int(multiprocessing.cpu_count()-1)
 
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
-_1_c_IMPORT = 1  # import CENSUS
-_1_d_IMPORT = 1  # import CENSUS
+_1_c_IMPORT = 0  # import CENSUS
+_1_d_IMPORT = 0  # import GCRO
 
 
 _2_FLAGRDP_ = 0
@@ -167,6 +167,14 @@ if _1_c_IMPORT ==1:
 
 
     print '\n'," - CENSUS data: done! "'\n'
+
+if _1_d_IMPORT ==1:
+
+    print '\n'," Importing GCRO data into SQL... ",'\n'
+
+    add_gcro(db,rawgcro)
+
+    print '\n'," - GCRO data: done! "'\n'
 
 
 #############################################
