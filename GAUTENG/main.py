@@ -14,7 +14,7 @@ main.py
 from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
-from subcode.data2sql import add_cenGIS, add_census, add_gcro
+from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
@@ -34,6 +34,7 @@ rawbblu = project + 'Raw/BBLU/'
 rawgis  = project + 'Raw/GIS/'
 rawcens = project + 'Raw/CENSUS/'
 rawgcro = project + 'Raw/GCRO/'
+rawland = project + 'Raw/LANDPLOTS/'
 gendata = project + 'Generated/GAUTENG/'
 outdir  = project + 'Output/GAUTENG/'
 tempdir = gendata + 'temp/'
@@ -52,7 +53,7 @@ workers = int(multiprocessing.cpu_count()-1)
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
-_1_d_IMPORT = 0  # import GCRO
+_1_d_IMPORT = 1  # import GCRO + landplots
 
 
 _2_FLAGRDP_ = 0
@@ -165,14 +166,14 @@ if _1_c_IMPORT ==1:
     dissolve_BBLU(db,'post','sp')   
     print 'Sub-place bblu aggregate tables: done!' 
 
-
     print '\n'," - CENSUS data: done! "'\n'
 
 if _1_d_IMPORT ==1:
 
-    print '\n'," Importing GCRO data into SQL... ",'\n'
+    print '\n'," Importing GCRO & Landplots data into SQL... ",'\n'
 
-    add_gcro(db,rawgcro)
+    #add_gcro(db,rawgcro)
+    add_landplot(db,rawland)
 
     print '\n'," - GCRO data: done! "'\n'
 
@@ -190,9 +191,12 @@ if _2_FLAGRDP_ ==1:
     cur.execute(''' DROP TABLE IF EXISTS rdp;''')
     con.commit()
     con.close()
+
     dofile = "subcode/rdp_flag.do"
     cmd = ['stata-mp', 'do', dofile]
     subprocess.call(cmd)
+
+
     con = sql.connect(db)
     cur = con.cursor()
     cur.execute("CREATE INDEX trans_ind_rdp ON rdp (trans_id);")
@@ -250,9 +254,9 @@ if _4_DISTANCE ==1:
     
     # 4.6 calculate distances for non-rdp
     inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
-    targ_centroid = matrx[2][:,:2].astype(np.float)
-    targ_nearest  = matrx[3][:,:2].astype(np.float)
-    targ_conhulls = coords[:,:2].astype(np.float)
+    targ_centroid  = matrx[2][:,:2].astype(np.float)
+    targ_nearest   = matrx[3][:,:2].astype(np.float)
+    targ_conhulls  = coords[:,:2].astype(np.float)
     part_dist_calc = partial(dist_calc,inmat)
     distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
     print '\n'," -- Non-RDP distance calculation: done! "'\n'
@@ -263,7 +267,7 @@ if _4_DISTANCE ==1:
 
     # 4.8 calculate distances for BBLU points
     inmat_post = matrx[5][:,:2].astype(np.float)
-    inmat_pre    = matrx[7][:,:2].astype(np.float)
+    inmat_pre  = matrx[7][:,:2].astype(np.float)
     part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
     distances = pp.map(part_dist_calc,[inmat_post,inmat_pre])
     print '\n'," -- BBLU distance calculation: done! "'\n'

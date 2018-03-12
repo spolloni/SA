@@ -264,6 +264,13 @@ def add_bblu(tmp_dir,database):
              '-nln bblu_post', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute('''CREATE INDEX bblu_post_ind_FID ON bblu_post (OGC_FID);''')
+    cur.execute('''CREATE INDEX bblu_post_ind_SLU ON bblu_post (s_lu_code);''')
+    con.commit()
+    con.close()
+
     # push BBLU pre-period to db
     con = sql.connect(database)
     cur = con.cursor()
@@ -275,6 +282,13 @@ def add_bblu(tmp_dir,database):
             database, tmp_dir+'pre.shp','-nlt POINT',
              '-nln bblu_pre', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
+
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute('''CREATE INDEX bblu_pre_ind_FID ON bblu_pre (OGC_FID);''')
+    cur.execute('''CREATE INDEX bblu_pre_ind_SLU ON bblu_pre (s_lu_code);''')
+    con.commit()
+    con.close()
 
     return
 
@@ -439,7 +453,7 @@ def add_gcro(db,source):
         if 'Public' in shp:
             tablename = 'gcro_publichousing'
 
-    # create mock table for overwrite
+        # create mock table for overwrite
         con = sql.connect(db)
         cur = con.cursor()
         cur.execute('''CREATE TABLE IF NOT EXISTS 
@@ -451,6 +465,67 @@ def add_gcro(db,source):
         cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
                db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
         subprocess.call(' '.join(cmd),shell=True)
+
+    return
+
+
+def add_landplot(db,source):
+
+    shp = glob.glob(source+'*.shp')[0]
+
+    tablename = 'landplots'
+
+    # create mock table for overwrite
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            {} (mock INT);'''.format(tablename))
+    con.commit()
+    con.close()
+
+    print 'mobing on sayonara'
+
+    # push shapefile to db
+    cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+           db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    qry =   '''
+            CREATE TABLE testerino_mofo AS 
+            SELECT A.OGC_FID, A.S_LU_CODE, B.id, B.GEOMETRY
+            FROM bblu_pre AS A, landplots AS B
+            WHERE A.S_LU_CODE='7.1'
+            AND A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_pre' AND search_frame=B.GEOMETRY)
+            AND st_within(A.GEOMETRY,B.GEOMETRY);
+            '''
+
+    qry1 =  '''
+            CREATE TABLE temp_subBBLU AS 
+            SELECT A.OGC_FID, A.S_LU_CODE, A.GEOMETRY
+            FROM bblu_pre AS A
+            WHERE A.S_LU_CODE='7.1';
+            '''
+
+    qry2 =   '''
+            CREATE TABLE temp_subPLOTS AS 
+            SELECT A.GEOMETRY, A.OGC_FID, A.ID
+            FROM landplots AS A, temp_subBBLU AS B
+            WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='landplots' AND search_frame=B.GEOMETRY)
+            AND st_intersects(A.GEOMETRY,B.GEOMETRY);
+            '''
+
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+    cur.execute(qry1)
+    cur.execute(qry2)
+    con.commit()
+    con.close()
+    
+
 
 
 
