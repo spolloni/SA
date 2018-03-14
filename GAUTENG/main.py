@@ -55,7 +55,6 @@ _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
 _1_d_IMPORT = 1  # import GCRO + landplots
 
-
 _2_FLAGRDP_ = 0
 
 _3_CLUSTER_ = 0 
@@ -172,8 +171,11 @@ if _1_d_IMPORT ==1:
 
     print '\n'," Importing GCRO & Landplots data into SQL... ",'\n'
 
-    #add_gcro(db,rawgcro)
-    add_landplot(db,rawland)
+    add_gcro(db,rawgcro)
+    print 'GCRO data: done!' 
+
+    #add_landplot(db,rawland)
+    #print 'Landplots data: done!' 
 
     print '\n'," - GCRO data: done! "'\n'
 
