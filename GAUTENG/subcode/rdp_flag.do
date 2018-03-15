@@ -5,7 +5,8 @@ set more off
 local qry = "
 	SELECT A.property_id, A.purch_yr, A.purch_mo, A.purch_day,
 		    A.seller_name, A.buyer_name, A.purch_price,
-	       A.trans_id, B.erf_size, A.munic_name
+	       A.trans_id, B.erf_size, A.munic_name, 
+          B.gcro_publichousing_dist, B.gcro_townships_dist, B.bblu_pre
 	FROM transactions AS A
 	INNER JOIN erven AS B
 	  ON A.property_id = B.property_id
@@ -81,49 +82,45 @@ destring trans_num, replace;
 
 * find gov sellers & buyers;
 gengov;
-gengov buyer;
+*gengov buyer;
 
 * find big sellers and "no seller" likely rdp;
-gen toobig = (erf_size  > 500);
-bys seller_name toobig munic_name purch_yr purch_mo: gen  n  = _n;
-bys seller_name toobig munic_name purch_yr purch_mo: egen nn = max(n);
-sum nn if seller_name == "" & n==nn & toobig==0, detail;
-local tresh = `r(p90)';
-gen no_seller_rdp = (nn > `tresh' & seller_name == "" & toobig==0 );
-sum nn if seller_name != "" & gov!=1 & n==nn & toobig==0, detail;
-local tresh = `r(mean)' + 10*`r(sd)';
-gen big_seller_rdp = (nn > `tresh' & seller_name != "" & gov!=1 & toobig==0 );
-drop n nn toobig;
+bys seller_name munic_name purch_yr purch_mo purch_day: gen  n  = _n;
+bys seller_name munic_name purch_yr purch_mo purch_day: egen nn = max(n);
+sum nn if seller_name == "" & n==nn, detail;
+local tresh = `r(p95)';
+gen no_seller_rdp = (nn > `tresh' & seller_name == "");
+sum nn if seller_name != "" & gov!=1 & n==nn, detail;
+local tresh = `r(mean)' + 5*`r(sd)';
+gen big_seller_rdp = (nn > `tresh' & seller_name != "" & gov!=1);
+drop n nn;
 
-pause on;
-pause;
+* indicate RDP (multiple definitions);
+gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
+replace rdp = 0 if bblu_pre==1;
+price_filter "replace rdp = 0";
+gen rdp_all        = rdp;
+gen rdp_gcroonly   = (rdp==1 & gcro_publichousing_dist == 0);
+gen rdp_notownship = (rdp==1 & gcro_townships_dist > 0);
+gen rdp_phtownship = (rdp==1 & (gcro_townships_dist > 0 |(gcro_townships_dist == 0 & gcro_publichousing_dist == 0)));
+gen rdp_all_small        = (rdp_all ==1 & erf_size <=500);
+gen rdp_gcroonly_small   = (rdp_gcroonly ==1 & erf_size <=500);
+gen rdp_notownship_small = (rdp_notownship ==1 & erf_size <=500);
+gen rdp_phtownship_small = (rdp_phtownship ==1 & erf_size <=500);
 
-* indicate RDP;
-sort property_id purch_yr purch_mo purch_day;
-by property_id: gen n = _n;
-by property_id: gen N = _N;
-by property_id: egen minpurchyr = min(purch_yr);
-gen rdp_ls = 0;
-foreach lev of local levels {;
-        replace rdp_ls=1 if seller_name== "`lev'" & n==1;
+* RDP is property concept (not a transaction concept);
+keep property_id *rdp* gov;
+ds *rdp* gov;
+foreach var in `r(varlist)' {;
+   bys property_id: egen maxvar = max(`var');
+   replace `var' = maxvar;
+   drop maxvar;
 };
-price_filter "replace rdp_ls = 0";
-replace rdp_ls = 0 if purch_price > 600000 & n == N;
-*replace rdp_ls = 1 if no_seller_rdp ==1;
-replace rdp_ls = 0 if erf_size  > 500;
-bys property_id: egen ever_rdp_ls = max(rdp_ls);
-keep if minpurchyr>2001 & minpurchyr<2012;
-
-*********************;
-* First-pass Method *;
-*********************;
-gen rdp_fp = gov;
-by property_id: egen ever_rdp_fp = max(rdp_fp);
+duplicates drop property_id, force;
 
 ************************;
 * close and push to DB *;
 ************************;
-keep trans_id *rdp* gov;
 odbc exec("DROP TABLE IF EXISTS rdp;"), dsn("gauteng");
 odbc insert, table("rdp") create;
 exit, STATA clear;  

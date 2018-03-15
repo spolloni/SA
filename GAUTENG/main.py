@@ -53,9 +53,9 @@ workers = int(multiprocessing.cpu_count()-1)
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
-_1_d_IMPORT = 1  # import GCRO + landplots
+_1_d_IMPORT = 0  # import GCRO + landplots
 
-_2_FLAGRDP_ = 0
+_2_FLAGRDP_ = 1
 
 _3_CLUSTER_ = 0 
 rdp  = 'ls'      # fp='first-pass', ls=lighstone for rdp
@@ -174,8 +174,8 @@ if _1_d_IMPORT ==1:
     add_gcro(db,rawgcro)
     print 'GCRO data: done!' 
 
-    #add_landplot(db,rawland)
-    #print 'Landplots data: done!' 
+    add_landplot(db,rawland)
+    print 'Landplots data: done!' 
 
     print '\n'," - GCRO data: done! "'\n'
 
@@ -188,12 +188,6 @@ if _2_FLAGRDP_ ==1:
 
     print '\n'," Identifying sample and RDP properties... ",'\n'
 
-    con = sql.connect(db)
-    cur = con.cursor()
-    cur.execute(''' DROP TABLE IF EXISTS rdp;''')
-    con.commit()
-    con.close()
-
     dofile = "subcode/rdp_flag.do"
     cmd = ['stata-mp', 'do', dofile]
     subprocess.call(cmd)
@@ -201,7 +195,8 @@ if _2_FLAGRDP_ ==1:
 
     con = sql.connect(db)
     cur = con.cursor()
-    cur.execute("CREATE INDEX trans_ind_rdp ON rdp (trans_id);")
+    #cur.execute("CREATE INDEX trans_ind_rdp ON rdp (trans_id);")
+    cur.execute("CREATE INDEX prop_ind_rdp ON rdp (property_id);")
     con.commit()
     con.close()
 

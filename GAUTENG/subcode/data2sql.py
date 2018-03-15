@@ -480,101 +480,39 @@ def add_gcro(db,source):
                WHERE A.urbanclass LIKE 'Old township' 
                '''
 
-    # table of erven centroids in polygons
-    qry_erv1 = '''
-               CREATE TABLE temp_erven_publichous AS 
-               SELECT DISTINCT A.property_id, '1' AS gcro_publichousing
-               FROM erven AS A, temp_publichous AS B
-               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
-               WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
-               AND st_intersects(A.GEOMETRY,B.GEOMETRY);
-               '''
-    qry_ind1 = '''
-               CREATE INDEX property_id_temp1 ON temp_erven_publichous (property_id);
-               '''
-    qry_erv2 = '''
-               CREATE TABLE temp_erven_townships AS 
-               SELECT DISTINCT A.property_id, '1' AS gcro_townships
-               FROM erven AS A, temp_townships AS B
-               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
-               WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
-               AND st_intersects(A.GEOMETRY,B.GEOMETRY);
-               '''
-    qry_ind2 = '''
-               CREATE INDEX property_id_temp2 ON temp_erven_townships (property_id);
-               '''
-
-    # table of erven distance to polygons
+    # table of erven distance to gcro polygons
     qry_dis1 = '''
                CREATE TABLE temp_erven_publichous_dist AS 
                SELECT DISTINCT A.property_id, st_distance(A.GEOMETRY,B.GEOMETRY) AS dist
-               FROM erven AS A, temp_publichous AS B
-               LIMIT 1000;
+               FROM erven AS A, temp_publichous AS B;
                '''
-    qry_ind3 = '''
-               CREATE INDEX property_id_temp1d ON temp_erven_publichous_dist (property_id);
+    qry_ind1 = '''
+               CREATE INDEX property_id_temp1 ON temp_erven_publichous_dist (property_id);
                '''
     qry_dis2 = '''
                CREATE TABLE temp_erven_townships_dist AS 
                SELECT DISTINCT A.property_id, st_distance(A.GEOMETRY,B.GEOMETRY) AS dist
-               FROM erven AS A, temp_townships AS B
-               LIMIT 1000;
+               FROM erven AS A, temp_townships AS B;
                '''
-    qry_ind4 = '''
-               CREATE INDEX property_id_temp2d ON temp_erven_townships_dist (property_id);
+    qry_ind2 = '''
+               CREATE INDEX property_id_temp2 ON temp_erven_townships_dist (property_id);
                '''
 
     # add information into erven table
     qry_alt1 = '''
-               ALTER TABLE erven ADD COLUMN gcro_publichousing INT;
+               ALTER TABLE erven ADD COLUMN gcro_publichousing_dist numeric(10,10);
                '''
     qry_upd1 = '''
-               UPDATE erven 
-               SET gcro_publichousing = (SELECT
-               temp_erven_publichous.gcro_publichousing
-               FROM temp_erven_publichous
-               WHERE erven.property_id = temp_erven_publichous.property_id );
-               '''
-    qry_upd2 = '''
-               UPDATE erven 
-               SET gcro_publichousing = (CASE 
-                   WHEN gcro_publichousing IS NULL
-                       THEN 0
-                       ELSE gcro_publichousing
-                   END);
-               '''
-    qry_alt2 = '''
-               ALTER TABLE erven ADD COLUMN gcro_townships INT;
-               '''
-    qry_upd3 = '''
-               UPDATE erven 
-               SET gcro_townships = (SELECT
-               temp_erven_townships.gcro_townships
-               FROM temp_erven_townships
-               WHERE erven.property_id = temp_erven_townships.property_id );
-               '''
-    qry_upd4 = '''
-               UPDATE erven 
-               SET gcro_townships = (CASE 
-                   WHEN gcro_townships IS NULL
-                       THEN 0
-                       ELSE gcro_townships
-                   END);
-               '''
-    qry_alt3 = '''
-               ALTER TABLE erven ADD COLUMN gcro_publichousing_dist INT;
-               '''
-    qry_upd5 = '''
                UPDATE erven 
                SET gcro_publichousing_dist = (SELECT
                temp_erven_publichous_dist.dist
                FROM temp_erven_publichous_dist
                WHERE erven.property_id = temp_erven_publichous_dist.property_id );
                '''
-    qry_alt4 = '''
-               ALTER TABLE erven ADD COLUMN gcro_townships_dist INT;
+    qry_alt2 = '''
+               ALTER TABLE erven ADD COLUMN gcro_townships_dist numeric(10,10);
                '''
-    qry_upd6 = '''
+    qry_upd2 = '''
                UPDATE erven 
                SET gcro_townships_dist = (SELECT
                temp_erven_townships_dist.dist
@@ -590,15 +528,9 @@ def add_gcro(db,source):
                DROP TABLE IF EXISTS temp_townships;
                '''
     qry_drp3 = '''
-               DROP TABLE IF EXISTS temp_erven_publichous;
-               '''
-    qry_drp4 = '''
-               DROP TABLE IF EXISTS temp_erven_townships;
-               '''
-    qry_drp5 = '''
                DROP TABLE IF EXISTS temp_erven_publichous_dist;
                '''
-    qry_drp6 = '''
+    qry_drp4 = '''
                DROP TABLE IF EXISTS temp_erven_townships_dist;
                '''
 
@@ -606,32 +538,20 @@ def add_gcro(db,source):
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
-    #cur.execute(qry_pubh)
-    #cur.execute(qry_oldt)
-    #cur.execute(qry_erv1) 
-    #cur.execute(qry_erv2)
+    cur.execute(qry_pubh)
+    cur.execute(qry_oldt)
     cur.execute(qry_dis1) 
     cur.execute(qry_dis2)
-    #cur.execute(qry_ind1)
-    #cur.execute(qry_ind2)
-    cur.execute(qry_ind3)
-    cur.execute(qry_ind4)
-    #cur.execute(qry_alt1)
-    #cur.execute(qry_alt2)
-    cur.execute(qry_alt3)
-    cur.execute(qry_alt4)
-    #cur.execute(qry_upd1)
-    #cur.execute(qry_upd2)
-    #cur.execute(qry_upd3)
-    #cur.execute(qry_upd4)
-    cur.execute(qry_upd5)
-    cur.execute(qry_upd6)
-    #cur.execute(qry_drp1)
-    #cur.execute(qry_drp2)
-    #cur.execute(qry_drp3)
-    #cur.execute(qry_drp4)
-    #cur.execute(qry_drp5)
-    #cur.execute(qry_drp6)
+    cur.execute(qry_ind1)
+    cur.execute(qry_ind2)
+    cur.execute(qry_alt1)
+    cur.execute(qry_alt2)
+    cur.execute(qry_upd1)
+    cur.execute(qry_upd2)
+    cur.execute(qry_drp1)
+    cur.execute(qry_drp2)
+    cur.execute(qry_drp3)
+    cur.execute(qry_drp4)
     con.commit()
     con.close()
 
