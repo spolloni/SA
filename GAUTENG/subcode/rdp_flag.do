@@ -4,8 +4,8 @@ set more off
 
 local qry = "
 	SELECT A.property_id, A.purch_yr, A.purch_mo, A.purch_day,
-		    A.seller_name, A.buyer_name, A.purch_price,
-	       A.trans_id, B.erf_size, A.munic_name, 
+		    A.seller_name, A.buyer_name, A.purch_price, A.trans_id, 
+          B.erf_size, A.munic_name, B.prob_residential, B.prob_res_small,
           B.gcro_publichousing_dist, B.gcro_townships_dist, B.bblu_pre
 	FROM transactions AS A
 	INNER JOIN erven AS B
@@ -71,10 +71,9 @@ end;
 odbc query "gauteng";
 odbc load, exec("`qry'");
 
-********************;
-* Lighstone Method *;
-********************;
 
+* Intialize stuff;
+drop if prob_residential == "RES NO";
 destring  purch_yr purch_mo purch_day, replace;
 sort property_id purch_yr purch_mo purch_day;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
@@ -98,15 +97,12 @@ drop n nn;
 * indicate RDP (multiple definitions);
 gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
 replace rdp = 0 if bblu_pre==1;
+replace rdp = 0 if prob_res_small =="RES YES AND LARGE";
 price_filter "replace rdp = 0";
 gen rdp_all        = rdp;
 gen rdp_gcroonly   = (rdp==1 & gcro_publichousing_dist == 0);
 gen rdp_notownship = (rdp==1 & gcro_townships_dist > 0);
 gen rdp_phtownship = (rdp==1 & (gcro_townships_dist > 0 |(gcro_townships_dist == 0 & gcro_publichousing_dist == 0)));
-gen rdp_all_small        = (rdp_all ==1 & erf_size <=500);
-gen rdp_gcroonly_small   = (rdp_gcroonly ==1 & erf_size <=500);
-gen rdp_notownship_small = (rdp_notownship ==1 & erf_size <=500);
-gen rdp_phtownship_small = (rdp_phtownship ==1 & erf_size <=500);
 
 * RDP is property concept (not a transaction concept);
 keep property_id *rdp* gov;
@@ -124,3 +120,4 @@ duplicates drop property_id, force;
 odbc exec("DROP TABLE IF EXISTS rdp;"), dsn("gauteng");
 odbc insert, table("rdp") create;
 exit, STATA clear;  
+

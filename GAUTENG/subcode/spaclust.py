@@ -27,11 +27,11 @@ def spatial_cluster(algo,par1,par2,database,suf):
     cur = con.cursor()
 
     qry =   '''
-            SELECT A.trans_id, A.purch_yr, C.latitude, C.longitude
+            SELECT A.trans_id, A.purch_yr, B.latitude, B.longitude
             FROM transactions AS A
-                JOIN rdp      AS B ON A.trans_id = B.trans_id
-                JOIN erven    AS C ON A.property_id = C.property_id
-            WHERE B.rdp_{}=1;
+                JOIN erven    AS B ON A.property_id = B.property_id
+                JOIN rdp      AS C ON B.property_id = C.property_id
+            WHERE C.rdp_{}=1;
             '''.format(suf)
 
     # clear table and query

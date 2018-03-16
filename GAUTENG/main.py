@@ -15,6 +15,7 @@ from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
+from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.distfuns import selfintersect, merge_n_push, concavehull
 from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
@@ -55,13 +56,13 @@ _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
 _1_d_IMPORT = 0  # import GCRO + landplots
 
-_2_FLAGRDP_ = 1
+_2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 0 
-rdp  = 'ls'      # fp='first-pass', ls=lighstone for rdp
-algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM
-par1 = 0.002     # Parameter setting #1 for Clustering                          
-par2 = 10        # Parameter setting #2 for Clustering 
+_3_CLUSTER_ = 1 
+rdp  = 'all'     # Choose rdp definition. 
+algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
+par1 = 0.002     # Parameter setting #1 for Clustering  #0.002                        
+par2 = 10        # Parameter setting #2 for Clustering  #10
 
 _4_DISTANCE = 0
 
@@ -210,7 +211,7 @@ if _3_CLUSTER_ ==1:
 
     print '\n'," Clustering RDP properties... ",'\n'
 
-    spatial_cluster(algo,par1,par2,db,'ls')
+    spatial_cluster(algo,par1,par2,db,rdp)
 
     print '\n'," -- clustering RDP: done! "'\n'
 
