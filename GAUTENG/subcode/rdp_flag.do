@@ -5,6 +5,7 @@ set more off
 local qry = "
 	SELECT A.property_id, A.purch_yr, A.purch_mo, A.purch_day,
 		    A.seller_name, A.buyer_name, A.purch_price, A.trans_id, 
+          A.owner_type, A.prevowner_type,
           B.erf_size, A.munic_name, B.prob_residential, B.prob_res_small,
           B.gcro_publichousing_dist, B.gcro_townships_dist, B.bblu_pre
 	FROM transactions AS A
@@ -105,19 +106,33 @@ gen rdp_notownship = (rdp==1 & gcro_townships_dist > 0);
 gen rdp_phtownship = (rdp==1 & (gcro_townships_dist > 0 |(gcro_townships_dist == 0 & gcro_publichousing_dist == 0)));
 
 * RDP is property concept (not a transaction concept);
-keep property_id *rdp* gov;
 ds *rdp* gov;
 foreach var in `r(varlist)' {;
    bys property_id: egen maxvar = max(`var');
    replace `var' = maxvar;
    drop maxvar;
 };
-duplicates drop property_id, force;
+
+* sort which transaction within property was actual construction;
+duplicates drop property_id if rdp_all==0, force;
+bys property_id: gen normal = _n if owner_type=="NORMAL OWNER";
+replace normal=99 if normal == .;
+bys property_id: egen minnormal = min(normal);
+keep if normal == minnormal;
+bys property_id: gen n   = _n;
+bys property_id: egen nn = max(n);
+drop if n>1 & nn>1;
+
+*keep necessary vars;
+keep property_id trans_id *rdp* gov;
+drop rdp;
 
 ************************;
 * close and push to DB *;
 ************************;
 odbc exec("DROP TABLE IF EXISTS rdp;"), dsn("gauteng");
 odbc insert, table("rdp") create;
+odbc exec("CREATE INDEX trans_ind_rdp ON rdp (trans_id);"), dsn("gauteng");
+odbc exec("CREATE INDEX prop_ind_rdp ON rdp (property_id);"), dsn("gauteng");
 exit, STATA clear;  
 

@@ -58,14 +58,15 @@ _1_d_IMPORT = 0  # import GCRO + landplots
 
 _2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 1 
+_3_CLUSTER_ = 0 
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
-par1 = 0.002     # Parameter setting #1 for Clustering  #0.002                        
-par2 = 10        # Parameter setting #2 for Clustering  #10
+par1 = 750       # Parameter setting #1 for Clustering  #0.002                        
+par2 = 77        # Parameter setting #2 for Clustering  #10
 
-_4_DISTANCE = 0
-
+_4_DISTANCE = 1
+fr1 = 50         # percent constructed in mode year
+fr2 = 70         # percent constructed +-1 mode year
 bw  = 600        # bandwidth for clusters
 sig = 2.5        # sigma factor for concave hulls
 
@@ -74,8 +75,6 @@ _5_b_PLOTS_ = 0
 _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
 typ = 'conhulls' # distance to nearest or centroid
-fr1 = 50         # percent constructed on mode year
-fr2 = 70         # percent constructed +-1 mode year
 top = 99         # per cluster outlier remover (top)
 bot = 1          # per cluster outlier remover (bottom)
 mcl = 50         # minimum cluster size to keep
@@ -193,14 +192,6 @@ if _2_FLAGRDP_ ==1:
     cmd = ['stata-mp', 'do', dofile]
     subprocess.call(cmd)
 
-
-    con = sql.connect(db)
-    cur = con.cursor()
-    #cur.execute("CREATE INDEX trans_ind_rdp ON rdp (trans_id);")
-    cur.execute("CREATE INDEX prop_ind_rdp ON rdp (property_id);")
-    con.commit()
-    con.close()
-
     print '\n'," -- RDP flagging: done! ",'\n'
 
 #############################################
@@ -228,51 +219,51 @@ if _4_DISTANCE ==1:
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
 
-    # 4.1 buffers and self-interesctions
-    selfintersect(db,tempdir,bw,rdp,algo,par1,par2)
-    print '\n'," -- Self-Intersections: done! "'\n'
-
-    # 4.2 make concave hulls
+    # 4.1 make concave hulls
     grids = glob.glob(rawgis+'grid_7*')
     for grid in grids: shutil.copy(grid, tempdir)
-    concavehull(db,tempdir,sig,rdp,algo,par1,par2)
+    concavehull(db,tempdir,sig,rdp,algo,par1,par2,fr1,fr2)
     print '\n'," -- Concave Hulls: done! "'\n'
 
-    # 4.3 merge buffers & hulls, then push to DB 
-    merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
-    print '\n'," -- Merge and Push Back: done! "'\n'
-
-    # 4.4 assemble coordinates for hull edges
-    coords = comb_coordinates(tempdir).as_matrix()
-    print '\n'," -- Assemble hull coordinates: done! "'\n'
-    # 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
-    part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
-    matrx = pp.map(part_fetch_data,range(8,0,-1))
-    print '\n'," -- Data fetch: done! "'\n'
-    
-    # 4.6 calculate distances for non-rdp
-    inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
-    targ_centroid  = matrx[2][:,:2].astype(np.float)
-    targ_nearest   = matrx[3][:,:2].astype(np.float)
-    targ_conhulls  = coords[:,:2].astype(np.float)
-    part_dist_calc = partial(dist_calc,inmat)
-    distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
-    print '\n'," -- Non-RDP distance calculation: done! "'\n'
-
-    # 4.7 retrieve IDs, populate table and push back to DB
-    push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
-    print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
-
-    # 4.8 calculate distances for BBLU points
-    inmat_post = matrx[5][:,:2].astype(np.float)
-    inmat_pre  = matrx[7][:,:2].astype(np.float)
-    part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
-    distances = pp.map(part_dist_calc,[inmat_post,inmat_pre])
-    print '\n'," -- BBLU distance calculation: done! "'\n'
-
-    # 4.9 retrieve IDs, populate table and push back to DB
-    push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
-    print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
+    ## 4.2 buffers and self-intersections
+    #selfintersect(db,tempdir,bw,rdp,algo,par1,par2)
+    #print '\n'," -- Self-Intersections: done! "'\n'
+#
+    ## 4.3 merge buffers & hulls, then push to DB 
+    #merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
+    #print '\n'," -- Merge and Push Back: done! "'\n'
+#
+    ## 4.4 assemble coordinates for hull edges
+    #coords = comb_coordinates(tempdir).as_matrix()
+    #print '\n'," -- Assemble hull coordinates: done! "'\n'
+    ## 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
+    #part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
+    #matrx = pp.map(part_fetch_data,range(8,0,-1))
+    #print '\n'," -- Data fetch: done! "'\n'
+    #
+    ## 4.6 calculate distances for non-rdp
+    #inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
+    #targ_centroid  = matrx[2][:,:2].astype(np.float)
+    #targ_nearest   = matrx[3][:,:2].astype(np.float)
+    #targ_conhulls  = coords[:,:2].astype(np.float)
+    #part_dist_calc = partial(dist_calc,inmat)
+    #distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
+    #print '\n'," -- Non-RDP distance calculation: done! "'\n'
+#
+    ## 4.7 retrieve IDs, populate table and push back to DB
+    #push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
+    #print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
+#
+    ## 4.8 calculate distances for BBLU points
+    #inmat_post = matrx[5][:,:2].astype(np.float)
+    #inmat_pre  = matrx[7][:,:2].astype(np.float)
+    #part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
+    #distances = pp.map(part_dist_calc,[inmat_post,inmat_pre])
+    #print '\n'," -- BBLU distance calculation: done! "'\n'
+#
+    ## 4.9 retrieve IDs, populate table and push back to DB
+    #push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
+    #print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
 
     # 4.10 kill parallel workers
     pp.close()

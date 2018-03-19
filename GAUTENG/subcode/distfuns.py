@@ -30,6 +30,67 @@ def gp2shp(db,qrys,geocol,out,espg):
     return
 
 
+def concavehull(db,dir,sig,rdp,algo,par1,par2,fr1,fr2):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+
+    drop_qry = '''
+               DROP TABLE IF EXISTS rdp_conhulls;
+               '''
+
+    make_qry = '''
+               CREATE TABLE rdp_conhulls AS 
+               SELECT CastToMultiPolygon(ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(A.GEOMETRY),{}),20)))
+                AS GEOMETRY, B.cluster as cluster
+               FROM erven AS A
+               JOIN rdp_clusters AS B ON A.property_id = B.property_id
+               WHERE B.cluster !=0
+               GROUP BY cluster;
+               '''.format(sig)
+    
+    # create hulls table
+    cur.execute(drop_qry)
+    cur.execute(make_qry)
+    cur.execute("SELECT RecoverGeometryColumn('rdp_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
+    cur.execute("SELECT CreateSpatialIndex('rdp_conhulls','GEOMETRY');")
+
+    con.commit()
+    con.close()
+
+    qry  = "SELECT * FROM rdp_conhulls"
+    out1 = dir+'hull.shp'
+    out2 = dir+'edgehull.shp'
+    out3 = dir+'splitedgehull.shp'
+    out4 = dir+'coordshull.csv'
+    grid = dir+'grid_7.shp'
+
+    # fetch concave hulls
+    if os.path.exists(out1): os.remove(out1)
+    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # convert hulls to lines (edges)
+    cmd = ['saga_cmd shapes_lines 0 -POLYGONS', out1,'-LINES', out2]
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # split edges into many vertices  
+    cmd = ['saga_cmd shapes_lines 6 -LINES', out2, '-SPLIT', grid,
+            '-INTERSECT', out3, '-OUTPUT', '1']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # export vertices to csv
+    if os.path.exists(out4): os.remove(out4)
+    cmd = ['ogr2ogr -f "CSV"', out4, out3, '-lco GEOMETRY=AS_WKT']
+    subprocess.call(' '.join(cmd),shell=True)
+    
+    return
+
+
 def selfintersect(db,dir,bw,rdp,algo,par1,par2):
 
     spar1 = re.sub("[^0-9]", "", str(par1))
@@ -57,48 +118,6 @@ def selfintersect(db,dir,bw,rdp,algo,par1,par2):
            '-ID cluster -INTERSECT', out2]
     subprocess.call(' '.join(cmd),shell=True)
 
-    return
-
-
-def concavehull(db,dir,sig,rdp,algo,par1,par2):
-
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-
-    qry ='''
-        SELECT ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(B.GEOMETRY),{}),20)), 
-        C.cluster, A.prov_code
-        FROM transactions AS A
-        JOIN erven AS B ON A.property_id = B.property_id
-        JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
-        WHERE C.cluster !=0
-        GROUP BY cluster
-        '''.format(sig,rdp,algo,spar1,spar2)
-    out1 = dir+'hull.shp'
-    out2 = dir+'edgehull.shp'
-    out3 = dir+'splitedgehull.shp'
-    out4 = dir+'coordshull.csv'
-    grid = dir+'grid_7.shp'
-
-    # fetch concave hulls
-    if os.path.exists(out1): os.remove(out1)
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # convert hulls to lines (edges)
-    cmd = ['saga_cmd shapes_lines 0 -POLYGONS', out1,'-LINES', out2]
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # split edges into many vertices  
-    cmd = ['saga_cmd shapes_lines 6 -LINES', out2, '-SPLIT', grid,
-            '-INTERSECT', out3, '-OUTPUT', '1']
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # export vertices to csv
-    if os.path.exists(out4): os.remove(out4)
-    cmd = ['ogr2ogr -f "CSV"', out4, out3, '-lco GEOMETRY=AS_WKT']
-    subprocess.call(' '.join(cmd),shell=True)
-    
     return
 
 
