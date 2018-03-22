@@ -264,9 +264,19 @@ def add_bblu(tmp_dir,database):
              '-nln bblu_post', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
+    qry_alt1 = '''
+               ALTER TABLE bblu_post ADD COLUMN STR_FID VARCHAR(11);
+               '''
+    qry_upd1 = '''
+               UPDATE bblu_post SET STR_FID = "post_" || OGC_FID;
+               '''
+
     con = sql.connect(database)
     cur = con.cursor()
-    cur.execute('''CREATE INDEX bblu_post_ind_FID ON bblu_post (OGC_FID);''')
+    cur.execute(qry_alt1)
+    cur.execute(qry_upd1)
+    cur.execute('''CREATE INDEX bblu_post_ind_OGCFID ON bblu_post (OGC_FID);''')
+    cur.execute('''CREATE INDEX bblu_post_ind_STRFID ON bblu_post (STR_FID);''')
     cur.execute('''CREATE INDEX bblu_post_ind_SLU ON bblu_post (s_lu_code);''')
     con.commit()
     con.close()
@@ -283,9 +293,19 @@ def add_bblu(tmp_dir,database):
              '-nln bblu_pre', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
+    qry_alt1 = '''
+               ALTER TABLE bblu_pre ADD COLUMN STR_FID VARCHAR(11);
+               '''
+    qry_upd1 = '''
+               UPDATE bblu_pre SET STR_FID = "pre_" || OGC_FID;
+               '''
+
     con = sql.connect(database)
     cur = con.cursor()
-    cur.execute('''CREATE INDEX bblu_pre_ind_FID ON bblu_pre (OGC_FID);''')
+    cur.execute(qry_alt1)
+    cur.execute(qry_upd1)
+    cur.execute('''CREATE INDEX bblu_pre_ind_OGCFID ON bblu_pre (OGC_FID);''')
+    cur.execute('''CREATE INDEX bblu_pre_ind_STRFID ON bblu_pre (STR_FID);''')
     cur.execute('''CREATE INDEX bblu_pre_ind_SLU ON bblu_pre (s_lu_code);''')
     con.commit()
     con.close()

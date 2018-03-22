@@ -3,9 +3,9 @@ main.py
 
     created by: sp, oct 9 2017
     
-    - _1_IMPORT__: import lightstone & BBLU data into DB.
+    - _1_IMPORT__: import all raw data into DB.
     - _2_FLAGRDP_: select sample and flag RDP.
-    - _3_CLUSTER_: assign RPP to spatial cluster.
+    - _3_CLUSTER_: assign RDP to spatial cluster.
     - _4_DISTANCE: find distance and cluster ID for non-RDP.
     - _5_PLOTS___: make house-price gradient plots/ regs.
 
@@ -17,12 +17,12 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.distfuns import selfintersect, merge_n_push, concavehull
-from subcode.distfuns import fetch_data, dist_calc, comb_coordinates
+from subcode.distfuns import selfintersect, concavehull
+from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
-import numpy as np
+import numpy  as np
 import pandas as pd
 
 #################
@@ -58,22 +58,23 @@ _1_d_IMPORT = 0  # import GCRO + landplots
 
 _2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 0 
+_3_CLUSTER_ = 1 
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
-par1 = 750       # Parameter setting #1 for Clustering  #0.002                        
-par2 = 77        # Parameter setting #2 for Clustering  #10
+par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
+par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_DISTANCE = 1
-fr1 = 50         # percent constructed in mode year
-fr2 = 70         # percent constructed +-1 mode year
-bw  = 600        # bandwidth for clusters
-sig = 2.5        # sigma factor for concave hulls
+_4_a_DISTS_ = 1
+_4_b_DISTS_ = 0
+bw  = 1200        # bandwidth for clusters
+sig = 3          # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
 _5_b_PLOTS_ = 0
 _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
+fr1 = 50         # percent constructed in mode year
+fr2 = 70         # percent constructed +-1 mode year
 typ = 'conhulls' # distance to nearest or centroid
 top = 99         # per cluster outlier remover (top)
 bot = 1          # per cluster outlier remover (bottom)
@@ -210,62 +211,58 @@ if _3_CLUSTER_ ==1:
 # STEP 4:  Distance to RDP for non-RDP      #
 #############################################
 
-if _4_DISTANCE ==1:
+if _4_a_DISTS_ ==1:
 
     print '\n'," Calculating distances to RDP... ",'\n'
+
+    # 4.1 make concave hulls
+    concavehull(db,tempdir,sig)
+    print '\n'," -- Concave Hulls: done! "'\n'
+
+    # 4.2 buffers and self-intersections
+    selfintersect(db,tempdir,bw)
+    print '\n'," -- Self-Intersections: done! "'\n'
+
+if _4_b_DISTS_ ==1:
 
     # 4.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
 
-    # 4.1 make concave hulls
+    # 4.3 assemble coordinates for hull edges
     grids = glob.glob(rawgis+'grid_7*')
     for grid in grids: shutil.copy(grid, tempdir)
-    concavehull(db,tempdir,sig,rdp,algo,par1,par2,fr1,fr2)
-    print '\n'," -- Concave Hulls: done! "'\n'
+    coords = hulls_coordinates(db,tempdir).as_matrix()
+    print '\n'," -- Assemble hull coordinates: done! "'\n'
 
-    ## 4.2 buffers and self-intersections
-    #selfintersect(db,tempdir,bw,rdp,algo,par1,par2)
-    #print '\n'," -- Self-Intersections: done! "'\n'
-#
-    ## 4.3 merge buffers & hulls, then push to DB 
-    #merge_n_push(db,tempdir,bw,sig,rdp,algo,par1,par2)
-    #print '\n'," -- Merge and Push Back: done! "'\n'
-#
-    ## 4.4 assemble coordinates for hull edges
-    #coords = comb_coordinates(tempdir).as_matrix()
-    #print '\n'," -- Assemble hull coordinates: done! "'\n'
-    ## 4.5 fetch BBLU, rdp, rdp centroids, & non-rdp in/out of hulls
-    #part_fetch_data = partial(fetch_data,db,tempdir,bw,sig,rdp,algo,par1,par2)
-    #matrx = pp.map(part_fetch_data,range(8,0,-1))
-    #print '\n'," -- Data fetch: done! "'\n'
-    #
-    ## 4.6 calculate distances for non-rdp
-    #inmat = matrx[0][matrx[0][:,3]=='0.0'][:,:2].astype(np.float) # filters for non-rdp
-    #targ_centroid  = matrx[2][:,:2].astype(np.float)
-    #targ_nearest   = matrx[3][:,:2].astype(np.float)
-    #targ_conhulls  = coords[:,:2].astype(np.float)
-    #part_dist_calc = partial(dist_calc,inmat)
-    #distances = pp.map(part_dist_calc,[targ_centroid,targ_nearest,targ_conhulls])
-    #print '\n'," -- Non-RDP distance calculation: done! "'\n'
-#
-    ## 4.7 retrieve IDs, populate table and push back to DB
-    #push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
-    #print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
-#
-    ## 4.8 calculate distances for BBLU points
-    #inmat_post = matrx[5][:,:2].astype(np.float)
-    #inmat_pre  = matrx[7][:,:2].astype(np.float)
-    #part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
-    #distances = pp.map(part_dist_calc,[inmat_post,inmat_pre])
-    #print '\n'," -- BBLU distance calculation: done! "'\n'
-#
-    ## 4.9 retrieve IDs, populate table and push back to DB
-    #push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig)
-    #print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
+    # 4.4 fetch BBLU & non-rdp in/out of hulls
+    part_fetch_data = partial(fetch_data,db,tempdir,'intersect')
+    matrx = pp.map(part_fetch_data,range(6,0,-1))
+    print '\n'," -- Data fetch: done! "'\n'
 
-    # 4.10 kill parallel workers
+    # 4.5 calculate distances for non-rdp
+    inmat = matrx[0][matrx[0][:,3]==0][:,:2].astype(np.float) # filters for non-rdp
+    targ_conhulls  = coords[:,:2].astype(np.float)
+    dist = dist_calc(inmat,targ_conhulls)
+    print '\n'," -- Non-RDP distance calculation: done! "'\n'
+
+    # 4.6 retrieve IDs, populate table and push back to DB
+    push_distNRDP2db(db,matrx,dist,coords)
+    print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
+
+    # 4.7 calculate distances for BBLU points
+    inmat_post = matrx[3][:,:2].astype(np.float)
+    inmat_pre  = matrx[5][:,:2].astype(np.float)
+    part_dist_calc = partial(dist_calc,targ_mat=targ_conhulls)
+    dist = pp.map(part_dist_calc,[inmat_post,inmat_pre])
+    print '\n'," -- BBLU distance calculation: done! "'\n'
+
+    # 4.8 retrieve IDs, populate table and push back to DB
+    push_distBBLU2db(db,matrx,dist,coords)
+    print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
+
+    # 4.9 kill parallel workers
     pp.close()
     pp.join()
 
@@ -329,17 +326,3 @@ if _5_d_PLOTS_ == 1:
     subprocess.call(cmd)
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'
-
-
-
-
-
-
-
-
-
-
-
-
-
-

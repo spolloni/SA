@@ -30,7 +30,7 @@ def gp2shp(db,qrys,geocol,out,espg):
     return
 
 
-def concavehull(db,dir,sig,rdp,algo,par1,par2,fr1,fr2):
+def concavehull(db,dir,sig):
 
     # connect to DB
     con = sql.connect(db)
@@ -38,8 +38,15 @@ def concavehull(db,dir,sig,rdp,algo,par1,par2,fr1,fr2):
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="rdp_conhulls";
+               '''
 
     drop_qry = '''
+               SELECT DisableSpatialIndex('rdp_conhulls','GEOMETRY');
+               SELECT DiscardGeometryColumn('rdp_conhulls','GEOMETRY');
+               DROP TABLE IF EXISTS idx_rdp_conhulls_GEOMETRY;
                DROP TABLE IF EXISTS rdp_conhulls;
                '''
 
@@ -52,15 +59,88 @@ def concavehull(db,dir,sig,rdp,algo,par1,par2,fr1,fr2):
                WHERE B.cluster !=0
                GROUP BY cluster;
                '''.format(sig)
-    
+
     # create hulls table
-    cur.execute(drop_qry)
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
     cur.execute(make_qry)
     cur.execute("SELECT RecoverGeometryColumn('rdp_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
     cur.execute("SELECT CreateSpatialIndex('rdp_conhulls','GEOMETRY');")
+    con.commit()
+    con.close()
+    
+    return
+
+
+def selfintersect(db,dir,bw):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="rdp_buffers_reg";
+               '''
+
+    drop_qry = '''
+               SELECT DisableSpatialIndex('rdp_buffers_reg','GEOMETRY');
+               SELECT DiscardGeometryColumn('rdp_buffers_reg','GEOMETRY');
+               DROP TABLE IF EXISTS idx_rdp_buffers_reg_GEOMETRY;
+               DROP TABLE IF EXISTS rdp_buffers_reg;
+               '''
+
+    make_qry = '''
+               CREATE TABLE rdp_buffers_reg AS 
+               SELECT CastToMultiPolygon(ST_Buffer(A.GEOMETRY,{})) AS GEOMETRY,
+               A.cluster AS cluster
+               FROM rdp_conhulls AS A;
+               '''.format(bw)
+
+    # create hulls table
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+    cur.execute(make_qry)
+    cur.execute("SELECT RecoverGeometryColumn('rdp_buffers_reg','GEOMETRY',2046,'MULTIPOLYGON','XY');")
+    cur.execute("SELECT CreateSpatialIndex('rdp_buffers_reg','GEOMETRY');")
 
     con.commit()
     con.close()
+
+    qry  = "SELECT * FROM rdp_buffers_reg"
+    out1 = dir+'buff.shp'
+    out2 = dir+'interbuff.shp'
+
+    # fetch buffers
+    if os.path.exists(out1): os.remove(out1)
+    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # self-intersect
+    cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
+           '-ID cluster -INTERSECT', out2]
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # push back to DB
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS rdp_buffers_intersect (mock INT);''')
+    con.commit()
+    con.close()
+    cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
+            db, dir+'interbuff.shp','-select cluster', '-where "cluster > 0"',
+            '-nlt PROMOTE_TO_MULTI','-nln rdp_buffers_intersect', '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    return
+
+def hulls_coordinates(db,dir):
 
     qry  = "SELECT * FROM rdp_conhulls"
     out1 = dir+'hull.shp'
@@ -87,193 +167,6 @@ def concavehull(db,dir,sig,rdp,algo,par1,par2,fr1,fr2):
     if os.path.exists(out4): os.remove(out4)
     cmd = ['ogr2ogr -f "CSV"', out4, out3, '-lco GEOMETRY=AS_WKT']
     subprocess.call(' '.join(cmd),shell=True)
-    
-    return
-
-
-def selfintersect(db,dir,bw,rdp,algo,par1,par2):
-
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-
-    qry ='''
-        SELECT ST_Union(ST_Buffer(B.GEOMETRY,{})), 
-        C.cluster, A.prov_code
-        FROM transactions AS A
-        JOIN erven AS B ON A.property_id = B.property_id
-        JOIN rdp_clusters_{}_{}_{}_{} AS C ON A.trans_id = C.trans_id
-        WHERE C.cluster !=0
-        GROUP BY cluster
-        '''.format(bw,rdp,algo,spar1,spar2)
-    out1 = dir+'buff.shp'
-    out2 = dir+'interbuff.shp'
-
-    # fetch dissolved buffers
-    if os.path.exists(out1): os.remove(out1)
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # self-intersect
-    cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
-           '-ID cluster -INTERSECT', out2]
-    subprocess.call(' '.join(cmd),shell=True)
-
-    return
-
-
-def merge_n_push(db,dir,bw,sig,rdp,algo,par1,par2):
-
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-    ssig  = re.sub("[^0-9]", "", str(sig))
-
-    # push buffers to db
-    con = sql.connect(db)
-    cur = con.cursor()
-    cur.execute('''CREATE TABLE IF NOT EXISTS 
-            rdp_buffers_{}_{}_{}_{}_{} (mock INT);'''.format(rdp,algo,spar1,spar2,bw))
-    con.commit()
-    con.close()
-    cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, dir+'interbuff.shp','-select cluster,prov_code ', '-where "cluster > 0"','-nlt PROMOTE_TO_MULTI',
-             '-nln rdp_buffers_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,bw), '-overwrite']
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # add hulls perimeter and area
-    cmd = ['saga_cmd shapes_polygons 2 -POLYGONS', dir+'hull.shp',
-           '-OUTPUT', dir+'hullwproperties.shp'] 
-    subprocess.call(' '.join(cmd),shell=True)
-
-    # push to db
-    con = sql.connect(db)
-    cur = con.cursor()
-    cur.execute('''CREATE TABLE IF NOT EXISTS 
-            rdp_hulls_{}_{}_{}_{}_{} (mock INT);'''.format(rdp,algo,spar1,spar2,ssig))
-    con.commit()
-    con.close()
-    cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, dir+'hullwproperties.shp','-select cluster,prov_code,PERIMETER,AREA','-nlt PROMOTE_TO_MULTI',
-             '-nln rdp_hulls_{}_{}_{}_{}_{}'.format(rdp,algo,spar1,spar2,ssig), '-overwrite']
-    subprocess.call(' '.join(cmd),shell=True)
-
-    return
-
-
-def fetch_data(db,dir,bw,sig,rdp,algo,par1,par2,i):
-
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-    ssig  = re.sub("[^0-9]", "", str(sig))
-
-    if i==1:
-
-        # BBLU pre points in buffers
-        qry ='''
-            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
-            FROM bblu_pre AS p, rdp_buffers_{}_{}_{}_{}_{} AS b
-            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='bblu_pre' AND search_frame=b.GEOMETRY)
-            AND st_within(p.GEOMETRY,b.GEOMETRY) 
-            '''.format(rdp,algo,spar1,spar2,bw)
-
-    if i==2:
-
-        # BBLU pre points in hulls
-        qry ='''
-            SELECT p.OGC_FID
-            FROM bblu_pre AS p, rdp_hulls_{}_{}_{}_{}_{} AS h
-            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='bblu_pre' AND search_frame=h.GEOMETRY)
-            AND st_within(p.GEOMETRY,h.GEOMETRY) 
-            '''.format(rdp,algo,spar1,spar2,ssig)
-
-    if i==3:
-
-        # BBLU post points in buffers
-        qry ='''
-            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
-            FROM bblu_post AS p, rdp_buffers_{}_{}_{}_{}_{} AS b
-            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='bblu_post' AND search_frame=b.GEOMETRY)
-            AND st_within(p.GEOMETRY,b.GEOMETRY) 
-            '''.format(rdp,algo,spar1,spar2,bw)
-
-    if i==4:
-
-        # BBLU post points in hulls
-        qry ='''
-            SELECT p.OGC_FID
-            FROM bblu_post AS p, rdp_hulls_{}_{}_{}_{}_{} AS h
-            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='bblu_post' AND search_frame=h.GEOMETRY)
-            AND st_within(p.GEOMETRY,h.GEOMETRY) 
-            '''.format(rdp,algo,spar1,spar2,ssig)
-
-    if i==5:
-
-        # all RDP transactions
-        qry ='''
-            SELECT st_x(e.GEOMETRY) as x, st_y(e.GEOMETRY) as y,
-                   t.trans_id, c.cluster 
-            FROM erven AS e
-            JOIN transactions AS t ON e.property_id = t.property_id
-            JOIN rdp_clusters_{}_{}_{}_{} AS c ON t.trans_id = c.trans_id
-            WHERE c.cluster !=0
-            '''.format(rdp,algo,spar1,spar2)
-            
-    if i==6:
-
-        # RDP centroids, per cluster
-        qry ='''
-            SELECT st_x(st_centroid(st_collect(e.GEOMETRY))) as x,
-                   st_y(st_centroid(st_collect(e.GEOMETRY))) as y , c.cluster 
-            FROM erven AS e
-            JOIN transactions AS t ON e.property_id = t.property_id
-            JOIN rdp_clusters_{}_{}_{}_{} AS c ON t.trans_id = c.trans_id
-            WHERE c.cluster !=0
-            GROUP BY c.cluster
-            '''.format(rdp,algo,spar1,spar2)
-
-    if i==7:
-
-        # all transactions inside hulls
-        qry ='''
-            SELECT t.trans_id, r.rdp_ls
-            FROM erven AS e, rdp_hulls_{}_{}_{}_{}_{} AS h
-            JOIN transactions AS t ON e.property_id = t.property_id
-            JOIN rdp AS r ON t.trans_id = r.trans_id
-            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='erven' AND search_frame=h.GEOMETRY)
-            AND st_within(e.GEOMETRY,h.GEOMETRY) 
-            '''.format(rdp,algo,spar1,spar2,ssig)
-
-    if i==8:
-
-        # all transactions inside buffers
-        qry ='''
-            SELECT st_x(e.GEOMETRY) AS x, st_y(e.GEOMETRY) AS y,
-                   t.trans_id, r.rdp_ls, b.cluster
-            FROM erven AS e, rdp_buffers_{}_{}_{}_{}_{} AS b
-            JOIN transactions AS t ON e.property_id = t.property_id
-            JOIN rdp AS r ON t.trans_id = r.trans_id
-            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
-            AND st_within(e.GEOMETRY,b.GEOMETRY) 
-            '''.format(rdp,algo,spar1,spar2,bw)
-
-    # fetch data
-    con = sql.connect(db)
-    con.enable_load_extension(True)
-    con.execute("SELECT load_extension('mod_spatialite');")
-    cur = con.cursor()
-    cur.execute(qry)
-    mat = np.array(cur.fetchall())
-    con.close()
-
-    return mat
-
-
-def comb_coordinates(dir):
 
     # load ogr2ogr exported csv
     df = pd.read_csv(dir+'coordshull.csv')
@@ -303,6 +196,87 @@ def comb_coordinates(dir):
     return coords
 
 
+def fetch_data(db,dir,bufftype,i):
+
+    if i==1:
+
+        # BBLU pre points in buffers
+        qry ='''
+            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
+            FROM bblu_pre AS p, rdp_buffers_{} AS b
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_pre' AND search_frame=b.GEOMETRY)
+            AND st_within(p.GEOMETRY,b.GEOMETRY);
+            '''.format(bufftype)
+
+    if i==2:
+
+        # BBLU pre points in hulls
+        qry ='''
+            SELECT p.OGC_FID
+            FROM bblu_pre AS p, rdp_conhulls AS h
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_pre' AND search_frame=h.GEOMETRY)
+            AND st_within(p.GEOMETRY,h.GEOMETRY);
+            '''
+
+    if i==3:
+
+        # BBLU post points in buffers
+        qry ='''
+            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
+            FROM bblu_post AS p, rdp_buffers_{} AS b
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_post' AND search_frame=b.GEOMETRY)
+            AND st_within(p.GEOMETRY,b.GEOMETRY);
+            '''.format(bufftype)
+
+    if i==4:
+
+        # BBLU post points in hulls
+        qry ='''
+            SELECT p.OGC_FID
+            FROM bblu_post AS p, rdp_conhulls AS h
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_post' AND search_frame=h.GEOMETRY)
+            AND st_within(p.GEOMETRY,h.GEOMETRY);
+            '''
+
+    if i==5:
+
+        qry ='''
+            SELECT e.property_id, r.rdp_all
+            FROM erven AS e, rdp_conhulls AS h
+            JOIN rdp AS r ON e.property_id = r.property_id
+            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='erven' AND search_frame=h.GEOMETRY)
+            AND st_within(e.GEOMETRY,h.GEOMETRY)
+            '''
+
+    if i==6:
+
+        qry ='''
+            SELECT st_x(e.GEOMETRY) AS x, st_y(e.GEOMETRY) AS y,
+                   e.property_id AS property_id, r.rdp_all, b.cluster AS cluster
+            FROM erven AS e, rdp_buffers_{} AS b
+            JOIN rdp AS r ON e.property_id = r.property_id
+            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
+            AND st_within(e.GEOMETRY,b.GEOMETRY) 
+            '''.format(bufftype)
+
+    # fetch data
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+    cur.execute(qry)
+    mat = np.array(cur.fetchall())
+    con.close()
+
+    return mat
+
+
 def dist_calc(in_mat,targ_mat):
 
     nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(targ_mat)
@@ -311,57 +285,33 @@ def dist_calc(in_mat,targ_mat):
     return [dist,ind]
 
 
-def push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
-
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-    ssig  = re.sub("[^0-9]", "", str(sig))
+def push_distNRDP2db(db,matrx,distances,coords):
 
     # Retrieve cluster IDS 
-    trans_id = pd.DataFrame(matrx[0][matrx[0][:,3]=='0.0'][:,2],columns=['tr_id'])
-    labels   = pd.DataFrame(matrx[1][matrx[1][:,1]=='0.0'][:,0],columns=['tr_id'])
-    trans_id = pd.merge(trans_id,labels,how='left',on='tr_id',
+    prop_id = pd.DataFrame(matrx[0][matrx[0][:,3]==0][:,2],columns=['pr_id'])
+    labels  = pd.DataFrame(matrx[1][matrx[1][:,1]==0][:,0],columns=['pr_id'])
+    prop_id = pd.merge(prop_id,labels,how='left',on='pr_id',
                 sort=False,indicator=True,validate='1:1').as_matrix()
-    centroid_id = matrx[2][:,2][distances[0][1]].astype(np.float)
-    nearest_id  = matrx[3][:,3][distances[1][1]].astype(np.float)
-    conhulls_id = coords[:,2][distances[2][1]].astype(np.float)
+    conhulls_id = coords[:,2][distances[1]].astype(np.float)
 
     con = sql.connect(db)
     cur = con.cursor()
     
-    cur.execute('''DROP TABLE IF EXISTS 
-        distance_nrdp_{}_{}_{}_{}_{}_{};'''.format(rdp,algo,spar1,spar2,bw,ssig))
+    cur.execute('''DROP TABLE IF EXISTS distance_nrdp;''')
+    cur.execute(''' CREATE TABLE distance_nrdp (
+                    property_id VARCHAR(11) PRIMARY KEY,
+                    distance    numeric(10,10), 
+                    cluster     INTEGER); ''')
 
-    cur.execute(''' CREATE TABLE distance_nrdp_{}_{}_{}_{}_{}_{} (
-            trans_id         VARCHAR(11) PRIMARY KEY,
-            centroid_dist    numeric(10,10), 
-            centroid_cluster INTEGER,
-            nearest_dist     numeric(10,10), 
-            nearest_cluster  INTEGER,
-            conhulls_dist    numeric(10,10), 
-            conhulls_cluster INTEGER,
-            conhulls_inhull  INTEGER
-        );'''.format(rdp,algo,spar1,spar2,bw,ssig))
+    rowsqry = '''INSERT INTO distance_nrdp VALUES (?,?,?);'''
 
-    rowsqry = '''
-        INSERT INTO distance_nrdp_{}_{}_{}_{}_{}_{}
-        VALUES (?,?,?,?,?,?,?,?);
-        '''.format(rdp,algo,spar1,spar2,bw,ssig)
+    for i in range(len(prop_id[:,0])):
 
-    for i in range(len(trans_id[:,0])):
+        if prop_id[:,1][i] == 'both':
+            distances[0][i][0] = -distances[0][i][0]     
+        cur.execute(rowsqry, [prop_id[:,0][i], distances[0][i][0],conhulls_id[i][0]])
 
-        inhull = 0
-        if trans_id[:,1][i] == 'both':
-            distances[2][0][i][0] = -distances[2][0][i][0]
-            inhull = 1
-
-        cur.execute(rowsqry, [trans_id[:,0][i],distances[0][0][i][0],
-           centroid_id[i][0],distances[1][0][i][0],nearest_id[i][0],
-           distances[2][0][i][0],conhulls_id[i][0],inhull])
-
-    cur.execute('''CREATE INDEX dist_nrdpind_{}_{}_{}_{}_{}_{}
-        ON distance_nrdp_{}_{}_{}_{}_{}_{} (trans_id);'''.format(rdp,
-            algo,spar1,spar2,bw,ssig,rdp,algo,spar1,spar2,bw,ssig))
+    cur.execute('''CREATE INDEX dist_nrdp_ind ON distance_nrdp (property_id);''')
 
     con.commit()
     con.close()
@@ -369,11 +319,20 @@ def push_distNRDP2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
     return
 
 
-def push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
+def push_distBBLU2db(db,matrx,distances,coords):
 
-    spar1 = re.sub("[^0-9]", "", str(par1))
-    spar2 = re.sub("[^0-9]", "", str(par2))
-    ssig  = re.sub("[^0-9]", "", str(sig))
+    con = sql.connect(db)
+    cur = con.cursor()
+
+    cur.execute('''DROP TABLE IF EXISTS distance_bblu;''')
+
+    cur.execute(''' CREATE TABLE distance_bblu (
+                STR_FID   VARCHAR(11) PRIMARY KEY,
+                OGC_FID   VARCHAR(11),
+                distance  numeric(10,10), 
+                cluster   INTEGER,
+                period    VARCHAR(11));
+                ''')
 
     for t in ['pre','post']:
 
@@ -385,47 +344,26 @@ def push_distBBLU2db(db,matrx,distances,coords,rdp,algo,par1,par2,bw,sig):
             int2 = 0
 
         # Retrieve cluster IDS 
-        bblu_id  = pd.DataFrame(matrx[int(5+int2)][:,2],columns=['ogc_fid'])
-        bblu_lab = pd.DataFrame(matrx[int(4+int2)],columns=['ogc_fid']).drop_duplicates()
+        bblu_id  = pd.DataFrame(matrx[int(3+int2)][:,2],columns=['ogc_fid'])
+        bblu_lab = pd.DataFrame(matrx[int(2+int2)],columns=['ogc_fid']).drop_duplicates()
         bblu_id  = pd.merge(bblu_id,bblu_lab,how='left',on='ogc_fid',
                         sort=False,indicator=True,validate='1:1').as_matrix()
         conhulls_id = coords[:,2][distances[int1][1]].astype(np.float)
 
-        con = sql.connect(db)
-        cur = con.cursor()
-
-        cur.execute('''DROP TABLE IF EXISTS 
-            distance_bblu{}_{}_{}_{}_{}_{}_{};'''.format(t,rdp,algo,spar1,spar2,bw,ssig))
-
-        cur.execute(''' CREATE TABLE distance_bblu{}_{}_{}_{}_{}_{}_{} (
-                STR_FID   VARCHAR(11) ,
-                OGC_FID   VARCHAR(11) PRIMARY KEY,
-                distance  numeric(10,10), 
-                cluster   INTEGER,
-                inhull    INTEGER
-            );'''.format(t,rdp,algo,spar1,spar2,bw,ssig))
-
-        rowsqry = '''
-            INSERT INTO distance_bblu{}_{}_{}_{}_{}_{}_{}
-            VALUES (?,?,?,?,?);
-            '''.format(t,rdp,algo,spar1,spar2,bw,ssig)
+        rowsqry = '''INSERT INTO distance_bblu VALUES (?,?,?,?,?);'''
 
         for i in range(len(bblu_id[:,0])):
 
-            inhull = 0
             if bblu_id[:,1][i] == 'both':
                 distances[int1][0][i][0] = -distances[int1][0][i][0]
-                inhull = 1
     
             cur.execute(rowsqry,[t+'_'+str(int(bblu_id[:,0][i])),int(bblu_id[:,0][i]),
-                distances[int1][0][i][0],conhulls_id[i][0],inhull])
+                distances[int1][0][i][0],conhulls_id[i][0],t])
 
-        cur.execute('''CREATE INDEX dist_{}ind_{}_{}_{}_{}_{}_{}
-        ON distance_bblu{}_{}_{}_{}_{}_{}_{} (OGC_FID);'''.format(t,rdp,
-            algo,spar1,spar2,bw,ssig,t,rdp,algo,spar1,spar2,bw,ssig))
+    cur.execute('''CREATE INDEX dist_bblu_ind ON distance_bblu (OGC_FID);''')
 
-        con.commit()
-        con.close()
+    con.commit()
+    con.close()
 
     return
 
