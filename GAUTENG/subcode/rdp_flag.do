@@ -4,57 +4,68 @@ set more off
 
 local qry = "
 	SELECT A.property_id, A.purch_yr, A.purch_mo, A.purch_day,
-		    A.seller_name, A.buyer_name, A.purch_price,
-	       A.trans_id, B.erf_size, A.munic_name
+		    A.seller_name, A.buyer_name, A.purch_price, A.trans_id, 
+          A.owner_type, A.prevowner_type, A.munic_name, A.mun_code,
+
+          B.erf_size, B.prob_residential, B.prob_res_small,
+          B.gcro_publichousing_dist, B.gcro_townships_dist, B.bblu_pre
+
 	FROM transactions AS A
 	INNER JOIN erven AS B
 	  ON A.property_id = B.property_id
 	";
 
-cap program drop prisiz_filter;
-program prisiz_filter;
+cap program drop price_filter;
+program price_filter;
 
    * THIS IS FROM THE LIGHSTONE RECOMMENDED PRACTICE;
    `1' if purch_yr < 1994;
-   `1' if purch_yr == 1994 & purch_price > 14375 + 50000;
-   `1' if purch_yr == 1995 & purch_price > 17250 + 50000;
-   `1' if purch_yr == 1996 & purch_price > 17250 + 50000;
-   `1' if purch_yr == 1997 & purch_price > 17250 + 50000;
-   `1' if purch_yr == 1998 & purch_price > 17250 + 50000;
-   `1' if purch_yr == 1999 & purch_price > 18400 + 50000;
-   `1' if purch_yr == 2000 & purch_price > 18400 + 50000;
-   `1' if purch_yr == 2001 & purch_price > 18400 + 50000;
-   `1' if purch_yr == 2002 & purch_price > 23345 + 50000;
-   `1' if purch_yr == 2003 & purch_price > 29415.85 + 50000;
-   `1' if purch_yr == 2004 & purch_price > 32520.85 + 50000;
-   `1' if purch_yr == 2005 & purch_price > 36718.35 + 50000;
-   `1' if purch_yr == 2006 & purch_price > 42007.2  + 50000;
-   `1' if purch_yr == 2007 & purch_price > 69014.95 + 50000;
-   `1' if purch_yr == 2008 & purch_price > 74778.75 + 50000;
-   `1' if purch_yr == 2009 & purch_price > 90271.55 + 50000;
-   `1' if purch_yr == 2010 & purch_price > 96448.2  + 50000;
-   `1' if purch_yr == 2011 & purch_price > 96448.2  + 50000;
-   `1' if purch_yr == 2012 & purch_price > 110816.3 + 50000;
+   `1' if purch_yr == 1994 & purch_price > 14375 + 50000 & purch_price!=.;
+   `1' if purch_yr == 1995 & purch_price > 17250 + 50000 & purch_price!=.;
+   `1' if purch_yr == 1996 & purch_price > 17250 + 50000 & purch_price!=.;
+   `1' if purch_yr == 1997 & purch_price > 17250 + 50000 & purch_price!=.;
+   `1' if purch_yr == 1998 & purch_price > 17250 + 50000 & purch_price!=.;
+   `1' if purch_yr == 1999 & purch_price > 18400 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2000 & purch_price > 18400 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2001 & purch_price > 18400 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2002 & purch_price > 23345 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2003 & purch_price > 29415.85 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2004 & purch_price > 32520.85 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2005 & purch_price > 36718.35 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2006 & purch_price > 42007.2  + 50000 & purch_price!=.;
+   `1' if purch_yr == 2007 & purch_price > 69014.95 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2008 & purch_price > 74778.75 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2009 & purch_price > 90271.55 + 50000 & purch_price!=.;
+   `1' if purch_yr == 2010 & purch_price > 96448.2  + 50000 & purch_price!=.;
+   `1' if purch_yr == 2011 & purch_price > 96448.2  + 50000 & purch_price!=.;
+   `1' if purch_yr == 2012 & purch_price > 110816.3 + 50000 & purch_price!=.;
 
 end;
 
 cap program drop gengov;
 program gengov;
 
-   gen gov=(regexm(seller_name,"GOVERNMENT")==1                | 
-            regexm(seller_name,"MUNISIPALITEIT")==1            | 
-            regexm(seller_name,"MUNISIPALITY")==1              | 
-            regexm(seller_name,"MUNICIPALITY")==1              | 
-            regexm(seller_name,"(:?^|\s)MUN ")==1              |
-            regexm(seller_name,"CITY OF ")==1                  | 
-            regexm(seller_name,"LOCAL AUTHORITY")==1           | 
-            regexm(seller_name," COUNCIL")==1                  |
-            regexm(seller_name,"PROVINCIAL HOUSING")==1        | 
-            regexm(seller_name,"NATIONAL HOUSING")==1          |      
-            regexm(seller_name,"PROVINCIAL ADMINISTRATION")==1 |
-            regexm(seller_name,"DEPARTMENT OF HOUSING")==1     |
-            (regexm(seller_name,"PROVINCE OF ")==1 & regexm(seller_name,"CHURCH")==0 ) |
-            (regexm(seller_name,"HOUSING")==1 & regexm(seller_name,"BOARD")==1 )
+   local who = "seller";
+
+   if "`1'"=="buyer" {;
+      local who = "`1'";
+      local var = "_`1'";
+      }; 
+
+   gen gov`var' =(regexm(`who'_name,"GOVERNMENT")==1          | 
+            regexm(`who'_name,"MUNISIPALITEIT")==1            | 
+            regexm(`who'_name,"MUNISIPALITY")==1              | 
+            regexm(`who'_name,"MUNICIPALITY")==1              | 
+            regexm(`who'_name,"(:?^|\s)MUN ")==1              |
+            regexm(`who'_name,"CITY OF ")==1                  | 
+            regexm(`who'_name,"LOCAL AUTHORITY")==1           | 
+            regexm(`who'_name," COUNCIL")==1                  |
+            regexm(`who'_name,"PROVINCIAL HOUSING")==1        | 
+            regexm(`who'_name,"NATIONAL HOUSING")==1          |      
+            regexm(`who'_name,"PROVINCIAL ADMINISTRATION")==1 |
+            regexm(`who'_name,"DEPARTMENT OF HOUSING")==1     |
+            (regexm(`who'_name,"PROVINCE OF ")==1 & regexm(seller_name,"CHURCH")==0 ) |
+            (regexm(`who'_name,"HOUSING")==1 & regexm(seller_name,"BOARD")==1 )
             );
 
 end;
@@ -63,66 +74,76 @@ end;
 odbc query "gauteng";
 odbc load, exec("`qry'");
 
-********************;
-* Lighstone Method *;
-********************;
-
+* Intialize stuff;
+drop if prob_residential == "RES NO";
 destring  purch_yr purch_mo purch_day, replace;
 sort property_id purch_yr purch_mo purch_day;
+gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
+destring trans_num, replace;
 
-* find gov sellers;
+* find gov sellers & buyers;
 gengov;
+*gengov buyer;
 
-* find big sellers;
-preserve;
-by property_id: keep if _n==1;
-prisiz_filter drop;
-drop if erf_size  > 500;
-bys seller_name:   gen n = _n;
-bys seller_name: egen nn = max(n);
-keep if n==nn;
-drop if seller_name == "";
-drop if regexm(seller_name,"BANK")==1 & gov==0;
-sum nn if gov==0, detail;
-local tresh = `r(mean)' + 3018*`r(sd)';
-drop if gov==0 & nn < `tresh';
-levelsof seller_name,local(levels); 
-restore;
+* find big sellers and "no seller" likely rdp;
+bys seller_name munic_name purch_yr purch_mo purch_price: gen  n  = _n;
+bys seller_name munic_name purch_yr purch_mo purch_price: egen nn = max(n);
+sum nn if seller_name == "" & n==nn, detail;
+local tresh = `r(p95)';
+gen no_seller_rdp = (nn > `tresh' & seller_name == "");
+sum nn if seller_name != "" & gov!=1 & n==nn, detail;
+local tresh = `r(mean)' + 6*`r(sd)';
+gen big_seller_rdp = (nn > `tresh' & seller_name != "" & gov!=1);
+drop n nn;
 
-** find "no seller" likely rdp;
-*gen toobig = (erf_size  > 500);
-*bys seller_name toobig munic_name purch_yr purch_mo: gen  n  = _n;
-*bys seller_name toobig munic_name purch_yr purch_mo: egen nn = max(n);
-*sum nn if seller_name == "" & n==nn & toobig==0, detail;
-*local tresh = `r(mean)' + 2.5*`r(sd)';
-*gen no_seller_rdp = (nn > `tresh' & seller_name == "" & toobig==0 );
-*drop n nn toobig;
+* indicate RDP (multiple definitions);
+gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
+gen rdp_never = (rdp==0);
+replace rdp = 0 if bblu_pre==1 & purch_yr > 2001;
+replace rdp = 0 if prob_res_small =="RES YES AND LARGE";
+price_filter "replace rdp = 0";
+gen rdp_all        = rdp;
+gen rdp_gcroonly   = (rdp==1 & gcro_publichousing_dist == 0);
+gen rdp_notownship = (rdp==1 & gcro_townships_dist > 0);
+gen rdp_phtownship = (rdp==1 & (gcro_townships_dist > 0 |(gcro_townships_dist == 0 & gcro_publichousing_dist == 0)));
 
-* indicate RDP;
-sort property_id purch_yr purch_mo purch_day;
-by property_id: gen n = _n;
-by property_id: gen N = _N;
-by property_id: egen minpurchyr = min(purch_yr);
-gen rdp_ls = 0;
-foreach lev of local levels {;
-        replace rdp_ls=1 if seller_name== "`lev'" & n==1;
-};
-prisiz_filter "replace rdp_ls = 0";
-replace rdp_ls = 0 if purch_price > 600000 & n == N;
-*replace rdp_ls = 1 if no_seller_rdp ==1;
-replace rdp_ls = 0 if erf_size  > 500;
-bys property_id: egen ever_rdp_ls = max(rdp_ls);
-keep if minpurchyr>2001 & minpurchyr<2012;
+* RDP is property concept (not a transaction concept);
+ds *rdp* gov;
+foreach var in `r(varlist)' {;
+   if "`var'"=="rdp_never"{;
+      bys property_id: egen maxvar = min(`var');
+   };
+   else {;
+      bys property_id: egen maxvar = max(`var');
+   };
+   replace `var' = maxvar;
+   drop maxvar;
+};  
 
-*********************;
-* First-pass Method *;
-*********************;
-gen rdp_fp = gov;
-by property_id: egen ever_rdp_fp = max(rdp_fp);
+* sort which transaction within property was actual construction;
+duplicates drop property_id if rdp_all==0, force;
+bys property_id: gen normal = _n if owner_type=="NORMAL OWNER";
+replace normal=99 if normal == .;
+bys property_id: egen minnormal = min(normal);
+keep if normal == minnormal;
+bys property_id: gen n   = _n;
+bys property_id: egen nn = max(n);
+drop if n>1 & nn>1;
+
+*keep necessary vars;
+keep property_id trans_id *rdp* gov;
+drop rdp;
 
 ************************;
 * close and push to DB *;
 ************************;
-keep trans_id *rdp* gov;
+odbc exec("DROP TABLE IF EXISTS rdp;"), dsn("gauteng");
 odbc insert, table("rdp") create;
+odbc exec("CREATE INDEX trans_ind_rdp ON rdp (trans_id);"), dsn("gauteng");
+odbc exec("CREATE INDEX prop_ind_rdp ON rdp (property_id);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_all_ind_rdp ON rdp (rdp_all);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_gcroonly_ind_rdp ON rdp (rdp_gcroonly);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_notownship_ind_rdp ON rdp (rdp_notownship);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_phtownship_ind_rdp ON rdp (rdp_phtownship);"), dsn("gauteng");
 exit, STATA clear;  
+

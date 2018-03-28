@@ -8,9 +8,24 @@ data2sql.py
 '''
 
 from pysqlite2 import dbapi2 as sql
-import subprocess, ntpath, glob, pandas
+import subprocess, ntpath, glob, pandas, csv
 
-def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
+def check_geo(geo,extra):
+
+    if geo[0] not in ['6','7','8']:
+        return 0
+
+    if geo[0] == "7":
+        return 1
+
+    if geo[:3] in ['676','688','812','882']:
+        if geo in extra:
+            return 1
+
+    return 0 
+
+
+def addtable2db(input,database,tablename,namesqry,rowsqry,ea,extra):
 
     con = sql.connect(database)
     cur = con.cursor()
@@ -23,7 +38,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
         lines = f.read().splitlines()
         for line in lines:
             row = line.split("|")
-            if row[ea][0] == "7":
+            if check_geo(row[ea],extra) == 1:
                 try:
                     cur.execute(rowsqry, row)
                 except sql.ProgrammingError:
@@ -39,7 +54,7 @@ def addtable2db(input,database,tablename,namesqry,rowsqry,ea):
     return
 
 
-def add_trans(input,database):
+def add_trans(input,database,extra):
 
     tablename = 'transactions'
     namesqry  = '''
@@ -70,7 +85,7 @@ def add_trans(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-    addtable2db(input,database,tablename,namesqry,rowsqry,14)
+    addtable2db(input,database,tablename,namesqry,rowsqry,14,extra)
 
     # create unique ID in stata
     dofile = 'subcode/trans_id.do'
@@ -120,7 +135,7 @@ def add_trans(input,database):
     return
 
 
-def add_erven(input,database):
+def add_erven(input,database,extra):
 
     tablename = 'erven'
     namesqry  = '''
@@ -150,7 +165,7 @@ def add_erven(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-    addtable2db(input,database,tablename,namesqry,rowsqry,1)
+    addtable2db(input,database,tablename,namesqry,rowsqry,1,extra)
 
     # Add Geometry
     con = sql.connect(database)
@@ -169,7 +184,7 @@ def add_erven(input,database):
     return
 
 
-def add_bonds(input,database):
+def add_bonds(input,database,extra):
 
     tablename = 'bonds'
     namesqry  = '''
@@ -201,7 +216,7 @@ def add_bonds(input,database):
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
     
-    addtable2db(input,database,tablename,namesqry,rowsqry,3)
+    addtable2db(input,database,tablename,namesqry,rowsqry,3,extra)
 
     return
 
@@ -249,6 +264,23 @@ def add_bblu(tmp_dir,database):
              '-nln bblu_post', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
+    qry_alt1 = '''
+               ALTER TABLE bblu_post ADD COLUMN STR_FID VARCHAR(11);
+               '''
+    qry_upd1 = '''
+               UPDATE bblu_post SET STR_FID = "post_" || OGC_FID;
+               '''
+
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute(qry_alt1)
+    cur.execute(qry_upd1)
+    cur.execute('''CREATE INDEX bblu_post_ind_OGCFID ON bblu_post (OGC_FID);''')
+    cur.execute('''CREATE INDEX bblu_post_ind_STRFID ON bblu_post (STR_FID);''')
+    cur.execute('''CREATE INDEX bblu_post_ind_SLU ON bblu_post (s_lu_code);''')
+    con.commit()
+    con.close()
+
     # push BBLU pre-period to db
     con = sql.connect(database)
     cur = con.cursor()
@@ -261,70 +293,390 @@ def add_bblu(tmp_dir,database):
              '-nln bblu_pre', '-overwrite']
     subprocess.call(' '.join(cmd),shell=True)
 
+    qry_alt1 = '''
+               ALTER TABLE bblu_pre ADD COLUMN STR_FID VARCHAR(11);
+               '''
+    qry_upd1 = '''
+               UPDATE bblu_pre SET STR_FID = "pre_" || OGC_FID;
+               '''
+
+    con = sql.connect(database)
+    cur = con.cursor()
+    cur.execute(qry_alt1)
+    cur.execute(qry_upd1)
+    cur.execute('''CREATE INDEX bblu_pre_ind_OGCFID ON bblu_pre (OGC_FID);''')
+    cur.execute('''CREATE INDEX bblu_pre_ind_STRFID ON bblu_pre (STR_FID);''')
+    cur.execute('''CREATE INDEX bblu_pre_ind_SLU ON bblu_pre (s_lu_code);''')
+    con.commit()
+    con.close()
+
     return
+
 
 def add_cenGIS(db,source,yr):
 
     shps = glob.glob(source+'c'+yr+'/GIS/*.shp')
+    s_srs = '-s_srs http://spatialreference.org/ref/epsg/4326/'
 
+    # make 2001-specific adjustments
     if yr == "2001":
+        s_srs = '-s_srs http://spatialreference.org/ref/epsg/4148/'
         extra_SPs = pandas.read_csv(source+'c'+yr+'/GIS/extra_SPs.csv').SP_CODE.tolist()
-        inextra = extra_SPs[0]
+        inextra = 'SP_CODE = '+str(extra_SPs[0])+' '
         for sp in extra_SPs[1:]:
             inextra += 'OR SP_CODE = '+str(sp)+' '
-
 
     for shp in shps:
 
         geography = ntpath.basename(shp)[:ntpath.basename(shp).find('_')] 
         tablename = geography + '_' + yr
 
+        # where clause to keep just Gauteng
+        where = ''
         if yr=='2011' and geography == 'WD':
             where = '''-where "PROVINCE = 'Gauteng'"'''
         if yr=='2011' and geography != 'WD':
             where = '-where "PR_CODE = 7"'
         if yr=='2001' and geography == 'PR':
             where = '''-where "PR_NAME = 'GAUTENG'"'''
-        if yr=='2001' and geography == 'WD':
-            where = '''-where "substr(WD_CODE,1,1) = '7'"'''
-        if yr=='2001' and geography in ['SP','SAL','EA']:
-            where = '''-where "substr(SP_CODE,1,1) = '7' OR {} "'''
 
+        # create mock table for overwrite
+        con = sql.connect(db)
+        cur = con.cursor()
+        cur.execute('''CREATE TABLE IF NOT EXISTS 
+                {} (mock INT);'''.format(tablename))
+        con.commit()
+        con.close()
 
+        # push shapefile to db
+        cmd = ['ogr2ogr -f "SQLite" -update',s_srs,'-t_srs http://spatialreference.org/ref/epsg/2046/',
+               db,shp,where,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+        subprocess.call(' '.join(cmd),shell=True)
 
-        print geography
-        print tablename 
-        #print where
-        print ' '
+        # delete non-Gauteng rows for 2001
+        if yr=='2001' and geography != 'PR':
+            if geography == 'WD':
+                qry = ''' DELETE FROM {} 
+                          WHERE cast(WD_CODE as TEXT) 
+                          NOT LIKE '7%';'''.format(tablename)
+            if geography in ['SP','SAL','EA']:
+                qry = ''' DELETE FROM {} 
+                          WHERE (cast(SP_CODE as TEXT) 
+                          NOT LIKE '7%') AND NOT ({}) ;'''.format(tablename,inextra)
 
-    print inextra
+            con = sql.connect(db)
+            cur = con.cursor()
+            cur.execute(qry)
+            con.commit()
+            con.close()
 
-        #con = sql.connect(db)
-        #cur = con.cursor()
-        #cur.execute('''CREATE TABLE IF NOT EXISTS 
-        #        {} (mock INT);'''.format(tablename))
-        #con.commit()
-        #con.close()
-#
-        #cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-        #       db,shp,where,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
-        #subprocess.call(' '.join(cmd),shell=True)
+    return
+
+def add_census(db,source,yr):
+
+    extra_SPs = []
+    if yr == '2001':
+        extra_SPs = pandas.read_csv(source+'c2001/GIS/extra_SPs.csv')
+        extra_SPs = [str(x) for x in extra_SPs.SP_CODE.tolist()]
+
+    for level in ['pers','hh']:
+
+        file = source+'c{}/{}_{}.csv'.format(yr,level,yr)
+        tablename = 'census_{}_{}'.format(level,yr)
+
+        with open(file, 'rb') as f:
+
+            reader = csv.reader(f)
+            header = reader.next()
+
+            # indices to throw out (string-heavy)
+            colnames_ind = [i for i, s in enumerate(header) 
+                            if any(x in s for x in ['_NAME','_Name','_type','name1996','_MDB_C_'])]
+
+            # names of columns to keep
+            colnames = [i for j, i in enumerate(header) if j not in colnames_ind]
+
+            # indice containing SP code
+            SP = [i for i, s in enumerate(header) 
+                    if any(x in s for x in ['Subplace_Code','SP_CODE','PR_CODE_2011'])]
+
+            # indice containing household weight
+            WGT = [i for i, s in enumerate(colnames) 
+                     if any(x in s for x in ['HOUSEHOLDS','WGT','Wgt','wgt','PESHHWEI','PESPWEIG'])]
+
+            # index columns
+            indices = [x for x in colnames if ('Code' in x or 'CODE' in x )]
+
+            # column data-types
+            coldatypes = [' INTEGER, ']*len(colnames) 
+            coldatypes[WGT[0]] = ' numeric(10,10), ' 
+            coldatypes[-1] = ' INTEGER '
+
+            # query to drop if exits
+            drop_qry = '''
+                       DROP TABLE IF EXISTS census_{}_{};
+                       '''.format(level,yr)
+
+            # query to create table
+            concat = ["{}{}".format(i,j) for i,j in zip(colnames,coldatypes)]
+            create_qry = '''
+                         CREATE TABLE census_{}_{} ({});
+                         '''.format(level,yr,''.join(concat))
+
+            # query to insert line
+            qmarks = ["?"]*len(coldatypes)
+            insert_qry = '''
+                         INSERT INTO census_{}_{} VALUES ({});
+                         '''.format(level,yr,', '.join(map(str,qmarks)))
+
+            # PUSH TO CENSUS             
+            con = sql.connect(db)
+            cur = con.cursor()
+        
+            # drop if exist
+            cur.execute(drop_qry)
+        
+            # create table
+            cur.execute(create_qry)
+        
+            # add rows
+            for row in reader:
+        
+                if check_geo(row[SP[0]],extra_SPs) == 0:
+                    continue
+        
+                row = [k for j, k in enumerate(row) if j not in colnames_ind]
+                cur.execute(insert_qry,row)
+
+            # make indices
+            for index in indices:
+                qry = '''
+                      CREATE INDEX {}_ind_{} ON {} ({});
+                      '''.format(tablename,index,tablename,index)
+                cur.execute(qry)
+        
+            con.commit()
+            con.close()
 
     return
 
 
+def add_gcro(db,source):
+
+    shps = glob.glob(source+'*.shp')
+
+    for shp in shps:
+
+        if 'former' in shp:
+            tablename = 'gcro_townships'
+
+        if 'Public' in shp:
+            tablename = 'gcro_publichousing'
+
+        # create mock table for overwrite
+        con = sql.connect(db)
+        cur = con.cursor()
+        cur.execute('''CREATE TABLE IF NOT EXISTS 
+                {} (mock INT);'''.format(tablename))
+        con.commit()
+        con.close()
+
+        # push shapefile to db
+        cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+               db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+        subprocess.call(' '.join(cmd),shell=True)
 
 
+    # make temp layers with disolved polygons
+    qry_pubh = '''
+               CREATE TABLE temp_publichous AS 
+               SELECT st_union(A.GEOMETRY) AS GEOMETRY
+               FROM gcro_publichousing AS A
+               '''
+    qry_oldt = '''
+               CREATE TABLE temp_townships AS 
+               SELECT st_union(A.GEOMETRY) AS GEOMETRY
+               FROM gcro_townships AS A
+               WHERE A.urbanclass LIKE 'Old township' 
+               '''
+
+    # table of erven distance to gcro polygons
+    qry_dis1 = '''
+               CREATE TABLE temp_erven_publichous_dist AS 
+               SELECT DISTINCT A.property_id, st_distance(A.GEOMETRY,B.GEOMETRY) AS dist
+               FROM erven AS A, temp_publichous AS B;
+               '''
+    qry_ind1 = '''
+               CREATE INDEX property_id_temp1 ON temp_erven_publichous_dist (property_id);
+               '''
+    qry_dis2 = '''
+               CREATE TABLE temp_erven_townships_dist AS 
+               SELECT DISTINCT A.property_id, st_distance(A.GEOMETRY,B.GEOMETRY) AS dist
+               FROM erven AS A, temp_townships AS B;
+               '''
+    qry_ind2 = '''
+               CREATE INDEX property_id_temp2 ON temp_erven_townships_dist (property_id);
+               '''
+
+    # add information into erven table
+    qry_alt1 = '''
+               ALTER TABLE erven ADD COLUMN gcro_publichousing_dist numeric(10,10);
+               '''
+    qry_upd1 = '''
+               UPDATE erven 
+               SET gcro_publichousing_dist = (SELECT
+               temp_erven_publichous_dist.dist
+               FROM temp_erven_publichous_dist
+               WHERE erven.property_id = temp_erven_publichous_dist.property_id );
+               '''
+    qry_alt2 = '''
+               ALTER TABLE erven ADD COLUMN gcro_townships_dist numeric(10,10);
+               '''
+    qry_upd2 = '''
+               UPDATE erven 
+               SET gcro_townships_dist = (SELECT
+               temp_erven_townships_dist.dist
+               FROM temp_erven_townships_dist
+               WHERE erven.property_id = temp_erven_townships_dist.property_id );
+               '''
+
+    # drop temporary tables
+    qry_drp1 = '''
+               DROP TABLE IF EXISTS temp_publichous;
+               '''
+    qry_drp2 = '''
+               DROP TABLE IF EXISTS temp_townships;
+               '''
+    qry_drp3 = '''
+               DROP TABLE IF EXISTS temp_erven_publichous_dist;
+               '''
+    qry_drp4 = '''
+               DROP TABLE IF EXISTS temp_erven_townships_dist;
+               '''
+
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+    cur.execute(qry_pubh)
+    cur.execute(qry_oldt)
+    cur.execute(qry_dis1) 
+    cur.execute(qry_dis2)
+    cur.execute(qry_ind1)
+    cur.execute(qry_ind2)
+    cur.execute(qry_alt1)
+    cur.execute(qry_alt2)
+    cur.execute(qry_upd1)
+    cur.execute(qry_upd2)
+    cur.execute(qry_drp1)
+    cur.execute(qry_drp2)
+    cur.execute(qry_drp3)
+    cur.execute(qry_drp4)
+    con.commit()
+    con.close()
+
+    return
 
 
+def add_landplot(db,source):
 
+    shp = glob.glob(source+'*.shp')[0]
+    tablename = 'landplots'
 
+    # create mock table for overwrite
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            {} (mock INT);'''.format(tablename))
+    con.commit()
+    con.close()
 
+    # push shapefile to db
+    cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+           db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
 
+    # table of formal residential bblu
+    qry_bblu = '''
+               CREATE TABLE temp_subBBLU AS 
+               SELECT A.OGC_FID, A.S_LU_CODE, A.GEOMETRY
+               FROM bblu_pre AS A
+               WHERE A.S_LU_CODE='7.1';
+               '''
+
+    # table of landplots containing residential bblu
+    qry_plot = '''
+               CREATE TABLE temp_subPLOTS AS 
+               SELECT DISTINCT A.GEOMETRY, A.OGC_FID, A.ID
+               FROM landplots AS A 
+               JOIN temp_subBBLU AS B ON st_contains(A.GEOMETRY,B.GEOMETRY)
+               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                       WHERE f_table_name='landplots' AND search_frame=B.GEOMETRY);
+               '''
+
+    # table of erven centroids on landplots
+    qry_erve = '''
+               CREATE TABLE temp_erven AS 
+               SELECT DISTINCT A.property_id, '1' as bblu_pre
+               FROM erven AS A, temp_subPLOTS AS B
+               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+               WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
+               AND st_within(A.GEOMETRY,B.GEOMETRY);
+               '''
+    qry_inde = '''
+               CREATE INDEX property_id_temp ON temp_erven (property_id);
+               '''
+
+    # add information into erven table
+    qry_alte = '''
+               ALTER TABLE erven ADD COLUMN bblu_pre INT;
+               '''
+    qry_upd1 = '''
+               UPDATE erven 
+               SET bblu_pre = (SELECT
+               temp_erven.bblu_pre
+               FROM temp_erven
+               WHERE erven.property_id = temp_erven.property_id );
+               '''
+    qry_upd2 = '''
+               UPDATE erven 
+               SET bblu_pre = (CASE 
+                   WHEN bblu_pre IS NULL
+                       THEN 0
+                       ELSE bblu_pre
+                   END);
+               '''
+
+    # drop temporary tables
+    qry_drp1 = '''
+               DROP TABLE IF EXISTS temp_subBBLU;
+               '''
+    qry_drp2 = '''
+               DROP TABLE IF EXISTS temp_subPLOTS;
+               '''
+    qry_drp3 = '''
+               DROP TABLE IF EXISTS temp_erven;
+               '''
+
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+    cur.execute(qry_bblu)
+    cur.execute(qry_plot)
+    cur.execute(qry_erve)
+    cur.execute(qry_inde)
+    cur.execute(qry_alte)
+    cur.execute(qry_upd1)
+    cur.execute(qry_upd2)
+    cur.execute(qry_drp1)
+    cur.execute(qry_drp2)
+    cur.execute(qry_drp3)
+    con.commit()
+    con.close()
+
+    return
     
-
-
-
 
 
 
