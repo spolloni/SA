@@ -5,9 +5,11 @@ set more off
 local qry = "
 	SELECT A.property_id, A.purch_yr, A.purch_mo, A.purch_day,
 		    A.seller_name, A.buyer_name, A.purch_price, A.trans_id, 
-          A.owner_type, A.prevowner_type,
-          B.erf_size, A.munic_name, B.prob_residential, B.prob_res_small,
+          A.owner_type, A.prevowner_type, A.munic_name, A.mun_code,
+
+          B.erf_size, B.prob_residential, B.prob_res_small,
           B.gcro_publichousing_dist, B.gcro_townships_dist, B.bblu_pre
+
 	FROM transactions AS A
 	INNER JOIN erven AS B
 	  ON A.property_id = B.property_id
@@ -72,7 +74,6 @@ end;
 odbc query "gauteng";
 odbc load, exec("`qry'");
 
-
 * Intialize stuff;
 drop if prob_residential == "RES NO";
 destring  purch_yr purch_mo purch_day, replace;
@@ -85,19 +86,20 @@ gengov;
 *gengov buyer;
 
 * find big sellers and "no seller" likely rdp;
-bys seller_name munic_name purch_yr purch_mo purch_day: gen  n  = _n;
-bys seller_name munic_name purch_yr purch_mo purch_day: egen nn = max(n);
+bys seller_name munic_name purch_yr purch_mo purch_price: gen  n  = _n;
+bys seller_name munic_name purch_yr purch_mo purch_price: egen nn = max(n);
 sum nn if seller_name == "" & n==nn, detail;
 local tresh = `r(p95)';
 gen no_seller_rdp = (nn > `tresh' & seller_name == "");
 sum nn if seller_name != "" & gov!=1 & n==nn, detail;
-local tresh = `r(mean)' + 5*`r(sd)';
+local tresh = `r(mean)' + 6*`r(sd)';
 gen big_seller_rdp = (nn > `tresh' & seller_name != "" & gov!=1);
 drop n nn;
 
 * indicate RDP (multiple definitions);
 gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
-replace rdp = 0 if bblu_pre==1;
+gen rdp_never = (rdp==0);
+replace rdp = 0 if bblu_pre==1 & purch_yr > 2001;
 replace rdp = 0 if prob_res_small =="RES YES AND LARGE";
 price_filter "replace rdp = 0";
 gen rdp_all        = rdp;
@@ -108,10 +110,15 @@ gen rdp_phtownship = (rdp==1 & (gcro_townships_dist > 0 |(gcro_townships_dist ==
 * RDP is property concept (not a transaction concept);
 ds *rdp* gov;
 foreach var in `r(varlist)' {;
-   bys property_id: egen maxvar = max(`var');
+   if "`var'"=="rdp_never"{;
+      bys property_id: egen maxvar = min(`var');
+   };
+   else {;
+      bys property_id: egen maxvar = max(`var');
+   };
    replace `var' = maxvar;
    drop maxvar;
-};
+};  
 
 * sort which transaction within property was actual construction;
 duplicates drop property_id if rdp_all==0, force;

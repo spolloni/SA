@@ -19,7 +19,7 @@ local qry1 = "
          D.frac1, D.frac2, E.perimeter, E.area      
 	FROM transactions AS A
 	JOIN erven AS B ON A.property_id = B.property_id
-  JOIN rdp   AS C ON A.trans_id = C.trans_id
+  JOIN rdp   AS C ON B.property_id = .property_id
   JOIN rdp_clusters_`rdp'_`algo'_`par1'_`par2' AS D ON A.trans_id = D.trans_id
   LEFT JOIN rdp_hulls_`rdp'_`algo'_`par1'_`par2'_`sig' as E on D.cluster = E.cluster
   WHERE D.cluster!=0

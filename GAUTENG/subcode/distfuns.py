@@ -74,6 +74,49 @@ def concavehull(db,dir,sig):
     return
 
 
+def intersEA(db,dir):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    #chec_qry = '''
+    #           SELECT type,name from SQLite_Master
+    #           WHERE type="table" AND name ="rdp_conhulls";
+    #           '''
+#
+    #drop_qry = '''
+    #           SELECT DisableSpatialIndex('rdp_conhulls','GEOMETRY');
+    #           SELECT DiscardGeometryColumn('rdp_conhulls','GEOMETRY');
+    #           DROP TABLE IF EXISTS idx_rdp_conhulls_GEOMETRY;
+    #           DROP TABLE IF EXISTS rdp_conhulls;
+    #           '''
+
+    make_qry = '''
+               CREATE TABLE rdp_hullsEA AS 
+               SELECT A.GEOMETRY, A.ea_code, B.cluster
+               FROM ea_2011 as A, rdp_conhulls as B
+               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+               WHERE f_table_name='ea_2011' AND search_frame=B.GEOMETRY)
+               AND st_intersects(A.GEOMETRY,B.GEOMETRY);
+               '''
+
+    # create hulls table
+    #cur.execute(chec_qry)
+    #result = cur.fetchall()
+    #if result:
+    #    cur.executescript(drop_qry)
+    cur.execute(make_qry)
+    #cur.execute("SELECT RecoverGeometryColumn('rdp_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
+    #cur.execute("SELECT CreateSpatialIndex('rdp_conhulls','GEOMETRY');")
+    con.commit()
+    con.close()
+
+    return
+
+
 def selfintersect(db,dir,bw):
 
     # connect to DB
@@ -244,8 +287,9 @@ def fetch_data(db,dir,bufftype,i):
 
     if i==5:
 
+        # transactions inside hulls
         qry ='''
-            SELECT e.property_id, r.rdp_all
+            SELECT e.property_id, r.rdp_never
             FROM erven AS e, rdp_conhulls AS h
             JOIN rdp AS r ON e.property_id = r.property_id
             WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
@@ -255,9 +299,10 @@ def fetch_data(db,dir,bufftype,i):
 
     if i==6:
 
+        # transactions inside buffers
         qry ='''
             SELECT st_x(e.GEOMETRY) AS x, st_y(e.GEOMETRY) AS y,
-                   e.property_id AS property_id, r.rdp_all, b.cluster AS cluster
+                   e.property_id AS property_id, r.rdp_never, b.cluster AS cluster
             FROM erven AS e, rdp_buffers_{} AS b
             JOIN rdp AS r ON e.property_id = r.property_id
             WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
@@ -288,8 +333,8 @@ def dist_calc(in_mat,targ_mat):
 def push_distNRDP2db(db,matrx,distances,coords):
 
     # Retrieve cluster IDS 
-    prop_id = pd.DataFrame(matrx[0][matrx[0][:,3]==0][:,2],columns=['pr_id'])
-    labels  = pd.DataFrame(matrx[1][matrx[1][:,1]==0][:,0],columns=['pr_id'])
+    prop_id = pd.DataFrame(matrx[0][matrx[0][:,3]==1][:,2],columns=['pr_id'])
+    labels  = pd.DataFrame(matrx[1][matrx[1][:,1]==1][:,0],columns=['pr_id'])
     prop_id = pd.merge(prop_id,labels,how='left',on='pr_id',
                 sort=False,indicator=True,validate='1:1').as_matrix()
     conhulls_id = coords[:,2][distances[1]].astype(np.float)
@@ -299,7 +344,7 @@ def push_distNRDP2db(db,matrx,distances,coords):
     
     cur.execute('''DROP TABLE IF EXISTS distance_nrdp;''')
     cur.execute(''' CREATE TABLE distance_nrdp (
-                    property_id VARCHAR(11) PRIMARY KEY,
+                    property_id INTEGER PRIMARY KEY,
                     distance    numeric(10,10), 
                     cluster     INTEGER); ''')
 

@@ -5,46 +5,76 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
-local rdp  = "`1'";
-local algo = "`2'";
-local par1 = "`3'";
-local par2 = "`4'";
-local bw   = "`5'";
-local sig  = "`6'";
-local type = "`7'";
+* RUN LOCALLY?;
+global LOCAL = 1;
 
 local qry = "
-	SELECT A.munic_name, A.purch_yr, A.purch_mo, A.purch_day,
-		    A.purch_price, A.trans_id, A.property_id, B.erf_size,
-        C.rdp_`rdp', C.ever_rdp_`rdp', C.gov, E.cluster, E.mode_yr, E.frac1, E.frac2,
-        D.`type'_dist, D.`type'_cluster, A.seller_name, B.latitude, B.longitude
-	FROM transactions AS A
-	JOIN erven AS B ON A.property_id = B.property_id
-  JOIN rdp   AS C ON A.trans_id = C.trans_id
-  LEFT JOIN distance_nrdp_`rdp'_`algo'_`par1'_`par2'_`bw'_`sig' 
-  AS D ON A.trans_id = D.trans_id
-  LEFT JOIN (SELECT trans_id, cluster, mode_yr, frac1, frac2
-             FROM rdp_clusters_`rdp'_`algo'_`par1'_`par2'
-             WHERE cluster != 0 ) AS E ON A.trans_id = E.trans_id
-  WHERE NOT (D.`type'_cluster IS NULL AND E.cluster IS NULL)
-  AND (D.`type'_cluster = D.nearest_cluster OR D.`type'_cluster IS NULL)
-	";
+  SELECT 
+
+         A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day,
+         A.purch_price, A.trans_id, A.property_id, A.seller_name,
+
+         B.erf_size, B.latitude, B.longitude, 
+
+         C.rdp_all, C.rdp_gcroonly, C.rdp_notownship, C.rdp_phtownship, C.gov,
+         C.no_seller_rdp, C.big_seller_rdp, C.rdp_never, C.trans_id as trans_id_rdp,
+
+         D.distance, D.cluster, 
+
+         E.cluster as cl, E.mode_yr, E.frac1, E.frac2, E.cluster_siz
+
+  FROM transactions AS A
+  JOIN erven AS B ON A.property_id = B.property_id
+  JOIN rdp   AS C ON B.property_id = C.property_id
+  LEFT JOIN distance_nrdp AS D ON B.property_id = D.property_id 
+  LEFT JOIN (SELECT property_id, cluster, mode_yr, frac1, frac2, cluster_siz
+       FROM rdp_clusters WHERE cluster != 0 ) AS E ON B.property_id = E.property_id
+  WHERE NOT (D.cluster IS NULL AND E.cluster IS NULL)
+  ";
+
+* set cd;
+cd ../..;
+if $LOCAL==1{;cd ..;};
+cd Generated/GAUTENG;
 
 * load data; 
-odbc query "lightstone";
+odbc query "gauteng";
 odbc load, exec("`qry'") clear;
 
 * set up frac vars;
-destring purch_yr purch_mo purch_day, replace;
-replace `type'_cluster=cluster if `type'_cluster==.;
+destring purch_yr purch_mo purch_day mun_code, replace;
+gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
+replace cluster=cl if cluster==.;
 foreach var in mode_yr frac1 frac2 {;
-   bys `type'_cluster: egen max = max(`var');
-   replace `var' = max if cluster ==.;
+   bys cluster: egen max = max(`var');
+   replace `var' = max if cl ==.;
    drop max;
 };
 
+* generate pre/post variables;
+gen post = (purch_yr >= mode_yr);
+gen abs_yrdist = abs(purch_yr - mode_yr); 
+
+* create date variables and dummies;
+gen day_date = mdy(purch_mo,purch_day,purch_yr);
+gen mo_date  = ym(purch_yr,purch_mo);
+gen con_day  = mdy(07,02,mode_yr);
+replace con_day = mdy(01,01,mode_yr+1 ) if mod(mode_yr,1)>0;
+gen con_mo   = ym(mode_yr,07);
+format day_date %td;
+format mo_date %tm;
+gen day2con = day_date - con_day;
+gen mo2con  = mo_date - con_mo;
+
+* gen required vars;
+gen lprice = log(purch_price);
+gen erf_size2 = erf_size^2;
+gen erf_size3 = erf_size^3;
+
+* identify bank sellers;
+
 * save data;
-save "`8'`type'_gradplot.dta", replace;
+save "gradplot.dta", replace;
 
 * exit stata;
-exit, STATA clear;  
+exit, STATA clear; 

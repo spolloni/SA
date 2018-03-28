@@ -67,7 +67,7 @@ def spatial_cluster(algo,par1,par2,database,suf):
     # create table 
     cur.execute('''
         CREATE TABLE rdp_clusters (
-            property_id      VARCHAR(11) PRIMARY KEY,
+            property_id   INTEGER PRIMARY KEY,
             cluster       INTEGER,
             cluster_siz   INTEGER,
             mode_yr       INTEGER,

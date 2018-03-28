@@ -17,7 +17,7 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.distfuns import selfintersect, concavehull
+from subcode.distfuns import selfintersect, concavehull, intersEA
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db
 import os, subprocess, shutil, multiprocessing, re, glob
@@ -56,7 +56,7 @@ _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
 _1_d_IMPORT = 0  # import GCRO + landplots
 
-_2_FLAGRDP_ = 0
+_2_FLAGRDP_ = 1
 
 _3_CLUSTER_ = 1 
 rdp  = 'all'     # Choose rdp definition. 
@@ -65,8 +65,8 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
 _4_a_DISTS_ = 1
-_4_b_DISTS_ = 0
-bw  = 1200        # bandwidth for clusters
+_4_b_DISTS_ = 1
+bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
 _5_a_PLOTS_ = 0
@@ -75,12 +75,6 @@ _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
 fr1 = 50         # percent constructed in mode year
 fr2 = 70         # percent constructed +-1 mode year
-typ = 'conhulls' # distance to nearest or centroid
-top = 99         # per cluster outlier remover (top)
-bot = 1          # per cluster outlier remover (bottom)
-mcl = 50         # minimum cluster size to keep
-tw  = 5          # take observations within `tw' years  
-res = 0          # =1 if keep rdp resale
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -219,7 +213,11 @@ if _4_a_DISTS_ ==1:
     concavehull(db,tempdir,sig)
     print '\n'," -- Concave Hulls: done! "'\n'
 
-    # 4.2 buffers and self-intersections
+    ## 4.2 intersecting EAs
+    #intersEA(db,tempdir)
+    #print '\n'," -- Intersecting EAs: done! "'\n'
+
+    # 4.3 buffers and self-intersections
     selfintersect(db,tempdir,bw)
     print '\n'," -- Self-Intersections: done! "'\n'
 
@@ -242,7 +240,7 @@ if _4_b_DISTS_ ==1:
     print '\n'," -- Data fetch: done! "'\n'
 
     # 4.5 calculate distances for non-rdp
-    inmat = matrx[0][matrx[0][:,3]==0][:,:2].astype(np.float) # filters for non-rdp
+    inmat = matrx[0][matrx[0][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
     targ_conhulls  = coords[:,:2].astype(np.float)
     dist = dist_calc(inmat,targ_conhulls)
     print '\n'," -- Non-RDP distance calculation: done! "'\n'
@@ -270,24 +268,23 @@ if _4_b_DISTS_ ==1:
 # STEP 5:  Make Gradient/Density  Plots     #
 #############################################
 
-salgo = str(algo)
-spar1 = re.sub("[^0-9]", "", str(par1))
-spar2 = re.sub("[^0-9]", "", str(par2))
-ssig  = re.sub("[^0-9]", "", str(sig))
-sbw   = str(bw)
-sfr1  = str(fr1)
-sfr2  = str(fr2)
-stop  = str(top)
-sbot  = str(bot)
-smcl  = str(mcl)
-stw   = str(tw)
-sres  = str(res)
+#salgo = str(algo)
+#spar1 = re.sub("[^0-9]", "", str(par1))
+#spar2 = re.sub("[^0-9]", "", str(par2))
+#ssig  = re.sub("[^0-9]", "", str(sig))
+#sbw   = str(bw)
+#sfr1  = str(fr1)
+#sfr2  = str(fr2)
+#stop  = str(top)
+#sbot  = str(bot)
+#smcl  = str(mcl)
+#stw   = str(tw)
+#sres  = str(res)
 
 if _5_a_PLOTS_ == 1:
 
     dofile = "subcode/export2gradplot.do"
-    cmd = ['stata-mp','do',dofile,rdp,salgo,
-                spar1,spar2,sbw,ssig,typ,gendata]
+    cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
 if _5_b_PLOTS_ == 1:
