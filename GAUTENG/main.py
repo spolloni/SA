@@ -55,8 +55,9 @@ _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
 _1_d_IMPORT = 0  # import GCRO + landplots
+_1_e_IMPORT = 0  # import GHS
 
-_2_FLAGRDP_ = 1
+_2_FLAGRDP_ = 0
 
 _3_CLUSTER_ = 1 
 rdp  = 'all'     # Choose rdp definition. 
@@ -174,6 +175,15 @@ if _1_d_IMPORT ==1:
 
     print '\n'," - GCRO data: done! "'\n'
 
+if _1_e_IMPORT ==1:
+
+    print '\n'," Importing GHS into SQL... ",'\n'
+    
+    dofile = "subcode/add_ghs.do"
+    cmd = ['stata-mp', 'do', dofile]
+    subprocess.call(cmd)    
+
+    print '\n'," - GHS data: done! "'\n'
 
 #############################################
 # STEP 2:  flag RDP properties              #
