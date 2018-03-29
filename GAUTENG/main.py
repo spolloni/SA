@@ -55,18 +55,18 @@ _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
 _1_d_IMPORT = 0  # import GCRO + landplots
-_1_e_IMPORT = 1  # import GHS
+_1_e_IMPORT = 0  # import GHS
 
-_2_FLAGRDP_ = 1
+_2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 0 
+_3_CLUSTER_ = 1 
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_a_DISTS_ = 0
-_4_b_DISTS_ = 0
+_4_a_DISTS_ = 1
+_4_b_DISTS_ = 1
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
