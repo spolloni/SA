@@ -240,11 +240,10 @@ if _4_b_DISTS_ ==1:
 
     BBLU_set = ['BBLU_pre_buff','BBLU_pre_hull', \
                   'BBLU_post_buff','BBLU_post_hull']
-    EA_set =   ['EA_2001_buff','EA_2011_buff',  \
+    EA_set   = ['EA_2001_buff','EA_2011_buff',  \
                 'EA_2001_hull','EA_2011_hull'  ]
     tran_set = ['tran_buff','tran_hull']
-
-    fetch_list =  BBLU_set + EA_set + tran_set
+    fetch_set = BBLU_set+EA_set+tran_set
 
     # 4.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
@@ -259,11 +258,11 @@ if _4_b_DISTS_ ==1:
 
     # 4.4 fetch BBLU & ea_codes & non-rdp in/out of hulls
     part_fetch_data = partial(fetch_data,db,tempdir,'intersect')
-    matrx = dict(zip(fetch_list,pp.map(part_fetch_data,fetch_list)))
+    matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
     print '\n'," -- Data fetch: done! "'\n'
 
     # 4.5 calculate distances for non-rdp
-    if set(fetch_list).issubset(set(tran_set)):
+    if len(tran_set)>0:
         inmat = matrx['tran_buff'][matrx['tran_buff'][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
         dist = dist_calc(inmat, coords[:,:2].astype(np.float) ) # second input is targ_conhulls
         print '\n'," -- Non-RDP distance calculation: done! "'\n'
@@ -273,7 +272,7 @@ if _4_b_DISTS_ ==1:
         print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
 
     # 4.7 calculate distances for BBLU points
-    if set(fetch_list).issubset(set(BBLU_set)):
+    if len(BBLU_set)>0:      
         inmat_pre  = matrx['BBLU_pre_buff'][:,:2].astype(np.float)        
         inmat_post = matrx['BBLU_post_buff'][:,:2].astype(np.float)
         part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
@@ -285,7 +284,7 @@ if _4_b_DISTS_ ==1:
         print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
 
     # 4.9 calculate distances for EA
-    if set(fetch_list).issubset(set(EA_set)):
+    if len(EA_set)>0:      
         dist_input=[ matrx[x][:,:2].astype(np.float) for x in ['EA_2001_buff','EA_2011_buff'] ]
         part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
         dist = dict(zip(['EA_2001_buff','EA_2011_buff'],pp.map(part_dist_calc, dist_input )))
@@ -300,6 +299,7 @@ if _4_b_DISTS_ ==1:
     # 4.11 kill parallel workers
     pp.close()
     pp.join()
+
 
 if _4_c_DISTS_ ==1:
 
