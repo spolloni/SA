@@ -19,7 +19,7 @@ from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.distfuns import selfintersect, concavehull, intersEA
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates
-from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_dist2db
+from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -293,7 +293,7 @@ if _4_b_DISTS_ ==1:
         # 4.10 retrieve IDs, populate table and push back to DB
         ID = 'ea_code'
         for e in ['EA_2001','EA_2011']:
-            push_dist2db(db,matrx,dist,coords,e,ID)
+            push_distCENSUS2db(db,matrx,dist,coords,e,ID)
         print '\n'," -- EA distance, Populate table / push to DB: done! "'\n'
 
     # 4.11 kill parallel workers

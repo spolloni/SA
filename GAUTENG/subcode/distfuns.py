@@ -424,7 +424,7 @@ def push_distBBLU2db(db,matrx,distances,coords):
     return
 
 
-def push_dist2db(db,matrx,distances,coords,INPUT,ID):
+def push_distCENSUS2db(db,matrx,distances,coords,INPUT,ID):
 
     # Retrieve cluster IDS
     buff = pd.DataFrame(matrx[INPUT+'_buff'][:,2],columns=[ID])
