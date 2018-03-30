@@ -345,8 +345,6 @@ def dist_calc(in_mat,targ_mat):
 
 def push_distNRDP2db(db,matrx,distances,coords):
 
-    test='' # this creates a duplicate to test side by side if the code changes work
-
     prop_id = pd.DataFrame(matrx['tran_buff']\
         [matrx['tran_buff'][:,3]==1][:,2],columns=['pr_id'])
     labels  = pd.DataFrame(matrx['tran_hull']\
@@ -358,13 +356,13 @@ def push_distNRDP2db(db,matrx,distances,coords):
     con = sql.connect(db)
     cur = con.cursor()
     
-    cur.execute('''DROP TABLE IF EXISTS distance_nrdp{};'''.format(test))
-    cur.execute(''' CREATE TABLE distance_nrdp{} (
+    cur.execute('''DROP TABLE IF EXISTS distance_nrdp;''')
+    cur.execute(''' CREATE TABLE distance_nrdp (
                     property_id INTEGER PRIMARY KEY,
                     distance    numeric(10,10), 
-                    cluster     INTEGER); '''.format(test))
+                    cluster     INTEGER); ''')
 
-    rowsqry = '''INSERT INTO distance_nrdp{} VALUES (?,?,?);'''.format(test)
+    rowsqry = '''INSERT INTO distance_nrdp VALUES (?,?,?);'''
 
     for i in range(len(prop_id[:,0])):
 
@@ -372,7 +370,7 @@ def push_distNRDP2db(db,matrx,distances,coords):
             distances[0][i][0] = -distances[0][i][0]     
         cur.execute(rowsqry, [prop_id[:,0][i], distances[0][i][0],conhulls_id[i][0]])
 
-    cur.execute('''CREATE INDEX dist_nrdp_ind{} ON distance_nrdp{} (property_id);'''.format(test,test))
+    cur.execute('''CREATE INDEX dist_nrdp_ind ON distance_nrdp (property_id);''')
 
     con.commit()
     con.close()
@@ -382,20 +380,18 @@ def push_distNRDP2db(db,matrx,distances,coords):
 
 def push_distBBLU2db(db,matrx,distances,coords):
 
-    test='' # this creates a duplicate to test side by side if the code changes work
-
     con = sql.connect(db)
     cur = con.cursor()
 
-    cur.execute('''DROP TABLE IF EXISTS distance_bblu{};'''.format(test))
+    cur.execute('''DROP TABLE IF EXISTS distance_bblu;''')
 
-    cur.execute(''' CREATE TABLE distance_bblu{} (
+    cur.execute(''' CREATE TABLE distance_bblu (
                 STR_FID   VARCHAR(11) PRIMARY KEY,
                 OGC_FID   VARCHAR(11),
                 distance  numeric(10,10), 
                 cluster   INTEGER,
                 period    VARCHAR(11));
-                '''.format(test))
+                ''')
 
     for t in ['pre','post']:
 
@@ -406,7 +402,7 @@ def push_distBBLU2db(db,matrx,distances,coords):
                         sort=False,indicator=True,validate='1:1').as_matrix()
         conhulls_id = coords[:,2][distances['BBLU_'+t+'_buff'][1]].astype(np.float)
 
-        rowsqry = '''INSERT INTO distance_bblu{} VALUES (?,?,?,?,?);'''.format(test)
+        rowsqry = '''INSERT INTO distance_bblu VALUES (?,?,?,?,?);'''
 
         for i in range(len(bblu_id[:,0])):
 
@@ -416,7 +412,7 @@ def push_distBBLU2db(db,matrx,distances,coords):
             cur.execute(rowsqry,[t+'_'+str(int(bblu_id[:,0][i])),int(bblu_id[:,0][i]),
                 distances['BBLU_'+t+'_buff'][0][i][0],conhulls_id[i][0],t])
 
-    cur.execute('''CREATE INDEX dist_bblu_ind{} ON distance_bblu{} (OGC_FID);'''.format(test,test))
+    cur.execute('''CREATE INDEX dist_bblu_ind ON distance_bblu (OGC_FID);''')
 
     con.commit()
     con.close()
