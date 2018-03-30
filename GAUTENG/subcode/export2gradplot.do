@@ -8,6 +8,8 @@ set maxvar 32767
 * RUN LOCALLY?;
 global LOCAL = 1;
 
+
+
 local qry = "
   SELECT 
 
