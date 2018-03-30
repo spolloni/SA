@@ -11,8 +11,7 @@ local qry = "
           B.gcro_publichousing_dist, B.gcro_townships_dist, B.bblu_pre
 
 	FROM transactions AS A
-	INNER JOIN erven AS B
-	  ON A.property_id = B.property_id
+	INNER JOIN erven AS B ON A.property_id = B.property_id
 	";
 
 cap program drop price_filter;
