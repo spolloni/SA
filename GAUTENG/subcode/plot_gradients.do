@@ -76,7 +76,6 @@ global ifhist = "
        ";
 
 * histogram transactions;
-
 local b = 12*$tw;
 tw
 (hist mo2con if rdp_never==1 & $ifhist, w(1) fc(none) lc(gs0))
@@ -86,15 +85,16 @@ xlabel(-`b'(12)`b')
 legend(order(1 "non-RDP" 2 "RDP")ring(0) position(2) bmargin(small));
 graphexportpdf summary_densitytime, dropeps;
 
-
-
 reg lprice b$max.dists#b0.post  i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg distplot distplot;
 
-
-
 reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg timeplot timeplot;
+
+
+
+
+
 
 
 
