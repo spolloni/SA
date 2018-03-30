@@ -4,31 +4,82 @@ set scheme s1mono
 set matsize 11000
 set maxvar 32767
 #delimit;
-
 ******************;
 *  PLOT DENSITY  *;
 ******************;
 
-* RUN LOCALLY?;
+global bin  = 20;
+global bw   = 1000;
+
+
 global LOCAL = 1;
-if $LOCAL==1{;cd ..;};
+global DATA_PREP = 0;
+	local temp_file "Generated/Gauteng/temp/plot_density_temp.dta";
+
+if $LOCAL==1 {;
+	cd ..;
+	global rdp  = "all";
+};
+cd ../..;
+
+if $DATA_PREP==1 {;
+  local qry = "
+  SELECT  B.STR_FID, B.distance, B.cluster, A.s_lu_code
+  FROM bblu_pre  AS A  JOIN distance_bblu AS B     ON A.STR_FID=B.STR_FID  WHERE A.s_lu_code=7.1 OR A.s_lu_code=7.2
+  	UNION
+  SELECT D.STR_FID, D.distance, D.cluster, C.s_lu_code
+  FROM bblu_post AS C  JOIN distance_bblu AS D    ON C.STR_FID=D.STR_FID   WHERE C.s_lu_code=7.1 OR C.s_lu_code=7.2
+  ";
+qui odbc query "gauteng";
+odbc load, exec("`qry'") clear;
+	g formal=s_lu_code=="7.1" 	;
+		drop s_lu_code 			;
+	g post=substr(STR_FID,1,4)=="post";
+		drop STR_FID 			;
+save `temp_file', replace;
+	};
+
+
+
+use `temp_file', clear;
+
+egen dists = cut(distance),at(-100($bin)$bw)	;  
+drop if dists==.							;
+drop distance ;
+
+bys dists post formal: g C=_N ;
+bys dists post formal: g nn=_n ;
+
+tw  
+	scatter C dists if nn==1 & post==0 & formal==0, yaxis(1) ||
+	scatter C dists if nn==1 & post==0 & formal==1, yaxis(1) ||
+	scatter C dists if nn==1 & post==1 & formal==0, yaxis(1) ||
+	scatter C dists if nn==1 & post==1 & formal==1, yaxis(1)	
+	, legend(order(1 "pre inf" 2 "pre for" 3 "post inf" 4 "post for")) ;
+
+
+
+*tw  
+*	scatter C dists if nn==1 & post==0 & formal==0, yaxis(1) ||
+*	scatter C dists if nn==1 & post==0 & formal==1, yaxis(1) 	
+*	, legend(order(1 "pre inf" 2 "pre for")) ;
+
+
+
+/*
 
 * set parameters;
-do subcode/parameters.do
-`1'  `2'  `3'  `4'  `5'  `6'  `7'  `8'
-`9' `10' `11' `12' `13' `14' `15' `16'; 
-global bin   = 20;
+* PARAMETERS;
+global rdp  = "`1'";
+*global top  = "99";
+*global bot  = "1";
+global tw   = "4";
+global bin  = 20;
 
-* import plotreg program;
-do subcode/import_plotreg.do; 
+*   import plotreg program;
+* do subcode/import_plotreg.do; 
 
-* set cd;
-cd "$cd";
-
-* load data; 
-use "${data}/bblu_densityplot.dta", clear;
-
-* indicate post-waves from pre-waves;
+* indicate post-waves from pre-waves;m
 gen post = (substr(STR_FID,1,4)=="post");
 
 * remove clusters with no pre;

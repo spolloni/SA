@@ -19,7 +19,8 @@ from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.distfuns import selfintersect, concavehull, intersEA
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates
-from subcode.distfuns import push_distNRDP2db, push_distBBLU2db
+from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
+
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
 import numpy  as np
@@ -59,16 +60,19 @@ _1_e_IMPORT = 0  # import GHS
 
 _2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 1 
+_3_CLUSTER_ = 0
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_a_DISTS_ = 1
+_4_a_DISTS_ = 0
 _4_b_DISTS_ = 1
+_4_c_DISTS_ = 0
+
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
+
 
 _5_a_PLOTS_ = 0
 _5_b_PLOTS_ = 0
@@ -224,14 +228,22 @@ if _4_a_DISTS_ ==1:
     print '\n'," -- Concave Hulls: done! "'\n'
 
     ## 4.2 intersecting EAs
-    #intersEA(db,tempdir)
-    #print '\n'," -- Intersecting EAs: done! "'\n'
+    intersEA(db,tempdir,'2001')   
+    intersEA(db,tempdir,'2011')
+    print '\n'," -- Intersecting EAs: done! "'\n'
 
     # 4.3 buffers and self-intersections
     selfintersect(db,tempdir,bw)
     print '\n'," -- Self-Intersections: done! "'\n'
 
 if _4_b_DISTS_ ==1:
+
+    BBLU_set = ['BBLU_pre_buff','BBLU_pre_hull', \
+                  'BBLU_post_buff','BBLU_post_hull']
+    EA_set   = ['EA_2001_buff','EA_2011_buff',  \
+                'EA_2001_hull','EA_2011_hull'  ]
+    tran_set = ['tran_buff','tran_hull']
+    fetch_set = BBLU_set+EA_set+tran_set
 
     # 4.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
@@ -243,6 +255,55 @@ if _4_b_DISTS_ ==1:
     for grid in grids: shutil.copy(grid, tempdir)
     coords = hulls_coordinates(db,tempdir).as_matrix()
     print '\n'," -- Assemble hull coordinates: done! "'\n'
+
+    # 4.4 fetch BBLU & ea_codes & non-rdp in/out of hulls
+    part_fetch_data = partial(fetch_data,db,tempdir,'intersect')
+    matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
+    print '\n'," -- Data fetch: done! "'\n'
+
+    # 4.5 calculate distances for non-rdp
+    if len(tran_set)>0:
+        inmat = matrx['tran_buff'][matrx['tran_buff'][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
+        dist = dist_calc(inmat, coords[:,:2].astype(np.float) ) # second input is targ_conhulls
+        print '\n'," -- Non-RDP distance calculation: done! "'\n'
+
+        # 4.6 retrieve IDs, populate table and push back to DB
+        push_distNRDP2db(db,matrx,dist,coords)
+        print '\n'," -- NRDP distance, Populate table / push to DB: done! "'\n'
+
+    # 4.7 calculate distances for BBLU points
+    if len(BBLU_set)>0:      
+        inmat_pre  = matrx['BBLU_pre_buff'][:,:2].astype(np.float)        
+        inmat_post = matrx['BBLU_post_buff'][:,:2].astype(np.float)
+        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
+        dist = dict(zip(['BBLU_pre_buff','BBLU_post_buff'],pp.map(part_dist_calc,[inmat_pre,inmat_post])))
+        print '\n'," -- BBLU distance calculation: done! "'\n'
+
+        # 4.8 retrieve IDs, populate table and push back to DB
+        push_distBBLU2db(db,matrx,dist,coords)
+        print '\n'," -- BBLU distance, Populate table / push to DB: done! "'\n'
+
+    # 4.9 calculate distances for EA
+    if len(EA_set)>0:      
+        dist_input=[ matrx[x][:,:2].astype(np.float) for x in ['EA_2001_buff','EA_2011_buff'] ]
+        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
+        dist = dict(zip(['EA_2001_buff','EA_2011_buff'],pp.map(part_dist_calc, dist_input )))
+        print '\n'," -- EA distance calculation: done! "'\n'
+
+        # 4.10 retrieve IDs, populate table and push back to DB
+        ID = 'ea_code'
+        for e in ['EA_2001','EA_2011']:
+            push_distCENSUS2db(db,matrx,dist,coords,e,ID)
+        print '\n'," -- EA distance, Populate table / push to DB: done! "'\n'
+
+    # 4.11 kill parallel workers
+    pp.close()
+    pp.join()
+
+
+if _4_c_DISTS_ ==1:
+
+    # calculate distances for ea codes
 
     # 4.4 fetch BBLU & non-rdp in/out of hulls
     part_fetch_data = partial(fetch_data,db,tempdir,'intersect')
@@ -273,6 +334,7 @@ if _4_b_DISTS_ ==1:
     # 4.9 kill parallel workers
     pp.close()
     pp.join()
+
 
 #############################################
 # STEP 5:  Make Gradient/Density  Plots     #

@@ -74,7 +74,7 @@ def concavehull(db,dir,sig):
     return
 
 
-def intersEA(db,dir):
+def intersEA(db,dir,year):
 
     # connect to DB
     con = sql.connect(db)
@@ -82,35 +82,17 @@ def intersEA(db,dir):
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
-    #chec_qry = '''
-    #           SELECT type,name from SQLite_Master
-    #           WHERE type="table" AND name ="rdp_conhulls";
-    #           '''
-#
-    #drop_qry = '''
-    #           SELECT DisableSpatialIndex('rdp_conhulls','GEOMETRY');
-    #           SELECT DiscardGeometryColumn('rdp_conhulls','GEOMETRY');
-    #           DROP TABLE IF EXISTS idx_rdp_conhulls_GEOMETRY;
-    #           DROP TABLE IF EXISTS rdp_conhulls;
-    #           '''
-
+    cur.execute('DROP TABLE IF EXISTS rdp_ea_int_{};'.format(year))
     make_qry = '''
-               CREATE TABLE rdp_hullsEA AS 
-               SELECT A.GEOMETRY, A.ea_code, B.cluster
-               FROM ea_2011 as A, rdp_conhulls as B
+               CREATE TABLE rdp_ea_int_{} AS 
+               SELECT A.GEOMETRY, A.ea_code, B.cluster, 
+               st_area(st_intersection(A.GEOMETRY,B.GEOMETRY)) / st_area(A.GEOMETRY) AS area_int
+               FROM ea_{} as A, rdp_conhulls as B
                WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
-               WHERE f_table_name='ea_2011' AND search_frame=B.GEOMETRY)
+               WHERE f_table_name='ea_{}' AND search_frame=B.GEOMETRY)
                AND st_intersects(A.GEOMETRY,B.GEOMETRY);
-               '''
-
-    # create hulls table
-    #cur.execute(chec_qry)
-    #result = cur.fetchall()
-    #if result:
-    #    cur.executescript(drop_qry)
+               '''.format(year,year,year)
     cur.execute(make_qry)
-    #cur.execute("SELECT RecoverGeometryColumn('rdp_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
-    #cur.execute("SELECT CreateSpatialIndex('rdp_conhulls','GEOMETRY');")
     con.commit()
     con.close()
 
@@ -241,7 +223,7 @@ def hulls_coordinates(db,dir):
 
 def fetch_data(db,dir,bufftype,i):
 
-    if i==1:
+    if i=='BBLU_pre_buff':
 
         # BBLU pre points in buffers
         qry ='''
@@ -252,7 +234,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(p.GEOMETRY,b.GEOMETRY);
             '''.format(bufftype)
 
-    if i==2:
+    if i=='BBLU_pre_hull':
 
         # BBLU pre points in hulls
         qry ='''
@@ -263,7 +245,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(p.GEOMETRY,h.GEOMETRY);
             '''
 
-    if i==3:
+    if i=='BBLU_post_buff':
 
         # BBLU post points in buffers
         qry ='''
@@ -274,7 +256,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(p.GEOMETRY,b.GEOMETRY);
             '''.format(bufftype)
 
-    if i==4:
+    if i=='BBLU_post_hull':
 
         # BBLU post points in hulls
         qry ='''
@@ -285,7 +267,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(p.GEOMETRY,h.GEOMETRY);
             '''
 
-    if i==5:
+    if i=='tran_hull':
 
         # transactions inside hulls
         qry ='''
@@ -297,7 +279,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(e.GEOMETRY,h.GEOMETRY)
             '''
 
-    if i==6:
+    if i=='tran_buff':
 
         # transactions inside buffers
         qry ='''
@@ -309,6 +291,37 @@ def fetch_data(db,dir,bufftype,i):
                     WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
             AND st_within(e.GEOMETRY,b.GEOMETRY) 
             '''.format(bufftype)
+
+    if i=='EA_2001_buff' or i=='EA_2011_buff':
+        # EA centroids inside buffers 
+        if i=='EA_2001_buff':
+            yr='2001'
+        if i=='EA_2011_buff':
+            yr='2011'
+
+        qry ='''
+            SELECT st_x(st_centroid(e.GEOMETRY)) AS x, st_y(st_centroid(e.GEOMETRY)) AS y,
+                   e.ea_code, b.cluster AS cluster
+            FROM ea_{} AS e, rdp_buffers_{} AS b
+            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='ea_{}' AND search_frame=b.GEOMETRY)
+            AND st_within(e.GEOMETRY,b.GEOMETRY) 
+            '''.format(yr,bufftype,yr)
+
+    if i=='EA_2001_hull' or i=='EA_2011_hull':
+        # EA centroids inside hulls 
+        if i=='EA_2001_hull':
+            yr='2001'
+        if i=='EA_2011_hull':
+            yr='2011'
+
+        qry ='''
+            SELECT p.ea_code
+            FROM ea_{} AS p, rdp_conhulls AS h
+            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='ea_{}' AND search_frame=h.GEOMETRY)
+            AND st_within(p.GEOMETRY,h.GEOMETRY);
+            '''.format(yr,yr)
 
     # fetch data
     con = sql.connect(db)
@@ -332,9 +345,10 @@ def dist_calc(in_mat,targ_mat):
 
 def push_distNRDP2db(db,matrx,distances,coords):
 
-    # Retrieve cluster IDS 
-    prop_id = pd.DataFrame(matrx[0][matrx[0][:,3]==1][:,2],columns=['pr_id'])
-    labels  = pd.DataFrame(matrx[1][matrx[1][:,1]==1][:,0],columns=['pr_id'])
+    prop_id = pd.DataFrame(matrx['tran_buff']\
+        [matrx['tran_buff'][:,3]==1][:,2],columns=['pr_id'])
+    labels  = pd.DataFrame(matrx['tran_hull']\
+        [matrx['tran_hull'][:,1]==1][:,0],columns=['pr_id'])
     prop_id = pd.merge(prop_id,labels,how='left',on='pr_id',
                 sort=False,indicator=True,validate='1:1').as_matrix()
     conhulls_id = coords[:,2][distances[1]].astype(np.float)
@@ -381,29 +395,22 @@ def push_distBBLU2db(db,matrx,distances,coords):
 
     for t in ['pre','post']:
 
-        if t == 'pre':
-            int1 = 1
-            int2 = 2
-        else:
-            int1 = 0
-            int2 = 0
-
         # Retrieve cluster IDS 
-        bblu_id  = pd.DataFrame(matrx[int(3+int2)][:,2],columns=['ogc_fid'])
-        bblu_lab = pd.DataFrame(matrx[int(2+int2)],columns=['ogc_fid']).drop_duplicates()
+        bblu_id  = pd.DataFrame(matrx['BBLU_'+t+'_buff'][:,2],columns=['ogc_fid'])
+        bblu_lab = pd.DataFrame(matrx['BBLU_'+t+'_hull'],columns=['ogc_fid']).drop_duplicates()
         bblu_id  = pd.merge(bblu_id,bblu_lab,how='left',on='ogc_fid',
                         sort=False,indicator=True,validate='1:1').as_matrix()
-        conhulls_id = coords[:,2][distances[int1][1]].astype(np.float)
+        conhulls_id = coords[:,2][distances['BBLU_'+t+'_buff'][1]].astype(np.float)
 
         rowsqry = '''INSERT INTO distance_bblu VALUES (?,?,?,?,?);'''
 
         for i in range(len(bblu_id[:,0])):
 
             if bblu_id[:,1][i] == 'both':
-                distances[int1][0][i][0] = -distances[int1][0][i][0]
+                distances['BBLU_'+t+'_buff'][0][i][0] = -distances['BBLU_'+t+'_buff'][0][i][0]
     
             cur.execute(rowsqry,[t+'_'+str(int(bblu_id[:,0][i])),int(bblu_id[:,0][i]),
-                distances[int1][0][i][0],conhulls_id[i][0],t])
+                distances['BBLU_'+t+'_buff'][0][i][0],conhulls_id[i][0],t])
 
     cur.execute('''CREATE INDEX dist_bblu_ind ON distance_bblu (OGC_FID);''')
 
@@ -412,4 +419,39 @@ def push_distBBLU2db(db,matrx,distances,coords):
 
     return
 
-   
+
+def push_distCENSUS2db(db,matrx,distances,coords,INPUT,ID):
+
+    # Retrieve cluster IDS
+    buff = pd.DataFrame(matrx[INPUT+'_buff'][:,2],columns=[ID])
+    hull = pd.DataFrame(matrx[INPUT+'_hull'],columns=[ID]).drop_duplicates()
+
+    full_id = pd.merge(buff,hull,how='left',on=ID,
+                sort=False,indicator=True,validate='1:1').as_matrix()
+    conhulls_id = coords[:,2][distances[INPUT+'_buff'][1]].astype(np.float)
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    
+    cur.execute('''DROP TABLE IF EXISTS distance_{};'''.format(INPUT))
+    cur.execute(''' CREATE TABLE distance_{} (
+                    {} INTEGER PRIMARY KEY,
+                    distance    numeric(10,10), 
+                    cluster     INTEGER); '''.format(INPUT,ID))
+
+    rowsqry = '''INSERT INTO distance_{} VALUES (?,?,?);'''.format(INPUT)
+
+    for i in range(len(full_id[:,0])):
+
+        if full_id[:,1][i] == 'both':
+            distances[INPUT+'_buff'][0][i][0] = -distances[INPUT+'_buff'][0][i][0]     
+        cur.execute(rowsqry, [full_id[:,0][i], distances[INPUT+'_buff'][0][i][0],conhulls_id[i][0]])
+
+    cur.execute('''CREATE INDEX dist_{} ON distance_{} ({});'''.format(INPUT,INPUT,ID))
+
+    con.commit()
+    con.close()
+
+    return
+
+
