@@ -218,6 +218,24 @@ def hulls_coordinates(db,dir):
     coords.columns = ['x','y']
     coords = pd.concat([coords,stack_df['cluster']],axis=1)
 
+    # stash in DB 
+    con = sql.connect(db)
+    coords.to_sql('coords',con,if_exists='replace',index=False)
+    con.commit()
+    con.close()
+
+    return
+
+
+def fetch_coordinates(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('SELECT * FROM coords')
+    coords = np.array(cur.fetchall())
+
+    con.close()
+
     return coords
 
 
@@ -267,7 +285,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(p.GEOMETRY,h.GEOMETRY);
             '''
 
-    if i=='tran_hull':
+    if i=='trans_hull':
 
         # transactions inside hulls
         qry ='''
@@ -279,7 +297,7 @@ def fetch_data(db,dir,bufftype,i):
             AND st_within(e.GEOMETRY,h.GEOMETRY)
             '''
 
-    if i=='tran_buff':
+    if i=='trans_buff':
 
         # transactions inside buffers
         qry ='''
@@ -345,10 +363,10 @@ def dist_calc(in_mat,targ_mat):
 
 def push_distNRDP2db(db,matrx,distances,coords):
 
-    prop_id = pd.DataFrame(matrx['tran_buff']\
-        [matrx['tran_buff'][:,3]==1][:,2],columns=['pr_id'])
-    labels  = pd.DataFrame(matrx['tran_hull']\
-        [matrx['tran_hull'][:,1]==1][:,0],columns=['pr_id'])
+    prop_id = pd.DataFrame(matrx['trans_buff']\
+        [matrx['trans_buff'][:,3]==1][:,2],columns=['pr_id'])
+    labels  = pd.DataFrame(matrx['trans_hull']\
+        [matrx['trans_hull'][:,1]==1][:,0],columns=['pr_id'])
     prop_id = pd.merge(prop_id,labels,how='left',on='pr_id',
                 sort=False,indicator=True,validate='1:1').as_matrix()
     conhulls_id = coords[:,2][distances[1]].astype(np.float)

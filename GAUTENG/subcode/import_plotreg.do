@@ -58,8 +58,6 @@ program plotreg;
 
    if "`1'" == "timeplot" {;
 
-      
-      
       replace contin = -1*(contin - 1000) if contin>1000;
       replace contin = $mbin*contin;
       *drop if contin == 0;

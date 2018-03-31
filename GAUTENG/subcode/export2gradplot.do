@@ -8,8 +8,6 @@ set maxvar 32767
 * RUN LOCALLY?;
 global LOCAL = 1;
 
-
-
 local qry = "
   SELECT 
 
@@ -69,8 +67,6 @@ gen mo2con  = mo_date - con_mo;
 gen lprice = log(purch_price);
 gen erf_size2 = erf_size^2;
 gen erf_size3 = erf_size^3;
-
-* identify bank sellers;
 
 * save data;
 save "gradplot.dta", replace;
