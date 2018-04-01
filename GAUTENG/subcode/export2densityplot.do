@@ -52,7 +52,6 @@ if $LOCAL==1{;cd ..;};
 
 
 
-
 destring purch_yr purch_mo purch_day, replace;
 keep munic_name prov_code cluster mode_yr frac1 frac2 perimeter area;
 bys cluster: keep if _n==1;

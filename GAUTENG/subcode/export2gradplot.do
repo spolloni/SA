@@ -8,8 +8,6 @@ set maxvar 32767
 * RUN LOCALLY?;
 global LOCAL = 1;
 
-
-
 local qry = "
   SELECT 
 
@@ -53,11 +51,8 @@ foreach var in mode_yr frac1 frac2 {;
    drop max;
 };
 
-* generate pre/post variables;
-gen post = (purch_yr >= mode_yr);
-gen abs_yrdist = abs(purch_yr - mode_yr); 
-
 * create date variables and dummies;
+gen abs_yrdist = abs(purch_yr - mode_yr); 
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen con_day  = mdy(07,02,mode_yr);
@@ -72,8 +67,6 @@ gen mo2con  = mo_date - con_mo;
 gen lprice = log(purch_price);
 gen erf_size2 = erf_size^2;
 gen erf_size3 = erf_size^3;
-
-* identify bank sellers;
 
 * save data;
 save "gradplot.dta", replace;
