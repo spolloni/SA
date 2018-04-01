@@ -339,19 +339,6 @@ if _4_d_DISTS_ ==1:
 # STEP 5:  Make Gradient/Density  Plots     #
 #############################################
 
-#salgo = str(algo)
-#spar1 = re.sub("[^0-9]", "", str(par1))
-#spar2 = re.sub("[^0-9]", "", str(par2))
-#ssig  = re.sub("[^0-9]", "", str(sig))
-#sbw   = str(bw)
-#sfr1  = str(fr1)
-#sfr2  = str(fr2)
-#stop  = str(top)
-#sbot  = str(bot)
-#smcl  = str(mcl)
-#stw   = str(tw)
-#sres  = str(res)
-
 if _5_a_PLOTS_ == 1:
 
     dofile = "subcode/export2gradplot.do"
@@ -359,12 +346,6 @@ if _5_a_PLOTS_ == 1:
     subprocess.call(cmd)
 
 if _5_b_PLOTS_ == 1:
-
-    output = outdir+"gradplots/RDP{}_{}_alg{}_".format(rdp,typ,algo)
-    output = output+"{}_{}_bw{}_fr{}_{}_".format(spar1,spar2,bw,sfr1,sfr2)
-    output = output+"tb{}_{}_m{}_tw{}_res{}".format(stop,sbot,smcl,stw,sres)
-    shutil.rmtree(output,ignore_errors=True)
-    os.makedirs(output)
 
     dofile = "subcode/plot_gradients.do"
     cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,ssig,
