@@ -10,13 +10,14 @@ set maxvar 32767
 *******************;
 
 * PARAMETERS;
-global rdp  = "`1'";
-global fr1  = "0.5";
-global fr2  = "0.5";
-global tw   = "4";   /* look at +-tw years to construction */
-global bin  = 100;   /* distance bin width for dist regs   */
-global mbin =  6;    /* months bin width for time-series   */
-global msiz = 50;    /* minimum obs per cluster            */
+global rdp   = "`1'";
+global fr1   = "0.5";
+global fr2   = "0.5";
+global tw    = "4";   /* look at +-tw years to construction */
+global bin   = 100;   /* distance bin width for dist regs   */
+global mbin  =  6;    /* months bin width for time-series   */
+global msiz  = 50;    /* minimum obs per cluster            */
+global treat = 300; 
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -40,7 +41,7 @@ cd Output/GAUTENG/gradplots;
 * regression dummies;
 *gen post = (purch_yr >= mode_yr);
 gen post  =  mo2con>=0;
-gen treat =  (distance <= 300);
+gen treat =  (distance <= $treat);
 
 * create distance dummies;
 sum distance;

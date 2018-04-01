@@ -73,8 +73,8 @@ _4_d_DISTS_ = 1  # EA distance
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
-_5_a_PLOTS_ = 0
-_5_b_PLOTS_ = 0
+_5_a_PLOTS_ = 1
+_5_b_PLOTS_ = 1
 _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
 fr1 = 50         # percent constructed in mode year
@@ -348,8 +348,7 @@ if _5_a_PLOTS_ == 1:
 if _5_b_PLOTS_ == 1:
 
     dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,ssig,
-            typ,sfr1,sfr2,stop,sbot,smcl,stw,sres,gendata,output]
+    cmd = ['stata-mp','do',rdp]
     subprocess.call(cmd)
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'

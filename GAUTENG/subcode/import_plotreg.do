@@ -74,7 +74,7 @@ program plotreg;
       ytitle("log-price coefficient",height(5))
       xlabel(-$bound($step)$bound)
       ylabel(-1(.5)1,labsize(small))
-      legend(order(3 "far" 4 "near")
+      legend(order(3 "far" 4 "near (< ${treat}m)")
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none))) note("`3'");
       graphexportpdf `2', dropeps;
