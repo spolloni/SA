@@ -66,10 +66,10 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_a_DISTS_ = 1  # buffers and hull creation
-_4_b_DISTS_ = 1  # non-RDP distance
-_4_c_DISTS_ = 1  # BBLU istance
-_4_d_DISTS_ = 1  # EA distance 
+_4_a_DISTS_ = 0  # buffers and hull creation
+_4_b_DISTS_ = 0  # non-RDP distance
+_4_c_DISTS_ = 0  # BBLU istance
+_4_d_DISTS_ = 1  # EA and SP distance 
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
@@ -305,7 +305,7 @@ if _4_c_DISTS_ ==1:
 
 if _4_d_DISTS_ ==1:
 
-    print '\n'," Distance part D: distances for EAs... ",'\n'
+    print '\n'," Distance part D: distances for EAs and SPs... ",'\n'
 
     # 4d.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
@@ -313,23 +313,22 @@ if _4_d_DISTS_ ==1:
     # 4d.1 fetch hull coordinates
     coords = fetch_coordinates(db)
 
-    # 4d.2 EA in/out of hulls
-    fetch_set = ['EA_2001_buff','EA_2011_buff','EA_2001_hull','EA_2011_hull']
-    part_fetch_data = partial(fetch_data,db,tempdir,'intersect')
-    matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-    print '\n'," -- Data fetch: done! "'\n'
-
-    # 4d.3 calculate distances for EA  
-    dist_input=[matrx[x][:,:2].astype(np.float) for x in ['EA_2001_buff','EA_2011_buff']]
-    part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
-    dist = dict(zip(['EA_2001_buff','EA_2011_buff'],pp.map(part_dist_calc,dist_input)))
-    print '\n'," -- EA distance calculation: done! "'\n'
-
-    # 4d.4 retrieve IDs, populate table and push back to DB
-    ID = 'ea_code'
-    for e in ['EA_2001','EA_2011']:
-        push_distCENSUS2db(db,matrx,dist,coords,e,ID)
-    print '\n'," -- EA distance, Populate table / push to DB: done! "'\n'
+    for GEO in ['EA','SP']:
+        # 4d.2 EA and SP in/out of hulls
+        fetch_set = [GEO+'_2001_buff',GEO+'_2011_buff',GEO+'_2001_hull',GEO+'_2011_hull']
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect')
+        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
+        print '\n'," -- Data fetch: done! "'\n'
+        # 4d.3 calculate distances for EA and SP
+        dist_input=[matrx[x][:,:2].astype(np.float) for x in [GEO+'_2001_buff',GEO+'_2011_buff']]
+        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
+        dist = dict(zip([GEO+'_2001_buff',GEO+'_2011_buff'],pp.map(part_dist_calc,dist_input)))
+        print '\n'," -- "+GEO+" distance calculation: done! "'\n'
+        # 4d.4 retrieve IDs, populate table and push back to DB
+        ID = GEO.lower()+'_code'
+        for e in [GEO+'_2001',GEO+'_2011']:
+            push_distCENSUS2db(db,matrx,dist,coords,e,ID)
+        print '\n'," -- "+GEO+" distance, Populate table / push to DB: done! "'\n'
 
     # 4d.5 kill parallel workers
     pp.close()
