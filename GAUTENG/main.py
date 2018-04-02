@@ -69,7 +69,7 @@ par2 = 50        # Parameter setting #2 for Clustering  #77,50
 _4_a_DISTS_ = 0  # buffers and hull creation
 _4_b_DISTS_ = 0  # non-RDP distance
 _4_c_DISTS_ = 0  # BBLU istance
-_4_d_DISTS_ = 1  # EA and SP distance 
+_4_d_DISTS_ = 0  # EA and SP distance 
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
@@ -79,6 +79,85 @@ _5_c_PLOTS_ = 0
 _5_d_PLOTS_ = 0 
 fr1 = 50         # percent constructed in mode year
 fr2 = 70         # percent constructed +-1 mode year
+
+
+
+
+count_pre  = 20 # upper-bound on pre formal structures in project area
+count_post = 20 # upper-bound on post formal structures in project area
+
+keywords   = [\
+                'Informal', \
+                'Planning',\
+                'Proposed',\
+                'Investigating',\
+                'future',\
+                'Essential'] # creates dummies for projects with these terms
+keep_condition = 0 # limits to projects with keywords
+
+def make_gcro_test(db,count_pre,count_post,keywords,keep_condition):
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    var_gen=''
+    var_cond=''
+    if len(keywords)>0:
+        var_cond = ' AND ('
+        for k in keywords:
+            var_gen=var_gen+' , CASE WHEN G.descriptio LIKE \'%'+k+'%\' THEN 1 ELSE 0 END as '+k.lower()
+            var_cond= var_cond + 'G.descriptio LIKE \'%' + k + '%\''
+            if k!=keywords[-1]:
+                var_cond = var_cond + ' OR '
+        var_cond = var_cond + ')'
+
+    if keep_condition==0:
+        var_cond=''
+
+    for bbfile in ['pre','post']:
+        cur.execute('DROP TABLE IF EXISTS gcro_test_{};'.format(bbfile))
+        make_qry = '''
+                   CREATE TABLE gcro_test_{} AS 
+                   SELECT G.OGC_FID, 
+                   SUM(CASE WHEN A.s_lu_code="7.1" THEN 1 ELSE 0 END) as formal_{},
+                   SUM(CASE WHEN A.s_lu_code="7.2" THEN 1 ELSE 0 END) as informal_{}
+                   FROM bblu_{} as A, gcro_publichousing as G
+                   WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                   WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
+                   AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
+                   GROUP BY G.OGC_FID
+                   ;
+                   '''.format(bbfile,bbfile,bbfile,bbfile,bbfile)
+        cur.execute(make_qry)
+
+    cur.execute('DROP TABLE IF EXISTS placebo_conhulls;')
+    make_qry = '''
+               CREATE TABLE placebo_conhulls AS 
+               SELECT G.ROWID+1000 as cluster, G.GEOMETRY,
+                    G.OGC_FID as OGC_FID_gcro , 
+                    A.formal_pre, A.informal_pre, B.formal_post, B.informal_post
+                    {}
+               FROM gcro_publichousing as G
+                JOIN gcro_test_pre as A ON A.OGC_FID = G.OGC_FID 
+                JOIN gcro_test_post as B ON B.OGC_FID = G.OGC_FID
+                WHERE A.formal_pre<={} AND B.formal_post<={}
+                {}
+               ;
+               '''.format(var_gen,count_pre,count_post,var_cond)
+
+    cur.execute(make_qry) 
+    cur.execute('DROP TABLE IF EXISTS gcro_test_pre;')    
+    cur.execute('DROP TABLE IF EXISTS gcro_test_post;')  
+
+    con.commit()
+    con.close()
+
+make_gcro_test(db,count_pre,count_post,keywords,keep_condition)
+
+
+
+
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -230,9 +309,9 @@ if _4_a_DISTS_ ==1:
     print '\n'," -- Concave Hulls: done! "'\n'
 
     # 4a.2 intersecting EAs
-    intersEA(db,tempdir,'2001')   
-    intersEA(db,tempdir,'2011')
-    print '\n'," -- Intersecting EAs: done! "'\n'
+#    intersEA(db,tempdir,'2001')   
+#    intersEA(db,tempdir,'2011')
+#    print '\n'," -- Intersecting EAs: done! "'\n'
 
     # 4a.3 buffers and self-intersections
     selfintersect(db,tempdir,bw)
