@@ -2,12 +2,6 @@
 main.py
 
     created by: sp, oct 9 2017
-    
-    - _1_IMPORT__: import all raw data into DB.
-    - _2_FLAGRDP_: select sample and flag RDP.
-    - _3_CLUSTER_: assign RDP to spatial cluster.
-    - _4_DISTANCE: find distance and cluster ID for non-RDP.
-    - _5_PLOTS___: make house-price gradient plots/ regs.
 
 '''
 
@@ -66,15 +60,17 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_a_DISTS_ = 0  # buffers and hull creation
-_4_b_DISTS_ = 0  # non-RDP distance
-_4_c_DISTS_ = 0  # BBLU istance
-_4_d_DISTS_ = 0  # EA distance 
+_4_PLACEBO_ = 0
+
+_5_a_DISTS_ = 0  # buffers and hull creation
+_5_b_DISTS_ = 0  # non-RDP distance
+_5_c_DISTS_ = 0  # BBLU istance
+_5_d_DISTS_ = 0  # EA distance 
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
-_5_a_PLOTS_ = 0
-_5_b_PLOTS_ = 0
+_6_a_PLOTS_ = 0
+_6_b_PLOTS_ = 0
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -211,10 +207,22 @@ if _3_CLUSTER_ ==1:
     print '\n'," -- clustering RDP: done! "'\n'
 
 #############################################
-# STEP 4:  Distance to RDP for non-RDP      #
+# STEP 4:  Placebo RDP from GCRO            #
 #############################################
 
-if _4_a_DISTS_ ==1:
+if _4_PLACEBO_ = 1:
+
+    print '\n'," Defining Placebo RDPs ... ",'\n'
+
+
+
+    print '\n'," -- Placebo RDPs: done! "'\n'
+
+#############################################
+# STEP 5:  Distance to RDP for non-RDP      #
+#############################################
+
+if _5_a_DISTS_ ==1:
 
     print '\n'," Distance part A: Creating tables and polygons... ",'\n'
 
@@ -240,7 +248,7 @@ if _4_a_DISTS_ ==1:
     hulls_coordinates(db,tempdir)
     print '\n'," -- Assemble hull coordinates: done! "'\n'
 
-if _4_b_DISTS_ ==1:
+if _5_b_DISTS_ ==1:
 
     print '\n'," Distance part B: distances for non-RDP... ",'\n'
 
@@ -269,7 +277,7 @@ if _4_b_DISTS_ ==1:
     pp.close()
     pp.join()
 
-if _4_c_DISTS_ ==1:
+if _5_c_DISTS_ ==1:
 
     print '\n'," Distance part C: distances for BBLU... ",'\n'
 
@@ -299,7 +307,7 @@ if _4_c_DISTS_ ==1:
     pp.close()
     pp.join()
 
-if _4_d_DISTS_ ==1:
+if _5_d_DISTS_ ==1:
 
     print '\n'," Distance part D: distances for EAs... ",'\n'
 
@@ -332,10 +340,10 @@ if _4_d_DISTS_ ==1:
     pp.join()
 
 #############################################
-# STEP 5:  Make Gradient/Density  Plots     #
+# STEP 6:  Make Gradient/Density  Plots     #
 #############################################
 
-if _5_a_PLOTS_ == 1:
+if _6_a_PLOTS_ == 1:
 
     print '\n'," Making Housing Prices plots...",'\n'
 
@@ -352,7 +360,9 @@ if _5_a_PLOTS_ == 1:
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'
 
-if _5_b_PLOTS_ == 1:
+if _6_b_PLOTS_ == 1:
+
+    print '\n'," Making BBLU plots...",'\n'
 
     if not os.path.exists(outdir+'bbluplots'):
         os.makedirs(outdir+'bbluplots')
@@ -360,4 +370,6 @@ if _5_b_PLOTS_ == 1:
     dofile = "subcode/plot_density.do"
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
+
+    print '\n'," -- BBLU Plots: done! ",'\n'
 
