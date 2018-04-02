@@ -83,6 +83,7 @@ fr2 = 70         # percent constructed +-1 mode year
 
 
 
+
 count_pre  = 20 # upper-bound on pre formal structures in project area
 count_post = 20 # upper-bound on post formal structures in project area
 
@@ -131,24 +132,44 @@ def make_gcro_test(db,count_pre,count_post,keywords,keep_condition):
                    '''.format(bbfile,bbfile,bbfile,bbfile,bbfile)
         cur.execute(make_qry)
 
+    cur.execute('DROP TABLE IF EXISTS gcro_test_rdp_count;')
+    make_qry = '''
+               CREATE TABLE gcro_test_rdp_count AS 
+               SELECT G.OGC_FID, SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END) as RDP_total
+               FROM  gcro_publichousing as G, erven AS E
+               JOIN rdp AS R on E.property_id=R.property_id                
+               WHERE E.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                            WHERE f_table_name='erven' AND search_frame=G.GEOMETRY)
+                     AND st_intersects(E.GEOMETRY,G.GEOMETRY)
+               GROUP BY G.OGC_FID
+               ;
+               '''
+    cur.execute(make_qry)
+
     cur.execute('DROP TABLE IF EXISTS placebo_conhulls;')
     make_qry = '''
                CREATE TABLE placebo_conhulls AS 
                SELECT G.ROWID+1000 as cluster, G.GEOMETRY,
                     G.OGC_FID as OGC_FID_gcro , 
-                    A.formal_pre, A.informal_pre, B.formal_post, B.informal_post
+                    A.formal_pre, R.RDP_total, A.informal_pre, B.formal_post, B.informal_post
                     {}
                FROM gcro_publichousing as G
                 JOIN gcro_test_pre as A ON A.OGC_FID = G.OGC_FID 
                 JOIN gcro_test_post as B ON B.OGC_FID = G.OGC_FID
+                LEFT JOIN gcro_test_rdp_count as R ON R.OGC_FID = G.OGC_FID
                 WHERE A.formal_pre<={} AND B.formal_post<={}
                 {}
                ;
                '''.format(var_gen,count_pre,count_post,var_cond)
 
     cur.execute(make_qry) 
+    cur.execute("CREATE INDEX placebo_index ON placebo_conhulls (OGC_FID_gcro);")
+    cur.execute("SELECT RecoverGeometryColumn('placebo_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
+    cur.execute("SELECT CreateSpatialIndex('placebo_conhulls','GEOMETRY');")
+
     cur.execute('DROP TABLE IF EXISTS gcro_test_pre;')    
     cur.execute('DROP TABLE IF EXISTS gcro_test_post;')  
+    cur.execute('DROP TABLE IF EXISTS gcro_test_rdp_count;')
 
     con.commit()
     con.close()
