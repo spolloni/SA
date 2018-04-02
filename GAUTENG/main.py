@@ -66,19 +66,15 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_a_DISTS_ = 1  # buffers and hull creation
-_4_b_DISTS_ = 1  # non-RDP distance
-_4_c_DISTS_ = 1  # BBLU istance
-_4_d_DISTS_ = 1  # EA distance 
+_4_a_DISTS_ = 0  # buffers and hull creation
+_4_b_DISTS_ = 0  # non-RDP distance
+_4_c_DISTS_ = 0  # BBLU istance
+_4_d_DISTS_ = 0  # EA distance 
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
-_5_a_PLOTS_ = 1
-_5_b_PLOTS_ = 1
-_5_c_PLOTS_ = 0
-_5_d_PLOTS_ = 0 
-fr1 = 50         # percent constructed in mode year
-fr2 = 70         # percent constructed +-1 mode year
+_5_a_PLOTS_ = 0
+_5_b_PLOTS_ = 0
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -341,36 +337,27 @@ if _4_d_DISTS_ ==1:
 
 if _5_a_PLOTS_ == 1:
 
+    print '\n'," Making Housing Prices plots...",'\n'
+
     dofile = "subcode/export2gradplot.do"
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-if _5_b_PLOTS_ == 1:
+    if not os.path.exists(outdir+'gradplots'):
+        os.makedirs(outdir+'gradplots')
 
     dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',rdp]
+    cmd = ['stata-mp','do',dofile,rdp]
     subprocess.call(cmd)
 
     print '\n'," -- Price Gradient Plots: done! ",'\n'
 
-if _5_c_PLOTS_ == 1:
+if _5_b_PLOTS_ == 1:
 
-    dofile = "subcode/export2densityplot.do"
-    cmd = ['stata-mp','do',dofile,rdp,salgo,
-                spar1,spar2,sbw,ssig,typ,gendata]
-    subprocess.call(cmd)
-
-if _5_d_PLOTS_ == 1:
-
-    output = outdir+"densityplots/RDP{}_{}_alg{}_".format(rdp,typ,algo)
-    output = output+"{}_{}_bw{}_fr{}_{}_".format(spar1,spar2,bw,sfr1,sfr2)
-    output = output+"tb{}_{}_m{}_tw{}_res{}".format(stop,sbot,smcl,stw,sres)
-    shutil.rmtree(output,ignore_errors=True)
-    os.makedirs(output)
+    if not os.path.exists(outdir+'bbluplots'):
+        os.makedirs(outdir+'bbluplots')
 
     dofile = "subcode/plot_density.do"
-    cmd = ['stata-mp','do',dofile,rdp,salgo,spar1,spar2,sbw,ssig,
-            typ,sfr1,sfr2,stop,sbot,smcl,stw,sres,gendata,output]
+    cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    print '\n'," -- Price Gradient Plots: done! ",'\n'

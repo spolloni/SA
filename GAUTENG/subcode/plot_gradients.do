@@ -66,7 +66,8 @@ global ifregs = "
        abs_yrdist <= $tw  &
        purch_price > 1000 &
        cluster_siz_nrdp > $msiz &
-       distance >0
+       distance >0 &
+       mode_yr>2002 
        ";
 
 global ifhist = "
@@ -75,7 +76,8 @@ global ifhist = "
        abs_yrdist <= $tw &
        cluster_siz_nrdp > $msiz &
        mo2con <= 48 &
-       mo2con >= -48
+       mo2con >= -48 &
+       mode_yr>2002 
        ";
 
 * histogram transactions;
@@ -99,6 +101,9 @@ plotreg distplot distplot;
 * time regression;
 reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg timeplot timeplot;
+
+* exit stata;
+exit, STATA clear; 
 
 
 
