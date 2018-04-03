@@ -17,6 +17,13 @@ program plotreg;
 
    };
 
+   if "`1'" == "bbluplot" {;
+
+      local contin = "dists";
+      local group  = "formal";
+
+   };
+
    preserve;
    parmest, fast;
    
@@ -74,8 +81,28 @@ program plotreg;
       ytitle("log-price coefficient",height(5))
       xlabel(-$bound($step)$bound)
       ylabel(-1(.5)1,labsize(small))
-      legend(order(3 "far" 4 "near")
+      legend(order(3 "far" 4 "near (< ${treat}m)")
       ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(medsmall) region(lwidth(none))) note("`3'");
+      graphexportpdf `2', dropeps;
+
+   };
+
+   if "`1'" == "bbluplot" {;
+
+      replace contin = -1*(contin - 2000) if contin>2000;
+      replace contin = contin + $bin if contin >=0;
+      sort contin;
+      
+      tw 
+      (sc estimate contin if group==0, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin))
+      (sc estimate contin if group==1, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin)),
+      xline(0,lw(thin)lp(shortdash))
+      xtitle("meters from project border",height(5))
+      ytitle("qty. new structures (2001-2011)",height(5))
+      xlabel(0(400)$max)
+      legend(order(2 "formal residential" 1 "informal residential" ) col(1)
+      ring(0) position(2) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none))) note("`3'");
       graphexportpdf `2', dropeps;
 

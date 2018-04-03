@@ -10,15 +10,14 @@ set maxvar 32767
 *******************;
 
 * PARAMETERS;
-global rdp  = "`1'";
-global fr1  = "0.5";
-global fr2  = "0.5";
-global top  = "99";
-global bot  = "1";
-global mcl  = "`12'";
-global tw   = "4";
-global bin  = 100;
-global mbin =  6;
+global rdp   = "`1'";
+global fr1   = "0.5";
+global fr2   = "0.5";
+global tw    = "4";   /* look at +-tw years to construction */
+global bin   = 100;   /* distance bin width for dist regs   */
+global mbin  =  6;    /* months bin width for time-series   */
+global msiz  = 50;    /* minimum obs per cluster            */
+global treat = 300; 
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -42,7 +41,7 @@ cd Output/GAUTENG/gradplots;
 * regression dummies;
 *gen post = (purch_yr >= mode_yr);
 gen post  =  mo2con>=0;
-gen treat =  (distance <= 300);
+gen treat =  (distance <= $treat);
 
 * create distance dummies;
 sum distance;
@@ -66,30 +65,45 @@ global ifregs = "
        rdp_never ==1 &
        abs_yrdist <= $tw  &
        purch_price > 1000 &
-       distance >0
+       cluster_siz_nrdp > $msiz &
+       distance >0 &
+       mode_yr>2002 
        ";
 
 global ifhist = "
        frac1 > $fr1  &
        frac2 > $fr2  &
-       abs_yrdist <= $tw
+       abs_yrdist <= $tw &
+       cluster_siz_nrdp > $msiz &
+       mo2con <= 48 &
+       mo2con >= -48 &
+       mode_yr>2002 
        ";
 
 * histogram transactions;
 local b = 12*$tw;
 tw
-(hist mo2con if rdp_never==1 & $ifhist, w(1) fc(none) lc(gs0))
-(hist mo2con if rdp_$rdp ==1 & $ifhist & trans_id_rdp==trans_id, w(1) c(gs10)),
-xtitle("months to event mode year")
+(hist mo2con if rdp_never==1 & $ifhist, freq w(2) fc(none) lc(gs0) lw(thin))
+(hist mo2con if rdp_$rdp ==1 & $ifhist & trans_id_rdp==trans_id, freq w(2) lc(gs0) fc(sienna) lw(thin)),
+xtitle("months to event mode year",height(5))
+ytitle("transactions (thousands)",height(5))
 xlabel(-`b'(12)`b')
-legend(order(1 "non-RDP" 2 "RDP")ring(0) position(2) bmargin(small));
+yla(0 2000 "2" 4000 "4" 6000 "6" 8000 "8" 10000 "10")
+legend(order(1 "non-RDP" 2 "RDP")
+ring(0) position(2) bm(tiny) rowgap(small) 
+colgap(small) cols(1) size(small) region(lwidth(none)));
 graphexportpdf summary_densitytime, dropeps;
 
+* distance regression;
 reg lprice b$max.dists#b0.post  i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg distplot distplot;
 
+* time regression;
 reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg timeplot timeplot;
+
+* exit stata;
+exit, STATA clear; 
 
 
 

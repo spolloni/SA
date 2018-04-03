@@ -45,7 +45,7 @@ odbc load, exec("`qry'") clear;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 replace cluster=cl if cluster==.;
-foreach var in mode_yr frac1 frac2 {;
+foreach var in mode_yr frac1 frac2 cluster_siz {;
    bys cluster: egen max = max(`var');
    replace `var' = max if cl ==.;
    drop max;
@@ -62,6 +62,12 @@ format day_date %td;
 format mo_date %tm;
 gen day2con = day_date - con_day;
 gen mo2con  = mo_date - con_mo;
+
+* non-rdp cluster size;
+bys cluster rdp_never: gen n = _n;
+replace n = 0 if rdp_never==0;
+bys cluster: egen cluster_siz_nrdp = max(n);
+drop n;
 
 * gen required vars;
 gen lprice = log(purch_price);

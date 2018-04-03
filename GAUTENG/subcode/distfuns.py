@@ -165,6 +165,7 @@ def selfintersect(db,dir,bw):
 
     return
 
+
 def hulls_coordinates(db,dir):
 
     qry  = "SELECT * FROM rdp_conhulls"
