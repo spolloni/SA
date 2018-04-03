@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,subfigure,array,hyperref}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{mathptmx,multirow,endfloat,titlesec,threeparttable}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+% MARGINS AND SPACING
+\normalem
+\onehalfspacing
+\geometry{left=1.0in,right=1.0in,top=1.0in,bottom=1.0in}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+\begin{document}
+
+\begin{titlepage}
+\title{In da house!\thanks{I am grateful to Matthew Turner and Jesse Shapiro for their feedback, advice and support. I also thank Nathaniel Baum-Snow, John Friedman, Nicolas Gendron-Carrier, William Violette, Jacob Robbins, and all the participants of the Brown University applied microeconomics seminar for their helpful comments. I am indebted to Aaron Kilbey for granting me access to a beta version of Portland Maps's API and allowing me to complete the data collection for this project. Ian Hackett also provided invaluable help in obtaining data necessary for this project. Finally, financial support from the Fonds de Recherche Soci\'et\'e et Culture du Qu\'ebec is gratefully acknowledged.}}
+\vspace{2mm}
+\author{Stefano Polloni\thanks{Department of Economics, Brown University, Box B, Providence, RI 02912  E-mail: stefano\textunderscore polloni@brown.edu}\\[-0.4em] \normalsize{\it Brown University}\\}
+\vspace{30mm}
+\date{\vspace{5mm}This Version: \today}
+\maketitle
+\begin{abstract}
+\noindent This paper examines the impact of traffic calming on the livability of urban residential streets. Using geo-referenced data on the installation of 1,187 calming devices in Portland (OR), I test whether the interventions locally affect housing prices during succeeding years. I provide reduced-form evidence that city dwellers pay significant premiums to limit their exposure to motor vehicles, but obtain mixed results regarding the overall price impacts of calming devices. My estimates suggest that only the most effective traffic calming measures have a detectable impact on housing prices. The implied traffic flow elasticity is -0.07: projects decreasing traffic by 16\% raise home values on treated streets by 1\%.\\
+\vspace{0in}\\
+\noindent\textbf{Keywords:} traffic externalities; street livability; urban policy; housing market.\\
+\vspace{0in}\\
+\noindent\textbf{JEL Codes:} O18; H4; R2; R4.\\
+
+\bigskip
+\end{abstract}
+\setcounter{page}{0}
+\thispagestyle{empty}
+\end{titlepage}
+\pagebreak \newpage
+
+\doublespacing
+
+\section{Introduction} \label{sec:introduction}
+
+
+
+\section{Background} \label{sec:background}
+
+\subsection{ Slum Rehab Projects Globally (get some figures)}
+
+\subsection{  }
+
+\begin{itemize}
+\item 
+\item 
+
+\end{itemize}
+
+
+\nocite{*}
+\singlespacing
+\setlength\bibsep{0pt}
+\bibliographystyle{abbrvnat}
+\bibliography{ref}
+
+
+% APPENDIX 
+\appendix
+\doublespacing
+
+\section*{Appendix}
+
+\end{document}

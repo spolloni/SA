@@ -55,21 +55,21 @@ workers = int(multiprocessing.cpu_count()-1)
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
-_1_d_IMPORT = 0  # import GCRO + landplots
+_1_d_IMPORT = 1  # import GCRO + landplots
 _1_e_IMPORT = 0  # import GHS
 
-_2_FLAGRDP_ = 0
+_2_FLAGRDP_ = 1
 
-_3_CLUSTER_ = 0
+_3_CLUSTER_ = 1
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_a_DISTS_ = 0  # buffers and hull creation
-_4_b_DISTS_ = 0  # non-RDP distance
-_4_c_DISTS_ = 0  # BBLU istance
-_4_d_DISTS_ = 0  # EA and SP distance 
+_4_a_DISTS_ = 1  # buffers and hull creation
+_4_b_DISTS_ = 1  # non-RDP distance
+_4_c_DISTS_ = 1  # BBLU istance
+_4_d_DISTS_ = 1  # EA and SP distance 
 bw  = 1200       # bandwidth for clusters
 sig = 3          # sigma factor for concave hulls
 
@@ -87,34 +87,24 @@ fr2 = 70         # percent constructed +-1 mode year
 count_pre  = 20 # upper-bound on pre formal structures in project area
 count_post = 20 # upper-bound on post formal structures in project area
 
-keywords   = [\
+keywords   = [ \
                 'Informal', \
-                'Planning',\
-                'Proposed',\
-                'Investigating',\
-                'future',\
-                'Essential'] # creates dummies for projects with these terms
-keep_condition = 0 # limits to projects with keywords
+                'Planning', \
+                'Proposed', \
+                'Investigating', \
+                'future', \
+                'Essential' ] # creates dummies for projects with these terms
 
-def make_gcro_test(db,count_pre,count_post,keywords,keep_condition):
+def make_gcro_test(db,count_pre,count_post,keywords):
     con = sql.connect(db)
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
     var_gen=''
-    var_cond=''
     if len(keywords)>0:
-        var_cond = ' AND ('
         for k in keywords:
             var_gen=var_gen+' , CASE WHEN G.descriptio LIKE \'%'+k+'%\' THEN 1 ELSE 0 END as '+k.lower()
-            var_cond= var_cond + 'G.descriptio LIKE \'%' + k + '%\''
-            if k!=keywords[-1]:
-                var_cond = var_cond + ' OR '
-        var_cond = var_cond + ')'
-
-    if keep_condition==0:
-        var_cond=''
 
     for bbfile in ['pre','post']:
         cur.execute('DROP TABLE IF EXISTS gcro_test_{};'.format(bbfile))
@@ -151,21 +141,21 @@ def make_gcro_test(db,count_pre,count_post,keywords,keep_condition):
                CREATE TABLE placebo_conhulls AS 
                SELECT G.ROWID+1000 as cluster, G.GEOMETRY,
                     G.OGC_FID as OGC_FID_gcro , 
-                    A.formal_pre, R.RDP_total, A.informal_pre, B.formal_post, B.informal_post
+                    R.RDP_total, 
+                    A.formal_pre, A.informal_pre, 
+                    B.formal_post, B.informal_post
                     {}
                FROM gcro_publichousing as G
-                JOIN gcro_test_pre as A ON A.OGC_FID = G.OGC_FID 
-                JOIN gcro_test_post as B ON B.OGC_FID = G.OGC_FID
+                LEFT JOIN gcro_test_pre as A ON A.OGC_FID = G.OGC_FID 
+                LEFT JOIN gcro_test_post as B ON B.OGC_FID = G.OGC_FID
                 LEFT JOIN gcro_test_rdp_count as R ON R.OGC_FID = G.OGC_FID
-                WHERE A.formal_pre<={} AND B.formal_post<={}
-                {}
                ;
-               '''.format(var_gen,count_pre,count_post,var_cond)
+               '''.format(var_gen,count_pre,count_post)
 
     cur.execute(make_qry) 
-    cur.execute("CREATE INDEX placebo_index ON placebo_conhulls (OGC_FID_gcro);")
     cur.execute("SELECT RecoverGeometryColumn('placebo_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
     cur.execute("SELECT CreateSpatialIndex('placebo_conhulls','GEOMETRY');")
+    cur.execute("CREATE INDEX placebo_index ON placebo_conhulls (OGC_FID_gcro);")
 
     cur.execute('DROP TABLE IF EXISTS gcro_test_pre;')    
     cur.execute('DROP TABLE IF EXISTS gcro_test_post;')  
@@ -174,7 +164,7 @@ def make_gcro_test(db,count_pre,count_post,keywords,keep_condition):
     con.commit()
     con.close()
 
-make_gcro_test(db,count_pre,count_post,keywords,keep_condition)
+make_gcro_test(db,count_pre,count_post,keywords)
 
 
 
