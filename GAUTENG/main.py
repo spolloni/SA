@@ -11,6 +11,7 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
+from subcode.placebofuns import make_gcro_placebo
 from subcode.distfuns import selfintersect, concavehull, intersEA
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
@@ -60,7 +61,15 @@ algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 
-_4_PLACEBO_ = 0
+_4_PLACEBO_ = 0 
+counts = {
+    'erven_rdp': '20', # upper-bound on rdp erven in project area 
+    'formal_pre': '20', # upper-bound on pre formal structures in project area
+    'formal_post': '20', # upper-bound on post formal structures in project area 
+    'informal_pre': '20', # upper-bound on pre informal structures in project area
+    'informal_post': '20'} # upper-bound on post informal structures in project area
+keywords = ['Informal','Planning','Proposed', # keywords to identify 
+            'Investigating','future', 'Essential'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
@@ -210,11 +219,11 @@ if _3_CLUSTER_ ==1:
 # STEP 4:  Placebo RDP from GCRO            #
 #############################################
 
-if _4_PLACEBO_ = 1:
+if _4_PLACEBO_ == 1:
 
     print '\n'," Defining Placebo RDPs ... ",'\n'
 
-
+    make_gcro_placebo(db,counts,keywords)
 
     print '\n'," -- Placebo RDPs: done! "'\n'
 
