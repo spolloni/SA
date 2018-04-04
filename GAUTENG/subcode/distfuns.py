@@ -166,13 +166,13 @@ def selfintersect(db,dir,bw):
     return
 
 
-def hulls_coordinates(db,dir):
+def hulls_coordinates(db,dir,table):
 
-    qry  = "SELECT * FROM rdp_conhulls"
-    out1 = dir+'hull.shp'
-    out2 = dir+'edgehull.shp'
-    out3 = dir+'splitedgehull.shp'
-    out4 = dir+'coordshull.csv'
+    qry  = 'SELECT * FROM {}_conhulls'.format(table)
+    out1 = dir+'{}_hull.shp'.format(table)
+    out2 = dir+'{}_edgehull.shp'.format(table)
+    out3 = dir+'{}_splitedgehull.shp'.format(table)
+    out4 = dir+'{}_coordshull.csv'.format(table)
     grid = dir+'grid_7.shp'
 
     # fetch concave hulls
@@ -195,7 +195,7 @@ def hulls_coordinates(db,dir):
     subprocess.call(' '.join(cmd),shell=True)
 
     # load ogr2ogr exported csv
-    df = pd.read_csv(dir+'coordshull.csv')
+    df = pd.read_csv(out4)
 
     # cluster column
     cluster = df['cluster']
@@ -221,7 +221,7 @@ def hulls_coordinates(db,dir):
 
     # stash in DB 
     con = sql.connect(db)
-    coords.to_sql('coords',con,if_exists='replace',index=False)
+    coords.to_sql('{}_coords'.format(table),con,if_exists='replace',index=False)
     con.commit()
     con.close()
 

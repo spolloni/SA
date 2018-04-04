@@ -235,6 +235,7 @@ if _5_a_DISTS_ ==1:
 
     print '\n'," Distance part A: Creating tables and polygons... ",'\n'
 
+    # 4a.0 set-up
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
 
@@ -254,7 +255,9 @@ if _5_a_DISTS_ ==1:
     # 4a.4 assemble coordinates for hull edges
     grids = glob.glob(rawgis+'grid_7*')
     for grid in grids: shutil.copy(grid, tempdir)
-    hulls_coordinates(db,tempdir)
+    hulls_coordinates(db,tempdir,'rdp')
+    hulls_coordinates(db,tempdir,'placebo')
+
     print '\n'," -- Assemble hull coordinates: done! "'\n'
 
 if _5_b_DISTS_ ==1:
