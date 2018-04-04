@@ -210,7 +210,7 @@ if _2_FLAGRDP_ ==1:
 
 if _3_CLUSTER_ ==1:
 
-    print '\n'," Clustering RDP properties & forming hulls... ",'\n'
+    print '\n'," Clustering RDP properties, forming hulls... ",'\n'
 
     spatial_cluster(algo,par1,par2,db,rdp)
     print '\n'," -- clustering RDP: done! "'\n'
