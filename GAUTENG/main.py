@@ -9,10 +9,10 @@ from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
-from subcode.spaclust import spatial_cluster
 from subcode.dissolve import dissolve_census, dissolve_BBLU
+from subcode.spaclust import spatial_cluster, concavehull
 from subcode.placebofuns import make_gcro_placebo
-from subcode.distfuns import selfintersect, concavehull, intersEA
+from subcode.distfuns import selfintersect, intersEA
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 
@@ -60,6 +60,7 @@ rdp  = 'all'     # Choose rdp definition.
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
+sig  = 3         # sigma factor for concave hulls
 
 _4_PLACEBO_ = 0 
 counts = {
@@ -75,8 +76,8 @@ _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU istance
 _5_d_DISTS_ = 0  # EA distance 
-bw  = 1200       # bandwidth for clusters
-sig = 3          # sigma factor for concave hulls
+bw = 1200        # bandwidth for buffers
+
 
 _6_a_PLOTS_ = 0
 _6_b_PLOTS_ = 0
@@ -212,8 +213,10 @@ if _3_CLUSTER_ ==1:
     print '\n'," Clustering RDP properties... ",'\n'
 
     spatial_cluster(algo,par1,par2,db,rdp)
-
     print '\n'," -- clustering RDP: done! "'\n'
+
+    concavehull(db,tempdir,sig)
+    print '\n'," -- Concave Hulls: done! "'\n'
 
 #############################################
 # STEP 4:  Placebo RDP from GCRO            #
@@ -238,10 +241,6 @@ if _5_a_DISTS_ ==1:
     # 4a.0 set-up
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
-
-    # 4a.1 make concave hulls
-    concavehull(db,tempdir,sig)
-    print '\n'," -- Concave Hulls: done! "'\n'
 
     # 4a.2 intersecting EAs
     intersEA(db,tempdir,'2001')   

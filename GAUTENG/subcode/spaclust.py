@@ -93,3 +93,46 @@ def spatial_cluster(algo,par1,par2,database,suf):
 
     return
 
+def concavehull(db,dir,sig):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="rdp_conhulls";
+               '''
+
+    drop_qry = '''
+               SELECT DisableSpatialIndex('rdp_conhulls','GEOMETRY');
+               SELECT DiscardGeometryColumn('rdp_conhulls','GEOMETRY');
+               DROP TABLE IF EXISTS idx_rdp_conhulls_GEOMETRY;
+               DROP TABLE IF EXISTS rdp_conhulls;
+               '''
+
+    make_qry = '''
+               CREATE TABLE rdp_conhulls AS 
+               SELECT CastToMultiPolygon(ST_MakeValid(ST_Buffer(ST_ConcaveHull(ST_Collect(A.GEOMETRY),{}),20)))
+                AS GEOMETRY, B.cluster as cluster
+               FROM erven AS A
+               JOIN rdp_clusters AS B ON A.property_id = B.property_id
+               WHERE B.cluster !=0
+               GROUP BY cluster;
+               '''.format(sig)
+
+    # create hulls table
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+    cur.execute(make_qry)
+    cur.execute("SELECT RecoverGeometryColumn('rdp_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
+    cur.execute("SELECT CreateSpatialIndex('rdp_conhulls','GEOMETRY');")
+    con.commit()
+    con.close()
+    
+    return
+
