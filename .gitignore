@@ -1,11 +1,3 @@
 *.DS_Store
 *.log
 *.pyc
-*.pdf
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.out
-*.gz

@@ -26,7 +26,7 @@ local qry = "
   FROM transactions AS A
   JOIN erven AS B ON A.property_id = B.property_id
   JOIN rdp   AS C ON B.property_id = C.property_id
-  LEFT JOIN distance_nrdp AS D ON B.property_id = D.property_id 
+  LEFT JOIN distance_nrdp_rdp AS D ON B.property_id = D.property_id 
   LEFT JOIN (SELECT property_id, cluster, mode_yr, frac1, frac2, cluster_siz
        FROM rdp_clusters WHERE cluster != 0 ) AS E ON B.property_id = E.property_id
   WHERE NOT (D.cluster IS NULL AND E.cluster IS NULL)
