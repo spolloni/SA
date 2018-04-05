@@ -18,7 +18,7 @@
 
 % MARGINS AND SPACING
 \normalem
-\onehalfspacing
+%\onehalfspacing
 \geometry{left=1.0in,right=1.0in,top=1.0in,bottom=1.0in}
 
 % SPECIAL CELL 
@@ -35,7 +35,7 @@
 \date{\vspace{5mm}This Version: \today}
 \maketitle
 \begin{abstract}
-\noindent This paper examines the impact of traffic calming on the livability of urban residential streets. Using geo-referenced data on the installation of 1,187 calming devices in Portland (OR), I test whether the interventions locally affect housing prices during succeeding years. I provide reduced-form evidence that city dwellers pay significant premiums to limit their exposure to motor vehicles, but obtain mixed results regarding the overall price impacts of calming devices. My estimates suggest that only the most effective traffic calming measures have a detectable impact on housing prices. The implied traffic flow elasticity is -0.07: projects decreasing traffic by 16\% raise home values on treated streets by 1\%.\\
+\noindent This paper examines the impact of traffic calming on the livability of urban residential streets. Using geo-referenced data on the installation of 1,187 calming devices in Portland (OR), I test whether the interventions locally affect housing prices during succeeding years. I provide reduced-form evidence that city dwellers pay significant premiums to limit their exposure to motor vehicles, but obtain mixed results regarding the overall price impacts of calming devices. My estimates suggest that only the most effective traffic calming measures have a detectable impact on housing prices. The implied traffic flow elasticity is -0.07: projects decreasing traffic by 16\% raise home values on treated streets by 1\%. \\
 \vspace{0in}\\
 \noindent\textbf{Keywords:} traffic externalities; street livability; urban policy; housing market.\\
 \vspace{0in}\\
@@ -56,22 +56,63 @@
 
 \section{Background} \label{sec:background}
 
-\subsection{ Slum Rehab Projects Globally (get some figures)}
+\subsection{ Slum Rehab Projects Globally (get some figures) }
 
-\subsection{  }
+The share of urban populations living in slums in developing countries has grown from 34.5\% in 1995 to 45.9\% (UN Habitat, 2013).  
+
 
 \begin{itemize}
 \item 
 \item 
-
 \end{itemize}
 
 
+
+\subsection{Housing Subsidies in South Africa}
+
+In 1994, the South African government launched an aggressive housing subsidy scheme that continues to this day in order to address socioeconomic inequalities from apartheid.  The policy has allocated over 4.3 million houses from 1994 to 2016 to eligible households with the following goals (\cite{dhsreports}):
+
+\begin{itemize}
+	\item \textbf{Impacts on Recipients:} Like other housing policies throughout the developing world, this program's first aim is to improve wellbeing for recipient households, serving as ``a key strategy for poverty alleviation'' and ``combating crime, promoting social cohesion and improving quality of life for the poor.''
+	\item \textbf{Housing Market Impacts:} Unlike many other housing policies, this program articulates a goal of ``supporting the functioning of the entire single residential property market to reduce duality within the sector by breaking the barriers between the first economy residential property boom and the second economy slump.'' 
+	\item \textbf{Local Economic Development:}  This housing program also serves as a way of ``leveraging growth in the economy'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng})
+\end{itemize}
+
+
+
+\subsubsection{Where are housing projects built?}
+
+Between 2000 and 2010, subsidized housing efforts in South Africa primarily focus on constructing and allocating single-story, two-room (30 to 40 square meter) dwellings to households in groups of 50 to 500 per land plot.  These housing projects are evenly divided between two categories based on where they are located (\cite{dhsreports}):
+\begin{enumerate}
+	\item  \textbf{Greenfield developments} involve the construction of housing projects primarily on undeveloped state-owned land although in some cases, municipalities will work with private developers to purchase inexpensive, undeveloped private land for these projects.  Finding undeveloped land often requires policymakers to locate these projects far from city centers and economic opportunities.
+	\item  \textbf{In-Situ Upgrading of Informal Settlements} replaces existing informal settlements with housing developments.\footnote{While in some cases these programs refer simply to the provision of land titles and municipal services (water, electricity, etc.), this paper focuses on cases where informal settlements are replaced by fully-serviced, single-story houses.}  Since informal settlements are often located closer to city centers, the resulting housing projects may provide better employment opportunities (\cite{serihistory}).
+\end{enumerate}
+Facing substantial housing demand, the Department of Human Settlements has continued to issue grants to provincial governments to keep the rate of yearly housing allocations roughly constant (\cite{dhsreports}).
+
+Since housing projects require coordination between many stakeholders, these projects often face unanticipated delays and cancellations due to labor and land procurement issues, difficulties gaining support from local government agencies, environmental impact assessments, and inadequate bulk infrastructure provision (\cite{dhsreports}).  In one example, political disagreements with local stakeholders led to the abandonment of a large project in Gauteng (\cite{protest}).
+
+\subsubsection{Who gets the houses?}
+
+The National Department of Human Settlements issues guidelines for eligibility and maintains an official waiting list for eligible households for greenfield developments.  Eligibility requires citizenship, no previous property ownership, being married or having financial dependents, and having a monthly household income below R3,500 (\cite{seriq}).\footnote{The Gauteng Province has implemented their own waiting list since 2008 in order to exert greater control over the allocation process.}  The share of households reporting at least one member on the waiting list has remained stable at over 13\% from 2009 to 2013.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Each project is assigned beneficiaries in a first-come, first-served basis according to the waiting list in their province or municipality.  For in-situ upgrading projects, previous inhabitants of informal settlements receive renovated houses while any remaining houses are allocated according to the housing waiting list.
+
+In practice, these guidelines are only loosely followed.  Recent reports point to cases of corruption in the allocation of houses while in some instances, housing projects are organized with the assistance of local community groups who ultimately select the beneficiaries (\cite{seriq}; \cite{casestudytinazonke}). 
+
+Beneficiaries are expected to pay a small one-time payment in order to receive title for their houses.  Guidelines also prevent beneficiaries from reselling their houses (and discourage renting) within their first 7 years of ownership.  Despite these guidelines, only 82\% of project houses are reported being still occupied by their original beneficiaries within five years of construction.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Anecdotal evidence suggests that project managers are aware of this active secondary market but have difficulty policing these transactions (\cite{resale}).
+
+
+
+
+
+{}
 \nocite{*}
 \singlespacing
 \setlength\bibsep{0pt}
 \bibliographystyle{abbrvnat}
 \bibliography{ref}
+
+
+
+
 
 
 % APPENDIX 
