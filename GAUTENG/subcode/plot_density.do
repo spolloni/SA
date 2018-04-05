@@ -15,7 +15,7 @@ global fr2 = "0";
 global bin = 10; /* distance bin width */
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 
 * MAKE DATASET?;
 global DATA_PREP = 0;
@@ -41,14 +41,14 @@ if $DATA_PREP==1 {;
   	(
     SELECT  B.STR_FID, B.distance, B.cluster, A.s_lu_code
     FROM bblu_pre  AS A  
-    JOIN distance_bblu AS B ON A.STR_FID=B.STR_FID  
+    JOIN distance_bblu_rdp AS B ON A.STR_FID=B.STR_FID  
     WHERE A.s_lu_code=7.1 OR A.s_lu_code=7.2
   
     UNION
   
     SELECT D.STR_FID, D.distance, D.cluster, C.s_lu_code
     FROM bblu_post AS C 
-    JOIN distance_bblu AS D ON C.STR_FID=D.STR_FID   
+    JOIN distance_bblu_rdp AS D ON C.STR_FID=D.STR_FID   
     WHERE C.s_lu_code=7.1 OR C.s_lu_code=7.2
     ) AS AA 
 
