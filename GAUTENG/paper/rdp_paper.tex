@@ -35,7 +35,7 @@
 \date{\vspace{5mm}This Version: \today}
 \maketitle
 \begin{abstract}
-\noindent This paper examines the impact of traffic calming on the livability of urban residential streets. Using geo-referenced data on the installation of 1,187 calming devices in Portland (OR), I test whether the interventions locally affect housing prices during succeeding years. I provide reduced-form evidence that city dwellers pay significant premiums to limit their exposure to motor vehicles, but obtain mixed results regarding the overall price impacts of calming devices. My estimates suggest that only the most effective traffic calming measures have a detectable impact on housing prices. The implied traffic flow elasticity is -0.07: projects decreasing traffic by 16\% raise home values on treated streets by 1\%. \\
+\noindent We estimate economic spillovers from subsidized housing projects on local neighborhoods using housing transaction records and high-resolution census data in South Africa.  With a differences-in-differences design, we find that projects lead to a X\% decline in nearby housing prices.  We attribute this decline to externalities from informal settlements constructed within housing projects.   \\
 \vspace{0in}\\
 \noindent\textbf{Keywords:} traffic externalities; street livability; urban policy; housing market.\\
 \vspace{0in}\\
@@ -52,46 +52,58 @@
 
 \section{Introduction} \label{sec:introduction}
 
+In developing countries, 30\% of urban populations live in slums where households often suffer high rates of crime, low access to infrastructure, insecure property rights, and unsanitary conditions (\cite{mdg}).  Governments have responded by replacing slums with new homes and moving slum dwellers to public housing projects with the primary goal of creating health and economic benefits for these residents.  Economic theory points to how public housing not only impacts its direct recipients, but also produces spillover effects on their surrounding areas.  Slum communities can suffer from poverty traps, which persist due to a combination of unsanitary conditions, poor governance, and other negative externalities (\cite{10.1257/jep.27.4.187}).  High-quality public housing can provide an incentive for neighbors to invest more in their own homes and communities, helping to lift these communities out of their poverty traps.
 
+In this paper, we analyze the impacts of public housing on the development of their surrounding neighborhoods.  We study a large-scale housing program in South Africa, which has allocated over 4.3 million dwellings and houses over 13\% of the total population (\cite{dhsreports}; General Household Survey).  Already one of the largest housing programs in the developing world, this program continues to respond to large backlogs in housing demand with an even mix of upgrading slum areas with new houses as well as constructing large public housing developments.  This program is intended to not only serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also generate community-wide benefits, ``leveraging growth in the economy,'' ``combating crime, promoting social cohesion and improving quality of life for the poor,'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng}). 
 
-\section{Background} \label{sec:background}
+We combine administrative data on [XX] housing projects with data on property transactions, demographics, and building construction to measure the local impacts of these projects.  We estimate a persistent [XX]\% decline in home prices within [XX] meters of a project.  We then use heterogeneity in the extent to which projects eradicate existing slums as a natural experiment to quantify negative externalities from slum areas.  Our estimates imply that increasing slum density by [XX]\% leads to a [XX]\% decline in local housing prices.  We find some evidence that this effect scales non-linearly with the size of the housing projects, which has theoretical implications for the extent to which slum areas represent poverty traps.
 
-\subsection{ Slum Rehab Projects Globally (get some figures) }
+To identify these effects, we use a differences-in-differences strategy leveraging both the exact timing of housing project construction as well as precise geographic proximity of surrounding areas.  Like \cite{diamond2016wants}'s similar analysis of public housing in the US, we leverage the substantial uncertainty in project timing due to difficulties coordinating many stakeholders and sources of funding (\cite{serihistory}).  Similar to the context in the US, we find little evidence that local housing markets anticipate these projects.  We also build on \cite{diamond2016wants} by using planned but unconstructed project areas as counterfactual areas, which help to control for demographic or housing market trends that might be correlated with the choice of project locations.
 
-The share of urban populations living in slums in developing countries has grown from 34.5\% in 1995 to 45.9\% (UN Habitat, 2013).  
+Our negative spillover estimates stand in contrast to a large literature in development that has focused on measuring housing impacts on direct recipients.  Relying on small-scale experimental designs, previous studies have linked public housing to improvements in employment outcomes (\cite{franklin2016enabled}), self-reported wellbeing (\cite{galiani2017shelter}; \cite{devoto2012happiness}), and child health outcomes (\cite{cattaneo2009housing}).  Data limitations both in finding a large enough sample of housing projects and in identifying outcomes at a precise spatial scale have prevented previous studies identifying spillover effects.  Taken alongside these previous studies, our findings suggest that policymakers may benefit from weighing direct benefits to recipients against potential negative effects to the local housing neighborhoods in designing future housing policy.
 
-
-\begin{itemize}
-\item 
-\item 
-\end{itemize}
-
-
-
-\subsection{Housing Subsidies in South Africa}
-
-In 1994, the South African government launched an aggressive housing subsidy scheme that continues to this day in order to address socioeconomic inequalities from apartheid.  The policy has allocated over 4.3 million houses from 1994 to 2016 to eligible households with the following goals (\cite{dhsreports}):
-
-\begin{itemize}
-	\item \textbf{Impacts on Recipients:} Like other housing policies throughout the developing world, this program's first aim is to improve wellbeing for recipient households, serving as ``a key strategy for poverty alleviation'' and ``combating crime, promoting social cohesion and improving quality of life for the poor.''
-	\item \textbf{Housing Market Impacts:} Unlike many other housing policies, this program articulates a goal of ``supporting the functioning of the entire single residential property market to reduce duality within the sector by breaking the barriers between the first economy residential property boom and the second economy slump.'' 
-	\item \textbf{Local Economic Development:}  This housing program also serves as a way of ``leveraging growth in the economy'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng})
-\end{itemize}
+To understand the welfare implications of this policy, we also develop a model similar to... 
 
 
 
-\subsubsection{Where are housing projects built?}
+%% combine administrative data on with property deeds data to measure the location, size, and date of housing projects surrounding the Johannesburg Metro-Area.
+
+%Like other housing policies throughout the developing world, this program's first aim was to improve wellbeing for recipient households, serving as ``a key strategy for poverty alleviation.''  Yet unlike many other housing policies, this program also articulated goals of ``leveraging growth in the economy,'' ``combating crime, promoting social cohesion and improving quality of life for the poor,'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng}).  We test these hypotheses by measuring the impact of this housing program on outcomes in their immediate neighborhoods.
+
+%To measure housing spillovers, we take a differences-in-differences approach comparing changes in outcomes, 
+
+
+%  also articulated d
+
+
+
+% a goal of ``supporting the functioning of the entire single residential property market to reduce duality within the sector by breaking the barriers between the first economy residential property boom and the second economy slump.'' 
+% Similarly, the government envisioned this program to serve as a way of
+
+% Yet , the South African housing program articulated   These policy goals form the hypotheses for this paper: (1) how do large housing projects affect the local housing market?  (2)
+
+
+% The policy has allocated over 4.3 million houses from 1994 to 2016 to eligible households with the following goals
+
+% These potential spillovers from public housing have remained unexplored
+
+% ; instead, the development economics literature has focused on understanding the impacts from improved housing conditions on outcomes for the direct recipients.  
+
+
+
+
+\subsection{Where are housing projects built?}
 
 Between 2000 and 2010, subsidized housing efforts in South Africa primarily focus on constructing and allocating single-story, two-room (30 to 40 square meter) dwellings to households in groups of 50 to 500 per land plot.  These housing projects are evenly divided between two categories based on where they are located (\cite{dhsreports}):
 \begin{enumerate}
 	\item  \textbf{Greenfield developments} involve the construction of housing projects primarily on undeveloped state-owned land although in some cases, municipalities will work with private developers to purchase inexpensive, undeveloped private land for these projects.  Finding undeveloped land often requires policymakers to locate these projects far from city centers and economic opportunities.
-	\item  \textbf{In-Situ Upgrading of Informal Settlements} replaces existing informal settlements with housing developments.\footnote{While in some cases these programs refer simply to the provision of land titles and municipal services (water, electricity, etc.), this paper focuses on cases where informal settlements are replaced by fully-serviced, single-story houses.}  Since informal settlements are often located closer to city centers, the resulting housing projects may provide better employment opportunities (\cite{serihistory}).
+	\item  \textbf{In-situ upgradings} replace existing informal settlements with housing developments.\footnote{While in some cases these programs refer simply to the provision of land titles and municipal services (water, electricity, etc.), this paper focuses on cases where informal settlements are replaced by fully-serviced, single-story houses.}  Since informal settlements are often located closer to city centers, the resulting housing projects may provide better employment opportunities (\cite{serihistory}).
 \end{enumerate}
 Facing substantial housing demand, the Department of Human Settlements has continued to issue grants to provincial governments to keep the rate of yearly housing allocations roughly constant (\cite{dhsreports}).
 
 Since housing projects require coordination between many stakeholders, these projects often face unanticipated delays and cancellations due to labor and land procurement issues, difficulties gaining support from local government agencies, environmental impact assessments, and inadequate bulk infrastructure provision (\cite{dhsreports}).  In one example, political disagreements with local stakeholders led to the abandonment of a large project in Gauteng (\cite{protest}).
 
-\subsubsection{Who gets the houses?}
+\subsection{Who gets the houses?}
 
 The National Department of Human Settlements issues guidelines for eligibility and maintains an official waiting list for eligible households for greenfield developments.  Eligibility requires citizenship, no previous property ownership, being married or having financial dependents, and having a monthly household income below R3,500 (\cite{seriq}).\footnote{The Gauteng Province has implemented their own waiting list since 2008 in order to exert greater control over the allocation process.}  The share of households reporting at least one member on the waiting list has remained stable at over 13\% from 2009 to 2013.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Each project is assigned beneficiaries in a first-come, first-served basis according to the waiting list in their province or municipality.  For in-situ upgrading projects, previous inhabitants of informal settlements receive renovated houses while any remaining houses are allocated according to the housing waiting list.
 
