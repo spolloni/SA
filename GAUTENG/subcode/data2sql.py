@@ -226,6 +226,7 @@ def shpxtract(tmp_dir,shp):
     sel = '-select M_LU_CODE,S_LU_CODE,T_LU_CODE,UNITS,UNITS_EST,DOP'
     out = tmp_dir + ntpath.basename(shp)
     if 'rl2017' in shp:
+        sel = '-select M_LU_CODE,S_LU_CODE,T_LU_CODE,UNITS,UNITS_EST,DOP,CF_UNITS'
         out = tmp_dir + 'post.shp'
     cmd = ['ogr2ogr -f "ESRI Shapefile"', out, shp, sel]
     subprocess.call(' '.join(cmd),shell=True)
