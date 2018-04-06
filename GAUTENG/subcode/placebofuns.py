@@ -22,13 +22,13 @@ def make_gcro_placebo(db,counts,keywords):
 
     var_gen = ''
     if len(keywords)>0:
-        var_gen = ' , (CASE '
+        var_gen = ''' , (CASE WHEN G.descriptio IS NULL THEN "descr_is_null" '''
         for k in keywords:
-            var_gen = var_gen + ''' WHEN G.descriptio LIKE '%{}%' THEN "{}" '''.format(k,k.lower())
+            var_gen += ''' WHEN G.descriptio LIKE '%{}%' THEN "{}" '''.format(k,k.lower())
         var_gen += ' ELSE NULL END) as keywords '
 
     keep_cond = ''' 
-                WHERE RDP_total   <= {}
+                WHERE RDP_density <= {}
                 AND formal_pre    <= {}
                 AND formal_post   <= {}
                 AND informal_pre  <= {}  
@@ -44,8 +44,10 @@ def make_gcro_placebo(db,counts,keywords):
         make_qry = '''
                     CREATE TABLE gcro_temp_{} AS 
                     SELECT G.OGC_FID as OGC_FID, 
-                    SUM(CASE WHEN A.s_lu_code="7.1" THEN 1 ELSE 0 END) as formal_{},
-                    SUM(CASE WHEN A.s_lu_code="7.2" THEN 1 ELSE 0 END) as informal_{}
+                    1000000*SUM(CASE WHEN A.s_lu_code="7.1" THEN 1 ELSE 0 END)
+                    /st_area(G.GEOMETRY) AS formal_{},
+                    1000000*SUM(CASE WHEN A.s_lu_code="7.2" THEN 1 ELSE 0 END)
+                    /st_area(G.GEOMETRY) AS informal_{}
                     FROM bblu_{} as A, gcro_publichousing as G
                     WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
@@ -57,12 +59,16 @@ def make_gcro_placebo(db,counts,keywords):
     cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
     make_qry = '''
                 CREATE TABLE gcro_temp_rdp_count AS 
-                SELECT G.OGC_FID as OGC_FID, SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END) as RDP_total
+                SELECT G.OGC_FID as OGC_FID, 
+                1000000*SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END)
+                /st_area(G.GEOMETRY) AS RDP_density
                 FROM  gcro_publichousing as G, erven AS E
-                JOIN rdp AS R on E.property_id=R.property_id                
+                JOIN rdp AS R on E.property_id=R.property_id  
+                JOIN rdp_clusters AS RC on E.property_id=RC.property_id                
                 WHERE E.ROWID IN (SELECT ROWID FROM SpatialIndex 
                              WHERE f_table_name='erven' AND search_frame=G.GEOMETRY)
-                      AND st_intersects(E.GEOMETRY,G.GEOMETRY)
+                    AND st_intersects(E.GEOMETRY,G.GEOMETRY)
+                    AND RC.cluster >0
                 GROUP BY G.OGC_FID;
                '''
     cur.execute(make_qry) 
@@ -71,11 +77,11 @@ def make_gcro_placebo(db,counts,keywords):
     make_qry = '''
                 CREATE TABLE gcro_publichousing_stats AS 
                 SELECT G.OGC_FID as OGC_FID_gcro , 
-                     coalesce(R.RDP_total,0) as RDP_total, 
-                     coalesce(A.formal_pre,0)as formal_pre,
-                     coalesce(A.informal_pre,0) as informal_pre, 
-                     coalesce(B.formal_post,0) as formal_post, 
-                     coalesce(B.informal_post,0) as informal_post
+                     cast(coalesce(R.RDP_density,0) AS FLOAT) as RDP_density, 
+                     cast(coalesce(A.formal_pre,0) AS FLOAT) as formal_pre,
+                     cast(coalesce(A.informal_pre,0) AS FLOAT) as informal_pre, 
+                     cast(coalesce(B.formal_post,0) AS FLOAT) as formal_post, 
+                     cast(coalesce(B.informal_post,0) AS FLOAT) as informal_post
                      {}
                 FROM gcro_publichousing as G
                 LEFT JOIN gcro_temp_pre as A ON A.OGC_FID = G.OGC_FID 
