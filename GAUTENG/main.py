@@ -77,7 +77,7 @@ keywords = ['Informal','Planning','Proposed', # keywords to identify
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU istance
-_5_d_DISTS_ = 1  # EA distance 
+_5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 
