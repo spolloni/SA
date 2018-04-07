@@ -18,8 +18,10 @@ from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
+from itertools import product
 import numpy  as np
 import pandas as pd
+
 
 #################
 # ENV SETTINGS  # 
@@ -75,7 +77,7 @@ keywords = ['Informal','Planning','Proposed', # keywords to identify
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU istance
-_5_d_DISTS_ = 0  # EA distance 
+_5_d_DISTS_ = 1  # EA distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 
@@ -324,33 +326,33 @@ if _5_c_DISTS_ ==1:
 
 if _5_d_DISTS_ ==1:
 
-    print '\n'," Distance part D: distances for EAs... ",'\n'
+    print '\n'," Distance part D: distances for EAs and SALs... ",'\n'
 
     # 4d.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
 
-    for hull in hulls:
+    for hull,geom in product(hulls,['ea','sal']):
 
         # 4d.1 fetch hull coordinates
         coords = fetch_coordinates(db,hull)
     
-        # 4d.2 EA in/out of hulls
-        fetch_set = ['EA_2001_buff','EA_2011_buff','EA_2001_hull','EA_2011_hull']
+        # 4d.2 EA and SAL in/out of hulls
+        fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
         part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
-        # 4d.3 calculate distances for EA  
-        dist_input=[matrx[x][:,:2].astype(np.float) for x in ['EA_2001_buff','EA_2011_buff']]
+        # 4d.3 calculate distances for EA and SAL
+        dist_input=[matrx[x][:,:2].astype(np.float) for x in [geom+'_2001_buff',geom+'_2011_buff']]
         part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
-        dist = dict(zip(['EA_2001_buff','EA_2011_buff'],pp.map(part_dist_calc,dist_input)))
+        dist = dict(zip([geom+'_2001_buff',geom+'_2011_buff'],pp.map(part_dist_calc,dist_input)))
         print '\n'," -- EA distance calculation: done! ({}) "'\n'.format(hull)
     
         # 4d.4 retrieve IDs, populate table and push back to DB
-        ID = 'ea_code'
-        for e in ['EA_2001','EA_2011']:
+        ID = geom+'_code'
+        for e in [geom+'_2001',geom+'_2011']:
             push_distCENSUS2db(db,matrx,dist,coords,e,ID,hull)
-        print '\n'," -- EA distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
+        print '\n'," -- EA and SAL distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
 
     # 4d.5 kill parallel workers
     pp.close()

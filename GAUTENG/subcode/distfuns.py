@@ -275,36 +275,31 @@ def fetch_data(db,dir,bufftype,hull,i):
             AND st_within(e.GEOMETRY,b.GEOMETRY) 
             '''.format(hull,bufftype)
 
-    if i=='EA_2001_buff' or i=='EA_2011_buff':
-        # EA centroids inside buffers 
-        if i=='EA_2001_buff':
-            yr='2001'
-        if i=='EA_2011_buff':
-            yr='2011'
+    if 'ea_' in i or 'sal_' in i:
 
-        qry ='''
-            SELECT st_x(st_centroid(e.GEOMETRY)) AS x, st_y(st_centroid(e.GEOMETRY)) AS y,
-                   e.ea_code, b.cluster AS cluster
-            FROM ea_{} AS e, {}_buffers_{} AS b
-            WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='ea_{}' AND search_frame=b.GEOMETRY)
-            AND st_within(e.GEOMETRY,b.GEOMETRY) 
-            '''.format(yr,hull,bufftype,yr)
+        # EA and SAL centroids inside buffers 
+        geom,yr,plygn =  i.split('_')
 
-    if i=='EA_2001_hull' or i=='EA_2011_hull':
-        # EA centroids inside hulls 
-        if i=='EA_2001_hull':
-            yr='2001'
-        if i=='EA_2011_hull':
-            yr='2011'
+        if plygn=='buff':  
 
-        qry ='''
-            SELECT p.ea_code
-            FROM ea_{} AS p, {}_conhulls AS h
-            WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                    WHERE f_table_name='ea_{}' AND search_frame=h.GEOMETRY)
-            AND st_within(p.GEOMETRY,h.GEOMETRY);
-            '''.format(yr,hull,yr)
+            qry ='''
+                SELECT st_x(st_centroid(e.GEOMETRY)) AS x, st_y(st_centroid(e.GEOMETRY)) AS y,
+                       e.{}_code, b.cluster AS cluster
+                FROM {}_{} AS e, {}_buffers_{} AS b
+                WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                        WHERE f_table_name='{}_{}' AND search_frame=b.GEOMETRY)
+                AND st_within(e.GEOMETRY,b.GEOMETRY)
+                '''.format(geom,geom,yr,hull,bufftype,geom,yr)
+
+        if plygn=='hull':
+
+            qry ='''
+                SELECT p.{}_code
+                FROM {}_{} AS p, {}_conhulls AS h
+                WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                        WHERE f_table_name='{}_{}' AND search_frame=h.GEOMETRY)
+                AND st_within(p.GEOMETRY,h.GEOMETRY);
+                '''.format(geom,geom,yr,hull,geom,yr)
 
     # fetch data
     con = sql.connect(db)
