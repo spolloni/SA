@@ -104,3 +104,15 @@ plotreg timeplot timeplot;
 
 * exit stata;
 exit, STATA clear; 
+
+
+
+
+
+
+
+
+
+
+
+

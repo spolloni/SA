@@ -62,7 +62,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 1 
+_4_PLACEBO_ = 0 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -70,7 +70,7 @@ counts = {
     'informal_pre': '99999', # upper-bound on pre informal structures in project area
     'informal_post': '99999'} # upper-bound on post informal structures in project area
 keywords = ['Planning','Proposed', # keywords to identify 
-            'Investigating','future','Implementation'] 
+            'Investigating','future','Implementation','Essential','Informal'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
@@ -401,14 +401,14 @@ if _7_a_PLOTS_ == 1:
 
     print '\n'," Making Housing Prices plots...",'\n'
 
-    dofile = "subcode/export2gradplot.do"
+    dofile = "subcode/export2gradplot_placebo.do"
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
     if not os.path.exists(outdir+'gradplots'):
         os.makedirs(outdir+'gradplots')
 
-    dofile = "subcode/plot_gradients.do"
+    dofile = "subcode/plot_gradients_placebo.do"
     cmd = ['stata-mp','do',dofile,rdp]
     subprocess.call(cmd)
 

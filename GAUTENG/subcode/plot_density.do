@@ -106,5 +106,5 @@ plotreg bbluplot bbluplot;
 restore;
 
 * exit stata;
-exit, STATA clear; 
+*exit, STATA clear; 
 
