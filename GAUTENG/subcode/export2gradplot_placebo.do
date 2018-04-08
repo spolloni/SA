@@ -12,8 +12,8 @@ local qry = "
 
   SELECT AA.*, BB.distance AS dist_rdp, BB.cluster AS clust_rdp,
          CC.cluster_siz AS clust_siz_rdp, CC.mode_yr AS mode_yr_rdp,
-         CC.frac1 AS frac1_rdp, CC.frac2 AS frac2_rdp, 
-         DD.distance AS dist_placebo, DD.cluster AS clust_placebo
+         CC.frac1 AS frac1_rdp, CC.frac2 AS frac2_rdp, EE.area,
+         DD.distance AS dist_placebo, DD.cluster AS clust_placebo 
 
   FROM 
 
@@ -32,6 +32,8 @@ local qry = "
   FROM rdp_clusters) AS CC on BB.cluster = CC.cluster
 
   LEFT JOIN distance_nrdp_placebo AS DD ON DD.property_id = AA.property_id 
+
+  LEFT JOIN placebo_conhulls AS EE on EE.cluster = DD.cluster
 
   ";
 

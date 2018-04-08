@@ -126,6 +126,8 @@ def make_gcro_placebo(db,counts,keywords):
                 SELECT ElementaryGeometries('placebo_conhulls_union', 'GEOMETRY',
                       'placebo_conhulls', 'cluster', 'parent');
                 UPDATE placebo_conhulls SET cluster = cluster + 1000;
+                ALTER TABLE placebo_conhulls ADD COLUMN area FLOAT;
+                UPDATE placebo_conhulls SET area = ST_AREA(GEOMETRY)/1000000;
                '''
 
     cur.execute(chec_qry)
