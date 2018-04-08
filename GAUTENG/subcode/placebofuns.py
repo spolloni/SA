@@ -15,11 +15,13 @@ import pandas as pd
 
 def make_gcro_placebo(db,counts,keywords):
 
+    # connect to DB
     con = sql.connect(db)
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
+    # prepare query text for keywords column
     var_gen = ''
     if len(keywords)>0:
         var_gen = ''' , (CASE WHEN G.descriptio IS NULL THEN "descr_is_null" '''
@@ -27,6 +29,7 @@ def make_gcro_placebo(db,counts,keywords):
             var_gen += ''' WHEN G.descriptio LIKE '%{}%' THEN "{}" '''.format(k,k.lower())
         var_gen += ' ELSE NULL END) as keywords '
 
+    # prepare query text for filtering shapes 
     keep_cond = ''' 
                 WHERE RDP_density <= {}
                 AND formal_pre    <= {}
@@ -35,10 +38,10 @@ def make_gcro_placebo(db,counts,keywords):
                 AND informal_post <= {}
                 '''.format(counts['erven_rdp'],counts['formal_pre'],
                     counts['formal_post'],counts['informal_pre'],counts['informal_post'])
-
     if len(keywords)>0:
         keep_cond += 'AND keywords IS NOT NULL'
 
+    # count number BBLU in shapes
     for t in ['pre','post']:
         cur.execute('DROP TABLE IF EXISTS gcro_temp_{};'.format(t))
         make_qry = '''
@@ -56,6 +59,7 @@ def make_gcro_placebo(db,counts,keywords):
                    '''.format(t,t,t,t,t)
         cur.execute(make_qry) 
 
+    # count number RDP in shapes
     cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
     make_qry = '''
                 CREATE TABLE gcro_temp_rdp_count AS 
@@ -73,6 +77,7 @@ def make_gcro_placebo(db,counts,keywords):
                '''
     cur.execute(make_qry) 
 
+    # join information into stats table
     cur.execute('DROP TABLE IF EXISTS gcro_publichousing_stats;')
     make_qry = '''
                 CREATE TABLE gcro_publichousing_stats AS 
@@ -90,6 +95,20 @@ def make_gcro_placebo(db,counts,keywords):
                '''.format(var_gen)
     cur.execute(make_qry) 
 
+    # create table with Union of shapes that make the cut
+    cur.execute('DROP TABLE IF EXISTS placebo_conhulls_union;')
+    make_qry = '''
+               CREATE TABLE placebo_conhulls_union AS 
+               SELECT ST_UNION(G.GEOMETRY) AS GEOMETRY
+               FROM gcro_publichousing as G
+               JOIN gcro_publichousing_stats as H on G.OGC_FID = H.OGC_FID_gcro
+               {};
+               '''.format(keep_cond)
+    cur.execute(make_qry)
+    cur.execute(''' SELECT RecoverGeometryColumn('placebo_conhulls_union',
+                        'GEOMETRY',2046,'MULTIPOLYGON','XY');''')
+
+    # create table of elementary geometries;
 
     chec_qry = '''
                SELECT type,name from SQLite_Master
@@ -104,34 +123,29 @@ def make_gcro_placebo(db,counts,keywords):
                '''
 
     make_qry = '''
-               CREATE TABLE placebo_conhulls AS 
-               SELECT G.ROWID+1000 as cluster, G.GEOMETRY, G.OGC_FID as OGC_FID_gcro
-               FROM gcro_publichousing as G
-               JOIN gcro_publichousing_stats as H on G.OGC_FID = H.OGC_FID_gcro
-               {};
-               '''.format(keep_cond)
+                SELECT ElementaryGeometries('placebo_conhulls_union', 'GEOMETRY',
+                      'placebo_conhulls', 'cluster', 'parent');
+                UPDATE placebo_conhulls SET cluster = cluster + 1000;
+               '''
 
     cur.execute(chec_qry)
     result = cur.fetchall()
     if result:
         cur.executescript(drop_qry)
-    cur.execute(make_qry)
+    cur.executescript(make_qry)
 
-    cur.execute("SELECT RecoverGeometryColumn('placebo_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
+    # create indices
     cur.execute("SELECT CreateSpatialIndex('placebo_conhulls','GEOMETRY');")
     cur.execute("CREATE INDEX gcro_publichousing_stats_index ON gcro_publichousing_stats (OGC_FID_gcro);")
-    cur.execute("CREATE INDEX placebo_index ON placebo_conhulls (OGC_FID_gcro);")
 
+    # clean-up
     cur.execute('DROP TABLE IF EXISTS gcro_temp_pre;')    
     cur.execute('DROP TABLE IF EXISTS gcro_temp_post;')  
     cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
+    cur.execute('''SELECT DiscardGeometryColumn('placebo_conhulls_union','GEOMETRY');''')
+    cur.execute('DROP TABLE IF EXISTS placebo_conhulls_union;')
 
     con.commit()
     con.close()
 
     return 
-
-
-
-
-
