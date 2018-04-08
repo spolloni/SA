@@ -206,74 +206,77 @@ def fetch_coordinates(db,hull):
 
 def fetch_data(db,dir,bufftype,hull,i):
 
+    distinct = ''
+    if bufftype == 'reg': distinct = 'DISTINCT'
+
     if i=='BBLU_pre_buff':
 
         # BBLU pre points in buffers
         qry ='''
-            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
+            SELECT {} st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
             FROM bblu_pre AS p, {}_buffers_{} AS b
             WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='bblu_pre' AND search_frame=b.GEOMETRY)
             AND st_within(p.GEOMETRY,b.GEOMETRY);
-            '''.format(hull,bufftype)
+            '''.format(distinct,hull,bufftype)
 
     if i=='BBLU_pre_hull':
 
         # BBLU pre points in hulls
         qry ='''
-            SELECT p.OGC_FID
+            SELECT {} p.OGC_FID
             FROM bblu_pre AS p, {}_conhulls AS h
             WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='bblu_pre' AND search_frame=h.GEOMETRY)
             AND st_within(p.GEOMETRY,h.GEOMETRY);
-            '''.format(hull)
+            '''.format(distinct,hull)
 
     if i=='BBLU_post_buff':
 
         # BBLU post points in buffers
         qry ='''
-            SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
+            SELECT {} st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID
             FROM bblu_post AS p, {}_buffers_{} AS b
             WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='bblu_post' AND search_frame=b.GEOMETRY)
             AND st_within(p.GEOMETRY,b.GEOMETRY);
-            '''.format(hull,bufftype)
+            '''.format(distinct,hull,bufftype)
 
     if i=='BBLU_post_hull':
 
         # BBLU post points in hulls
         qry ='''
-            SELECT p.OGC_FID
+            SELECT {} p.OGC_FID
             FROM bblu_post AS p, {}_conhulls AS h
             WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='bblu_post' AND search_frame=h.GEOMETRY)
             AND st_within(p.GEOMETRY,h.GEOMETRY);
-            '''.format(hull)
+            '''.format(distinct,hull)
 
     if i=='trans_hull':
 
         # transactions inside hulls
         qry ='''
-            SELECT e.property_id, r.rdp_never
+            SELECT {} e.property_id, r.rdp_never
             FROM erven AS e, {}_conhulls AS h
             JOIN rdp AS r ON e.property_id = r.property_id
             WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='erven' AND search_frame=h.GEOMETRY)
             AND st_within(e.GEOMETRY,h.GEOMETRY)
-            '''.format(hull)
+            '''.format(distinct,hull)
 
     if i=='trans_buff':
 
         # transactions inside buffers
         qry ='''
-            SELECT st_x(e.GEOMETRY) AS x, st_y(e.GEOMETRY) AS y,
-                   e.property_id AS property_id, r.rdp_never, b.cluster AS cluster
+            SELECT {} st_x(e.GEOMETRY) AS x, st_y(e.GEOMETRY) AS y,
+                   e.property_id AS property_id, r.rdp_never
             FROM erven AS e, {}_buffers_{} AS b
             JOIN rdp AS r ON e.property_id = r.property_id
             WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='erven' AND search_frame=b.GEOMETRY)
             AND st_within(e.GEOMETRY,b.GEOMETRY) 
-            '''.format(hull,bufftype)
+            '''.format(distinct,hull,bufftype)
 
     if 'ea_' in i or 'sal_' in i:
 
@@ -283,23 +286,23 @@ def fetch_data(db,dir,bufftype,hull,i):
         if plygn=='buff':  
 
             qry ='''
-                SELECT st_x(st_centroid(e.GEOMETRY)) AS x, st_y(st_centroid(e.GEOMETRY)) AS y,
-                       e.{}_code, b.cluster AS cluster
+                SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
+                       st_y(st_centroid(e.GEOMETRY)) AS y, e.{}_code
                 FROM {}_{} AS e, {}_buffers_{} AS b
                 WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                         WHERE f_table_name='{}_{}' AND search_frame=b.GEOMETRY)
                 AND st_within(e.GEOMETRY,b.GEOMETRY)
-                '''.format(geom,geom,yr,hull,bufftype,geom,yr)
+                '''.format(distinct,geom,geom,yr,hull,bufftype,geom,yr)
 
         if plygn=='hull':
 
             qry ='''
-                SELECT p.{}_code
+                SELECT {} p.{}_code
                 FROM {}_{} AS p, {}_conhulls AS h
                 WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
                         WHERE f_table_name='{}_{}' AND search_frame=h.GEOMETRY)
                 AND st_within(p.GEOMETRY,h.GEOMETRY);
-                '''.format(geom,geom,yr,hull,geom,yr)
+                '''.format(distinct,geom,geom,yr,hull,geom,yr)
 
     # fetch data
     con = sql.connect(db)

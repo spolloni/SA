@@ -277,8 +277,9 @@ if _5_b_DISTS_ ==1:
         coords = fetch_coordinates(db,hull)
     
         # 4b.2 non-rdp in/out of hulls
+        bufftype = 'intersect' if hull == 'rdp' else 'reg'
         fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,bufftype,hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -308,8 +309,9 @@ if _5_c_DISTS_ ==1:
         coords = fetch_coordinates(db,hull)
     
         # 4c.2 BBLU in/out of hulls
+        bufftype = 'intersect' if hull == 'rdp' else 'reg'
         fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,bufftype,hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -340,8 +342,9 @@ if _5_d_DISTS_ ==1:
         coords = fetch_coordinates(db,hull)
     
         # 4d.2 EA and SAL in/out of hulls
+        bufftype = 'intersect' if hull == 'rdp' else 'reg'
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,bufftype,hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
