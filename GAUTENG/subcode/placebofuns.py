@@ -99,7 +99,7 @@ def make_gcro_placebo(db,counts,keywords):
     cur.execute('DROP TABLE IF EXISTS placebo_conhulls_union;')
     make_qry = '''
                CREATE TABLE placebo_conhulls_union AS 
-               SELECT ST_UNION(G.GEOMETRY) AS GEOMETRY
+               SELECT ST_UNION(ST_MAKEVALID(G.GEOMETRY)) AS GEOMETRY
                FROM gcro_publichousing as G
                JOIN gcro_publichousing_stats as H on G.OGC_FID = H.OGC_FID_gcro
                {};
