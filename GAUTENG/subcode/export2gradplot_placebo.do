@@ -44,35 +44,13 @@ cd Generated/GAUTENG;
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;
 
-pause on;
-pause;
-
-* set up frac vars;
+* set up ;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
-replace cluster=cl if cluster==.;
-foreach var in mode_yr frac1 frac2 cluster_siz {;
-   bys cluster: egen max = max(`var');
-   replace `var' = max if cl ==.;
-   drop max;
-};
-
-* create date variables and dummies;
-gen abs_yrdist = abs(purch_yr - mode_yr); 
-gen day_date = mdy(purch_mo,purch_day,purch_yr);
-gen mo_date  = ym(purch_yr,purch_mo);
-gen con_day  = mdy(07,02,mode_yr);
-replace con_day = mdy(01,01,mode_yr+1 ) if mod(mode_yr,1)>0;
-gen con_mo   = ym(mode_yr,07);
-format day_date %td;
-format mo_date %tm;
-gen day2con = day_date - con_day;
-gen mo2con  = mo_date - con_mo;
 
 * non-rdp cluster size;
-bys cluster rdp_never: gen n = _n;
-replace n = 0 if rdp_never==0;
-bys cluster: egen cluster_siz_nrdp = max(n);
+bys clust_placebo: gen n = _n;
+bys clust_placebo: egen clust_placebo_siz = max(n);
 drop n;
 
 * gen required vars;
@@ -81,7 +59,7 @@ gen erf_size2 = erf_size^2;
 gen erf_size3 = erf_size^3;
 
 * save data;
-save "gradplot.dta", replace;
+save "gradplot_placebo.dta", replace;
 
 * exit stata;
 exit, STATA clear; 
