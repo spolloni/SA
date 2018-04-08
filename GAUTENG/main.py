@@ -61,28 +61,31 @@ _3_CLUSTER_ = 0
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
-par2 = 50        # Parameter setting #2 for Clustering  #77,50
+par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
 _4_PLACEBO_ = 0 
 counts = {
-    'erven_rdp': '20', # upper-bound on rdp erven in project area 
-    'formal_pre': '20', # upper-bound on pre formal structures in project area
-    'formal_post': '20', # upper-bound on post formal structures in project area 
-    'informal_pre': '20', # upper-bound on pre informal structures in project area
-    'informal_post': '20'} # upper-bound on post informal structures in project area
-keywords = ['Informal','Planning','Proposed', # keywords to identify 
-            'Investigating','future', 'Essential'] 
+    'erven_rdp': '15', # upper-bound on rdp erven in project area 
+    'formal_pre': '99999', # upper-bound on pre formal structures in project area
+    'formal_post': '500',  # upper-bound on post formal structures in project area 
+    'informal_pre': '99999', # upper-bound on pre informal structures in project area
+    'informal_post': '99999'} # upper-bound on post informal structures in project area
+keywords = ['Planning','Proposed', # keywords to identify 
+            'Investigating','future','Implementation','Essential','Informal'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
-_5_c_DISTS_ = 0  # BBLU istance
+_5_c_DISTS_ = 0  # BBLU distance
 _5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 
-_6_a_PLOTS_ = 0
-_6_b_PLOTS_ = 0
+_6_a_PLOTS_ = 0  # distance plots for RDP: house prices
+_6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
+
+_7_a_PLOTS_ = 0  # distance plots for placebo: house prices
+_7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -380,6 +383,40 @@ if _6_a_PLOTS_ == 1:
     print '\n'," -- Price Gradient Plots: done! ",'\n'
 
 if _6_b_PLOTS_ == 1:
+
+    print '\n'," Making BBLU plots...",'\n'
+
+    if not os.path.exists(outdir+'bbluplots'):
+        os.makedirs(outdir+'bbluplots')
+
+    dofile = "subcode/plot_density.do"
+    cmd = ['stata-mp','do',dofile]
+    subprocess.call(cmd)
+
+    print '\n'," -- BBLU Plots: done! ",'\n'
+
+#################################################
+# STEP 7:  Make Placebo Gradient/Density Plots  #
+#################################################
+
+if _7_a_PLOTS_ == 1:
+
+    print '\n'," Making Housing Prices plots...",'\n'
+
+    dofile = "subcode/export2gradplot_placebo.do"
+    cmd = ['stata-mp','do',dofile]
+    subprocess.call(cmd)
+
+    if not os.path.exists(outdir+'gradplots'):
+        os.makedirs(outdir+'gradplots')
+
+    dofile = "subcode/plot_gradients_placebo.do"
+    cmd = ['stata-mp','do',dofile,rdp]
+    subprocess.call(cmd)
+
+    print '\n'," -- Price Gradient Plots: done! ",'\n'
+
+if _7_b_PLOTS_ == 1:
 
     print '\n'," Making BBLU plots...",'\n'
 
