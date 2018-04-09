@@ -80,6 +80,9 @@ global ifhist = "
        mode_yr>2002 
        ";
 
+
+drop if purch_yr<2003 | purch_yr>2011;
+
 * histogram transactions;
 local b = 12*$tw;
 tw
@@ -103,7 +106,7 @@ reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs
 plotreg timeplot timeplot;
 
 * exit stata;
-exit, STATA clear; 
+*exit, STATA clear; 
 
 
 
