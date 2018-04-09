@@ -10,74 +10,147 @@ set maxvar 32767
 ******************;
 
 global LOCAL = 1;
+global gcro_import 		= 0 ;
+global tab_05_06_import = 0 ;
+global tab_06_07_import = 1 ;
+
+global matching_05_06 = 0;
+
 if $LOCAL==1{;
 	cd ..;
 };
 cd ../..;
-
 cd "lit_review/rdp_housing/budget_statement_3/";
 
-import delimited using "tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
+*** import and clean GCRO  ;
 
-
-g name1 = name[_n-1]+" "+name[_n] if start[_n-1]=="nan" & start[_n]!="nan";
-drop if name1=="";
-
-
-/*
-
-prog define var_ren `1' `2';
-	capture confirm variable `1';
-	if _rc==0 {;
-	g `1'_descrip = regexm(`1',"`2'")==1;
-	sum `1'_descrip, detail;
-	if `=r(max)'==1 {;
-	capture confirm variable `2';
-		if _rc!=0 {;
-		ren `1' `2';
-		};
-	};
-	drop `1'_descrip;
-	};
-end;
-
-forvalues r=2/3 {;
-import delimited using "tabula-bs_2004_2005-`r'.csv", delimiter(",") clear;
-
-
-foreach var of varlist * {;
-	capture confirm numeric variable `var';
-	if _rc!=0 {;
-	replace `var'=lower(`var');
-
-
-	** find date variables ;
-	g `var'_len = substr(`var',3,1)=="/";
-	sum `var'_len, detail;
-	if `=r(mean)'>.5 {;
-	capture confirm variable start_date;
-		if _rc!=0 {;
-		ren `var' start_date;
-		};
-		else {;
-		ren `var' end_date;
-		};
-	};
-	drop `var'_len;
-
-*	var_ren "`var'" description;
-*	var_ren "`var'" name;
-*	var_ren "`var'" cost;
-
-	};
-	};
-
-keep name description cost start_date end_date;
-drop if start_date=="";
-save "/Users/williamviolette/southafrica/lit_review/rdp_housing/budget_statement_3/bs_2004_2005_`r'.dta", replace;
+if $gcro_import==1 {;
+local qry = "SELECT  A.*, B.*  
+FROM gcro_publichousing AS A 
+JOIN gcro_publichousing_stats AS B 
+ON A.OGC_FID = B.OGC_FID_gcro";
+qui odbc query "gauteng";
+odbc load, exec("`qry'") clear;
+drop GEOMETRY;
+replace name = lower(name);
+duplicates drop name, force;
+replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"([a-z]+) x([0-9]+)");
+replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"([a-z]+) x ([0-9]+)");
+replace name = subinstr(name,","," ",.);
+replace name = subinstr(name,"."," ",.);
+replace name = subinstr(name,"[","(",.);
+replace name = subinstr(name,"]",")",.);
+replace name = subinstr(name,"&","and",.);
+replace name = subinstr(name,"extension","ext",.);
+replace name = stritrim(name);
+replace name = strtrim(name);
+drop if name=="";
+ren name name_gcro;
+drop objectid;
+g ID_gcro=_n;
+save "gcro.dta", replace;
 };
 
 
-*import delimited using "tabula-bs_2004_2005-1.csv", delimiter(",") clear;
 
-*import delimited using "tabula-bs_2004_2005-2.csv", delimiter(",") clear;
+
+if $tab_05_06_import == 1 {;
+
+import delimited using "tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
+
+g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
+replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
+g type1 = type[_n-1]+" " + type[_n] if start[_n-1]=="nan" & start[_n]!="nan";
+drop if name1=="" | name1=="nan";
+bys type1: g T_N=_N ;
+keep if T_N>10 ;
+drop T_N;
+drop name;
+ren name1 name;
+drop type;
+ren type1 type;
+order name type;
+duplicates drop name, force;
+replace name = subinstr(name,"extension","ext",.);
+replace name = subinstr(name,"&","and",.);
+g ID = _n;
+save "tab_05_06.dta", replace;
+};
+
+
+if $tab_06_07_import == 1 {;
+
+import delimited using "tab_06_07.csv", clear delimiter(",") colrange(2:) varnames(1);
+
+replace date = cost if _n<=27;
+replace cost = status if _n<=27;
+replace status = "nan" if _n<=27;
+
+g name1 = name[_n-1]+" " + name[_n] if date[_n-1]=="nan" & date[_n]!="nan" & name[_n]!="nan";
+replace name1 = name[_n-1] if date[_n-1]=="nan" & date[_n]!="nan" & name[_n]=="nan";
+replace name1 = name if date[_n]!="nan" & name[_n]!="nan";
+
+
+g type1 = type[_n-1]+" " + type[_n] if date[_n-1]=="nan" & date[_n]!="nan";
+replace type1 = type if date[_n]!="nan" & name[_n]!="nan" & type1=="";
+
+drop if _n>=402;
+
+drop if name1=="" | name1=="nan";
+g start = regexs(1) if regexm(date,"([0-9/]+) ([0-9/]+)");
+g end = regexs(2) if regexm(date,"([0-9/]+) ([0-9/]+)");
+drop if start=="";
+drop start;
+drop name;
+ren name1 name;
+drop type;
+ren type1 type;
+order name type;
+
+replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"([a-z]+) x([0-9]+)");
+replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"([a-z]+) x ([0-9]+)");
+replace name = subinstr(name,","," ",.);
+replace name = subinstr(name,"."," ",.);
+replace name = subinstr(name,"[","(",.);
+replace name = subinstr(name,"]",")",.);
+replace name = subinstr(name,"&","and",.);
+replace name = subinstr(name,"extension","ext",.);
+replace name = stritrim(name);
+replace name = strtrim(name);
+replace name = subinstr(name,"3c ","",.);
+replace name = subinstr(name,"-p1","",.);
+replace name = subinstr(name," p1","",.);
+
+duplicates drop name, force;
+drop date;
+g ID = _n;
+save "tab_06_07.dta", replace;
+};
+
+
+
+
+
+
+if $matching_05_06 == 1{;
+
+use "tab_05_06.dta", clear;
+
+matchit ID name using "gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
+	replace score = round(score,.00001);
+	egen max_score=max(score), by(ID_gcro);
+	keep if score+.00001>max_score;
+	keep if max_score>.6;
+	drop max_score;
+save "gcro_05_06.dta", replace;
+
+
+
+** if we're worried about matching the numbers exactly ... ;
+*g num=regexs(1) if regexm(name,"([0-9]+$)");
+*g num_gcro=regexs(1) if regexm(name_gcro,"([0-9]+$)");
+
+};
+
+
+
