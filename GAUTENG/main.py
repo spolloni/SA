@@ -226,7 +226,7 @@ if _4_PLACEBO_ == 1:
 
     print '\n'," Defining Placebo RDPs ... ",'\n'
 
-    #make_gcro_placebo(db,counts,keywords)
+    make_gcro_placebo(db,counts,keywords)
 
     print '\n'," -- Placebo RDPs: done! "'\n'
 
