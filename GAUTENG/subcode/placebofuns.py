@@ -59,7 +59,7 @@ def make_gcro_placebo(db,counts,keywords):
                 CREATE TABLE gcro_temp_rdp_count AS 
                 SELECT G.OGC_FID as OGC_FID, 
                 SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END) as RDP_total,
-                MAX(C.mode_yr) as mode_yr
+                MODE(C.mode_yr) as mode_yr
                 FROM  gcro_publichousing as G, erven AS E
                 JOIN rdp AS R on E.property_id=R.property_id
                 LEFT JOIN rdp_clusters AS C on C.property_id=R.property_id                
@@ -128,6 +128,7 @@ def make_gcro_placebo(db,counts,keywords):
     con.close()
 
     return 
+
 
 
 

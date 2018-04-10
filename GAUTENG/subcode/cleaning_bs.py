@@ -1,11 +1,14 @@
 
+
+
 from pysqlite2 import dbapi2 as sql
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
 import numpy  as np
 import pandas as pd
 import re
-import string 
+import string
+
 
 project = os.getcwd()[:os.getcwd().rfind('Code')]
 project = project + 'Raw/GCRO/DOCUMENTS/budget_statement_3/'
@@ -23,7 +26,7 @@ for j in [str(x) for x in range(1,43)]:
 	else:
 		d_full=d_full.append(d1)
 
-d_full.to_csv(project+"temp/ab_05_06.csv")
+d_full.to_csv(project+"temp/tab_05_06.csv")
 
 
 

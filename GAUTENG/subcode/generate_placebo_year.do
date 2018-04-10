@@ -5,20 +5,8 @@ set scheme s1mono
 set matsize 11000
 set maxvar 32767
 #delimit;
-******************;
-*  PLOT DENSITY  *;
-******************;
 
 global LOCAL = 1;
-global gcro_import 		= 1 ;
-
-global tab_04_05_import = 1 ;
-global tab_05_06_import = 1 ;
-global tab_06_07_import = 1 ;
-global tab_08_09_import = 1 ;
-
-global matching 	= 1 ;
-global generate_placebo_year_output 		= 1 ;
 
 prog define name_fix ;
 	replace name = lower(name);
@@ -47,37 +35,32 @@ prog define name_fix ;
 	drop if name=="nan" ;
 end ;
 
-
-
 if $LOCAL==1{;
 	cd ..;
 };
 cd ../..;
 cd "Raw/GCRO/DOCUMENTS/budget_statement_3/";
 
-*** import and clean GCRO  ;
 
-if $gcro_import==1 {;
 local qry = "SELECT  A.*, B.*  
 FROM gcro_publichousing AS A 
 JOIN gcro_publichousing_stats AS B 
 ON A.OGC_FID = B.OGC_FID_gcro";
-qui odbc query "gauteng";
-odbc load, exec("`qry'") clear;
-drop GEOMETRY;
-name_fix;
-duplicates drop name, force;
-drop if name=="";
-ren name name_gcro;
-drop objectid;
-g ID_gcro=_n;
+	qui odbc query "gauteng";
+	odbc load, exec("`qry'") clear;
+	drop GEOMETRY;
+	name_fix;
+	duplicates drop name, force;
+	drop if name=="";
+	ren name name_gcro;
+	drop objectid;
+	g ID_gcro=_n;
 save "temp/gcro.dta", replace;
-};
 
 
+** CLEAN 04 05; 
 
-if $tab_04_05_import == 1 {;
-	import delimited using "temp/tab_04_05.csv", clear delimiter(",") colrange(2:) varnames(1);
+import delimited using "temp/tab_04_05.csv", clear delimiter(",") colrange(2:) varnames(1);
 	drop if name=="sub total";
 		g name1=name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n-1]!="nan";
 		replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
@@ -100,12 +83,12 @@ if $tab_04_05_import == 1 {;
 			drop cost_max;
 	duplicates drop name, force;
 	g ID = _n;
-	save "temp/tab_04_05.dta", replace;
-};
+save "temp/tab_04_05.dta", replace;
 
 
-if $tab_05_06_import == 1 {;
-	import delimited using "temp/tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
+** CLEAN 05 06; 
+
+import delimited using "temp/tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
 	g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
 	g type1 = type[_n-1]+" " + type[_n] if start[_n-1]=="nan" & start[_n]!="nan";
@@ -130,14 +113,13 @@ if $tab_05_06_import == 1 {;
 	destring cost, replace ignore(,);
 	duplicates drop name, force;
 	g ID = _n;
-	save "temp/tab_05_06.dta", replace;	
-};
+save "temp/tab_05_06.dta", replace;	
 
 
 
-if $tab_06_07_import == 1 {;
+** CLEAN 06 07 (its in two files cus the formats were weird so I merge them in stata); 
 
-	import delimited using "temp/tab_06_07_short.csv", clear delimiter(",") colrange(2:) varnames(1) ;
+import delimited using "temp/tab_06_07_short.csv", clear delimiter(",") colrange(2:) varnames(1) ;
 	g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
 	g type1 = type[_n-1]+" " + type[_n] if start[_n-1]=="nan" & start[_n]!="nan";
@@ -154,7 +136,6 @@ if $tab_06_07_import == 1 {;
 	duplicates drop name, force;
 	*g ID = _n;
 	save "temp/tab_06_07_short_temp.dta", replace;
-
 
 	import delimited using "temp/tab_06_07.csv", clear delimiter(",") colrange(2:) varnames(1);
 	replace date = cost if _n<=27;
@@ -201,14 +182,14 @@ if $tab_06_07_import == 1 {;
 		drop if start_yr==.;
 
 	g ID = _n;
-	save "temp/tab_06_07.dta", replace;
-};
+save "temp/tab_06_07.dta", replace;
 
 
 
 
-if $tab_08_09_import == 1 {;
-	import delimited using "temp/tab_08_09.csv", clear delimiter(",") colrange(2:) varnames(1);
+** CLEAN 08 09;
+
+import delimited using "temp/tab_08_09.csv", clear delimiter(",") colrange(2:) varnames(1);
 	drop if regexm(name,"subtotal")==1;
 	replace name = name[_n] +" "+ name[_n+1] if start[_n+1]=="nan";
 	drop if start=="nan";
@@ -228,18 +209,20 @@ if $tab_08_09_import == 1 {;
 	*duplicates tag name, g(dup);
 	duplicates drop name, force;
 	g ID = _n;
-	save "temp/tab_08_09.dta", replace;
-};
+save "temp/tab_08_09.dta", replace;
 
 
-if $matching == 1 {;
 
-	foreach year in 04_05 05_06 06_07 08_09 {;
+
+** MERGE THEM ALL TOGETHER ;
+
+foreach year in 04_05 05_06 06_07 08_09 {;
 		use "temp/tab_`year'.dta", clear;
 		matchit ID name using "temp/gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
 			replace score = round(score,.00001);
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
+		** HERE IS WHERE WE SET THE THRESHOLD FOR THE STRING MATCHING SCORE ;
 			keep if max_score>.6;
 			drop max_score;
 			duplicates drop name_gcro, force;
@@ -254,14 +237,12 @@ if $matching == 1 {;
 	foreach year in 05_06 06_07 08_09 {;
 	append using "temp/gcro_`year'.dta";
 	};
-	save "temp/gcro_merge.dta", replace;
-
-};
+save "temp/gcro_merge.dta", replace;
 
 
-if $generate_placebo_year_output == 1{;
+*** HERE IS WHERE I MERGE BACK IN THE GCRO DATA TO CALCULATE THE YEAR;
 
-	use "temp/gcro_merge.dta", clear;
+use "temp/gcro_merge.dta", clear;
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
 			drop max_score;
@@ -293,8 +274,8 @@ if $generate_placebo_year_output == 1{;
 	odbc exec("DROP TABLE IF EXISTS placebo_year;"), dsn("gauteng");
 	odbc insert, table("placebo_year") create;
 	odbc exec("CREATE INDEX placebo_year_index ON placebo_year (OGC_FID);"), dsn("gauteng");
-	exit, STATA clear; 
-};
+exit, STATA clear; 
+
 
 
 
