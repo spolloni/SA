@@ -65,7 +65,8 @@ def make_gcro_placebo(db,counts,keywords):
                 CREATE TABLE gcro_temp_rdp_count AS 
                 SELECT G.OGC_FID as OGC_FID, 
                 1000000*SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END)
-                /st_area(G.GEOMETRY) AS RDP_density
+                /st_area(G.GEOMETRY) AS RDP_density,
+                MAX(RC.mode_yr) as mode_yr
                 FROM  gcro_publichousing as G, erven AS E
                 JOIN rdp AS R on E.property_id=R.property_id  
                 JOIN rdp_clusters AS RC on E.property_id=RC.property_id                
@@ -83,6 +84,7 @@ def make_gcro_placebo(db,counts,keywords):
                 CREATE TABLE gcro_publichousing_stats AS 
                 SELECT G.OGC_FID as OGC_FID_gcro , 
                      cast(coalesce(R.RDP_density,0) AS FLOAT) as RDP_density, 
+                     cast(R.mode_yr AS FLOAT) as RDP_mode_yr,
                      cast(coalesce(A.formal_pre,0) AS FLOAT) as formal_pre,
                      cast(coalesce(A.informal_pre,0) AS FLOAT) as informal_pre, 
                      cast(coalesce(B.formal_post,0) AS FLOAT) as formal_post, 
