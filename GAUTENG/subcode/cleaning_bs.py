@@ -95,9 +95,6 @@ d_full.to_csv(project+"temp/tab_04_05.csv")
 
 
 
-
-
-
 loc=project+"tabula-bs_2008_2009/"
 
 for j in [str(x) for x in range(0,4)]:

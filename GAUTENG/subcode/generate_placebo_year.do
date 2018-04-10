@@ -270,7 +270,7 @@ if $generate_placebo_year_output == 1{;
 			keep if start_yr==min_start_yr;
 			drop min_start_yr;
 		duplicates drop ID_gcro, force;
-		merge 1:m ID_gcro using "gcro.dta";
+		merge 1:m ID_gcro using "temp/gcro.dta";
 		keep if _merge==3;
 		drop _merge;
 
@@ -282,17 +282,17 @@ if $generate_placebo_year_output == 1{;
 
 	sum year_post if RDP_mode_yr>=2000 & start_yr>=2000 & start_yr<=2004 & year_post>=0, detail ;
 
-	g start_yr_placebo = start_yr + `=round(r(mean),1)';
+	g placebo_year = start_yr + `=round(r(mean),1)';
 	** round to the nearest year because we are going at the year level ;
 
-	keep OGC_FID start_yr start_yr_placebo;
-	order OGC_FID start_yr start_yr_placebo;
+	keep OGC_FID start_yr placebo_year;
+	order OGC_FID start_yr placebo_year;
 
 	duplicates drop OGC_FID, force;
 	
-	odbc exec("DROP TABLE IF EXISTS placebo_years;"), dsn("gauteng");
-	odbc insert, table("placebo_years") create;
-	odbc exec("CREATE INDEX OGC_FID_placebo_index ON placebo_years (OGC_FID);"), dsn("gauteng");
+	odbc exec("DROP TABLE IF EXISTS placebo_year;"), dsn("gauteng");
+	odbc insert, table("placebo_year") create;
+	odbc exec("CREATE INDEX placebo_year_index ON placebo_year (OGC_FID);"), dsn("gauteng");
 	exit, STATA clear; 
 };
 
