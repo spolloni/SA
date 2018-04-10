@@ -6,7 +6,7 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
-global LOCAL = 1;
+global LOCAL = 0;
 
 prog define name_fix ;
 	replace name = lower(name);

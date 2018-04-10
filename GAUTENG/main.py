@@ -11,7 +11,7 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.spaclust import spatial_cluster, concavehull
-from subcode.placebofuns import make_gcro_placebo
+from subcode.placebofuns import make_gcro_placebo, import_budget
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
@@ -226,9 +226,20 @@ if _4_PLACEBO_ == 1:
 
     print '\n'," Defining Placebo RDPs ... ",'\n'
 
-    make_gcro_placebo(db,counts,keywords)
+    #make_gcro_placebo(db,counts,keywords)
 
     print '\n'," -- Placebo RDPs: done! "'\n'
+
+    import_budget(project)
+
+    print '\n'," -- Import Budget Reports: done! "'\n'
+
+    dofile = "subcode/generate_placebo_year.do"
+    cmd = ['stata-mp', 'do', dofile]
+    subprocess.call(cmd)
+
+    print '\n'," -- Import Budget Reports: done! "'\n'
+
 
 #############################################
 # STEP 5:  Distance to RDP for non-RDP      #
