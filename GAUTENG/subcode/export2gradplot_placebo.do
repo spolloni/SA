@@ -10,10 +10,10 @@ global LOCAL = 1;
 
 local qry = "
 
-  SELECT AA.*, BB.distance AS dist_rdp, BB.cluster AS clust_rdp,
+  SELECT AA.*, BB.distance AS distance_rdp, BB.cluster AS cluster_rdp,
          CC.cluster_siz AS clust_siz_rdp, CC.mode_yr AS mode_yr_rdp,
          CC.frac1 AS frac1_rdp, CC.frac2 AS frac2_rdp, EE.area,
-         DD.distance AS dist_placebo, DD.cluster AS clust_placebo 
+         DD.distance AS distance_placebo, DD.cluster AS cluster_placebo 
 
   FROM 
 
@@ -50,9 +50,17 @@ odbc load, exec("`qry'") clear;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 
+* create date variables and dummies;
+gen day_date = mdy(purch_mo,purch_day,purch_yr);
+gen mo_date  = ym(purch_yr,purch_mo);
+gen hy_date  = hofd(dofm(mo_date)); // half-years;
+format day_date %td;
+format mo_date %tm;
+format hy_date %th;
+
 * non-rdp cluster size;
-bys clust_placebo: gen n = _n;
-bys clust_placebo: egen clust_placebo_siz = max(n);
+bys cluster_placebo: gen n = _n;
+bys cluster_placebo: egen clust_placebo_siz = max(n);
 drop n;
 
 * gen required vars;

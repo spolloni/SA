@@ -47,7 +47,7 @@ gen treat =  (distance <= $treat);
 sum distance;
 global max = round(ceil(`r(max)'),100);
 egen dists = cut(distance),at(0($bin)$max); 
-replace dists = $max + $bin if distance <0;
+replace dists = $max if distance <0;
 replace dists = dists+$bin;
 
 * create date dummies;
