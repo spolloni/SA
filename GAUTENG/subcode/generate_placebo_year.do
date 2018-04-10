@@ -10,15 +10,15 @@ set maxvar 32767
 ******************;
 
 global LOCAL = 1;
-global gcro_import 		= 0 ;
+global gcro_import 		= 1 ;
 
-global tab_04_05_import = 0 ;
-global tab_05_06_import = 0 ;
-global tab_06_07_import = 0 ;
-global tab_08_09_import = 0 ;
+global tab_04_05_import = 1 ;
+global tab_05_06_import = 1 ;
+global tab_06_07_import = 1 ;
+global tab_08_09_import = 1 ;
 
-global matching 	= 0 ;
-global working 		= 1 ;
+global matching 	= 1 ;
+global generate_placebo_year_output 		= 1 ;
 
 prog define name_fix ;
 	replace name = lower(name);
@@ -53,7 +53,7 @@ if $LOCAL==1{;
 	cd ..;
 };
 cd ../..;
-cd "lit_review/rdp_housing/budget_statement_3/";
+cd "Raw/GCRO/DOCUMENTS/budget_statement_3/";
 
 *** import and clean GCRO  ;
 
@@ -71,13 +71,13 @@ drop if name=="";
 ren name name_gcro;
 drop objectid;
 g ID_gcro=_n;
-save "gcro.dta", replace;
+save "temp/gcro.dta", replace;
 };
 
 
 
 if $tab_04_05_import == 1 {;
-	import delimited using "tab_04_05.csv", clear delimiter(",") colrange(2:) varnames(1);
+	import delimited using "temp/tab_04_05.csv", clear delimiter(",") colrange(2:) varnames(1);
 	drop if name=="sub total";
 		g name1=name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n-1]!="nan";
 		replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
@@ -100,12 +100,12 @@ if $tab_04_05_import == 1 {;
 			drop cost_max;
 	duplicates drop name, force;
 	g ID = _n;
-	save "tab_04_05.dta", replace;
+	save "temp/tab_04_05.dta", replace;
 };
 
 
 if $tab_05_06_import == 1 {;
-	import delimited using "tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
+	import delimited using "temp/tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
 	g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
 	g type1 = type[_n-1]+" " + type[_n] if start[_n-1]=="nan" & start[_n]!="nan";
@@ -130,14 +130,14 @@ if $tab_05_06_import == 1 {;
 	destring cost, replace ignore(,);
 	duplicates drop name, force;
 	g ID = _n;
-	save "tab_05_06.dta", replace;	
+	save "temp/tab_05_06.dta", replace;	
 };
 
 
 
 if $tab_06_07_import == 1 {;
 
-	import delimited using "tab_06_07_short.csv", clear delimiter(",") colrange(2:) varnames(1) ;
+	import delimited using "temp/tab_06_07_short.csv", clear delimiter(",") colrange(2:) varnames(1) ;
 	g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
 	g type1 = type[_n-1]+" " + type[_n] if start[_n-1]=="nan" & start[_n]!="nan";
@@ -153,10 +153,10 @@ if $tab_06_07_import == 1 {;
 
 	duplicates drop name, force;
 	*g ID = _n;
-	save "tab_06_07_short_temp.dta", replace;
+	save "temp/tab_06_07_short_temp.dta", replace;
 
 
-	import delimited using "tab_06_07.csv", clear delimiter(",") colrange(2:) varnames(1);
+	import delimited using "temp/tab_06_07.csv", clear delimiter(",") colrange(2:) varnames(1);
 	replace date = cost if _n<=27;
 	replace cost = status if _n<=27;
 	replace status = "nan" if _n<=27;
@@ -182,7 +182,7 @@ if $tab_06_07_import == 1 {;
 	name_fix;
 	drop date;
 
-	append using "tab_06_07_short_temp.dta";
+	append using "temp/tab_06_07_short_temp.dta";
 
 		destring cost, ignore(,) replace force;
 		egen cost_max = max(cost), by(name);
@@ -201,14 +201,14 @@ if $tab_06_07_import == 1 {;
 		drop if start_yr==.;
 
 	g ID = _n;
-	save "tab_06_07.dta", replace;
+	save "temp/tab_06_07.dta", replace;
 };
 
 
 
 
 if $tab_08_09_import == 1 {;
-	import delimited using "tab_08_09.csv", clear delimiter(",") colrange(2:) varnames(1);
+	import delimited using "temp/tab_08_09.csv", clear delimiter(",") colrange(2:) varnames(1);
 	drop if regexm(name,"subtotal")==1;
 	replace name = name[_n] +" "+ name[_n+1] if start[_n+1]=="nan";
 	drop if start=="nan";
@@ -228,43 +228,40 @@ if $tab_08_09_import == 1 {;
 	*duplicates tag name, g(dup);
 	duplicates drop name, force;
 	g ID = _n;
-	save "tab_08_09.dta", replace;
+	save "temp/tab_08_09.dta", replace;
 };
-
-
-
 
 
 if $matching == 1 {;
 
 	foreach year in 04_05 05_06 06_07 08_09 {;
-		use "tab_`year'.dta", clear;
-		matchit ID name using "gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
+		use "temp/tab_`year'.dta", clear;
+		matchit ID name using "temp/gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
 			replace score = round(score,.00001);
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
 			keep if max_score>.6;
 			drop max_score;
 			duplicates drop name_gcro, force;
-			merge m:1 ID using "tab_`year'.dta";
+			merge m:1 ID using "temp/tab_`year'.dta";
 			keep if _merge==3;
 			drop _merge;
 		g year = "`year'";		
-		save "gcro_`year'.dta", replace;
+		save "temp/gcro_`year'.dta", replace;
 	};
 
-	use "gcro_04_05.dta", clear;
+	use "temp/gcro_04_05.dta", clear;
 	foreach year in 05_06 06_07 08_09 {;
-	append using "gcro_`year'.dta";
+	append using "temp/gcro_`year'.dta";
 	};
-	save "gcro_merge.dta", replace;
+	save "temp/gcro_merge.dta", replace;
 
 };
 
 
-if $working == 1{;
+if $generate_placebo_year_output == 1{;
 
-	use "gcro_merge.dta", clear;
+	use "temp/gcro_merge.dta", clear;
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
 			drop max_score;
@@ -276,11 +273,6 @@ if $working == 1{;
 		merge 1:m ID_gcro using "gcro.dta";
 		keep if _merge==3;
 		drop _merge;
-	save "gcro_merge_with_stuff", replace;
-
-
-
-	use "gcro_merge_with_stuff", clear;
 
 	*** Determine average years taken to complete  		;
 	*** using projects built between 2000 and 2004      ;
@@ -288,41 +280,21 @@ if $working == 1{;
 
 	g year_post = RDP_mode_yr-start_yr;
 
-	sum year_post if RDP_mode_yr>=2000 & start_yr>=2000 & start_yr<=2004, detail ;
+	sum year_post if RDP_mode_yr>=2000 & start_yr>=2000 & start_yr<=2004 & year_post>=0, detail ;
 
-	g start_yr_placebo = start_yr + `=r(mean)';
+	g start_yr_placebo = start_yr + `=round(r(mean),1)';
+	** round to the nearest year because we are going at the year level ;
 
+	keep OGC_FID start_yr start_yr_placebo;
+	order OGC_FID start_yr start_yr_placebo;
 
-*corr start_yr RDP_mode_yr if RDP_mode_yr>=2000 ;
-*scatter end_yr RDP_mode_yr if RDP_mode_yr>=2000 & score==1 ;
-*scatter start_yr RDP_mode_yr if RDP_mode_yr>=2000 & score>.8 ;
-*scatter RDP_mode_yr start_yr if RDP_mode_yr>=2000 & start_yr>=2000 ; 
-*reg RDP_mode_yr start_yr if RDP_mode_yr>=2000 & start_yr>=2000 ;
-*hist RDP_mode_yr if RDP_mode_yr>=2000 & start_yr>=2000, by(start_yr) ;
-*g placebo = RDP_total==0 & formal_pre<=20 & formal_post<=20 ;
-*tab start_yr placebo ;
-*hist start_yr if start_yr>2000 & placebo==1 ;
-
-
-
+	duplicates drop OGC_FID, force;
+	
+	odbc exec("DROP TABLE IF EXISTS placebo_years;"), dsn("gauteng");
+	odbc insert, table("placebo_years") create;
+	odbc exec("CREATE INDEX OGC_FID_placebo_index ON placebo_years (OGC_FID);"), dsn("gauteng");
+	exit, STATA clear; 
 };
-
-
-
-
-
-*if $matching_05_06 == 1{;
-*use "tab_05_06.dta", clear;
-*matchit ID name using "gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
-*	replace score = round(score,.00001);
-*	egen max_score=max(score), by(ID_gcro);
-*	keep if score+.00001>max_score;
-*	keep if max_score>.6;
-*	drop max_score;
-*	duplicates drop name_gcro, force;	
-*save "gcro_05_06.dta", replace;
-*};
-
 
 
 
