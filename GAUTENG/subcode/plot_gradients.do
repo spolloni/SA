@@ -17,7 +17,7 @@ global tw    = "4";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
 global mbin  =  6;    /* months bin width for time-series   */
 global msiz  = 50;    /* minimum obs per cluster            */
-global treat = 300; 
+global treat = 400; 
 
 * RUN LOCALLY?;
 global LOCAL = 1;

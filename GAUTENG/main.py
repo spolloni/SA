@@ -410,8 +410,8 @@ if _7_a_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    if not os.path.exists(outdir+'gradplots'):
-        os.makedirs(outdir+'gradplots')
+    if not os.path.exists(outdir+'gradplots_placebo'):
+        os.makedirs(outdir+'gradplots_placebo')
 
     dofile = "subcode/plot_gradients_placebo.do"
     cmd = ['stata-mp','do',dofile,rdp]
