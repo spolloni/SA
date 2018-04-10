@@ -20,26 +20,26 @@ outdir  = project + 'Output/GAUTENG/'
 tempdir = gendata + 'temp/'
 
 
-loc=project+"lit_review/rdp_housing/budget_statement_3/tabula-bs_2004_2005/"
+#loc=project+"lit_review/rdp_housing/budget_statement_3/tabula-bs_2004_2005/"
 
-for j in [str(x) for x in range(0,12)]:
-	if j!='7' and j!='10' and j!='5' and j!='11':
+#for j in [str(x) for x in range(0,12)]:
+#	if j!='7' and j!='10' and j!='5' and j!='11':
 		#print '\n', j, '\n'
-		d1=pd.read_csv(loc+'tabula-bs_2004_2005-'+j+'.csv')
-		d1=d1.replace('Economic',np.nan)
-		d1=d1.dropna(axis=1,how='all')		
-		d1=d1.apply(lambda x: x.astype(str).str.lower())
-		d1=d1.iloc[:,[0] + list(range(-4,0))]
-		d1.columns=['name','descrip','cost','start','end']
+#		d1=pd.read_csv(loc+'tabula-bs_2004_2005-'+j+'.csv')
+#		d1=d1.replace('Economic',np.nan)
+#		d1=d1.dropna(axis=1,how='all')		
+#		d1=d1.apply(lambda x: x.astype(str).str.lower())
+#		d1=d1.iloc[:,[0] + list(range(-4,0))]
+#		d1.columns=['name','descrip','cost','start','end']
 		#d2 = d1['cost'].str.extract('[ab](\d)')
 		#print d1.head(10)
 
 
-loc="/Users/williamviolette/southafrica/lit_review/rdp_housing/budget_statement_3/tabula-bs_2005_2006/"
+loc=project+"lit_review/rdp_housing/budget_statement_3/tabula-bs_2005_2006/"
 
 for j in [str(x) for x in range(1,43)]:
 	#print '\n \n', j, '\n \n'
-	d1=pd.read_csv(loc+'tabula-bs_2005_2006-'+j+'.csv')
+	d1=pd.read_csv(loc+'tabula-bs_2005_2006-'+j+'.csv',header=None)
 	#print d1.head(10)
 	#d1=d1.dropna(axis=1,how='all')		
 	d1=d1.apply(lambda x: x.astype(str).str.lower())
@@ -62,22 +62,22 @@ d_full.to_csv(project+"lit_review/rdp_housing/budget_statement_3/tab_05_06.csv")
 
 
 
-loc="/Users/williamviolette/southafrica/lit_review/rdp_housing/budget_statement_3/tabula-bs_2006_2007/"
+loc=project+"lit_review/rdp_housing/budget_statement_3/tabula-bs_2006_2007/"
 
 t1=1
 #t2=1
 
 for j in [str(x) for x in range(1,20)]:
 	if j!='18':
-		print '\n \n', j, '\n \n'
+		#print '\n \n', j, '\n \n'
 		if j=='1' or j=='9' or j=='10':
 			LOC = [0,1,2,3,4,5,6]		
 			file_name=loc+'tabula-bs_2006_2007-'+j+'_1.csv'
 		else:
 			LOC = [0,2,3,5,7,8,9]		
 			file_name=loc+'tabula-bs_2006_2007-'+j+'.csv'
-		d1=pd.read_csv(file_name)
-		print len(d1.columns)
+		d1=pd.read_csv(file_name,header=None)
+		#print len(d1.columns)
 		d1=d1.apply(lambda x: x.astype(str).str.lower())		
 		if len(d1.columns)==10 or len(d1.columns)==9:
 			d1=d1.dropna(axis=1,how='all')	
@@ -105,18 +105,64 @@ d_full.to_csv(project+"lit_review/rdp_housing/budget_statement_3/tab_06_07.csv")
 
 
 
-#d_full.to_csv(project+"lit_review/rdp_housing/budget_statement_3/tab_06_07.csv")
 
-	#s = open(file_name).read()
-	#print s
-	#s = s.replace('\r', '","')
-	#s = s.replace('"','')
-	#f = open(file_name_r, 'w')
-	#f.write(s)
-	#f.close()
+loc=project+"lit_review/rdp_housing/budget_statement_3/tabula-bs_2004_2005/"
+
+for j in [str(x) for x in range(14,24)]:
+	if j!='19'  and j!='21' and j!='20':
+		#print '\n \n', j, '\n \n'
+		d1=pd.read_csv(loc+'tabula-bs_2004_2005-'+j+'.csv',header=None)
+		d1=d1.dropna(axis=1,how='all')			
+		#print len(d1.columns)
+		#print d1.head(10)
+		if j in ['14','15','16']:
+			LOC = [1,3,4,5,6]
+		if j in ['17']:
+			LOC = [3,5,6,7,8]
+		if j in ['22','23','18']:
+			LOC = [2,4,5,6,7]
+		d1=d1.iloc[:, LOC]
+		d1.columns=['region','name','cost','start','end']
+		d1=d1.apply(lambda x: x.astype(str).str.lower())	
+		#print d1.head(10)
+		if j=='14':
+			d_full=d1
+		else:
+			d_full=d_full.append(d1)
+
+
+#print d_full.head()
+d_full.to_csv(project+"lit_review/rdp_housing/budget_statement_3/tab_04_05.csv")
 
 
 
-	#print dict(zip(d1.columns[:], new_cols))
-	#d1=d1.rename(columns=dict(zip(d1.columns[:], new_cols)),inplace=True)
-	#print d1
+
+
+
+
+
+
+loc=project+"lit_review/rdp_housing/budget_statement_3/tabula-bs_2008_2009/"
+
+for j in [str(x) for x in range(0,4)]:
+	#print '\n \n', j, '\n \n'
+	d1=pd.read_csv(loc+'tabula-bs_2008_2009-'+j+'.csv',header=None)
+	d1=d1.dropna(axis=1,how='all')			
+	#print len(d1.columns)
+	#print d1.head(10)
+	LOC = list(range(0,6))
+	d1=d1.iloc[:, LOC]
+	d1.columns=['name','type','start','end','cost','status']
+	d1=d1.apply(lambda x: x.astype(str).str.lower())	
+	#print d1.head(10)
+	if j=='0':
+		d_full=d1
+	else:
+		d_full=d_full.append(d1)
+
+#print d_full.head()
+d_full.to_csv(project+"lit_review/rdp_housing/budget_statement_3/tab_08_09.csv")
+
+
+
+

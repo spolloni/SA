@@ -62,7 +62,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parameter setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 0
+_4_PLACEBO_ = 1
 counts = {
     'erven_rdp': '20', # upper-bound on rdp erven in project area 
     'formal_pre': '20', # upper-bound on pre formal structures in project area
@@ -75,7 +75,7 @@ keywords = ['Informal','Planning','Proposed', # keywords to identify
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU istance
-_5_d_DISTS_ = 1  # EA distance 
+_5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 

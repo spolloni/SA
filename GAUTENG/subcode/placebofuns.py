@@ -57,9 +57,12 @@ def make_gcro_placebo(db,counts,keywords):
     cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
     make_qry = '''
                 CREATE TABLE gcro_temp_rdp_count AS 
-                SELECT G.OGC_FID as OGC_FID, SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END) as RDP_total
+                SELECT G.OGC_FID as OGC_FID, 
+                SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END) as RDP_total,
+                MAX(C.mode_yr) as mode_yr
                 FROM  gcro_publichousing as G, erven AS E
-                JOIN rdp AS R on E.property_id=R.property_id                
+                JOIN rdp AS R on E.property_id=R.property_id
+                LEFT JOIN rdp_clusters AS C on C.property_id=R.property_id                
                 WHERE E.ROWID IN (SELECT ROWID FROM SpatialIndex 
                              WHERE f_table_name='erven' AND search_frame=G.GEOMETRY)
                       AND st_intersects(E.GEOMETRY,G.GEOMETRY)
@@ -72,6 +75,7 @@ def make_gcro_placebo(db,counts,keywords):
                 CREATE TABLE gcro_publichousing_stats AS 
                 SELECT G.OGC_FID as OGC_FID_gcro , 
                      coalesce(R.RDP_total,0) as RDP_total, 
+                     coalesce(R.mode_yr,0) as RDP_mode_yr,      
                      coalesce(A.formal_pre,0)as formal_pre,
                      coalesce(A.informal_pre,0) as informal_pre, 
                      coalesce(B.formal_post,0) as formal_post, 
