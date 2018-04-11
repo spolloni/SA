@@ -4,7 +4,8 @@
 \usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,subfigure,array,hyperref}
 
 % ADDED PACKAGES FOR THIS MANUSCRIPT
-\usepackage{mathptmx,multirow,endfloat,titlesec,threeparttable}
+\usepackage{mathptmx,multirow,titlesec,threeparttable,tabu,booktabs}
+% endfloat,
 
 % SECTION TITLE SETTINGS
 \titlelabel{\thetitle.\enskip}
@@ -52,6 +53,8 @@
 
 \section{Introduction} \label{sec:introduction}
 
+
+
 In developing countries, 30\% of urban populations live in slums where households often suffer high rates of crime, low access to infrastructure, insecure property rights, and unsanitary conditions (\cite{mdg}).  Governments have responded by replacing slums with new homes and moving slum dwellers to public housing projects with the primary goal of creating health and economic benefits for these residents.  Economic theory points to how public housing not only impacts its direct recipients, but also produces spillover effects on their surrounding areas.  Slum communities can suffer from poverty traps, which persist due to a combination of unsanitary conditions, poor governance, and other negative externalities (\cite{10.1257/jep.27.4.187}).  High-quality public housing can provide an incentive for neighbors to invest more in their own homes and communities, helping to lift these communities out of their poverty traps.
 
 In this paper, we analyze the impacts of public housing on the development of their surrounding neighborhoods.  We study a large-scale housing program in South Africa, which has allocated over 4.3 million dwellings and houses over 13\% of the total population (\cite{dhsreports}; General Household Survey).  Already one of the largest housing programs in the developing world, this program continues to respond to large backlogs in housing demand with an even mix of upgrading slum areas with new houses as well as constructing large public housing developments.  This program is intended to not only serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also generate community-wide benefits, ``leveraging growth in the economy,'' ``combating crime, promoting social cohesion and improving quality of life for the poor,'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng}). 
@@ -90,15 +93,23 @@ Beneficiaries are expected to pay a small one-time payment in order to receive t
 
 Understanding the spillover impacts of public housing requires (1) outcome measures at high spatial and geographic resolutions as well as (2) a precise measure of the location, timing, and size of housing projects.  
 
-To measure housing market impacts, we use over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).\footnote{The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.}  These data include the price, exact location, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 1.2 kilometers of a housing project bringing the final sample to [XX] transactions.\footnote{Appendix [XX] also details other data cleaning measures that we took.}
+To measure housing market impacts, we use over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).\footnote{The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.}  These data include the price, exact location, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 1.2 kilometers of a housing project bringing the final sample to around  transactions.\footnote{Appendix [XX] also details other data cleaning measures that we took.}
 
-Table [XX] includes descriptive statistics for these transactions...
+Table~\ref{table:descriptives} includes descriptive statistics for these transactions...
 
 We capture demographic responses to the 
 
-
-
 and where administrative data on housing projects.  
+
+
+\begin{table}
+	\centering
+	\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
+	\input{figures/descriptive_table}
+\end{table}
+
+
+
 
 
 
@@ -113,12 +124,18 @@ and where administrative data on housing projects.
 
 
 
-
-
 % APPENDIX 
 \appendix
 \doublespacing
 
 \section*{Appendix}
+
+\begin{table}
+	\centering
+	\caption{Ten Biggest Sellers}\label{table:biggestsellers}
+	\input{figures/biggest_sellers_table}
+\end{table}
+
+
 
 \end{document}

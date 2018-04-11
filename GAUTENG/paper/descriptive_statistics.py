@@ -1,9 +1,8 @@
 
 '''
-placebofuns.py
+descriptive_statistics.do
 
     created by: willy the vee, 04/02 2018
-    - spatial functions for placebo RDPs
 '''
 
 from pysqlite2 import dbapi2 as sql
