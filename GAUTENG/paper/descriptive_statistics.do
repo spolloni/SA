@@ -131,18 +131,15 @@ program write_descriptive_table;
 
         global cat1="keep if in_buffer==0" ;
         global cat2="keep if rdp_never==1 & in_buffer==1" ;
-        global cat3="keep if rdp_all==1" ;
-        global cat_num=3;
+    *    global cat3="keep if rdp_all==1" ;
+        global cat_num=2;
 
     file open newfile using "Code/GAUTENG/paper/figures/descriptive_table.tex", write replace;
     file write newfile  "\begin{tabu}{l";
     forvalues r=1/$cat_num {;
     file write newfile  "c";
     };
-    file write newfile "}" _n  "\toprule" _n 
-                        " & Outside Buffer & Inside Buffer & Housing Project \\" _n 
-                        "\midrule" _n;
-
+    file write newfile "}" _n  "\toprule" _n " & Outside Buffer & Inside Buffer  \\" _n "\midrule" _n;
 
     *** HERE ARE THE MAIN VARIABLES ;
     print_2 "Purchase Price (Rand)" purch_price "mean" "%10.1fc"   ;
@@ -151,12 +148,14 @@ program write_descriptive_table;
     print_1 "Sold At Least Once"   plus_trans  "mean" "%10.3fc"  ;
     print_1 "Median Purchase Year"  purch_yr    "p50"  "%10.0f"   ;
     ** add distance only for in_cluster ;
-    file write newfile " Distance to Project (meters) & " ;
-        in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
-    file write newfile " & \\" _n ;
-    file write newfile " \rowfont{\footnotesize} & " ;
-       in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
-    file write newfile " & \\" _n ;
+
+    *file write newfile " Distance to Project (meters) & " ;
+    *    in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
+    *file write newfile " & \\" _n ;
+    *file write newfile " \rowfont{\footnotesize} & " ;
+    *   in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
+    *file write newfile " & \\" _n ;
+
     ** add counts ;
     file write newfile "\midrule" _n;
         print_1 Observations purch_price "N" "%10.0fc" ;

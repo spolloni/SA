@@ -73,6 +73,7 @@ end;
 odbc query "gauteng";
 odbc load, exec("`qry'");
 
+
 * Intialize stuff;
 drop if prob_residential == "RES NO";
 destring  purch_yr purch_mo purch_day, replace;
@@ -98,7 +99,10 @@ drop n nn;
 * indicate RDP (multiple definitions);
 gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
 gen rdp_never = (rdp==0);
+
+
 replace rdp = 0 if bblu_pre==1 & purch_yr > 2001;
+
 replace rdp = 0 if prob_res_small =="RES YES AND LARGE";
 price_filter "replace rdp = 0";
 gen rdp_all        = rdp;
@@ -129,9 +133,11 @@ bys property_id: gen n   = _n;
 bys property_id: egen nn = max(n);
 drop if n>1 & nn>1;
 
+
 *keep necessary vars;
 keep property_id trans_id *rdp* gov;
 drop rdp;
+
 
 ************************;
 * close and push to DB *;
