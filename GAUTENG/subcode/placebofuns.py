@@ -142,7 +142,6 @@ def make_gcro_placebo(db,counts,keywords):
         cur.executescript(drop_qry)
     cur.executescript(make_qry)
 
-
     # grab matched report year via interect;
     cur.execute('DROP TABLE IF EXISTS placebo_conhulls_yr;')
     make_qry = '''
