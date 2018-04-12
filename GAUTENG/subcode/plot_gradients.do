@@ -17,7 +17,7 @@ global tw    = "4";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
 global mbin  =  6;    /* months bin width for time-series   */
 global msiz  = 50;    /* minimum obs per cluster            */
-global treat = 300; 
+global treat = 400; 
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -47,12 +47,14 @@ gen treat =  (distance <= $treat);
 sum distance;
 global max = round(ceil(`r(max)'),100);
 egen dists = cut(distance),at(0($bin)$max); 
-replace dists = $max + $bin if distance <0;
+replace dists = $max if distance <0;
 replace dists = dists+$bin;
 
 * create date dummies;
 gen mo2con_reg = ceil(abs(mo2con)/$mbin) if abs(mo2con)<=12*$tw; 
 replace mo2con_reg = mo2con_reg + 1000 if mo2con<0;
+gen sixmonths = hy_date if mo_date>tm(2000m12) & mo_date<tm(2012m1);
+replace sixmonths = 0 if sixmonths ==.;
 
 *extra time-controls;
 gen day_date_sq = day_date^2;
@@ -70,6 +72,15 @@ global ifregs = "
        mode_yr>2002 
        ";
 
+global iftsregs = "
+       frac1 > $fr1  &
+       frac2 > $fr2  &
+       rdp_never ==1 &
+       purch_price > 1000 &
+       cluster_siz_nrdp > $msiz &
+       distance >0 
+       ";
+
 global ifhist = "
        frac1 > $fr1  &
        frac2 > $fr2  &
@@ -79,9 +90,6 @@ global ifhist = "
        mo2con >= -48 &
        mode_yr>2002 
        ";
-
-
-drop if purch_yr<2003 | purch_yr>2011;
 
 * histogram transactions;
 local b = 12*$tw;
@@ -105,17 +113,9 @@ plotreg distplot distplot;
 reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg timeplot timeplot;
 
+* time-series regression;
+reg lprice i.sixmonths#b0.treat i.cluster erf* if $iftsregs;
+plotreg timeseries timeseries;
+
 * exit stata;
 *exit, STATA clear; 
-
-
-
-
-
-
-
-
-
-
-
-

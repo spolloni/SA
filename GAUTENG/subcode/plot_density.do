@@ -18,7 +18,7 @@ global bin = 10; /* distance bin width */
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 0;
+global DATA_PREP = 1;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -49,14 +49,17 @@ if $DATA_PREP==1 {;
     SELECT D.STR_FID, D.distance, D.cluster, C.s_lu_code
     FROM bblu_post AS C 
     JOIN distance_bblu_rdp AS D ON C.STR_FID=D.STR_FID   
-    WHERE C.s_lu_code=7.1 OR C.s_lu_code=7.2
+    WHERE (C.s_lu_code=7.1 OR C.s_lu_code=7.2)
+    /**********************/
+    AND C.cf_units = 'High'
+    /**********************/
     ) AS AA 
 
     JOIN (SELECT DISTINCT cluster as cl, mode_yr, frac1, frac2 from rdp_clusters) AS BB 
     ON AA.cluster = BB.cl
     ";
 
-    odbc query "gauteng";
+  odbc query "gauteng";
 	odbc load, exec("`qry'") clear;
 
 	g formal = (s_lu_code=="7.1");
@@ -77,7 +80,6 @@ cd Output/GAUTENG/bbluplots;
 sum distance;
 global max = round(ceil(`r(max)'),100);
 egen dists = cut(distance),at(-100($bin)$max);
-
 
 * gen counts;
 bys cluster dists post formal: g count =_N;

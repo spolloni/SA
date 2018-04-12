@@ -24,6 +24,13 @@ program plotreg;
 
    };
 
+   if "`1'" == "timeseries" {;
+
+      local contin = "sixmonths";
+      local group  = "treat";
+
+   };
+
    preserve;
    parmest, fast;
    
@@ -37,12 +44,11 @@ program plotreg;
    gen postalph = substr(parm,hash +1,dot2-1-hash);
    egen group = sieve(postalph), keep(n);
    destring group, replace;
-   
 
    if "`1'" == "distplot" {;
 
       sum contin;
-      global min = `r(min)';
+      global plotmin = `r(min)';
       global step = 2*$bin;
       
       tw 
@@ -53,9 +59,9 @@ program plotreg;
       ,
       yline(0,lw(thin)lp(shortdash))
       xtitle("meters from project border",height(5))
-      ytitle("log-price coefficient",height(5))
+      ytitle("log-price coefficients",height(5))
       ylabel(-.6(.2).4)
-      xlabel($min($step)$max)
+      xlabel($plotmin($step)$max)
       legend(order(3 "pre" 4 "post") 
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none))) note("`3'");
@@ -78,7 +84,7 @@ program plotreg;
       (connected estimate contin if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin))
       (connected estimate contin if group==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin)),
       xtitle("months to modal construction year",height(5))
-      ytitle("log-price coefficient",height(5))
+      ytitle("log-price coefficients",height(5))
       xlabel(-$bound($step)$bound)
       ylabel(-1(.5)1,labsize(small))
       legend(order(3 "far" 4 "near (< ${treat}m)")
@@ -108,6 +114,28 @@ program plotreg;
 
    };
 
+   if "`1'" == "timeseries" {;
+
+      drop if contin == 0;
+      format contin %th;
+      sum contin;
+      global plotmin = `r(min)';
+      global plotmax = `r(max)';
+
+      tw 
+      (rcap max95 min95 contin if group==0, lc(gs0) lw(thin))
+      (rcap max95 min95 contin if group==1, lc(sienna) lw(thin) lp(none))
+      (connected estimate contin if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin))
+      (connected estimate contin if group==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin)),
+      xlabel($plotmin(4)$plotmax,format(%thCY))
+      ylabel(-1(.5)2.25)
+      ytitle("log-price coefficients",height(5))
+      xtitle("")
+      legend(order(3 "far" 4 "near (< ${treat}m)")
+      ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(medsmall) region(lwidth(none))) note("`3'");
+      graphexportpdf `2', dropeps;
+   };
 
    restore;
    
