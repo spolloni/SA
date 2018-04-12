@@ -8,7 +8,7 @@ placebofuns.py
 from pysqlite2 import dbapi2 as sql
 import sys, csv, os, re, subprocess
 from sklearn.neighbors import NearestNeighbors
-import fiona, glob, multiprocessing
+import fiona, glob, multiprocessing, shutil, subprocess
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -66,7 +66,7 @@ def make_gcro_placebo(db,counts,keywords):
                 SELECT G.OGC_FID as OGC_FID, 
                 1000000*SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END)
                 /st_area(G.GEOMETRY) AS RDP_density,
-                MAX(RC.mode_yr) as mode_yr
+                cast(MAX(RC.mode_yr)AS INT) as RDP_mode_yr
                 FROM  gcro_publichousing as G, erven AS E
                 JOIN rdp AS R on E.property_id=R.property_id  
                 JOIN rdp_clusters AS RC on E.property_id=RC.property_id                
@@ -78,22 +78,29 @@ def make_gcro_placebo(db,counts,keywords):
                '''
     cur.execute(make_qry) 
 
+    # make placebo event-year
+    dofile = "subcode/generate_placebo_year.do"
+    cmd = ['stata-mp', 'do', dofile]
+    subprocess.call(cmd)
+
     # join information into stats table
     cur.execute('DROP TABLE IF EXISTS gcro_publichousing_stats;')
     make_qry = '''
                 CREATE TABLE gcro_publichousing_stats AS 
                 SELECT G.OGC_FID as OGC_FID_gcro , 
                      cast(coalesce(R.RDP_density,0) AS FLOAT) as RDP_density, 
-                     cast(R.mode_yr AS FLOAT) as RDP_mode_yr,
+                     R.RDP_mode_yr as RDP_mode_yr,
                      cast(coalesce(A.formal_pre,0) AS FLOAT) as formal_pre,
                      cast(coalesce(A.informal_pre,0) AS FLOAT) as informal_pre, 
                      cast(coalesce(B.formal_post,0) AS FLOAT) as formal_post, 
-                     cast(coalesce(B.informal_post,0) AS FLOAT) as informal_post
+                     cast(coalesce(B.informal_post,0) AS FLOAT) as informal_post,
+                     Y.start_yr as start_yr, Y.placebo_year as placebo_yr, Y.score
                      {}
                 FROM gcro_publichousing as G
                 LEFT JOIN gcro_temp_pre as A ON A.OGC_FID = G.OGC_FID 
                 LEFT JOIN gcro_temp_post as B ON B.OGC_FID = G.OGC_FID
-                LEFT JOIN gcro_temp_rdp_count as R ON R.OGC_FID = G.OGC_FID;
+                LEFT JOIN gcro_temp_rdp_count as R ON R.OGC_FID = G.OGC_FID
+                LEFT JOIN gcro_temp_year AS Y on Y.OGC_FID = G.OGC_FID;
                '''.format(var_gen)
     cur.execute(make_qry) 
 
@@ -111,19 +118,16 @@ def make_gcro_placebo(db,counts,keywords):
                         'GEOMETRY',2046,'MULTIPOLYGON','XY');''')
 
     # create table of elementary geometries;
-
     chec_qry = '''
                SELECT type,name from SQLite_Master
                WHERE type="table" AND name ="placebo_conhulls";
                '''
-
     drop_qry = '''
                SELECT DisableSpatialIndex('placebo_conhulls','GEOMETRY');
                SELECT DiscardGeometryColumn('placebo_conhulls','GEOMETRY');
                DROP TABLE IF EXISTS idx_placebo_conhulls_GEOMETRY;
                DROP TABLE IF EXISTS placebo_conhulls;
                '''
-
     make_qry = '''
                 SELECT ElementaryGeometries('placebo_conhulls_union', 'GEOMETRY',
                       'placebo_conhulls', 'cluster', 'parent');
@@ -138,6 +142,30 @@ def make_gcro_placebo(db,counts,keywords):
         cur.executescript(drop_qry)
     cur.executescript(make_qry)
 
+
+    # grab matched report year via interect;
+    cur.execute('DROP TABLE IF EXISTS placebo_conhulls_yr;')
+    make_qry = '''
+               CREATE TABLE placebo_conhulls_yr AS 
+               SELECT A.cluster as cluster, 
+               cast(MIN(C.placebo_yr)AS INT) as placebo_yr
+               FROM placebo_conhulls AS A, gcro_publichousing AS B
+               JOIN gcro_publichousing_stats AS C on B.OGC_FID=C.OGC_FID_gcro
+               WHERE ST_Intersects(B.GEOMETRY,A.GEOMETRY)
+               GROUP BY A.cluster
+               '''
+    cur.execute(make_qry)
+
+    # add report years to main conhulls table;
+    make_qry = '''
+               ALTER TABLE placebo_conhulls ADD COLUMN placebo_yr INT;
+               UPDATE placebo_conhulls SET placebo_yr = (SELECT
+               B.placebo_yr FROM placebo_conhulls_yr AS B
+               WHERE placebo_conhulls.cluster = B.cluster);
+               '''
+    cur.executescript(make_qry)
+
+
     # create indices
     cur.execute("SELECT CreateSpatialIndex('placebo_conhulls','GEOMETRY');")
     cur.execute("CREATE INDEX gcro_publichousing_stats_index ON gcro_publichousing_stats (OGC_FID_gcro);")
@@ -146,20 +174,25 @@ def make_gcro_placebo(db,counts,keywords):
     cur.execute('DROP TABLE IF EXISTS gcro_temp_pre;')    
     cur.execute('DROP TABLE IF EXISTS gcro_temp_post;')  
     cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
+    cur.execute('DROP TABLE IF EXISTS gcro_temp_year;')
     cur.execute('''SELECT DiscardGeometryColumn('placebo_conhulls_union','GEOMETRY');''')
     cur.execute('DROP TABLE IF EXISTS placebo_conhulls_union;')
+    cur.execute('DROP TABLE IF EXISTS placebo_conhulls_yr;')
 
     con.commit()
     con.close()
 
     return 
 
-def import_budget(PROJ):
+def import_budget(rawgcro):
 
-    project = PROJ + 'Raw/GCRO/DOCUMENTS/budget_statement_3/'
+    files =  rawgcro + 'DOCUMENTS/budget_statement_3/'
 
-    ## CLEAN AND APPEND 04 05 ##
-    loc=project+"tabula-bs_2004_2005/"
+    if os.path.exists(files+'temp/'): shutil.rmtree(files+'temp/')
+    os.makedirs(files+'temp/')
+
+    # clean & append 2004-2005
+    loc=files+"tabula-bs_2004_2005/"
     for j in [str(x) for x in range(14,24)]:
         if j!='19'  and j!='21' and j!='20':
             d1=pd.read_csv(loc+'tabula-bs_2004_2005-'+j+'.csv',header=None)
@@ -177,10 +210,10 @@ def import_budget(PROJ):
                 d_full=d1
             else:
                 d_full=d_full.append(d1)
-    d_full.to_csv(project+"temp/tab_04_05.csv")
+    d_full.to_csv(files+"temp/tab_04_05.csv")
 
-    ## CLEAN AND APPEND 05 06 ##
-    loc=project+"tabula-bs_2005_2006/"
+    # clean & append 2005-2006
+    loc=files+"tabula-bs_2005_2006/"
     for j in [str(x) for x in range(1,43)]:
         d1=pd.read_csv(loc+'tabula-bs_2005_2006-'+j+'.csv',header=None) 
         d1=d1.apply(lambda x: x.astype(str).str.lower())
@@ -191,10 +224,10 @@ def import_budget(PROJ):
             d_full=d1
         else:
             d_full=d_full.append(d1)
-    d_full.to_csv(project+"temp/tab_05_06.csv")
+    d_full.to_csv(files+"temp/tab_05_06.csv")
 
-    ## CLEAN AND APPEND 06 07 ##
-    loc=project+"tabula-bs_2006_2007/"
+    # clean & append 2006-2007
+    loc=files+"tabula-bs_2006_2007/"
     t1=1
     for j in [str(x) for x in range(1,20)]:
         if j!='18':
@@ -226,11 +259,11 @@ def import_budget(PROJ):
                     d_full=d1
                 else:
                     d_full=d_full.append(d1)
-    d_full_short.to_csv(project+"temp/tab_06_07_short.csv") 
-    d_full.to_csv(project+"temp/tab_06_07.csv") 
+    d_full_short.to_csv(files+"temp/tab_06_07_short.csv") 
+    d_full.to_csv(files+"temp/tab_06_07.csv") 
 
-    ## CLEAN AND APPEND 08 09 ##
-    loc=project+"tabula-bs_2008_2009/"
+    # clean & append 2008-2009
+    loc=files+"tabula-bs_2008_2009/"
     for j in [str(x) for x in range(0,4)]:
         d1=pd.read_csv(loc+'tabula-bs_2008_2009-'+j+'.csv',header=None)
         d1=d1.dropna(axis=1,how='all')          
@@ -242,7 +275,6 @@ def import_budget(PROJ):
             d_full=d1
         else:
             d_full=d_full.append(d1)
-
-    d_full.to_csv(project+"tab_08_09.csv")
+    d_full.to_csv(files+"temp/tab_08_09.csv")
 
 

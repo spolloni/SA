@@ -42,10 +42,10 @@ cd ../..;
 cd "Raw/GCRO/DOCUMENTS/budget_statement_3/";
 
 
-local qry = "SELECT  A.*, B.*  
+local qry = "SELECT  A.*, B.RDP_mode_yr 
 FROM gcro_publichousing AS A 
-JOIN gcro_publichousing_stats AS B 
-ON A.OGC_FID = B.OGC_FID_gcro";
+LEFT JOIN gcro_temp_rdp_count AS B 
+ON A.OGC_FID = B.OGC_FID";
 	qui odbc query "gauteng";
 	odbc load, exec("`qry'") clear;
 	drop GEOMETRY;
@@ -59,7 +59,6 @@ save "temp/gcro.dta", replace;
 
 
 ** CLEAN 04 05; 
-
 import delimited using "temp/tab_04_05.csv", clear delimiter(",") colrange(2:) varnames(1);
 	drop if name=="sub total";
 		g name1=name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n-1]!="nan";
@@ -87,7 +86,6 @@ save "temp/tab_04_05.dta", replace;
 
 
 ** CLEAN 05 06; 
-
 import delimited using "temp/tab_05_06.csv", clear delimiter(",") colrange(2:) varnames(1);
 	g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
@@ -116,9 +114,7 @@ import delimited using "temp/tab_05_06.csv", clear delimiter(",") colrange(2:) v
 save "temp/tab_05_06.dta", replace;	
 
 
-
 ** CLEAN 06 07 (its in two files cus the formats were weird so I merge them in stata); 
-
 import delimited using "temp/tab_06_07_short.csv", clear delimiter(",") colrange(2:) varnames(1) ;
 	g name1 = name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]!="nan";
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
@@ -185,10 +181,7 @@ import delimited using "temp/tab_06_07_short.csv", clear delimiter(",") colrange
 save "temp/tab_06_07.dta", replace;
 
 
-
-
 ** CLEAN 08 09;
-
 import delimited using "temp/tab_08_09.csv", clear delimiter(",") colrange(2:) varnames(1);
 	drop if regexm(name,"subtotal")==1;
 	replace name = name[_n] +" "+ name[_n+1] if start[_n+1]=="nan";
@@ -212,10 +205,7 @@ import delimited using "temp/tab_08_09.csv", clear delimiter(",") colrange(2:) v
 save "temp/tab_08_09.dta", replace;
 
 
-
-
 ** MERGE THEM ALL TOGETHER ;
-
 foreach year in 04_05 05_06 06_07 08_09 {;
 		use "temp/tab_`year'.dta", clear;
 		matchit ID name using "temp/gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
@@ -241,7 +231,6 @@ save "temp/gcro_merge.dta", replace;
 
 
 *** HERE IS WHERE I MERGE BACK IN THE GCRO DATA TO CALCULATE THE YEAR;
-
 use "temp/gcro_merge.dta", clear;
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
@@ -266,16 +255,14 @@ use "temp/gcro_merge.dta", clear;
 	g placebo_year = start_yr + `=round(r(mean),1)';
 	** round to the nearest year because we are going at the year level ;
 
-	keep OGC_FID start_yr placebo_year;
-	order OGC_FID start_yr placebo_year;
+	keep OGC_FID start_yr placebo_year score;
+	order OGC_FID start_yr placebo_year score; 
 
 	duplicates drop OGC_FID, force;
 	
-	odbc exec("DROP TABLE IF EXISTS placebo_year;"), dsn("gauteng");
-	odbc insert, table("placebo_year") create;
-	odbc exec("CREATE INDEX placebo_year_index ON placebo_year (OGC_FID);"), dsn("gauteng");
+	odbc exec("DROP TABLE IF EXISTS gcro_temp_year;"), dsn("gauteng");
+	odbc insert, table("gcro_temp_year") create;
+
+	shell rm -r "temp";
+
 exit, STATA clear; 
-
-
-
-

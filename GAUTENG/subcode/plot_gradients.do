@@ -53,6 +53,8 @@ replace dists = dists+$bin;
 * create date dummies;
 gen mo2con_reg = ceil(abs(mo2con)/$mbin) if abs(mo2con)<=12*$tw; 
 replace mo2con_reg = mo2con_reg + 1000 if mo2con<0;
+gen sixmonths = hy_date if mo_date>tm(2000m12) & mo_date<tm(2012m1);
+replace sixmonths = 0 if sixmonths ==.;
 
 *extra time-controls;
 gen day_date_sq = day_date^2;
@@ -68,6 +70,15 @@ global ifregs = "
        cluster_siz_nrdp > $msiz &
        distance >0 &
        mode_yr>2002 
+       ";
+
+global iftsregs = "
+       frac1 > $fr1  &
+       frac2 > $fr2  &
+       rdp_never ==1 &
+       purch_price > 1000 &
+       cluster_siz_nrdp > $msiz &
+       distance >0 
        ";
 
 global ifhist = "
@@ -102,5 +113,9 @@ plotreg distplot distplot;
 reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg timeplot timeplot;
 
+* time-series regression;
+reg lprice i.sixmonths#b0.treat i.cluster erf* if $iftsregs;
+plotreg timeseries timeseries;
+
 * exit stata;
-exit, STATA clear; 
+*exit, STATA clear; 

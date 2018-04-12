@@ -64,7 +64,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 0 
+_4_PLACEBO_ = 1 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -79,7 +79,7 @@ _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU distance
 _5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
-hulls = ['rdp','placebo'] # choose 
+hulls = ['placebo','rdp'] # choose 
 
 _6_a_PLOTS_ = 0  # distance plots for RDP: house prices
 _6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
@@ -231,20 +231,10 @@ if _4_PLACEBO_ == 1:
 
     print '\n'," Defining Placebo RDPs ... ",'\n'
 
+    import_budget(rawgcro)
     make_gcro_placebo(db,counts,keywords)
 
     print '\n'," -- Placebo RDPs: done! "'\n'
-
-    import_budget(project)
-
-    print '\n'," -- Import Budget Reports: done! "'\n'
-
-    dofile = "subcode/generate_placebo_year.do"
-    cmd = ['stata-mp', 'do', dofile]
-    subprocess.call(cmd)
-
-    print '\n'," -- Import Budget Reports: done! "'\n'
-
 
 #############################################
 # STEP 5:  Distance to RDP for non-RDP      #
@@ -288,9 +278,8 @@ if _5_b_DISTS_ ==1:
         coords = fetch_coordinates(db,hull)
     
         # 5b.2 non-rdp in/out of hulls
-        bufftype = 'intersect' if hull == 'rdp' else 'reg'
         fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,bufftype,hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -320,9 +309,8 @@ if _5_c_DISTS_ ==1:
         coords = fetch_coordinates(db,hull)
     
         # 5c.2 BBLU in/out of hulls
-        bufftype = 'intersect' if hull == 'rdp' else 'reg'
         fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,bufftype,hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -353,9 +341,8 @@ if _5_d_DISTS_ ==1:
         coords = fetch_coordinates(db,hull)
     
         # 5d.2 EA and SAL in/out of hulls
-        bufftype = 'intersect' if hull == 'rdp' else 'reg'
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,bufftype,hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
