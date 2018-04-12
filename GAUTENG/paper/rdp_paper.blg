@@ -8,45 +8,47 @@ Warning--empty institution in dhsreports
 Warning--empty journal in protest
 Warning--empty journal in franklin2016enabled
 Warning--empty journal in casestudytinazonke
-You've used 10 entries,
+Warning--empty journal in resale
+Warning--empty journal in mdg
+You've used 15 entries,
             2773 wiz_defined-function locations,
-            649 strings with 6735 characters,
-and the built_in function-call counts, 3944 in all, are:
-= -- 358
-> -- 216
-< -- 6
-+ -- 76
-- -- 66
-* -- 306
-:= -- 658
-add.period$ -- 38
-call.type$ -- 10
-change.case$ -- 56
-chr.to.int$ -- 10
-cite$ -- 25
-duplicate$ -- 181
-empty$ -- 304
-format.name$ -- 76
-if$ -- 791
+            674 strings with 7656 characters,
+and the built_in function-call counts, 6092 in all, are:
+= -- 548
+> -- 353
+< -- 9
++ -- 123
+- -- 108
+* -- 479
+:= -- 1006
+add.period$ -- 55
+call.type$ -- 15
+change.case$ -- 86
+chr.to.int$ -- 15
+cite$ -- 37
+duplicate$ -- 276
+empty$ -- 466
+format.name$ -- 125
+if$ -- 1226
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 6
-newline$ -- 66
-num.names$ -- 40
-pop$ -- 92
+missing$ -- 10
+newline$ -- 93
+num.names$ -- 60
+pop$ -- 147
 preamble$ -- 1
-purify$ -- 42
+purify$ -- 66
 quote$ -- 0
-skip$ -- 134
+skip$ -- 208
 stack$ -- 0
-substring$ -- 85
-swap$ -- 4
+substring$ -- 136
+swap$ -- 6
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 110
-warning$ -- 5
-while$ -- 35
+type$ -- 165
+warning$ -- 7
+while$ -- 54
 width$ -- 0
-write$ -- 145
-(There were 5 warnings)
+write$ -- 210
+(There were 7 warnings)
