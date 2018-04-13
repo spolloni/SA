@@ -4,7 +4,8 @@
 \usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,subfigure,array,hyperref}
 
 % ADDED PACKAGES FOR THIS MANUSCRIPT
-\usepackage{mathptmx,multirow,endfloat,titlesec,threeparttable}
+\usepackage{mathptmx,multirow,titlesec,threeparttable,tabu,booktabs}
+% endfloat,
 
 % SECTION TITLE SETTINGS
 \titlelabel{\thetitle.\enskip}
@@ -35,7 +36,7 @@
 \date{\vspace{5mm}This Version: \today}
 \maketitle
 \begin{abstract}
-\noindent This paper examines the impact of traffic calming on the livability of urban residential streets. Using geo-referenced data on the installation of 1,187 calming devices in Portland (OR), I test whether the interventions locally affect housing prices during succeeding years. I provide reduced-form evidence that city dwellers pay significant premiums to limit their exposure to motor vehicles, but obtain mixed results regarding the overall price impacts of calming devices. My estimates suggest that only the most effective traffic calming measures have a detectable impact on housing prices. The implied traffic flow elasticity is -0.07: projects decreasing traffic by 16\% raise home values on treated streets by 1\%. \\
+\noindent We estimate economic spillovers from subsidized housing projects on local neighborhoods using housing transaction records and high-resolution census data in South Africa.  With a differences-in-differences design, we find that projects lead to a X\% decline in nearby housing prices.  We attribute this decline to externalities from informal settlements constructed within housing projects.   \\
 \vspace{0in}\\
 \noindent\textbf{Keywords:} traffic externalities; street livability; urban policy; housing market.\\
 \vspace{0in}\\
@@ -54,50 +55,123 @@
 
 
 
-\section{Background} \label{sec:background}
+In developing countries, 30\% of urban populations live in slums where households often suffer high rates of crime, low access to infrastructure, insecure property rights, and unsanitary conditions (\cite{mdg}).  These negative externalities often combine to create poverty traps, preventing long-term economic development (\cite{10.1257/jep.27.4.187}). Governments have responded by replacing slums with new homes and moving slum dwellers to public housing projects.  While these policies are often motivated by immediate health and economic benefits for recipients, economic theory emphasizes how high-quality public housing provides an incentive for neighbors to invest more in their own homes and communities, reducing negative externalities and steering communities away from poverty traps.
 
-\subsection{ Slum Rehab Projects Globally (get some figures) }
+In this paper, we analyze the impacts of public housing on the development of surrounding neighborhoods.  We study a large-scale housing program in South Africa, which has allocated over 4.3 million dwellings and houses over 13\% of the total population (\cite{dhsreports}; GHS 2009-2013).  Already one of the largest housing programs in the developing world, this program continues to respond to large backlogs in housing demand with an even mix of upgrading slum areas with new houses as well as constructing large public housing developments.  This program is intended to not only serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also generate community-wide benefits, ``leveraging growth in the economy,'' ``combating crime, promoting social cohesion and improving quality of life for the poor,'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng}). 
 
-The share of urban populations living in slums in developing countries has grown from 34.5\% in 1995 to 45.9\% (UN Habitat, 2013).  
+We combine administrative data on [XX] housing projects with data on property transactions, demographics, and building construction to measure the local impacts of these projects.  We estimate a persistent [XX]\% decline in home prices within [XX] meters of a project.  We then use heterogeneity in the extent to which projects eradicate existing slums as a natural experiment to quantify negative externalities from slum areas.  Our estimates imply that increasing slum density by [XX]\% leads to a [XX]\% decline in local housing prices.  We find some evidence that this effect scales non-linearly with the size of the housing projects, which has theoretical implications for the extent to which slum areas represent poverty traps.
 
+To identify these effects, we use a differences-in-differences strategy leveraging both the exact timing of housing project construction as well as precise geographic proximity of surrounding areas.  Like \cite{diamond2016wants}'s similar analysis of public housing in the US, we leverage the substantial uncertainty in project timing due to difficulties coordinating many stakeholders and sources of funding (\cite{serihistory}).  Similar to the context in the US, we find little evidence that local housing markets anticipate these projects.  We also build on \cite{diamond2016wants} by using planned but unconstructed project areas as counterfactual areas, which help to control for demographic or housing market trends that might be correlated with the choice of project locations.
 
-\begin{itemize}
-\item 
-\item 
-\end{itemize}
+Our negative spillover estimates stand in contrast to a large literature in development that has focused on measuring housing impacts on direct recipients.  Relying on small-scale experimental designs, previous studies have linked public housing to improvements in employment outcomes (\cite{franklin2016enabled}), self-reported wellbeing (\cite{galiani2017shelter}; \cite{devoto2012happiness}), and child health outcomes (\cite{cattaneo2009housing}).  Data limitations both in finding a large enough sample of housing projects and in identifying outcomes at a precise spatial scale have prevented previous studies identifying spillover effects.  Taken alongside these previous studies, our findings suggest that policymakers may benefit from weighing direct benefits to recipients against potential negative effects to the local housing neighborhoods in designing future housing policy.
 
+To understand the welfare implications of this policy, we also develop a model similar to... 
 
-
-\subsection{Housing Subsidies in South Africa}
-
-In 1994, the South African government launched an aggressive housing subsidy scheme that continues to this day in order to address socioeconomic inequalities from apartheid.  The policy has allocated over 4.3 million houses from 1994 to 2016 to eligible households with the following goals (\cite{dhsreports}):
-
-\begin{itemize}
-	\item \textbf{Impacts on Recipients:} Like other housing policies throughout the developing world, this program's first aim is to improve wellbeing for recipient households, serving as ``a key strategy for poverty alleviation'' and ``combating crime, promoting social cohesion and improving quality of life for the poor.''
-	\item \textbf{Housing Market Impacts:} Unlike many other housing policies, this program articulates a goal of ``supporting the functioning of the entire single residential property market to reduce duality within the sector by breaking the barriers between the first economy residential property boom and the second economy slump.'' 
-	\item \textbf{Local Economic Development:}  This housing program also serves as a way of ``leveraging growth in the economy'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng})
-\end{itemize}
+%% COULD ALSO REFRAME ALL THIS TOP STUFF TO HAVE MORE WELFARE AND THEORY INVOLVED
 
 
+\subsection{Where are houses built?}
 
-\subsubsection{Where are housing projects built?}
-
-Between 2000 and 2010, subsidized housing efforts in South Africa primarily focus on constructing and allocating single-story, two-room (30 to 40 square meter) dwellings to households in groups of 50 to 500 per land plot.  These housing projects are evenly divided between two categories based on where they are located (\cite{dhsreports}):
+Between 2000 and 2010, subsidized housing efforts in South Africa have primarily focused on constructing and allocating single-story, two-room (30 to 40 square meter) dwellings to households in groups of 50 to 500 per project.  These housing projects are evenly divided between two categories (\cite{dhsreports}):
 \begin{enumerate}
-	\item  \textbf{Greenfield developments} involve the construction of housing projects primarily on undeveloped state-owned land although in some cases, municipalities will work with private developers to purchase inexpensive, undeveloped private land for these projects.  Finding undeveloped land often requires policymakers to locate these projects far from city centers and economic opportunities.
-	\item  \textbf{In-Situ Upgrading of Informal Settlements} replaces existing informal settlements with housing developments.\footnote{While in some cases these programs refer simply to the provision of land titles and municipal services (water, electricity, etc.), this paper focuses on cases where informal settlements are replaced by fully-serviced, single-story houses.}  Since informal settlements are often located closer to city centers, the resulting housing projects may provide better employment opportunities (\cite{serihistory}).
+	\item  \textbf{Greenfield developments} involve the construction of housing projects primarily on undeveloped state-owned land although in some cases, municipalities will work with private developers to purchase inexpensive, undeveloped private land for these projects.  Finding undeveloped land often requires policymakers to locate these projects far from city centers and economic opportunities.  
+	\item  \textbf{In-situ upgradings} replace existing informal settlements with housing developments.\footnote{While in some cases these programs refer simply to the provision of land titles and municipal services (water, electricity, etc.), this paper focuses on cases where informal settlements are replaced by fully-serviced, single-story houses.}  Since informal settlements are often located closer to city centers, the resulting housing projects may provide better employment opportunities (\cite{serihistory}).
 \end{enumerate}
-Facing substantial housing demand, the Department of Human Settlements has continued to issue grants to provincial governments to keep the rate of yearly housing allocations roughly constant (\cite{dhsreports}).
+Facing substantial housing demand, the Department of Human Settlements has continued to issue grants to provincial governments to keep the rate of yearly housing allocations roughly constant (\cite{dhsreports}).  While the location and types of projects are determined by provincial and municipal governments, construction is subcontracted to private developers who also act as project managers assisting in the allocation of houses to beneficiaries (\cite{seriq}).
 
 Since housing projects require coordination between many stakeholders, these projects often face unanticipated delays and cancellations due to labor and land procurement issues, difficulties gaining support from local government agencies, environmental impact assessments, and inadequate bulk infrastructure provision (\cite{dhsreports}).  In one example, political disagreements with local stakeholders led to the abandonment of a large project in Gauteng (\cite{protest}).
 
-\subsubsection{Who gets the houses?}
+\subsection{Who are the beneficiaries?}
 
-The National Department of Human Settlements issues guidelines for eligibility and maintains an official waiting list for eligible households for greenfield developments.  Eligibility requires citizenship, no previous property ownership, being married or having financial dependents, and having a monthly household income below R3,500 (\cite{seriq}).\footnote{The Gauteng Province has implemented their own waiting list since 2008 in order to exert greater control over the allocation process.}  The share of households reporting at least one member on the waiting list has remained stable at over 13\% from 2009 to 2013.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Each project is assigned beneficiaries in a first-come, first-served basis according to the waiting list in their province or municipality.  For in-situ upgrading projects, previous inhabitants of informal settlements receive renovated houses while any remaining houses are allocated according to the housing waiting list.
+The National Department of Human Settlements issues guidelines for eligibility and maintains an official waiting list for eligible households for greenfield developments.  Eligibility requires citizenship, no previous property ownership, being married or having financial dependents, and having a monthly household income below R3,500 (\cite{seriq}).\footnote{The Gauteng Province has implemented their own waiting list since 2008 in order to exert greater control over the allocation process.}  The share of households reporting at least one member on the waiting list has remained stable at over 13\% from 2009 to 2013.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Before construction, each project is assigned beneficiaries in a first-come, first-served basis according to the waiting list in their province or municipality.  For in-situ upgrading projects, previous inhabitants of informal settlements receive renovated houses while any remaining houses are allocated according to the housing waiting list.
 
-In practice, these guidelines are only loosely followed.  Recent reports point to cases of corruption in the allocation of houses while in some instances, housing projects are organized with the assistance of local community groups who ultimately select the beneficiaries (\cite{seriq}; \cite{casestudytinazonke}). 
+In practice, these guidelines are only loosely followed.  Recent reports point to cases of corruption in the allocation of houses while in some instances, housing projects are organized with the assistance of local community groups who ultimately select the beneficiaries (\cite{seriq}; \cite{casestudytinazonke}).  Research suggests that Beneficiaries are often selected over the course of project construction and sometimes even after construction has finished (\cite{seriq}).
 
 Beneficiaries are expected to pay a small one-time payment in order to receive title for their houses.  Guidelines also prevent beneficiaries from reselling their houses (and discourage renting) within their first 7 years of ownership.  Despite these guidelines, only 82\% of project houses are reported being still occupied by their original beneficiaries within five years of construction.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Anecdotal evidence suggests that project managers are aware of this active secondary market but have difficulty policing these transactions (\cite{resale}).
+
+\subsection{Data}
+
+Understanding the spillover impacts of public housing requires (1) outcome measures at high spatial and geographic resolutions as well as (2) a precise measure of the location, timing, and size of housing projects.  
+
+\subsubsection{Measuring Spillover Outcomes}
+
+To measure formal housing market impacts, we use over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).\footnote{The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.}  These data include the price, exact location, plot size, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 1.2 kilometers of a housing project bringing the final sample to around 100,000 transactions.  We exclude the top 1\% of prices as well as prices below 1,000 Rand, which are likely composed of measurement error or the exchange of property title between family members.
+
+Since government deeds records are unlikely to capture informal housing markets, we also include a building census of all structures in the Gauteng Province in 2001 and 2011.  Using a combination of high-resolution satellite imagery and local field teams, these data record the precise location of each structure, identifying structures within over 30 categories including formal and informal residential dwellings.  Out of \input{figures/total_bblu}structures, this building census includes \input{figures/total_bblu_formal}formal structures and \input{figures/total_bblu_informal}informal structures.  This data serves as both an outcome measure of informal housing development as well as an additional measure for public housing construction.
+
+For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 as well as the yearly General Household Survey for 2005 through 2014.  Both surveys include information about dwelling type, employment, income, and demographics for each household.  The General Household Survey includes additional details on participation in housing programs over time for a random sample of around 35,000 households in the Gauteng Province.  To spatially link these households in both samples to their corresponding housing projects, we conduct the analysis at the census block level, which is the smallest geography available with \input{figures/total_small_areas}blocks in the Gauteng Province and \input{figures/total_small_areas_in_buffer}within 1.2 kilometers of a housing project.  
+
+\subsubsection{Defining Housing Projects}
+
+Our primary measure of housing projects matches a set of housing program characteristics using the transaction records in the deeds data.  This procedure results in clusters of dwellings that form our housing projects (\cite{serihistory}).
+
+\begin{enumerate}
+	\item \textbf{Seller Identity:}  We focus on transactions from government entities or housing authorities from seller name records.  To account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most frequently.  We exclude transactions flagged as large buildings used for commercial purposes.
+	\item \textbf{Subsidy Value:}  We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value.
+	\item \textbf{Pre-Existing Formal Dwellings:}  We exclude transactions that occur on land plots with at least one pre-existing formal residential structure in the 2001 building census.  This method not only helps to reduce error in matching seller identities to housing programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented by local housing agencies over the same time period.
+	\item \textbf{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other small-scale housing programs.
+	\item \textbf{Temporal Clustering:}  Because our empirical design exploits the sudden timing of project construction, we assign a date for each housing project according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year.  This approach rules out gradual construction 
+\end{enumerate}
+
+We validate our measure of housing projects using administrative spatial data from the Gauteng government, which maps a subsample of [XX] housing projects.  Following Figure [XX] (put a nice map here), we find a substantial degree of overlap between our measure and the administrative subsample.  
+
+\subsubsection{Defining Planned but Unconstructed Housing Projects}
+
+The administrative spatial data identifies many project areas that do not appear to have received housing projects, as measured by comparing changes in formal structure counts between the 2001 and 2011 building censuses.  We use these areas to create a sample of planned but unconstructed housing projects to serve as counterfactuals areas in our analysis.
+
+Since the administrative data does not include information about the timing of these projects, we digitized National Treasury budget reports that detail the start date, expected completion date, and cost of each housing project.  We use a fuzzy-string matching algorithm with bigrams to merge project names in the administrative data with the budget reports.  Out of 
+
+
+To differentiate between greenfield and in-situ upgrading projects, we use the building survey to measure the extent of informal settlement development in 2001, prior to the construction of large housing projects.  
+
+
+In order to focus on public housing projects as separate from land-titling programs or 
+
+
+We combine this data with 
+
+
+%% reference a map of BBLU data ?!
+
+For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 includes information about dwelling type, employment, income, and demographics for each household. 
+
+
+
+
+Table~\ref{table:descriptives} provides descriptive statistics dividing transactions between properties outside and inside a 1.2 kilometer radius of the nearest housing project.  We find that 
+
+
+
+  The population census  The smallest level of geography available is census block where 
+
+We are able to identify households within a census block,
+
+We use the smallest level of geography available, which leaves us with 1,00
+
+
+
+ General Household Survey
+
+
+
+
+
+
+
+We capture demographic responses to the 
+
+and where administrative data on housing projects.  
+
+
+\begin{table}
+	\centering
+	\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
+	\input{figures/descriptive_table} \\
+	\vspace{.2cm}
+\footnotesize{Buffers include properties within 1.2 kilometers of a housing project.  These data exclude public housing projects themselves.}
+\end{table}
+
+
 
 
 
@@ -113,12 +187,18 @@ Beneficiaries are expected to pay a small one-time payment in order to receive t
 
 
 
-
-
 % APPENDIX 
 \appendix
 \doublespacing
 
 \section*{Appendix}
+
+\begin{table}
+	\centering
+	\caption{Ten Biggest Sellers}\label{table:biggestsellers}
+	\input{figures/biggest_sellers_table}
+\end{table}
+
+
 
 \end{document}

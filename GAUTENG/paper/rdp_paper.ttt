@@ -1,0 +1,7 @@
+\begin{table}
+\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
+\input{figures/descriptive_test}
+
+\end{table}
+\efloatseparator
+ 

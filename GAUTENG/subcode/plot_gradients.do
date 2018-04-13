@@ -17,7 +17,7 @@ global tw    = "4";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
 global mbin  =  6;    /* months bin width for time-series   */
 global msiz  = 50;    /* minimum obs per cluster            */
-global treat = 400; 
+global treat = 400;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -106,16 +106,18 @@ colgap(small) cols(1) size(small) region(lwidth(none)));
 graphexportpdf summary_densitytime, dropeps;
 
 * distance regression;
-reg lprice b$max.dists#b0.post  i.purch_yr i.cluster erf* day_date* if $ifregs;
+reg lprice b$max.dists#b0.post i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg distplot distplot;
 
 * time regression;
 reg lprice b0.mo2con_reg#b0.treat i.purch_yr i.cluster erf* day_date* if $ifregs;
 plotreg timeplot timeplot;
 
+/*
 * time-series regression;
 reg lprice i.sixmonths#b0.treat i.cluster erf* if $iftsregs;
 plotreg timeseries timeseries;
+*/
 
 * exit stata;
-*exit, STATA clear; 
+exit, STATA clear; 

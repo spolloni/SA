@@ -12,8 +12,9 @@ local qry = "
 
   SELECT AA.*, BB.distance AS distance_rdp, BB.cluster AS cluster_rdp,
          CC.cluster_siz AS clust_siz_rdp, CC.mode_yr AS mode_yr_rdp,
-         CC.frac1 AS frac1_rdp, CC.frac2 AS frac2_rdp, EE.area,
-         DD.distance AS distance_placebo, DD.cluster AS cluster_placebo 
+         CC.frac1 AS frac1_rdp, CC.frac2 AS frac2_rdp, 
+         DD.distance AS distance_placebo, DD.cluster AS cluster_placebo,
+         EE.area, EE.placebo_yr
 
   FROM 
 
@@ -46,17 +47,24 @@ cd Generated/GAUTENG;
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;
 
+
 * set up ;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 
 * create date variables and dummies;
+gen abs_yrdist = abs(purch_yr - placebo_yr); 
+
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen hy_date  = hofd(dofm(mo_date)); // half-years;
+gen con_day  = mdy(07,02,placebo_yr);
+gen con_mo   = ym(placebo_yr,07);
 format day_date %td;
 format mo_date %tm;
 format hy_date %th;
+gen day2con = day_date - con_day;
+gen mo2con  = mo_date - con_mo;
 
 * non-rdp cluster size;
 bys cluster_placebo: gen n = _n;
