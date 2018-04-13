@@ -120,4 +120,4 @@ plotreg timeseries timeseries;
 */
 
 * exit stata;
-*exit, STATA clear; 
+exit, STATA clear; 

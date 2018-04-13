@@ -107,6 +107,7 @@ program plotreg;
       xtitle("meters from project border",height(5))
       ytitle("qty. new structures (2001-2011)",height(5))
       xlabel(0(400)$max)
+      ylabel(0(20)80)
       legend(order(2 "formal residential" 1 "informal residential" ) col(1)
       ring(0) position(2) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none))) note("`3'");

@@ -18,7 +18,7 @@ global bin = 10; /* distance bin width */
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 1;
+global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -107,4 +107,3 @@ restore;
 
 * exit stata;
 exit, STATA clear; 
-

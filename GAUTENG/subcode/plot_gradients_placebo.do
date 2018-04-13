@@ -96,15 +96,3 @@ plotreg timeseries timeseries_placebo;
 
 * exit stata;
 exit, STATA clear; 
-
-
-
-
-
-
-
-
-
-
-
-

@@ -64,7 +64,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 1 
+_4_PLACEBO_ = 0 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -421,10 +421,10 @@ if _7_b_PLOTS_ == 1:
 
     print '\n'," Making BBLU plots...",'\n'
 
-    if not os.path.exists(outdir+'bbluplots'):
-        os.makedirs(outdir+'bbluplots')
+    if not os.path.exists(outdir+'bbluplots_placebo'):
+        os.makedirs(outdir+'bbluplots_placebo')
 
-    dofile = "subcode/plot_density.do"
+    dofile = "subcode/plot_density_placebo.do"
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
