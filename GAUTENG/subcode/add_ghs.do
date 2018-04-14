@@ -1,14 +1,8 @@
 
-
-
-
 clear all
 set more off
 
-* cd ../../
-cd ../../../
-
-
+cd ../../
 
 local p02 "Raw/GHS/2002/ghs-2002-v1.2-stata/ghs-2002-person-v1.2-20150127.dta"
 local h02 "Raw/GHS/2002/ghs-2002-v1.2-stata/ghs-2002-house-v1.2-20150127.dta"
@@ -75,12 +69,10 @@ end
 
 local yr "02"
 	use `h`yr'', clear
-*	use `p`yr'', clear
 	ren *, lower
 	ren q41maind  dwell
 	ren q45owner  owner	
 	ren q47house  rdp
-
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
@@ -237,12 +229,6 @@ foreach r in `years_append' {
 
 
 g ea_code = substr(uqnr,1,8)
-g ea_code_96 = substr(uqnr,1,7)
-*g ea_code_11 = substr(uqnr,1,11)
-replace ea_code = ea_code_96 if year=="02" | year=="03" | year=="04"
-*replace ea_code = ea_code_11 if year=="15" | year=="16"
-drop ea_code_96
-*drop ea_code_11
 replace year="20"+year
 destring uqnr year, replace force
 
