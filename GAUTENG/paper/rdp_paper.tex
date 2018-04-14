@@ -54,7 +54,6 @@
 \section{Introduction} \label{sec:introduction}
 
 
-
 In developing countries, 30\% of urban populations live in slums where households often suffer high rates of crime, low access to infrastructure, insecure property rights, and unsanitary conditions (\cite{mdg}).  These negative externalities often combine to create poverty traps, preventing long-term economic development (\cite{10.1257/jep.27.4.187}). Governments have responded by replacing slums with new homes and moving slum dwellers to public housing projects.  While these policies are often motivated by immediate health and economic benefits for recipients, economic theory emphasizes how high-quality public housing provides an incentive for neighbors to invest more in their own homes and communities, reducing negative externalities and steering communities away from poverty traps.
 
 In this paper, we analyze the impacts of public housing on the development of surrounding neighborhoods.  We study a large-scale housing program in South Africa, which has allocated over 4.3 million dwellings and houses over 13\% of the total population (\cite{dhsreports}; GHS 2009-2013).  Already one of the largest housing programs in the developing world, this program continues to respond to large backlogs in housing demand with an even mix of upgrading slum areas with new houses as well as constructing large public housing developments.  This program is intended to not only serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also generate community-wide benefits, ``leveraging growth in the economy,'' ``combating crime, promoting social cohesion and improving quality of life for the poor,'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng}). 
@@ -119,11 +118,17 @@ We validate our measure of housing projects using administrative spatial data fr
 
 The administrative spatial data identifies many project areas that do not appear to have received housing projects, as measured by comparing changes in formal structure counts between the 2001 and 2011 building censuses.  We use these areas to create a sample of planned but unconstructed housing projects to serve as counterfactuals areas in our analysis.
 
-Since the administrative data does not include information about the timing of these projects, we digitized National Treasury budget reports that detail the start date, expected completion date, and cost of each housing project.  We use a fuzzy-string matching algorithm with bigrams to merge project names in the administrative data with the budget reports.  Out of 
+To construct an estimated completion date for planned but unconstructed housing projects, we digitized National Treasury budget reports that detail the start date, expected completion date, and cost of each housing project.  We use a fuzzy-string matching algorithm with bigrams to successfully link project names from the budget reports to over 300 project names in our administrative spatial data (including both completed and uncompleted projects).  We find that for completed projects, the mode transaction year observed in the deeds data falls an average of three years after the start date indicated in the budget reports.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Therefore, we assign a expected completion date for unconstructed projects that is three years after the announced start-date in the project.
+
+To differentiate between greenfield and in-situ upgrading projects, we use the building survey to measure the density of informal structures per project area in 2001, prior to the construction of large housing projects.
 
 
-To differentiate between greenfield and in-situ upgrading projects, we use the building survey to measure the extent of informal settlement development in 2001, prior to the construction of large housing projects.  
 
+\begin{table}
+	\centering
+	\caption{Housing Project Descriptives}\label{table:projectdescriptives}
+\input{figures/housing_project_table}
+\end{table}
 
 In order to focus on public housing projects as separate from land-titling programs or 
 

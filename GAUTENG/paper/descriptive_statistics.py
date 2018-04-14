@@ -20,6 +20,147 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+### MAKE A TEMP TABLE FOR TRANSACTIONS WITHIN PLACEBO AREAS!
+##### and THE NUMBER OF STRUCTURES!
+
+def ea_overlap():
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    name = 'ea_2001_overlap'
+
+    for year in ['2001','2011']:
+        name = 'ea_'+year+'_overlap'
+        cur.execute("DROP TABLE IF EXISTS {};".format(name))
+        con.execute('''
+            CREATE TABLE {} AS
+            SELECT  A.ea_code, 
+                    B.cluster as cluster, 
+                    ST_AREA(ST_INTERSECTION(A.GEOMETRY,B.GEOMETRY))/ST_AREA(B.GEOMETRY) as overlap,
+                    "rdp" AS type
+            FROM ea_{} AS A, rdp_conhulls AS B
+                            WHERE 
+                            A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                WHERE f_table_name='ea_{}' AND search_frame=B.GEOMETRY)
+                            AND st_within(A.GEOMETRY,B.GEOMETRY)
+            UNION 
+            SELECT  AA.ea_code, 
+                    BB.cluster as cluster, 
+                    ST_AREA(ST_INTERSECTION(AA.GEOMETRY,BB.GEOMETRY))/ST_AREA(BB.GEOMETRY) as overlap,
+                    "placebo" AS type
+            FROM ea_{} AS AA, placebo_conhulls AS BB
+                            WHERE 
+                            AA.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                WHERE f_table_name='ea_{}' AND search_frame=BB.GEOMETRY)
+                            AND st_within(AA.GEOMETRY,BB.GEOMETRY) AND BB.placebo_yr>0   
+                            ;
+                    '''.format(name,year,year,year,year))
+        con.execute("CREATE INDEX {}_index ON {} (ea_code);".format(name,name))
+    con.close()
+
+ea_overlap()
+
+
+
+
+def erven_in_placebo():
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute("DROP TABLE IF EXISTS erven_in_placebo;")
+    con.execute('''
+        CREATE TABLE erven_in_placebo AS
+        SELECT A.property_id, B.cluster as cluster_placebo, B.placebo_yr
+        FROM erven AS A, placebo_conhulls AS B
+                        WHERE 
+                        A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                            WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
+                        AND st_within(A.GEOMETRY,B.GEOMETRY) AND B.placebo_yr>0  ;
+                ''')
+    con.execute("CREATE INDEX e_i_p ON erven_in_placebo (property_id);")
+
+    cur.execute("DROP TABLE IF EXISTS erven_in_placebo_buffer;")
+    con.execute('''
+        CREATE TABLE erven_in_placebo_buffer AS
+        SELECT A.property_id, B.cluster as cluster_placebo_buffer
+        FROM erven AS A, placebo_buffers_reg AS B
+                        WHERE 
+                        A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                            WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
+                        AND st_within(A.GEOMETRY,B.GEOMETRY) 
+                         ;
+                ''')
+    con.execute("CREATE INDEX e_i_pb ON erven_in_placebo_buffer (property_id);")
+    con.close()
+
+#erven_in_placebo()
+
+
+
+
+
+def housing_project_table():
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    for hull in ['placebo','rdp']:
+        for table in ['pre','post']:
+            if hull=='placebo':
+                placebo_filter=' AND B.placebo_yr>0 '
+            else:
+                placebo_filter=' '
+            if table=='post':
+                units_filter='AND A.cf_units =="High"'             
+            else:
+                units_filter=' '
+            
+            df = pd.read_sql('''
+                    SELECT 
+                        SUM(CASE WHEN A.s_lu_code=="7.1" {} THEN 1 ELSE 0 END) AS total_formal, 
+                        SUM(CASE WHEN A.s_lu_code=="7.2" {} THEN 1 ELSE 0 END) AS total_informal,
+                        ST_AREA(B.GEOMETRY) AS area,
+                        "{}_{}" AS name
+                        FROM bblu_{} AS A, {}_conhulls AS B
+                        WHERE 
+                        A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                            WHERE f_table_name='bblu_{}' AND search_frame=B.GEOMETRY)
+                        AND st_within(A.GEOMETRY,B.GEOMETRY) 
+                        {} 
+                        GROUP BY B.cluster       ;
+                    '''.format(units_filter,units_filter,table,hull,table,hull,table,placebo_filter),con)
+            if table=='pre' and hull=='placebo':
+                df_full=df
+            else:
+                df_full=df_full.append(df)
+
+    df_full.to_csv(gendata+'temp/housing_project_table.csv',header=True)
+    print df_full.head()
+
+    con.close()
+
+
+
+#housing_project_table()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def count_bblu():
     con = sql.connect(db)
     cur = con.cursor()
@@ -144,7 +285,10 @@ def share_during_mode_year():
     print df.head(10)
     con.close()
 
-share_during_mode_year()
+
+
+
+#    share_during_mode_year()
 
 # count_ghs()
 
