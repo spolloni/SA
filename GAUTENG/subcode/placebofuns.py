@@ -43,20 +43,23 @@ def make_gcro_placebo(db,counts,keywords):
 
     # count number BBLU in shapes
     for t in ['pre','post']:
+        quality_control=' '
+        if t=='post':
+            quality_control=' AND A.cf_units="High" '
         cur.execute('DROP TABLE IF EXISTS gcro_temp_{};'.format(t))
         make_qry = '''
                     CREATE TABLE gcro_temp_{} AS 
                     SELECT G.OGC_FID as OGC_FID, 
-                    1000000*SUM(CASE WHEN A.s_lu_code="7.1" THEN 1 ELSE 0 END)
+                    1000000*SUM(CASE WHEN A.s_lu_code="7.1" {} THEN 1 ELSE 0 END)
                     /st_area(G.GEOMETRY) AS formal_{},
-                    1000000*SUM(CASE WHEN A.s_lu_code="7.2" THEN 1 ELSE 0 END)
+                    1000000*SUM(CASE WHEN A.s_lu_code="7.2" {} THEN 1 ELSE 0 END)
                     /st_area(G.GEOMETRY) AS informal_{}
                     FROM bblu_{} as A, gcro_publichousing as G
                     WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
                     WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
-                    AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
+                    AND st_intersects(A.GEOMETRY,G.GEOMETRY)
                     GROUP BY G.OGC_FID;
-                   '''.format(t,t,t,t,t)
+                   '''.format(t,quality_control,t,quality_control,t,t,t)
         cur.execute(make_qry) 
 
     # count number RDP in shapes
@@ -147,7 +150,13 @@ def make_gcro_placebo(db,counts,keywords):
     make_qry = '''
                CREATE TABLE placebo_conhulls_yr AS 
                SELECT A.cluster as cluster, 
-               cast(MIN(C.placebo_yr)AS INT) as placebo_yr
+
+               cast(MIN(C.placebo_yr) AS INT) as placebo_yr,
+               cast(MIN(C.formal_pre) AS FLOAT) as formal_pre,
+               cast(MIN(C.informal_pre) AS FLOAT) as informal_pre,
+               cast(MIN(C.formal_post) AS FLOAT) as formal_post,
+               cast(MIN(C.informal_post) AS FLOAT) as informal_post
+
                FROM placebo_conhulls AS A, gcro_publichousing AS B
                JOIN gcro_publichousing_stats AS C on B.OGC_FID=C.OGC_FID_gcro
                WHERE ST_Intersects(B.GEOMETRY,A.GEOMETRY)
@@ -155,14 +164,18 @@ def make_gcro_placebo(db,counts,keywords):
                '''
     cur.execute(make_qry)
 
-    # add report years to main conhulls table;
-    make_qry = '''
-               ALTER TABLE placebo_conhulls ADD COLUMN placebo_yr INT;
-               UPDATE placebo_conhulls SET placebo_yr = (SELECT
-               B.placebo_yr FROM placebo_conhulls_yr AS B
-               WHERE placebo_conhulls.cluster = B.cluster);
-               '''
-    cur.executescript(make_qry)
+    # add report years and building counts to main conhulls table;
+    for column in ['placebo_yr','formal_pre','informal_pre','formal_post','informal_post']:
+        column_type='FLOAT'
+        if column=='placebo_yr':
+            column_type='INT'
+        make_qry = '''
+                   ALTER TABLE placebo_conhulls ADD COLUMN {} {};
+                   UPDATE placebo_conhulls SET {} = (SELECT
+                   B.{} FROM placebo_conhulls_yr AS B
+                   WHERE placebo_conhulls.cluster = B.cluster);
+                   '''.format(column,column_type,column,column)
+        cur.executescript(make_qry)
 
 
     # create indices

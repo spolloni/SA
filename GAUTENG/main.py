@@ -57,7 +57,7 @@ _1_e_IMPORT = 0  # import GHS
 
 _2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 0
+_3_CLUSTER_ = 1
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
