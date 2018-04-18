@@ -78,7 +78,7 @@ keywords = ['Planning','Proposed', # keywords to identify
             'Investigating','future','Implementation','Essential','Informal'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
-_5_b_DISTS_ = 1  # add grids
+_5_b_DISTS_ = 0  # add grids
 _5_c_DISTS_ = 0  # non-RDP distance
 _5_d_DISTS_ = 0  # BBLU distance
 _5_e_DISTS_ = 0  # EA distance 
@@ -280,18 +280,13 @@ if _5_b_DISTS_ ==1:
     print '\n'," Distance part B: Generate spatial grid... ",'\n'
 
     add_grid(db,grid_size)
-
     print '\n'," Generate building counts... ",'\n'
 
     add_grid_counts(db)
-
-    print '\n'," Table linking erven and grid... ",'\n'
+    print '\n'," Create table linking erven and grid... ",'\n'
 
     grid_to_erven(db)
-
     print '\n'," - Grid: done! "'\n'
-
-
 
 if _5_c_DISTS_ ==1:
 
