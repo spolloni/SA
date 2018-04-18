@@ -283,26 +283,57 @@ def fetch_data(db,dir,bufftype,hull,i):
         # EA and SAL centroids inside buffers 
         geom,yr,plygn =  i.split('_')
 
-        if plygn=='buff':  
-
-            qry ='''
-                SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
-                       st_y(st_centroid(e.GEOMETRY)) AS y, e.{}_code
-                FROM {}_{} AS e, {}_buffers_{} AS b
-                WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                        WHERE f_table_name='{}_{}' AND search_frame=b.GEOMETRY)
-                AND st_within(e.GEOMETRY,b.GEOMETRY)
-                '''.format(distinct,geom,geom,yr,hull,bufftype,geom,yr)
-
-        if plygn=='hull':
+        if plygn == 'hull':
 
             qry ='''
                 SELECT {} p.{}_code
                 FROM {}_{} AS p, {}_conhulls AS h
                 WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
                         WHERE f_table_name='{}_{}' AND search_frame=h.GEOMETRY)
-                AND st_within(p.GEOMETRY,h.GEOMETRY);
+                AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
                 '''.format(distinct,geom,geom,yr,hull,geom,yr)
+
+        if plygn == 'buff':  
+ 
+            qry = ''' 
+                  SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
+                         st_y(st_centroid(e.GEOMETRY)) AS y, e.{}_code,
+                         coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
+                         /st_area(e.GEOMETRY),0) AS area_int
+                  FROM {}_{} AS e, {}_buffers_{} AS b
+                  JOIN {}_conhulls AS h ON h.cluster = b.cluster  
+                  WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                          WHERE f_table_name = '{}_{}' AND search_frame=b.GEOMETRY)
+                  AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
+                  '''.format(distinct,geom,geom,yr,hull,bufftype,hull,geom,yr)
+
+
+    if i=='grid_hull':
+
+        # grids inside hulls
+        qry ='''
+                SELECT {} p.grid_id
+                FROM grid AS p, {}_conhulls AS h
+                WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                        WHERE f_table_name='grid' AND search_frame=h.GEOMETRY)
+                AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
+                '''.format(distinct,hull)
+
+    if i=='grid_buff':
+
+        # grids inside buffers     
+        qry = ''' 
+                  SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
+                         st_y(st_centroid(e.GEOMETRY)) AS y, e.grid_id AS grid_id,
+                         coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
+                         /st_area(e.GEOMETRY),0) AS area_int
+                  FROM grid AS e, {}_buffers_{} AS b
+                  JOIN {}_conhulls AS h ON h.cluster = b.cluster  
+                  WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                          WHERE f_table_name = 'grid' AND search_frame=b.GEOMETRY)
+                  AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
+                  '''.format(distinct,hull,bufftype,hull)    
+
 
     # fetch data
     con = sql.connect(db)
@@ -403,7 +434,9 @@ def push_distBBLU2db(db,matrx,distances,coords,hull):
     return
 
 
-def push_distCENSUS2db(db,matrx,distances,coords,INPUT,ID,hull):
+def push_distCENSUS2db(db,matrx,distances,coords,INPUT,hull):
+
+    ID = INPUT.split('_')[0]+'_code'
 
     # Retrieve cluster IDS
     buff_id = pd.DataFrame(matrx[INPUT+'_buff'][:,2],columns=[ID])
@@ -413,22 +446,26 @@ def push_distCENSUS2db(db,matrx,distances,coords,INPUT,ID,hull):
                 sort=False,indicator=True,validate='1:1').as_matrix()
     conhulls_id = coords[:,2][distances[INPUT+'_buff'][1]].astype(np.float)
 
+    areas = pd.DataFrame(matrx[INPUT+'_buff'][:,3],columns=['area']).as_matrix().astype(np.float)
+
     con = sql.connect(db)
     cur = con.cursor()
     
     cur.execute('''DROP TABLE IF EXISTS distance_{}_{};'''.format(INPUT,hull))
     cur.execute(''' CREATE TABLE distance_{}_{} (
-                    {} INTEGER PRIMARY KEY,
+                    {}          INTEGER PRIMARY KEY,
                     distance    numeric(10,10), 
-                    cluster     INTEGER); '''.format(INPUT,hull,ID))
+                    cluster     INTEGER,
+                    area_int    numeric(10,10));'''.format(INPUT,hull,ID))
 
-    rowsqry = '''INSERT INTO distance_{}_{} VALUES (?,?,?);'''.format(INPUT,hull)
+    rowsqry = '''INSERT INTO distance_{}_{} VALUES (?,?,?,?);'''.format(INPUT,hull)
 
     for i in range(len(full_id[:,0])):
 
         if full_id[:,1][i] == 'both':
             distances[INPUT+'_buff'][0][i][0] = -distances[INPUT+'_buff'][0][i][0]     
-        cur.execute(rowsqry, [full_id[:,0][i], distances[INPUT+'_buff'][0][i][0],conhulls_id[i][0]])
+        cur.execute(rowsqry, [full_id[:,0][i], distances[INPUT+'_buff'][0][i][0],
+            conhulls_id[i][0],areas[i][0]])
 
     cur.execute('''CREATE INDEX dist_{}_ind_{} ON distance_{}_{} ({});'''.format(INPUT,hull,INPUT,hull,ID))
 
@@ -437,4 +474,44 @@ def push_distCENSUS2db(db,matrx,distances,coords,INPUT,ID,hull):
 
     return
 
+
+
+def push_distGRID2db(db,matrx,distances,coords,INPUT,hull):
+
+    ID = 'grid_id'
+
+    # Retrieve cluster IDS
+    buff_id = pd.DataFrame(matrx[INPUT+'_buff'][:,2],columns=[ID])
+    hull_id = pd.DataFrame(matrx[INPUT+'_hull'],columns=[ID]).drop_duplicates()
+    full_id = pd.merge(buff_id,hull_id,how='left',on=ID,
+                sort=False,indicator=True,validate='1:1').as_matrix()
+    conhulls_id = coords[:,2][distances[1]].astype(np.float)
+
+    areas = pd.DataFrame(matrx[INPUT+'_buff'][:,3],columns=['area']).as_matrix().astype(np.float)
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    
+    cur.execute('''DROP TABLE IF EXISTS distance_{}_{};'''.format(INPUT,hull))
+    cur.execute(''' CREATE TABLE distance_{}_{} (
+                    {}          INTEGER PRIMARY KEY,
+                    distance    numeric(10,10), 
+                    cluster     INTEGER,
+                    area_int    numeric(10,10));'''.format(INPUT,hull,ID))
+
+    rowsqry = '''INSERT INTO distance_{}_{} VALUES (?,?,?,?);'''.format(INPUT,hull)
+
+    for i in range(len(full_id[:,0])):
+
+        if full_id[:,1][i] == 'both':
+            distances[0][i][0] = -distances[0][i][0]     
+        cur.execute(rowsqry, [full_id[:,0][i], distances[0][i][0],
+            conhulls_id[i][0],areas[i][0]])
+
+    cur.execute('''CREATE INDEX dist_{}_ind_{} ON distance_{}_{} ({});'''.format(INPUT,hull,INPUT,hull,ID))
+
+    con.commit()
+    con.close()
+
+    return
 
