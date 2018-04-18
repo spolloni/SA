@@ -283,15 +283,6 @@ def fetch_data(db,dir,bufftype,hull,i):
         # EA and SAL centroids inside buffers 
         geom,yr,plygn =  i.split('_')
 
-        if plygn == 'hull':
-
-            qry ='''
-                SELECT {} p.{}_code
-                FROM {}_{} AS p, {}_conhulls AS h
-                WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                        WHERE f_table_name='{}_{}' AND search_frame=h.GEOMETRY)
-                AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
-                '''.format(distinct,geom,geom,yr,hull,geom,yr)
 
         if plygn == 'buff':  
  
@@ -307,17 +298,16 @@ def fetch_data(db,dir,bufftype,hull,i):
                   AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
                   '''.format(distinct,geom,geom,yr,hull,bufftype,hull,geom,yr)
 
+        if plygn == 'hull':
 
-    if i=='grid_hull':
-
-        # grids inside hulls
-        qry ='''
-                SELECT {} p.grid_id
-                FROM grid AS p, {}_conhulls AS h
+            qry ='''
+                SELECT {} p.{}_code
+                FROM {}_{} AS p, {}_conhulls AS h
                 WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                        WHERE f_table_name='grid' AND search_frame=h.GEOMETRY)
+                        WHERE f_table_name='{}_{}' AND search_frame=h.GEOMETRY)
                 AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
-                '''.format(distinct,hull)
+                '''.format(distinct,geom,geom,yr,hull,geom,yr)
+
 
     if i=='grid_buff':
 
@@ -333,6 +323,19 @@ def fetch_data(db,dir,bufftype,hull,i):
                           WHERE f_table_name = 'grid' AND search_frame=b.GEOMETRY)
                   AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
                   '''.format(distinct,hull,bufftype,hull)    
+
+    if i=='grid_hull':
+
+        # grids inside hulls
+        qry ='''
+                SELECT {} p.grid_id
+                FROM grid AS p, {}_conhulls AS h
+                WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                        WHERE f_table_name='grid' AND search_frame=h.GEOMETRY)
+                AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
+                '''.format(distinct,hull)
+
+
 
 
     # fetch data

@@ -66,8 +66,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_a_PLACEBO_ = 0 
-
+_4_PLACEBO_ = 0 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -78,22 +77,24 @@ keywords = ['Planning','Proposed', # keywords to identify
             'Investigating','future','Implementation','Essential','Informal'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
-_5_b_DISTS_ = 0  # add grids
-_5_c_DISTS_ = 0  # non-RDP distance
-_5_d_DISTS_ = 1  # BBLU distance
-_5_e_DISTS_ = 1  # EA distance 
-_5_f_DISTS_ = 1  # grid distance
-grid_size = '1000' # assign size of grid
+grid_gen    = 0  # grid generate
+_5_b_DISTS_ = 0  # non-RDP distance
+_5_c_DISTS_ = 1  # BBLU distance
+_5_d_DISTS_ = 1  # EA distance 
+_5_e_DISTS_ = 1  # grid distance 
 bw = 1200        # bandwidth for buffers
-hulls = ['placebo','rdp'] # choose 
+hulls = ['rdp','placebo'] # choose 
 
 
+grid_size = '1000' # assign size of grid
 
 _6_a_PLOTS_ = 0  # distance plots for RDP: house prices
 _6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
 
 _7_a_PLOTS_ = 0  # distance plots for placebo: house prices
 _7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
+
+_8_DD_REGS_ = 0  # DD regressions with census data
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -203,7 +204,6 @@ if _1_e_IMPORT ==1:
 
     print '\n'," - GHS data: done! "'\n'
 
-
 #############################################
 # STEP 2:  flag RDP properties              #
 #############################################
@@ -236,7 +236,7 @@ if _3_CLUSTER_ ==1:
 # STEP 4:  Placebo RDP from GCRO            #
 #############################################
 
-if _4_a_PLACEBO_ == 1:
+if _4_PLACEBO_ == 1:
 
     print '\n'," Defining Placebo RDPs ... ",'\n'
 
@@ -244,7 +244,6 @@ if _4_a_PLACEBO_ == 1:
     make_gcro_placebo(db,counts,keywords)
 
     print '\n'," -- Placebo RDPs: done! "'\n'
-
 
 #############################################
 # STEP 5:  Distance to RDP for non-RDP      #
@@ -275,43 +274,41 @@ if _5_a_DISTS_ ==1:
         hulls_coordinates(db,tempdir,hull)
         print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
-if _5_b_DISTS_ ==1:
+if grid_gen ==1:
 
-    print '\n'," Distance part B: Generate spatial grid... ",'\n'
-
+    print '\n'," Generate spatial grid... ",'\n'
     add_grid(db,grid_size)
     print '\n'," Generate building counts... ",'\n'
-
     add_grid_counts(db)
     print '\n'," Create table linking erven and grid... ",'\n'
-
     grid_to_erven(db)
     print '\n'," - Grid: done! "'\n'
 
-if _5_c_DISTS_ ==1:
 
-    print '\n'," Distance part C: distances for non-RDP... ",'\n'
+if _5_b_DISTS_ ==1:
 
-    # 5c.0 instantiate parallel workers
+    print '\n'," Distance part B: distances for non-RDP... ",'\n'
+
+    # 5b.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
 
     for hull in hulls:
 
-        # 5c.1 fetch hull coordinates
+        # 5b.1 fetch hull coordinates
         coords = fetch_coordinates(db,hull)
     
-        # 5c.2 non-rdp in/out of hulls
+        # 5b.2 non-rdp in/out of hulls
         fetch_set = ['trans_buff','trans_hull']
         part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
-        # 5c.3 calculate distances for non-rdp
+        # 5b.3 calculate distances for non-rdp
         inmat = matrx['trans_buff'][matrx['trans_buff'][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
         dist = dist_calc(inmat, coords[:,:2].astype(np.float)) # second input is targ_conhulls
         print '\n'," -- Non-RDP distance calculation: done! ({}) "'\n'.format(hull)
     
-        # 5c.4 retrieve IDs, populate table and push back to DB
+        # 5b.4 retrieve IDs, populate table and push back to DB
         push_distNRDP2db(db,matrx,dist,coords,hull)
         print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
 
@@ -319,7 +316,7 @@ if _5_c_DISTS_ ==1:
     pp.close()
     pp.join()
 
-if _5_d_DISTS_ ==1:
+if _5_c_DISTS_ ==1:
 
     print '\n'," Distance part C: distances for BBLU... ",'\n'
 
@@ -351,7 +348,7 @@ if _5_d_DISTS_ ==1:
     pp.close()
     pp.join()
 
-if _5_e_DISTS_ ==1:
+if _5_d_DISTS_ ==1:
 
     print '\n'," Distance part D: distances for EAs and SALs... ",'\n'
 
@@ -385,36 +382,35 @@ if _5_e_DISTS_ ==1:
     pp.join()
 
 
+if _5_e_DISTS_ ==1:
 
-if _5_f_DISTS_ ==1:
+    print '\n'," Distance part E: distances for GRID... ",'\n'
 
-    print '\n'," Distance part F: distances for GRID... ",'\n'
-
-    # 5f.0 instantiate parallel workers
+    # 5e.0 instantiate parallel workers
     pp = multiprocessing.Pool(processes=workers)
 
     for hull in hulls:
 
-        # 5f.1 fetch hull coordinates
+        # 5e.1 fetch hull coordinates
         coords = fetch_coordinates(db,hull)
         
-        # 5f.2 non-rdp in/out of hulls
+        # 5e.2 non-rdp in/out of hulls
         fetch_set = ['grid_buff','grid_hull']
         part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
 
-        # 5c.3 calculate distances for non-rdp
+        # 5e.3 calculate distances for non-rdp
 
         inmat = matrx['grid_buff'][:,:2].astype(np.float) # filters for non-rdp
         dist = dist_calc(inmat, coords[:,:2].astype(np.float)) # second input is targ_conhulls
         print '\n'," -- grid distance calculation: done! ({}) "'\n'.format(hull)
 
-        # 5c.4 retrieve IDs, populate table and push back to DB
+        # 5e.4 retrieve IDs, populate table and push back to DB
         push_distGRID2db(db,matrx,dist,coords,'grid',hull)
         print '\n'," -- Grid distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
 
-    # 5d.5 kill parallel workers
+    # 5e.5 kill parallel workers
     pp.close()
     pp.join()
 
@@ -473,7 +469,7 @@ if _7_a_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile,rdp]
     subprocess.call(cmd)
 
-    print '\n'," -- Price Gradient Plots: done! ",'\n'
+    print '\n'," -- Placebo Price Gradient Plots: done! ",'\n'
 
 if _7_b_PLOTS_ == 1:
 
@@ -486,5 +482,24 @@ if _7_b_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    print '\n'," -- BBLU Plots: done! ",'\n'
+    print '\n'," -- Placebo BBLU Plots: done! ",'\n'
+
+##########################################
+# STEP 8:  Make census Diff-n-diff regs  #
+##########################################
+
+if _8_DD_REGS_ == 1:
+
+    print '\n'," Doing DD census regs...",'\n'
+
+    if not os.path.exists(outdir+'census_regs'):
+        os.makedirs(outdir+'census_regs')
+
+    dofile = "subcode/census_regs_hh.do"
+    cmd = ['stata-mp','do',dofile]
+    subprocess.call(cmd)
+
+    print '\n'," -- DD census regs: done! ",'\n'
+
+
 
