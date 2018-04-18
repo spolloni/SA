@@ -134,7 +134,7 @@ prog generate_descriptive_temp_sample_census;
     save "Generated/GAUTENG/temp/descriptive_sample_census.dta", replace;
 end;
 
-generate_descriptive_temp_sample_census;
+* generate_descriptive_temp_sample_census;
 
 
 *** TABLE PROGRAMS;

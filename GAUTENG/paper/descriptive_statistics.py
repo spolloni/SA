@@ -20,6 +20,44 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+
+def create_grid(db,name,grid_size):
+    
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="{}";
+               '''.format(name)
+    drop_qry = '''
+               SELECT DisableSpatialIndex('{}','GEOMETRY');
+               SELECT DiscardGeometryColumn('{}','GEOMETRY');
+               DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+               DROP TABLE IF EXISTS {};
+               '''.format(name,name,name,name)
+
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+
+    con.execute('''
+            CREATE TABLE {} AS
+            SELECT CastToMultiPolygon(ST_SquareGrid(A.GEOMETRY,grid_size)) AS GEOMETRY
+            FROM ea_2011 AS A
+            '''.format(name))
+    cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(name))
+    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+    con.close()    
+
+
+
+
+
+
 ### MAKE A TEMP TABLE FOR TRANSACTIONS WITHIN PLACEBO AREAS!
 ##### and THE NUMBER OF STRUCTURES!
 
@@ -60,7 +98,7 @@ def ea_overlap():
         con.execute("CREATE INDEX {}_index ON {} (ea_code);".format(name,name))
     con.close()
 
-ea_overlap()
+# ea_overlap()
 
 
 

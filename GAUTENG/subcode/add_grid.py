@@ -1,0 +1,205 @@
+
+
+
+
+'''
+add_grid.py
+
+    created by: wv, april 17 2017
+
+    - creates grid around buffers
+    - calculates statistics
+'''
+import os, subprocess, shutil, multiprocessing, re, glob
+from pysqlite2 import dbapi2 as sql
+import subprocess, ntpath, glob, pandas, csv
+
+
+
+### CREATES A GRID AROUND THE RDP AND PLACEBO BUFFER AREAS
+
+def add_grid(db,grid_size):
+    
+    name = 'grid'
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    def drop_full_table(name):
+        chec_qry = '''
+                   SELECT type,name from SQLite_Master
+                   WHERE type="table" AND name ="{}";
+                   '''.format(name)
+        drop_qry = '''
+                   SELECT DisableSpatialIndex('{}','GEOMETRY');
+                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
+                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+                   DROP TABLE IF EXISTS {};
+                   '''.format(name,name,name,name)
+        cur.execute(chec_qry)
+        result = cur.fetchall()
+        if result:
+            cur.executescript(drop_qry)
+
+    def add_index(name,index_var):
+        cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(name))
+        cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+        if index_var!='none':
+            cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
+
+    drop_full_table(name)
+    drop_full_table('grid_temp')
+    drop_full_table('grid_temp_3')    
+    drop_full_table('buffer_union')
+    drop_full_table('buffer_union_hull')
+    
+
+    ## create convex hull for easier grid creation
+    con.execute('''
+            CREATE TABLE buffer_union_hull AS
+            SELECT CastToMultiPolygon(ST_ConvexHull(ST_UNION(GEOMETRY))) AS GEOMETRY
+            FROM (SELECT GEOMETRY, cluster FROM rdp_buffers_intersect
+                        UNION ALL
+                 SELECT GEOMETRY, cluster FROM placebo_buffers_intersect );
+            ''')
+    add_index('buffer_union_hull','none')
+
+    ## create normal buffer for intersection
+    con.execute('''
+            CREATE TABLE buffer_union AS
+            SELECT CastToMultiPolygon(ST_UNION(GEOMETRY)) AS GEOMETRY
+            FROM (SELECT GEOMETRY, cluster FROM rdp_buffers_intersect
+                        UNION ALL
+                 SELECT GEOMETRY, cluster FROM placebo_buffers_intersect);
+            ''')
+    add_index('buffer_union','none')
+
+    ## create initial grid
+    qry_grid_temp = '''
+            CREATE TABLE grid_temp AS
+            SELECT CastToMultiPolygon(ST_SquareGrid(A.GEOMETRY,{})) AS GEOMETRY
+            FROM buffer_union AS A
+            '''.format(grid_size)
+    con.execute(qry_grid_temp)
+    add_index('grid_temp','none')
+
+    qry_grid_temp_3 = '''
+                SELECT ElementaryGeometries('grid_temp', 'GEOMETRY','grid_temp_3', 'grid_id', 'parent');
+                      '''
+    con.execute(qry_grid_temp_3)
+    add_index('grid_temp_3','none')
+
+    ## select only squares within the buffer areas
+    qry = '''
+            CREATE TABLE {} AS
+            SELECT CastToMultiPolygon(A.GEOMETRY) AS GEOMETRY, A.grid_id
+            FROM grid_temp_3 AS A, buffer_union AS G
+            WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='grid_temp_3' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
+            GROUP BY A.GEOMETRY
+            '''.format(name)
+    
+    con.execute(qry)
+    add_index(name,'grid_id')
+
+    drop_full_table('grid_temp')
+    drop_full_table('grid_temp_3')    
+    drop_full_table('buffer_union')
+    drop_full_table('buffer_union_hull')    
+
+    con.commit()
+    con.close()    
+
+    return
+
+
+
+def add_grid_counts(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    # add formal and informal building counts
+    name = 'grid'
+    ID = 'grid_id'
+    for t in ['pre','post']:
+        quality_control=' '
+        if t=='post':
+            quality_control=' AND A.cf_units="High" '
+        cur.execute('DROP TABLE IF EXISTS rdp_temp;')  
+
+        make_qry2=  ''' CREATE TABLE rdp_temp AS 
+                            SELECT 
+                                1000000*SUM(CASE WHEN A.s_lu_code="7.2" {} THEN 1 ELSE 0 END)
+                                /st_area(G.GEOMETRY) AS informal, 
+                                1000000*SUM(CASE WHEN A.s_lu_code="7.1" {} THEN 1 ELSE 0 END)
+                                /st_area(G.GEOMETRY) AS formal, 
+                                    G.{}
+                                FROM bblu_{} as A, {} AS G
+
+                                    WHERE A.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                    GROUP BY G.{} ;
+                    '''.format(quality_control,quality_control,ID,t,name,t,ID)
+        cur.execute(make_qry2) 
+
+        for F in ['formal','informal']:
+            make_qry3=   '''
+                    ALTER TABLE {} ADD COLUMN {}_{} FLOAT;
+                        UPDATE {} SET {}_{} = 
+                            ( SELECT B.{} 
+                            FROM rdp_temp AS B  WHERE {}.{} = B.{}) ;
+                        '''.format(name,F,t,name,F,t,F,name,ID,ID)
+            cur.executescript(make_qry3)
+
+        make_qry4=  '''
+                            UPDATE {} SET 
+                                formal_{} = case when formal_{} is null then 0 else formal_{} end,
+                                informal_{} = case when informal_{} is null then 0 else informal_{} end
+                                    WHERE 
+                                        formal_{} is null or informal_{} is null ;
+                  '''.format(name,t,t,t,t,t,t,t,t)
+        cur.execute(make_qry4) 
+        cur.execute('DROP TABLE IF EXISTS rdp_temp;') 
+
+    con.commit()
+    con.close()   
+
+    return
+
+
+def grid_to_erven(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    name = 'grid'
+    ID = 'grid_id'
+    cur.execute('DROP TABLE IF EXISTS {}_to_erven;'.format(name)) 
+    make_qry=  ''' CREATE TABLE {}_to_erven AS 
+                            SELECT A.property_id AS property_id, G.{} AS {}
+                                FROM erven as A, {} AS G
+                                    WHERE A.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='erven' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
+                    '''.format(name,ID,ID,name)
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX {}_to_erven_index ON {}_to_erven ({});".format(name,name,ID))
+    cur.execute("CREATE INDEX prop_id_to_erven_index ON {}_to_erven (property_id);".format(name))    
+    con.commit()
+    con.close()   
+
+    return
+
+
