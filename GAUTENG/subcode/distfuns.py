@@ -209,33 +209,6 @@ def fetch_data(db,dir,bufftype,hull,i):
     distinct = ''
     if bufftype == 'reg': distinct = 'DISTINCT'
 
-    if i=='grid_buff':
-
-        # grids inside buffers     
-        qry = ''' 
-                  SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
-                         st_y(st_centroid(e.GEOMETRY)) AS y, e.grid_id AS grid_id,
-                         coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
-                         /st_area(e.GEOMETRY),0) AS area_int
-                  FROM grid AS e, {}_buffers_{} AS b
-                  JOIN {}_conhulls AS h ON h.cluster = b.cluster  
-                  WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                          WHERE f_table_name = 'grid' AND search_frame=b.GEOMETRY)
-                  AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
-                  '''.format(distinct,hull,bufftype,hull)    
-
-    if i=='grid_hull':
-
-        # grids inside hulls
-        qry ='''
-                SELECT {} p.grid_id
-                FROM grid AS p, {}_conhulls AS h
-                WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                        WHERE f_table_name='grid' AND search_frame=h.GEOMETRY)
-                AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
-                '''.format(distinct,hull)
-
-
     if i=='BBLU_pre_buff':
 
         # BBLU pre points in buffers
@@ -310,6 +283,7 @@ def fetch_data(db,dir,bufftype,hull,i):
         # EA and SAL centroids inside buffers 
         geom,yr,plygn =  i.split('_')
 
+
         if plygn == 'buff':  
  
             qry = ''' 
@@ -333,6 +307,36 @@ def fetch_data(db,dir,bufftype,hull,i):
                         WHERE f_table_name='{}_{}' AND search_frame=h.GEOMETRY)
                 AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
                 '''.format(distinct,geom,geom,yr,hull,geom,yr)
+
+
+    if i=='grid_buff':
+
+        # grids inside buffers     
+        qry = ''' 
+                  SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
+                         st_y(st_centroid(e.GEOMETRY)) AS y, e.grid_id AS grid_id,
+                         coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
+                         /st_area(e.GEOMETRY),0) AS area_int
+                  FROM grid AS e, {}_buffers_{} AS b
+                  JOIN {}_conhulls AS h ON h.cluster = b.cluster  
+                  WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                          WHERE f_table_name = 'grid' AND search_frame=b.GEOMETRY)
+                  AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
+                  '''.format(distinct,hull,bufftype,hull)    
+
+    if i=='grid_hull':
+
+        # grids inside hulls
+        qry ='''
+                SELECT {} p.grid_id
+                FROM grid AS p, {}_conhulls AS h
+                WHERE p.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                        WHERE f_table_name='grid' AND search_frame=h.GEOMETRY)
+                AND st_within(st_centroid(p.GEOMETRY),h.GEOMETRY);
+                '''.format(distinct,hull)
+
+
+
 
     # fetch data
     con = sql.connect(db)
@@ -513,3 +517,4 @@ def push_distGRID2db(db,matrx,distances,coords,INPUT,hull):
     con.close()
 
     return
+

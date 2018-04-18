@@ -80,8 +80,8 @@ _5_a_DISTS_ = 0  # buffers and hull creation
 grid_gen    = 0  # grid generate
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 1  # BBLU distance
-_5_d_DISTS_ = 0  # EA distance 
-_5_e_DISTS_ = 0  # grid distance 
+_5_d_DISTS_ = 1  # EA distance 
+_5_e_DISTS_ = 1  # grid distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 
