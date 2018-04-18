@@ -79,13 +79,15 @@ _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU distance
 _5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
-hulls = ['placebo','rdp'] # choose 
+hulls = ['rdp','placebo'] # choose 
 
 _6_a_PLOTS_ = 0  # distance plots for RDP: house prices
 _6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
 
 _7_a_PLOTS_ = 0  # distance plots for placebo: house prices
 _7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
+
+_8_DD_REGS_ = 0  # DD regressions with census data
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -344,19 +346,18 @@ if _5_d_DISTS_ ==1:
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
         part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
+        print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
     
         # 5d.3 calculate distances for EA and SAL
         dist_input=[matrx[x][:,:2].astype(np.float) for x in [geom+'_2001_buff',geom+'_2011_buff']]
         part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
         dist = dict(zip([geom+'_2001_buff',geom+'_2011_buff'],pp.map(part_dist_calc,dist_input)))
-        print '\n'," -- EA distance calculation: done! ({}) "'\n'.format(hull)
+        print '\n'," -- EA distance calculation: done! ({},{}) "'\n'.format(hull,geom)
     
         # 5d.4 retrieve IDs, populate table and push back to DB
-        ID = geom+'_code'
-        for e in [geom+'_2001',geom+'_2011']:
-            push_distCENSUS2db(db,matrx,dist,coords,e,ID,hull)
-        print '\n'," -- EA and SAL distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
+        for cen in [geom+'_2001',geom+'_2011']:
+            push_distCENSUS2db(db,matrx,dist,coords,cen,hull)
+        print '\n'," -- EA and SAL distance, Populate table / push to DB: done! ({},{}) "'\n'.format(hull,geom)
 
     # 5d.5 kill parallel workers
     pp.close()
@@ -415,7 +416,7 @@ if _7_a_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile,rdp]
     subprocess.call(cmd)
 
-    print '\n'," -- Price Gradient Plots: done! ",'\n'
+    print '\n'," -- Placebo Price Gradient Plots: done! ",'\n'
 
 if _7_b_PLOTS_ == 1:
 
@@ -428,5 +429,24 @@ if _7_b_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    print '\n'," -- BBLU Plots: done! ",'\n'
+    print '\n'," -- Placebo BBLU Plots: done! ",'\n'
+
+##########################################
+# STEP 8:  Make census Diff-n-diff regs  #
+##########################################
+
+if _8_DD_REGS_ == 1:
+
+    print '\n'," Doing DD census regs...",'\n'
+
+    if not os.path.exists(outdir+'census_regs'):
+        os.makedirs(outdir+'census_regs')
+
+    dofile = "subcode/census_regs_hh.do"
+    cmd = ['stata-mp','do',dofile]
+    subprocess.call(cmd)
+
+    print '\n'," -- DD census regs: done! ",'\n'
+
+
 

@@ -20,7 +20,6 @@ global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
-	global rdp  = "all";
 };
 
 * import plotreg program;
