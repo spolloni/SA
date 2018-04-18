@@ -87,7 +87,7 @@ _6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
 _7_a_PLOTS_ = 0  # distance plots for placebo: house prices
 _7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
 
-_7_b_PLOTS_ = 0  # DD regs with census data
+_8_DD_REGS_ = 0  # DD regressions with census data
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -416,7 +416,7 @@ if _7_a_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile,rdp]
     subprocess.call(cmd)
 
-    print '\n'," -- Price Gradient Plots: done! ",'\n'
+    print '\n'," -- Placebo Price Gradient Plots: done! ",'\n'
 
 if _7_b_PLOTS_ == 1:
 
@@ -429,8 +429,24 @@ if _7_b_PLOTS_ == 1:
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    print '\n'," -- BBLU Plots: done! ",'\n'
+    print '\n'," -- Placebo BBLU Plots: done! ",'\n'
 
 ##########################################
 # STEP 8:  Make census Diff-n-diff regs  #
 ##########################################
+
+if _8_DD_REGS_ == 1:
+
+    print '\n'," Doing DD census regs...",'\n'
+
+    if not os.path.exists(outdir+'census_regs'):
+        os.makedirs(outdir+'census_regs')
+
+    dofile = "subcode/census_regs_hh.do"
+    cmd = ['stata-mp','do',dofile]
+    subprocess.call(cmd)
+
+    print '\n'," -- DD census regs: done! ",'\n'
+
+
+

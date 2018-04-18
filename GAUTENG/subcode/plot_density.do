@@ -22,7 +22,6 @@ global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
-	global rdp  = "all";
 };
 
 * import plotreg program;
@@ -34,7 +33,7 @@ cd Generated/Gauteng;
 
 if $DATA_PREP==1 {;
 
-  	local qry = " 
+  local qry = " 
 
   	SELECT * FROM 
 
