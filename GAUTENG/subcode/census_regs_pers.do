@@ -10,12 +10,13 @@ set maxvar 32767
 ******************;
 
 * PARAMETERS;
+global area = .3;
 
 * RUN LOCALLY?;
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 1;
+global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -32,7 +33,7 @@ if $DATA_PREP==1 {;
 
   local qry = " 
 
-  	SELECT * FROM 
+  	SELECT AA.*, (RANDOM()/(2*9223372036854775808)+.5) as random FROM
 
   	(
 
@@ -45,8 +46,9 @@ if $DATA_PREP==1 {;
 
            'census2001pers' AS source, 'rdp' AS hulltype, 2001 AS year
 
-    FROM census_pers_2001 AS A  
+    FROM census_pers_2001 AS A 
     JOIN distance_sal_2001_rdp AS B ON B.sal_code=A.SAL
+    WHERE area_int > $area
 
     UNION ALL 
 
@@ -58,8 +60,10 @@ if $DATA_PREP==1 {;
            cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int, 
 
            'census2001pers' AS source, 'placebo' AS hulltype, 2001 AS year
+
     FROM census_pers_2001 AS A  
     JOIN distance_sal_2001_placebo AS B ON B.sal_code=A.SAL
+    WHERE area_int > $area
 
     UNION ALL 
 
@@ -74,6 +78,7 @@ if $DATA_PREP==1 {;
 
     FROM census_pers_2011 AS A  
     JOIN distance_sal_2011_rdp AS B ON B.sal_code=A.SAL_code
+    WHERE area_int > $area
 
     UNION ALL 
 
@@ -88,10 +93,11 @@ if $DATA_PREP==1 {;
 
     FROM census_pers_2011 AS A  
     JOIN distance_sal_2011_placebo AS B ON B.sal_code=A.SAL_code
+    WHERE area_int > $area
 
     ) AS AA
 
-    LIMIT 10000000
+    WHERE random < .2
 
     ";
 
@@ -103,13 +109,11 @@ if $DATA_PREP==1 {;
 };
 
 use DDcensus_pers, clear;
-/*
+
+
 * go to working dir;
 cd ../..;
 cd Output/GAUTENG/censusregs;
-
-* SUBSET SALs "INSIDE";
-keep if area_int > .3;
 
 * drop clusters with no SAL;
 bys cluster year: gen N = _N;
@@ -123,6 +127,8 @@ gen post  	= (year==2011);
 gen treat 	= (cluster<1000);
 gen ptreat 	= post*treat; 
 
+
+/*
 * flush toilet?;
 gen toilet_flush = (toilet_typ==1|toilet_typ==2);
 

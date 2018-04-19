@@ -1,0 +1,23 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+            &\multicolumn{1}{c}{lpr\_sold}&\multicolumn{1}{c}{lpr\_sold}&\multicolumn{1}{c}{lpr\_sold}&\multicolumn{1}{c}{lpr\_sold}\\
+\hline
+ldist       &      0.0346\sym{***}&      0.0361\sym{***}&      0.0346\sym{***}&      0.0338\sym{***}\\
+            &   (0.00239)         &   (0.00268)         &   (0.00317)         &   (0.00307)         \\
+[1em]
+lvol        &                     &     -0.0253\sym{**} &                     &     -0.0136         \\
+            &                     &   (0.00875)         &                     &   (0.00947)         \\
+[1em]
+lspeed      &                     &                     &      -0.161\sym{**} &      -0.143\sym{**} \\
+            &                     &                     &    (0.0482)         &    (0.0490)         \\
+\hline
+\(N\)       &      177270         &      153168         &       92073         &       84961         \\
+\(R^{2}\)   &       0.825         &       0.824         &       0.832         &       0.828         \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.05\), \sym{**} \(p<0.01\), \sym{***} \(p<0.001\)}\\
+\end{tabular}
+}

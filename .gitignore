@@ -9,3 +9,11 @@
 *.gz
 *.aux
 *.bbl
+*.synctex.gz
+*.lot
+*.ttt
+*.out
+*.nav
+*.snm
+*.vrb
+*.toc

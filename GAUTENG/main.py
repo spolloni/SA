@@ -64,7 +64,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 0 
+_4_PLACEBO_ = 1 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
