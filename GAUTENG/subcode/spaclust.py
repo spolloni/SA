@@ -152,7 +152,7 @@ def concavehull(db,dir,sig):
                     WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
                         WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
                         AND st_intersects(A.GEOMETRY,G.GEOMETRY)
-                    GROUP BY G.cluster ;
+                    GROUP BY G.cluster;
       
                     ALTER TABLE rdp_conhulls ADD COLUMN formal_{} FLOAT;
 
@@ -174,7 +174,7 @@ def concavehull(db,dir,sig):
                   '''.format(quality_control,quality_control,t,t,t,t,t,t,t,t,t,t,t,t,t,t)
 
         cur.executescript(make_qry) 
-        
+
     con.commit()
     con.close()
     
