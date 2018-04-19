@@ -139,42 +139,42 @@ def concavehull(db,dir,sig):
             quality_control=' AND A.cf_units="High" '
 
         make_qry = '''
-                    DROP TABLE IF EXISTS rdp_temp;
-                        CREATE TABLE rdp_temp AS 
-                            SELECT 
-                                1000000*SUM(CASE WHEN A.s_lu_code="7.2" {} THEN 1 ELSE 0 END)
-                                /st_area(G.GEOMETRY) AS informal, 
-                                1000000*SUM(CASE WHEN A.s_lu_code="7.1" {} THEN 1 ELSE 0 END)
-                                /st_area(G.GEOMETRY) AS formal, 
-                                    G.cluster
-                                FROM bblu_{} as A, rdp_conhulls AS G
 
-                                    WHERE A.ROWID IN 
-                                        (SELECT ROWID FROM SpatialIndex 
-                                            WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
-                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
-                                    GROUP BY G.cluster ;
+                    DROP TABLE IF EXISTS rdp_temp;
+
+                    CREATE TABLE rdp_temp AS 
+                    SELECT 1000000*SUM(CASE WHEN A.s_lu_code="7.2" {} THEN 1 ELSE 0 END)
+                           /st_area(G.GEOMETRY) AS informal, 
+                           1000000*SUM(CASE WHEN A.s_lu_code="7.1" {} THEN 1 ELSE 0 END)
+                           /st_area(G.GEOMETRY) AS formal, 
+                           G.cluster as cluster
+                    FROM bblu_{} as A, rdp_conhulls AS G
+                    WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                        WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
+                        AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                    GROUP BY G.cluster ;
       
-                        ALTER TABLE rdp_conhulls ADD COLUMN formal_{} FLOAT;
-                            UPDATE rdp_conhulls SET formal_{} = 
-                                ( SELECT B.formal  
-                                FROM rdp_temp AS B  WHERE rdp_conhulls.cluster = B.cluster) ;
+                    ALTER TABLE rdp_conhulls ADD COLUMN formal_{} FLOAT;
 
-                        ALTER TABLE rdp_conhulls ADD COLUMN informal_{} FLOAT;
-                            UPDATE rdp_conhulls SET informal_{} = 
-                                ( SELECT B.informal 
-                                FROM rdp_temp AS B  WHERE rdp_conhulls.cluster = B.cluster) ;
+                    UPDATE rdp_conhulls SET formal_{} = (SELECT B.formal  
+                        FROM rdp_temp AS B  WHERE rdp_conhulls.cluster = B.cluster);
 
-                            UPDATE rdp_conhulls SET 
-                                formal_{} = case when formal_{} is null then 0 else formal_{} end,
-                                informal_{} = case when informal_{} is null then 0 else informal_{} end
-                                    WHERE 
-                                        formal_{} is null or informal_{} is null ;
+                    ALTER TABLE rdp_conhulls ADD COLUMN informal_{} FLOAT;
+
+                    UPDATE rdp_conhulls SET informal_{} = (SELECT B.informal 
+                        FROM rdp_temp AS B WHERE rdp_conhulls.cluster = B.cluster);
+
+                    UPDATE rdp_conhulls SET 
+                        formal_{} = case when formal_{} is null then 0 else formal_{} end,
+                        informal_{} = case when informal_{} is null then 0 else informal_{} end
+                    WHERE formal_{} is null or informal_{} is null;
+
                     DROP TABLE IF EXISTS rdp_temp;
+
                   '''.format(quality_control,quality_control,t,t,t,t,t,t,t,t,t,t,t,t,t,t)
 
         cur.executescript(make_qry) 
-
+        
     con.commit()
     con.close()
     
