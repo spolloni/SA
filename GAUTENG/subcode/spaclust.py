@@ -93,7 +93,7 @@ def spatial_cluster(algo,par1,par2,database,suf):
 
     return
 
-def concavehull(db,dir,sig):
+def concavehull(db,dir,sig,info):
 
     # connect to DB
     con = sql.connect(db)
@@ -131,6 +131,13 @@ def concavehull(db,dir,sig):
     cur.execute(make_qry)
     cur.execute("SELECT RecoverGeometryColumn('rdp_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');")
     cur.execute("SELECT CreateSpatialIndex('rdp_conhulls','GEOMETRY');")
+
+    if not info:
+
+        con.commit()
+        con.close()
+    
+        return
 
     # add formal and informal building counts
     for t in ['pre','post']:

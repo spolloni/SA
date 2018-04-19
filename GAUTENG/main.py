@@ -64,7 +64,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 1 
+_4_PLACEBO_ = 0 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -222,7 +222,7 @@ if _3_CLUSTER_ ==1:
     spatial_cluster(algo,par1,par2,db,rdp)
     print '\n'," -- clustering RDP: done! "'\n'
 
-    concavehull(db,tempdir,sig)
+    concavehull(db,tempdir,sig,True)
     print '\n'," -- Concave Hulls: done! "'\n'
 
 #############################################
