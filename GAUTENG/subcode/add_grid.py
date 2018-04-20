@@ -18,7 +18,7 @@ import subprocess, ntpath, glob, pandas, csv
 
 ### CREATES A GRID AROUND THE RDP AND PLACEBO BUFFER AREAS
 
-def add_grid(db,grid_size):
+def add_grid(db,grid_size,buffer_type):
     
     name = 'grid'
 
@@ -60,20 +60,32 @@ def add_grid(db,grid_size):
     con.execute('''
             CREATE TABLE buffer_union_hull AS
             SELECT CastToMultiPolygon(ST_ConvexHull(ST_UNION(GEOMETRY))) AS GEOMETRY
-            FROM (SELECT GEOMETRY, cluster FROM rdp_buffers_intersect
+            FROM (
+                SELECT GEOMETRY FROM rdp_buffers_{}
                         UNION ALL
-                 SELECT GEOMETRY, cluster FROM placebo_buffers_intersect );
-            ''')
+                SELECT GEOMETRY FROM placebo_buffers_{}
+                        UNION ALL
+                SELECT GEOMETRY FROM rdp_conhulls
+                        UNION ALL
+                SELECT GEOMETRY FROM placebo_conhulls                               
+                 );
+            '''.format(buffer_type,buffer_type))
     add_index('buffer_union_hull','none')
 
     ## create normal buffer for intersection
     con.execute('''
             CREATE TABLE buffer_union AS
             SELECT CastToMultiPolygon(ST_UNION(GEOMETRY)) AS GEOMETRY
-            FROM (SELECT GEOMETRY, cluster FROM rdp_buffers_intersect
+            FROM (
+                SELECT GEOMETRY FROM rdp_buffers_{}
                         UNION ALL
-                 SELECT GEOMETRY, cluster FROM placebo_buffers_intersect);
-            ''')
+                SELECT GEOMETRY FROM placebo_buffers_{}
+                        UNION ALL
+                SELECT GEOMETRY FROM rdp_conhulls
+                        UNION ALL
+                SELECT GEOMETRY FROM placebo_conhulls                               
+                 );
+            '''.format(buffer_type,buffer_type))
     add_index('buffer_union','none')
 
     ## create initial grid

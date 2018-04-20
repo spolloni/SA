@@ -152,10 +152,10 @@ def make_gcro_placebo(db,counts,keywords):
                SELECT A.cluster as cluster, 
 
                cast(MIN(C.placebo_yr) AS INT) as placebo_yr,
-               cast(MIN(C.formal_pre) AS FLOAT) as formal_pre,
-               cast(MIN(C.informal_pre) AS FLOAT) as informal_pre,
-               cast(MIN(C.formal_post) AS FLOAT) as formal_post,
-               cast(MIN(C.informal_post) AS FLOAT) as informal_post
+               cast(MAX(C.formal_pre) AS FLOAT) as formal_pre,
+               cast(MAX(C.informal_pre) AS FLOAT) as informal_pre,
+               cast(MAX(C.formal_post) AS FLOAT) as formal_post,
+               cast(MAX(C.informal_post) AS FLOAT) as informal_post
 
                FROM placebo_conhulls AS A, gcro_publichousing AS B
                JOIN gcro_publichousing_stats AS C on B.OGC_FID=C.OGC_FID_gcro
