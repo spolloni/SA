@@ -20,7 +20,6 @@ global treat = 400;   /* distance to be considered treated  */
 global LOCAL = 1;
 if $LOCAL==1{;
 	cd ..;
-	global rdp  = "all";
 };
 
 * import plotreg program;

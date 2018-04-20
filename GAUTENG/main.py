@@ -14,9 +14,7 @@ from subcode.spaclust import spatial_cluster, concavehull
 from subcode.placebofuns import make_gcro_placebo, import_budget
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
-from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db, push_distGRID2db
-from subcode.add_grid import add_grid, add_grid_counts, grid_to_erven
-
+from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -66,25 +64,22 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 1
+_4_PLACEBO_ = 0 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
-    'formal_post': '99999',  # upper-bound on post formal structures in project area 
+    'formal_post': '500',  # upper-bound on post formal structures in project area 
     'informal_pre': '99999', # upper-bound on pre informal structures in project area
     'informal_post': '99999'} # upper-bound on post informal structures in project area
 keywords = ['Planning','Proposed', # keywords to identify 
             'Investigating','future','Implementation','Essential','Informal'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
-grid_gen    = 0  # grid generate
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU distance
 _5_d_DISTS_ = 0  # EA distance 
-_5_e_DISTS_ = 0  # grid distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
-grid_size = '50' # assign size of grid
 
 _6_a_PLOTS_ = 0  # distance plots for RDP: house prices
 _6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
@@ -227,7 +222,7 @@ if _3_CLUSTER_ ==1:
     spatial_cluster(algo,par1,par2,db,rdp)
     print '\n'," -- clustering RDP: done! "'\n'
 
-    concavehull(db,tempdir,sig)
+    concavehull(db,tempdir,sig,True)
     print '\n'," -- Concave Hulls: done! "'\n'
 
 #############################################
@@ -272,17 +267,6 @@ if _5_a_DISTS_ ==1:
         hulls_coordinates(db,tempdir,hull)
         print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
-if grid_gen ==1:
-
-    print '\n'," Generate spatial grid... ",'\n'
-    ##  add_grid(db,grid_size,'reg')
-    print '\n'," Generate building counts... ",'\n'
-    add_grid_counts(db)
-    print '\n'," Create table linking erven and grid... ",'\n'
-    grid_to_erven(db)
-    print '\n'," - Grid: done! "'\n'
-
-
 if _5_b_DISTS_ ==1:
 
     print '\n'," Distance part B: distances for non-RDP... ",'\n'
@@ -297,7 +281,7 @@ if _5_b_DISTS_ ==1:
     
         # 5b.2 non-rdp in/out of hulls
         fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -360,7 +344,7 @@ if _5_d_DISTS_ ==1:
     
         # 5d.2 EA and SAL in/out of hulls
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,'reg',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
     
@@ -378,40 +362,6 @@ if _5_d_DISTS_ ==1:
     # 5d.5 kill parallel workers
     pp.close()
     pp.join()
-
-
-if _5_e_DISTS_ ==1:
-
-    print '\n'," Distance part E: distances for GRID... ",'\n'
-
-    # 5e.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
-
-    for hull in hulls:
-
-        # 5e.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-        
-        # 5e.2 grid in/out of hulls
-        fetch_set = ['grid_buff','grid_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
-
-        # 5e.3 calculate distances for grid
-        inmat = matrx['grid_buff'][:,:2].astype(np.float) # filters for non-rdp
-        dist = dist_calc(inmat, coords[:,:2].astype(np.float)) # second input is targ_conhulls
-        print '\n'," -- grid distance calculation: done! ({}) "'\n'.format(hull)
-
-        # 5e.4 retrieve IDs, populate table and push back to DB
-        push_distGRID2db(db,matrx,dist,coords,'grid',hull)
-        print '\n'," -- Grid distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
-
-    # 5e.5 kill parallel workers
-    pp.close()
-    pp.join()
-
-
 
 #############################################
 # STEP 6:  Make RDP Gradient/Density Plots  #
