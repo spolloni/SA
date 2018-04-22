@@ -103,8 +103,7 @@ prog generate_descriptive_temp_sample;
     save "Generated/GAUTENG/temp/descriptive_sample.dta", replace;
 end;
 
-
-generate_descriptive_temp_sample;
+* generate_descriptive_temp_sample;
 
 
 
@@ -127,9 +126,7 @@ prog project_sample_temp;
 end;
 
 
-project_sample_temp ;
-
-
+* project_sample_temp ;
 
 
 
@@ -224,78 +221,6 @@ program print_m2;
     file write newfile " \\ " _n;
 
 end;
-
-
-
-
-
-************************;
-***** WRITE DESCRIPTIVE TABLE Housing Projects ******;
-************************;
-
-
-program write_housing_project_table;
-    import delimited using 
-    "/Users/williamviolette/southafrica/Generated/GAUTENG/temp/housing_project_table.csv", 
-    delimiter(",") clear;
-
-    replace area = area/1000000;
-
-    replace total_formal= total_formal/area;
-    replace total_informal= total_informal/area;
-
-
-    g rdp = regexm(name,"rdp")==1; 
-    g pre = regexm(name,"pre")==1;
-
-    sum total_informal if rdp==1 & pre==1, detail ;
-    g green_field_id = total_informal<=`=r(mean)' & rdp==1 & pre==1;
-    egen green_field = max(green_field_id), by(v1);
-    replace green_field=0 if rdp==0;
-
-
-        global cat1="keep if green_field==1 & pre==1 & rdp==1" ;
-        global cat2="keep if green_field==1 & pre==0 & rdp==1" ;
-        global cat3="keep if green_field==0 & pre==1 & rdp==1" ;
-        global cat4="keep if green_field==0 & pre==0 & rdp==1" ;
-        global cat5="keep if pre==1 & rdp==0" ;
-        global cat6="keep if pre==0 & rdp==0" ;
-        
-        global cat_num=6;
-
-    file open newfile using "`1'", write replace;
-    file write newfile  "\begin{tabu}{l";
-    forvalues r=1/$cat_num {;
-    file write newfile  "c";
-    };
-    file write newfile "}" _n  ;
-
-   * file write newfile " & \multicolumn{4}{c}{Housing Projects} & \multicolumn{2}{c}{Placebo} \\ \\[-0.97em] \cline{2-5} " _n ;
-    file write newfile " & \multicolumn{2}{c}{Greenfield} & \multicolumn{2}{c}{In-Situ} & \multicolumn{2}{c}{Control} \\ \\[-0.97em] \cline{2-7} " _n  ;
-    file write newfile  " & 2001 & 2011 & 2001 & 2011 & 2001 & 2011  \\" _n "\midrule" _n;
-
-    print_1 "Formal Structures" total_formal "mean" "%10.1fc"   ;
-    print_1 "Informal Structures" total_informal   "mean" "%10.1fc"   ;
-
-    forvalues r=1/$cat_num {;
-    file write newfile  " & ";
-    };    
-    file write newfile " \\ " _n;    
-
-    print_m2 "Area (km2)"   area  "mean" "%10.2fc"  ;
-
-    ** add counts ;
-    *file write newfile "\midrule" _n;
-        print_m2 "Total Projects " area "N" "%10.0fc" ;
-    file write newfile "\bottomrule" _n "\end{tabu}" _n;
-    file close newfile;
-
-end;
-
-
-
-*write_housing_project_table "${figures}housing_project_table.tex";
-*write_housing_project_table "${present}housing_project_table.tex";
 
 
 
@@ -418,12 +343,12 @@ program write_descriptive_table;
     print_1 "Median Purchase Year"  purch_yr    "p50"  "%10.0f"   ;
 
     ** add distance only for in_cluster ;
-    *file write newfile " Distance to Project (meters) & " ;
-    *    in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
-    *file write newfile " & \\" _n ;
-    *file write newfile " \rowfont{\footnotesize} & " ;
-    *   in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
-    *file write newfile " & \\" _n ;
+    file write newfile " Distance to Project (meters) & " ;
+        in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
+    file write newfile " & \\" _n ;
+    file write newfile " \rowfont{\footnotesize} & " ;
+       in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
+    file write newfile " & \\" _n ;
 
     ** add counts ;
     file write newfile "\midrule" _n;
@@ -495,7 +420,9 @@ end;
 
 * generate_descriptive_temp_sample;
 
-* write_descriptive_table "${figures}descriptive_table.tex";
+write_descriptive_table "${figures}descriptive_table.tex";
+write_descriptive_table "${present}descriptive_table.tex";
+
 
 * write_price_histogram "${figures}price_histogram.pdf";
 * write_price_histogram "${present}price_histogram.pdf";
