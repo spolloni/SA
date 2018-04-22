@@ -135,7 +135,7 @@ def erven_in_placebo():
     con.execute("CREATE INDEX e_i_pb ON erven_in_placebo_buffer (property_id);")
     con.close()
 
-#erven_in_placebo()
+# erven_in_placebo()
 
 
 
@@ -150,7 +150,7 @@ def housing_project_table():
     for hull in ['placebo','rdp']:
         for table in ['pre','post']:
             if hull=='placebo':
-                placebo_filter=' AND B.placebo_yr>0 '
+                placebo_filter=' AND B.placebo_yr>2002 '
             else:
                 placebo_filter=' '
             if table=='post':
@@ -184,7 +184,7 @@ def housing_project_table():
 
 
 
-#housing_project_table()
+housing_project_table()
 
 
 

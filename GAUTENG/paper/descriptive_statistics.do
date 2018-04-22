@@ -29,6 +29,8 @@ program drop_99p;
 end;
 
 
+global figures="Code/GAUTENG/paper/figures/";
+global present="Code/GAUTENG/presentations/presentation_lunch/";
 
 
 
@@ -38,21 +40,6 @@ end;
 ********* PREP TRANSACTION DATA ;
 ********* ********* ********* ********* ;
 
-
-prog test_spatial_query;
-    local qry = "
-    SELECT A.property_id, B.cluster as cluster_placebo, B.placebo_yr
-        FROM erven AS A, placebo_conhulls AS B
-                        WHERE 
-                        A.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                            WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
-                        AND st_within(A.GEOMETRY,B.GEOMETRY) AND B.placebo_yr>0   ;
-      ";
-    qui odbc query "gauteng";    
-    odbc exec("SELECT load_extension('mod_spatialite');"), dsn("gauteng")
-    odbc load, exec("`qry'") clear;    
-end;
-*test_spatial_query;
 
 prog generate_descriptive_temp_sample;
     local qry = "
@@ -63,9 +50,12 @@ prog generate_descriptive_temp_sample;
              C.rdp_all, C.rdp_gcroonly, C.rdp_notownship, C.rdp_phtownship, C.gov,
              C.no_seller_rdp, C.big_seller_rdp, C.rdp_never, C.trans_id as trans_id_rdp,
              D.distance, D.cluster, 
+
              E.cluster as cl, E.mode_yr, E.frac1, E.frac2, E.cluster_siz,
 
-             F.cluster_placebo, G.cluster_placebo_buffer
+             F.cluster_placebo, 
+
+             G.cluster_placebo_buffer
 
       FROM transactions AS A
       JOIN erven AS B ON A.property_id = B.property_id
@@ -79,6 +69,9 @@ prog generate_descriptive_temp_sample;
 
     qui odbc query "gauteng";
     odbc load, exec("`qry'") clear;
+
+    drop if frac1<.5;
+    drop if mode_yr<=2002;
 
     *** trim outliers ;
     keep if purch_price>1000;
@@ -111,28 +104,56 @@ prog generate_descriptive_temp_sample;
 end;
 
 
-*generate_descriptive_temp_sample;
+generate_descriptive_temp_sample;
 
 
-********* ********* ********* ********* ;
-********* PREP CENSUS DATA ;
-********* PREP CENSUS DATA ;
-********* PREP CENSUS DATA ;
-********* ********* ********* ********* ;
 
 
-prog generate_descriptive_temp_sample_census;
+prog project_sample_temp;
     local qry = "
-      SELECT 
-             * 
-
+      SELECT cluster, formal_pre, formal_post, informal_pre, informal_post, placebo_yr, 0 AS frac1, 0 AS frac2 
+      FROM placebo_conhulls
+      UNION 
+      SELECT A.cluster, A.formal_pre, A.formal_post, A.informal_pre, A.informal_post, B.mode_yr as placebo_yr, B.frac1, B.frac2
+      FROM rdp_conhulls AS A JOIN rdp_clusters AS B ON A.cluster=B.cluster
       ";
 
     qui odbc query "gauteng";
     odbc load, exec("`qry'") clear;
 
-    save "Generated/GAUTENG/temp/descriptive_sample_census.dta", replace;
+    g rdp=cluster<1000;
+
+    save "Generated/GAUTENG/temp/project_sample_temp.dta", replace;
 end;
+
+
+project_sample_temp ;
+
+
+
+
+
+
+
+
+
+
+********* ********* ********* ********* ;
+********* PREP CENSUS DATA ;
+********* PREP CENSUS DATA ;
+********* PREP CENSUS DATA ;
+********* ********* ********* ********* ;
+
+
+*prog generate_descriptive_temp_sample_census;
+*    local qry = "
+*      SELECT 
+*             * 
+*      ";
+*    qui odbc query "gauteng";
+*    odbc load, exec("`qry'") clear;
+*    save "Generated/GAUTENG/temp/descriptive_sample_census.dta", replace;
+*end;
 
 * generate_descriptive_temp_sample_census;
 
@@ -242,7 +263,7 @@ program write_housing_project_table;
         
         global cat_num=6;
 
-    file open newfile using "Code/GAUTENG/paper/figures/housing_project_table.tex", write replace;
+    file open newfile using "`1'", write replace;
     file write newfile  "\begin{tabu}{l";
     forvalues r=1/$cat_num {;
     file write newfile  "c";
@@ -272,8 +293,84 @@ program write_housing_project_table;
 end;
 
 
-* write_housing_project_table;
 
+*write_housing_project_table "${figures}housing_project_table.tex";
+*write_housing_project_table "${present}housing_project_table.tex";
+
+
+
+
+************************;
+***** WRITE DESCRIPTIVE TABLE Housing Projects NO AGGREGATION ******;
+************************;
+
+program write_project_joint_table;
+    *import delimited using 
+    *"/Users/williamviolette/southafrica/Generated/GAUTENG/temp/housing_project_table.csv", 
+    *delimiter(",") clear;
+
+
+    use "Generated/GAUTENG/temp/project_sample_temp.dta", clear;
+
+    keep if (rdp==0 & placebo_yr>2002 & placebo_yr<=2010) 
+          | (frac1>.5 & frac2>.5 & placebo_yr>2002 & placebo_yr<=2010);
+
+        global cat1="keep if  rdp==1" ;
+        global cat2="keep if  rdp==0" ;
+        
+        global cat_num=2;
+
+    file open newfile using "`1'", write replace;
+    file write newfile  "\begin{tabu}{l";
+    forvalues r=1/$cat_num {;
+    file write newfile  "c";
+    };
+    file write newfile "}" _n  ;
+
+   * file write newfile " & \multicolumn{2}{c}{Completed} & \multicolumn{2}{c}{Planned but} \\ " _n ;
+    file write newfile " & Completed & Uncompleted \\ " _n  ;
+   * file write newfile  " & 2001 & 2011 & 2001 & 2011 \\" _n "\midrule" _n;
+
+    print_1 "Formal Density: 2001" formal_pre  "mean" "%10.1fc"   ;
+    print_1 "Formal Density: 2011" formal_post "mean" "%10.1fc"   ;
+
+    forvalues r=1/$cat_num {;
+    file write newfile  " & ";
+    };    
+    file write newfile " \\ " _n;    
+
+    print_1 "Informal Density: 2001" informal_pre  "mean" "%10.1fc"   ;
+    print_1 "Informal Density: 2011" informal_post "mean" "%10.1fc"   ;
+
+    forvalues r=1/$cat_num {;
+    file write newfile  " & ";
+    };    
+    file write newfile " \\ " _n;    
+
+   * print_m2 "Area (km2)"   area  "mean" "%10.2fc"  ;
+    ** add counts ;
+    *file write newfile "\midrule" _n;
+    *    print_m2 "Total Projects " area "N" "%10.0fc" ;
+
+    print_1 "Median Year (est.)" placebo_yr "p50" "%10.0f" ;
+
+ 
+    forvalues r=1/$cat_num {;
+    file write newfile  " & ";
+    };    
+    file write newfile " \\ " _n;    
+
+    print_1 "Total Projects " formal_pre "N" "%10.0fc" ;
+
+
+    file write newfile "\bottomrule" _n "\end{tabu}" _n;
+    file close newfile;
+
+end;
+
+
+write_project_joint_table "${figures}project_joint_table.tex";
+write_project_joint_table "${present}project_joint_table.tex";
 
 
 ************************;
@@ -291,7 +388,7 @@ program write_descriptive_table;
         global cat5="keep if in_rdp==0 & in_rdp_buffer==0 & in_placebo==0 & in_placebo_buffer==0" ;        
         global cat_num=5;
 
-    file open newfile using "Code/GAUTENG/paper/figures/descriptive_table.tex", write replace;
+    file open newfile using "`1'", write replace;
     file write newfile  "\begin{tabu}{l";
     forvalues r=1/$cat_num {;
     file write newfile  "c";
@@ -353,18 +450,19 @@ program write_biggest_sellers;
     bys seller_name: g name_count=_N;
     bys seller_name: keep if _n==1;
     gsort - name_count;
-    keep if _n<=10;
-        file open newfile using "Code/GAUTENG/paper/figures/biggest_sellers_table.tex", write replace;
+    local seller_count = 5;
+    keep if _n<=`seller_count';
+        file open newfile using "`1'", write replace;
         file write newfile  "\begin{tabu}{l";
         file write newfile  "c";
         file write newfile  "}" _n  "\toprule" _n 
                             " Seller Name & Observations \\" _n 
                             "\midrule" _n;
-        forvalues r = 1/10 {;
+        forvalues r = 1/`seller_count' {;
             file write newfile  "`=seller_name[`r']' & `=string(`=name_count[`r']',"%10.0fc")'  \\" _n ;    
         };
         file write newfile "\midrule" _n;
-        file write newfile  "Observations & `=string(`=total_obs[1]',"%10.0fc")'  \\" _n ;        
+        file write newfile  "Total Observations & `=string(`=total_obs[1]',"%10.0fc")'  \\" _n ;        
         file write newfile "\bottomrule" _n "\end{tabu}" _n;
         file close newfile;
 end;
@@ -383,8 +481,8 @@ program write_price_histogram;
     lab values rdp_all rdp_label;
     lab var purch_price "Price (Rand)";
 
-    histogram purch_price if purch_price<200000, by(rdp_all) discrete;
-    graph export "Code/GAUTENG/paper/figures/price_histogram.pdf", as(pdf) replace;
+    histogram purch_price if purch_price<100000, by(rdp_all) discrete;
+    graph export "`1'", as(pdf) replace;
 end;
 
 
@@ -397,11 +495,13 @@ end;
 
 * generate_descriptive_temp_sample;
 
-* write_descriptive_table;
+* write_descriptive_table "${figures}descriptive_table.tex";
 
-* write_price_histogram;
+* write_price_histogram "${figures}price_histogram.pdf";
+* write_price_histogram "${present}price_histogram.pdf";
 
-* write_biggest_sellers;
+* write_biggest_sellers "${figures}biggest_sellers_table.tex";
+* write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 
