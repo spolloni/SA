@@ -20,6 +20,55 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+
+
+### MAKE A TEMP TABLE TO KNOW WHICH ERVEN ARE IN PLACEBOS!
+
+def erven_in_placebo():
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute("DROP TABLE IF EXISTS erven_in_placebo;")
+    con.execute('''
+        CREATE TABLE erven_in_placebo AS
+        SELECT A.property_id, B.cluster as cluster_placebo, B.placebo_yr
+        FROM erven AS A, placebo_conhulls AS B
+                        WHERE 
+                        A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                            WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
+                        AND st_within(A.GEOMETRY,B.GEOMETRY) AND B.placebo_yr>0  ;
+                ''')
+    con.execute("CREATE INDEX e_i_p ON erven_in_placebo (property_id);")
+
+    cur.execute("DROP TABLE IF EXISTS erven_in_placebo_buffer;")
+    con.execute('''
+        CREATE TABLE erven_in_placebo_buffer AS
+        SELECT A.property_id, B.cluster as cluster_placebo_buffer
+        FROM erven AS A, placebo_buffers_reg AS B
+                        WHERE 
+                        A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                            WHERE f_table_name='erven' AND search_frame=B.GEOMETRY)
+                        AND st_within(A.GEOMETRY,B.GEOMETRY) 
+                         ;
+                ''')
+    con.execute("CREATE INDEX e_i_pb ON erven_in_placebo_buffer (property_id);")
+    con.close()
+
+erven_in_placebo()
+
+
+
+
+
+
+
+
+
+
+#### THESE JUST COUNT THINGS FOR THE PAPER
+
 def count_bblu():
     con = sql.connect(db)
     cur = con.cursor()
@@ -144,7 +193,10 @@ def share_during_mode_year():
     print df.head(10)
     con.close()
 
-share_during_mode_year()
+
+
+
+#    share_during_mode_year()
 
 # count_ghs()
 
