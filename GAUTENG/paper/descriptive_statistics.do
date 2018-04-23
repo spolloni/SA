@@ -11,7 +11,6 @@ set maxvar 32767
 
 ** make descriptive table for transactions ;
 
-
 global LOCAL = 1;
 
 
@@ -75,6 +74,7 @@ prog generate_descriptive_temp_sample;
 
     *** trim outliers ;
     keep if purch_price>1000;
+    drop if purch_price>2000000;
 
     drop_99p purch_price;
     drop_99p erf_size;
@@ -103,7 +103,6 @@ prog generate_descriptive_temp_sample;
     save "Generated/GAUTENG/temp/descriptive_sample.dta", replace;
 end;
 
-* generate_descriptive_temp_sample;
 
 
 
@@ -294,17 +293,19 @@ program write_project_joint_table;
 end;
 
 
-write_project_joint_table "${figures}project_joint_table.tex";
-write_project_joint_table "${present}project_joint_table.tex";
+*write_project_joint_table "${figures}project_joint_table.tex";
+*write_project_joint_table "${present}project_joint_table.tex";
+
 
 
 ************************;
 ***** WRITE DESCRIPTIVE TABLE ******;
 ************************;
 
-
 program write_descriptive_table;
     use "Generated/GAUTENG/temp/descriptive_sample.dta", clear;
+
+    drop if in_rdp==1 & purch_price>150000;
 
         global cat1="keep if in_rdp==1" ;
         global cat2="keep if in_rdp_buffer==1" ;
@@ -320,11 +321,11 @@ program write_descriptive_table;
     };
     file write newfile "}" _n  
     "\toprule" _n 
-    " & Project
-      & Near Project
-      & Control 
-      & Near Control
-      & Other
+    " & Completed Project
+      & Completed Buffer
+      & Uncompleted Project
+      & Uncompleted Buffer
+      & Other 
     \\" _n ;
 
     file write newfile 
@@ -343,12 +344,12 @@ program write_descriptive_table;
     print_1 "Median Purchase Year"  purch_yr    "p50"  "%10.0f"   ;
 
     ** add distance only for in_cluster ;
-    file write newfile " Distance to Project (meters) & " ;
-        in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
-    file write newfile " & \\" _n ;
-    file write newfile " \rowfont{\footnotesize} & " ;
-       in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
-    file write newfile " & \\" _n ;
+  *  file write newfile " Distance to Project (meters) & " ;
+  *      in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
+  *  file write newfile " & \\" _n ;
+  *  file write newfile " \rowfont{\footnotesize} & " ;
+  *     in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
+  *  file write newfile " & \\" _n ;
 
     ** add counts ;
     file write newfile "\midrule" _n;
@@ -358,6 +359,94 @@ program write_descriptive_table;
 end;
 
 
+  *  file write newfile 
+  *  " & \multicolumn{3}{c}{Completed}
+  *    &  \multicolumn{3}{c}{Uncompleted}
+  *  \\" _n;
+  *  file write newfile
+  *  " & No Overlap
+  *    & 0\%$<$ Overlap $\leq$50\%
+  *    & 50\%$<$ Overlap 
+  *    & No Overlap
+  *    & 0\%$<$ Overlap $\leq$50\%
+  *    & 50\%$<$ Overlap 
+  *  \\" _n ;
+  *  file write newfile "\midrule" _n;
+
+************************;
+***** WRITE DESCRIPTIVE CENSUS TABLE ******;
+************************;
+
+
+program write_census_hh_table;
+    use "Generated/GAUTENG/DDcensus_hh.dta", clear;
+    g rdp=hulltype=="rdp";
+    
+        global cat1="keep if area_int==0 & rdp==1 " ;
+        global cat2="keep if area_int==0 & rdp==0 " ;
+        global cat3="keep if area_int>0 & area_int<=.5 & rdp==1 " ;
+        global cat4="keep if area_int>0 & area_int<=.5 & rdp==0 " ;
+        global cat5="keep if area_int>.5 & rdp==1 " ;
+        global cat6="keep if area_int>.5 & rdp==0 " ;           
+        global cat_num=6;
+
+    file open newfile using "`1'", write replace;
+    file write newfile  "\begin{tabu}{l";
+    forvalues r=1/$cat_num {;
+    file write newfile  "c";
+    };
+    file write newfile "}" _n ;
+
+    file write newfile 
+    " & \multicolumn{2}{c}{In Buffer but No Overlap}
+      &  \multicolumn{2}{c}{0\%$<$ Overlap $\leq$50\%}
+      &  \multicolumn{2}{c}{50\%$<$ Overlap}
+    \\" _n;
+    
+    forvalues r=1/$cat_num {;
+    file write newfile  " & ";
+    };    
+    file write newfile " \\ " _n;   
+
+    file write newfile
+    " & Completed 
+      & Uncompleted
+      & Completed 
+      & Uncompleted
+      & Completed
+      & Uncompleted
+    \\" _n ;
+    file write newfile "\midrule" _n;
+
+
+        * flush toilet?;
+    gen toilet_flush = (toilet_typ==1|toilet_typ==2);
+
+    * piped water?;
+    gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001);
+
+    * tenure?;
+    gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
+
+    * house?;
+    gen house = dwelling_typ==1;
+
+    *** HERE ARE THE MAIN VARIABLES ;
+    print_1 "Flush Toilet" toilet_flush "mean" "%10.2fc"   ;
+    print_1 "Piped Water Inside" water_inside       "mean" "%10.2fc"   ;
+    print_1 "Owner" owner       "mean" "%10.2fc"   ;
+    print_1 "House" house       "mean" "%10.2fc"   ;
+
+    ** add counts ;
+    file write newfile "\midrule" _n;
+        print_1 Observations water_piped "N" "%10.0fc" ;
+    file write newfile "\bottomrule" _n "\end{tabu}" _n;
+    file close newfile;
+end;
+
+
+
+use "Generated/GAUTENG/DDcensus_hh.dta", clear;
 
 
 
@@ -418,17 +507,21 @@ end;
 ***** IMPlEMENT PROGRAMS ***** ;
 
 
-* generate_descriptive_temp_sample;
+generate_descriptive_temp_sample;
 
 write_descriptive_table "${figures}descriptive_table.tex";
 write_descriptive_table "${present}descriptive_table.tex";
 
 
-* write_price_histogram "${figures}price_histogram.pdf";
-* write_price_histogram "${present}price_histogram.pdf";
+write_census_hh_table "${figures}census_hh_table.tex";
+write_census_hh_table "${present}census_hh_table.tex";
 
-* write_biggest_sellers "${figures}biggest_sellers_table.tex";
-* write_biggest_sellers "${present}biggest_sellers_table.tex";
+
+write_price_histogram "${figures}price_histogram.pdf";
+write_price_histogram "${present}price_histogram.pdf";
+
+write_biggest_sellers "${figures}biggest_sellers_table.tex";
+write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 
