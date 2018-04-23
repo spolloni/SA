@@ -125,33 +125,9 @@ prog project_sample_temp;
 end;
 
 
-* project_sample_temp ;
 
 
 
-
-
-
-
-
-********* ********* ********* ********* ;
-********* PREP CENSUS DATA ;
-********* PREP CENSUS DATA ;
-********* PREP CENSUS DATA ;
-********* ********* ********* ********* ;
-
-
-*prog generate_descriptive_temp_sample_census;
-*    local qry = "
-*      SELECT 
-*             * 
-*      ";
-*    qui odbc query "gauteng";
-*    odbc load, exec("`qry'") clear;
-*    save "Generated/GAUTENG/temp/descriptive_sample_census.dta", replace;
-*end;
-
-* generate_descriptive_temp_sample_census;
 
 
 *** TABLE PROGRAMS;
@@ -507,21 +483,24 @@ end;
 ***** IMPlEMENT PROGRAMS ***** ;
 
 
-*generate_descriptive_temp_sample;
+*** GENERATE TEMP SAMPLES
+*** saves in generated/temp/ for the other tables to be generated (only needs to run once)
 
-*write_descriptive_table "${figures}descriptive_table.tex";
-*write_descriptive_table "${present}descriptive_table.tex";
+project_sample_temp ;
+generate_descriptive_temp_sample;
+
+write_descriptive_table "${figures}descriptive_table.tex";
+write_descriptive_table "${present}descriptive_table.tex";
+
+write_census_hh_table "${figures}census_hh_table.tex";
+write_census_hh_table "${present}census_hh_table.tex";
 
 
-*write_census_hh_table "${figures}census_hh_table.tex";
-*write_census_hh_table "${present}census_hh_table.tex";
+write_price_histogram "${figures}price_histogram.pdf";
+write_price_histogram "${present}price_histogram.pdf";
 
-
-*write_price_histogram "${figures}price_histogram.pdf";
-*write_price_histogram "${present}price_histogram.pdf";
-
-*write_biggest_sellers "${figures}biggest_sellers_table.tex";
-*write_biggest_sellers "${present}biggest_sellers_table.tex";
+write_biggest_sellers "${figures}biggest_sellers_table.tex";
+write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 
