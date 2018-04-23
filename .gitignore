@@ -1,7 +1,6 @@
 *.DS_Store
 *.log
 *.pyc
-*.pdf
 *.aux
 *.bbl
 *.blg

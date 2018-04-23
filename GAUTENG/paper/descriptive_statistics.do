@@ -507,21 +507,21 @@ end;
 ***** IMPlEMENT PROGRAMS ***** ;
 
 
-generate_descriptive_temp_sample;
+*generate_descriptive_temp_sample;
 
-write_descriptive_table "${figures}descriptive_table.tex";
-write_descriptive_table "${present}descriptive_table.tex";
-
-
-write_census_hh_table "${figures}census_hh_table.tex";
-write_census_hh_table "${present}census_hh_table.tex";
+*write_descriptive_table "${figures}descriptive_table.tex";
+*write_descriptive_table "${present}descriptive_table.tex";
 
 
-write_price_histogram "${figures}price_histogram.pdf";
-write_price_histogram "${present}price_histogram.pdf";
+*write_census_hh_table "${figures}census_hh_table.tex";
+*write_census_hh_table "${present}census_hh_table.tex";
 
-write_biggest_sellers "${figures}biggest_sellers_table.tex";
-write_biggest_sellers "${present}biggest_sellers_table.tex";
+
+*write_price_histogram "${figures}price_histogram.pdf";
+*write_price_histogram "${present}price_histogram.pdf";
+
+*write_biggest_sellers "${figures}biggest_sellers_table.tex";
+*write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 
