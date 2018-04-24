@@ -26,6 +26,12 @@ program drop_99p;
         qui sum `1', detail;
         drop if `1'>=`=r(p99)' & `1'<.;
 end;
+program write_blank;
+    forvalues r=1/$cat_num {;
+    file write newfile  " & ";
+    };    
+    file write newfile " \\ " _n;
+end;
 
 
 global figures="Code/GAUTENG/paper/figures/";
@@ -349,6 +355,8 @@ end;
   *  \\" _n ;
   *  file write newfile "\midrule" _n;
 
+
+
 ************************;
 ***** WRITE DESCRIPTIVE CENSUS TABLE ******;
 ************************;
@@ -394,7 +402,6 @@ program write_census_hh_table;
     \\" _n ;
     file write newfile "\midrule" _n;
 
-
         * flush toilet?;
     gen toilet_flush = (toilet_typ==1|toilet_typ==2);
 
@@ -422,7 +429,113 @@ end;
 
 
 
-use "Generated/GAUTENG/DDcensus_hh.dta", clear;
+
+************************;
+***** PRE//POST CENSUS TABLE ******;
+************************;
+
+program time_gen;
+  g `1'_pre = `1' if year==2001;
+  g `1'_post = `1' if year==2011;
+end;
+
+program write_census_hh_time_table;
+    use "Generated/GAUTENG/DDcensus_hh.dta", clear;
+    g rdp=hulltype=="rdp";
+    
+        global cat1="keep if area_int==0 & rdp==1 " ;
+        global cat2="keep if area_int==0 & rdp==0 " ;
+        global cat3="keep if area_int>0 & area_int<=.5 & rdp==1 " ;
+        global cat4="keep if area_int>0 & area_int<=.5 & rdp==0 " ;
+        global cat5="keep if area_int>.5 & rdp==1 " ;
+        global cat6="keep if area_int>.5 & rdp==0 " ;           
+        global cat_num=6;
+
+    file open newfile using "`1'", write replace;
+    file write newfile  "\begin{tabu}{l";
+    forvalues r=1/$cat_num {;
+    file write newfile  "c";
+    };
+    file write newfile "}" _n ;
+
+    file write newfile 
+    " & \multicolumn{2}{c}{In Buffer but No Overlap}
+      &  \multicolumn{2}{c}{0\%$<$ Overlap $\leq$50\%}
+      &  \multicolumn{2}{c}{50\%$<$ Overlap}
+    \\" _n;
+    
+    forvalues r=1/$cat_num {;
+    file write newfile  " & ";
+    };    
+    file write newfile " \\ " _n;   
+
+    file write newfile
+    " & Completed 
+      & Uncompleted
+      & Completed 
+      & Uncompleted
+      & Completed
+      & Uncompleted
+    \\" _n ;
+    file write newfile "\midrule" _n;
+
+        * flush toilet?;
+    gen toilet_flush = (toilet_typ==1|toilet_typ==2);
+    time_gen toilet_flush;
+    
+    * piped water?;
+    gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001);
+    time_gen water_inside; 
+
+    * tenure?;
+    gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
+    time_gen owner;
+
+    * house?;
+    gen house = dwelling_typ==1;
+    time_gen house;
+
+    g rooms  = tot_rooms if tot_rooms<=12;
+    time_gen rooms;
+
+    *** HERE ARE THE MAIN VARIABLES ;
+    print_1 "Flush Toilet: 2001" toilet_flush_pre "mean" "%10.2fc"   ;
+    print_1 "Flush Toilet: 2011" toilet_flush_post "mean" "%10.2fc"   ;
+    write_blank;
+
+    print_1 "Piped Water: 2001" water_inside_pre    "mean" "%10.2fc"   ;
+    print_1 "Piped Water: 2011" water_inside_post   "mean" "%10.2fc"   ;
+    write_blank;
+
+    print_1 "Owner: 2001" owner_pre       "mean" "%10.2fc"   ;
+    print_1 "Owner: 2011" owner_post      "mean" "%10.2fc"   ;
+    write_blank;
+
+    print_1 "House: 2001" house_pre       "mean" "%10.2fc"   ;
+    print_1 "House: 2011" house_post      "mean" "%10.2fc"   ;
+    write_blank;
+
+    print_1 "Rooms: 2001" rooms_pre      "mean" "%10.2fc"   ;
+    print_1 "Rooms: 2011" rooms_post     "mean" "%10.2fc"   ;
+    write_blank;
+
+    ** add counts ;
+    file write newfile "\midrule" _n;
+        print_1 Observations water_piped "N" "%10.0fc" ;
+    file write newfile "\bottomrule" _n "\end{tabu}" _n;
+    file close newfile;
+end;
+
+
+
+
+
+
+
+
+
+
+*use "Generated/GAUTENG/DDcensus_hh.dta", clear;
 
 
 
@@ -486,21 +599,23 @@ end;
 *** GENERATE TEMP SAMPLES
 *** saves in generated/temp/ for the other tables to be generated (only needs to run once)
 
-project_sample_temp ;
-generate_descriptive_temp_sample;
+* project_sample_temp ;
+* generate_descriptive_temp_sample;
 
-write_descriptive_table "${figures}descriptive_table.tex";
-write_descriptive_table "${present}descriptive_table.tex";
+*write_census_hh_time_table "${figures}census_hh_time_table.tex";
+write_census_hh_time_table "${present}census_hh_time_table.tex";
 
-write_census_hh_table "${figures}census_hh_table.tex";
-write_census_hh_table "${present}census_hh_table.tex";
+*write_census_hh_table "${figures}census_hh_table.tex";
+*write_census_hh_table "${present}census_hh_table.tex";
 
+* write_descriptive_table "${figures}descriptive_table.tex";
+* write_descriptive_table "${present}descriptive_table.tex";
 
-write_price_histogram "${figures}price_histogram.pdf";
-write_price_histogram "${present}price_histogram.pdf";
+*write_price_histogram "${figures}price_histogram.pdf";
+*write_price_histogram "${present}price_histogram.pdf";
 
-write_biggest_sellers "${figures}biggest_sellers_table.tex";
-write_biggest_sellers "${present}biggest_sellers_table.tex";
+*write_biggest_sellers "${figures}biggest_sellers_table.tex";
+*write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 

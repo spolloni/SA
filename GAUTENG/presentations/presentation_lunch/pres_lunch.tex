@@ -415,6 +415,8 @@ joint with Ben Bradlow and Will Violette}
 \end{figure}
 }\end{minipage}
 } ;
+% descriptive_statistics.do   program: write_biggest_sellers
+
 
 \onslide<2>\node[overlay,anchor=west,align=left] at (0, -1.7) { 
 \begin{minipage}{1\textwidth} { 
@@ -424,8 +426,11 @@ joint with Ben Bradlow and Will Violette}
 \end{figure}
 }\end{minipage} 
 } ;
+% descriptive_statistics.do   program: write_price_histogram
+
 
 \onslide<4>\node[overlay,anchor=west,align=left] at (2, -2.8) {  \includegraphics[scale=.16]{rdp_conhull_pic.png}  };
+% generated from QGIS
 
 
 \end{tikzpicture}
@@ -506,6 +511,7 @@ Density is building number per square kilometer.
 \input{descriptive_table}
 }
 \end{table}
+% descriptive_statistics.do program: write_descriptive_table
 \end{frame}
 
 %------------------------------------------------
@@ -513,14 +519,11 @@ Density is building number per square kilometer.
 \begin{frame}
 \frametitle{Census Descriptives}
 
-\begin{table}
-\caption{Census Descriptives}
 \centering
 \resizebox{\textwidth}{!}{  
-\input{census_hh_table}
+\input{census_hh_time_table}
 }
-\end{table}
-
+% descriptive_statistics.do program: write_census_hh_table
 
 \end{frame}
 
