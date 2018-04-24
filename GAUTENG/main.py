@@ -74,10 +74,10 @@ counts = {
 keywords = ['Planning','Proposed', # keywords to identify 
             'Investigating','future','Implementation','Essential','Informal'] 
 
-_5_a_DISTS_ = 0  # buffers and hull creation
+_5_a_DISTS_ = 1  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU distance
-_5_d_DISTS_ = 1  # EA distance 
+_5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 
@@ -252,7 +252,8 @@ if _5_a_DISTS_ ==1:
     grids = glob.glob(rawgis+'grid_7*')
     for grid in grids: shutil.copy(grid, tempdir)
 
-    for hull in hulls:
+    #for hull in hulls:
+    for hull in ['placebo']:
 
         ## 5a.1 intersecting EAs
         #intersGEOM(db,tempdir,'ea',hull,'2001')   
@@ -264,8 +265,8 @@ if _5_a_DISTS_ ==1:
         print '\n'," -- Self-Intersections: done! ({}) "'\n'.format(hull)
     
         # 5a.3 assemble coordinates for hull edges
-        hulls_coordinates(db,tempdir,hull)
-        print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
+        #hulls_coordinates(db,tempdir,hull)
+        #print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
 if _5_b_DISTS_ ==1:
 
