@@ -93,7 +93,7 @@ def selfintersect(db,dir,bw,hull):
     make_qry = '''
                    CREATE TABLE {}_buffers_reg AS 
                    SELECT CastToMultiPolygon(
-                   ST_Buffer(A.GEOMETRY,{})
+                   ST_SelfIntersections(ST_Buffer(A.GEOMETRY,{}))
                    ) AS GEOMETRY,
                    A.cluster AS cluster
                    FROM {}_conhulls AS A;
@@ -105,30 +105,30 @@ def selfintersect(db,dir,bw,hull):
     con.commit()
     con.close()
 
-    qry  = "SELECT * FROM {}_buffers_reg".format(hull)
-    out1 = dir+'{}_buff.shp'.format(hull)
-    out2 = dir+'{}_interbuff.shp'.format(hull)
-    
-    # fetch buffers
-    if os.path.exists(out1): os.remove(out1)
-    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
-    subprocess.call(' '.join(cmd),shell=True)
-    
-    # self-intersect
-    cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
-           '-ID cluster -INTERSECT', out2]
-    subprocess.call(' '.join(cmd),shell=True)
-    
-    # push back to DB
-    con = sql.connect(db)
-    cur = con.cursor()
-    cur.execute('''CREATE TABLE IF NOT EXISTS {}_buffers_intersect (mock INT);'''.format(hull))
-    con.commit()
-    con.close()
-    cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-            db, out2,'-select cluster', '-where "cluster > 0"',
-            '-nlt PROMOTE_TO_MULTI','-nln {}_buffers_intersect'.format(hull), '-overwrite']
-    subprocess.call(' '.join(cmd),shell=True)
+    # qry  = "SELECT * FROM {}_buffers_reg".format(hull)
+    # out1 = dir+'{}_buff.shp'.format(hull)
+    # out2 = dir+'{}_interbuff.shp'.format(hull)
+    # 
+    # # fetch buffers
+    # if os.path.exists(out1): os.remove(out1)
+    # cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
+    # subprocess.call(' '.join(cmd),shell=True)
+    # 
+    # # self-intersect
+    # cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
+    #        '-ID cluster -INTERSECT', out2]
+    # subprocess.call(' '.join(cmd),shell=True)
+    # 
+    # # push back to DB
+    # con = sql.connect(db)
+    # cur = con.cursor()
+    # cur.execute('''CREATE TABLE IF NOT EXISTS {}_buffers_intersect (mock INT);'''.format(hull))
+    # con.commit()
+    # con.close()
+    # cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
+    #         db, out2,'-select cluster', '-where "cluster > 0"',
+    #         '-nlt PROMOTE_TO_MULTI','-nln {}_buffers_intersect'.format(hull), '-overwrite']
+    # subprocess.call(' '.join(cmd),shell=True)
 
     return
 
