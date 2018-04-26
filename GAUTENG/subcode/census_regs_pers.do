@@ -16,7 +16,7 @@ global area = .3;
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 1;
+global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -189,6 +189,9 @@ gen ptreat = post*treat;
 gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
 gen schooling_hschool = (education>=0 & education<=12) if !missing(education);
 
+* race;
+gen black = (race==1) if !missing(race);
+
 * income;
 gen inc_value = . ;
 replace inc_value = 0      if income ==1;
@@ -212,14 +215,43 @@ replace unemployed = 1 if employment ==2;
 replace unemployed = 0 if employment ==1;
 
 
-areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster); 
+eststo clear;
+areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster); 
+eststo reg1;
+*areg inc_value 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg2;
+areg inc_value_earners 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg3;
+areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg4;
+*areg black 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg5;
+*areg age 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg6;
 
-areg income 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg income 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster); 
+esttab reg1 reg3 reg4 using census_DD_pers_sample,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress; 
 
-areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster); 
+eststo clear;
+areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+eststo reg1;
+*areg inc_value 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+*eststo reg2;
+areg inc_value_earners 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg3;
+areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+eststo reg4;
+*areg black 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr, a(cluster) cl(cluster);
+*eststo reg5;
+*areg age 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr, a(cluster) cl(cluster);
+*eststo reg6;
+
+esttab reg1 reg3 reg4 using census_DD_pers,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress;
 
 
 

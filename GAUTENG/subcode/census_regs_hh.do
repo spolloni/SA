@@ -204,39 +204,56 @@ gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==
 gen house = dwelling_typ==1 if !missing(dwelling_typ);
 
 
+eststo clear;
+*areg hh_size 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg1; 
+*areg tot_rooms 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg2;
+areg toilet_flush 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg3; 
+areg water_inside 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg4;
+areg electric_cooking 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg5;
+*areg electric_heating 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg6;
+areg electric_lighting 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster); 
+eststo reg7;
+*areg owner 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg8; 
+areg house 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg9; 
 
-areg hh_size 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg hh_size 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster); 
-
-areg tot_rooms 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg tot_rooms 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster); 
-
-areg toilet_flush 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg toilet_flush 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
-
-
-areg water_inside 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg water_inside 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
-
-
-areg electric_cooking 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg electric_cooking 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
-
-
-areg electric_heating 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg electric_heating 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
-
-
-areg electric_lighting 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg electric_lighting 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
-
-
-areg owner 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg owner 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
+esttab reg3 reg4 reg5 reg7 reg9 using census_DD_hh_sample,
+keep(*ptreat*) 
+replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress;
 
 
-areg house 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster); 
-areg house 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster);
+eststo clear;
+*areg hh_size 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+*eststo reg1;  
+*areg tot_rooms 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+*eststo reg2; 
+areg toilet_flush 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg3;  
+areg water_inside 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg4; 
+areg electric_cooking 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg5; 
+*areg electric_heating 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+*eststo reg6; 
+areg electric_lighting 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg7; 
+*areg owner 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+*eststo reg8; 
+areg house 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg9; 
+
+esttab reg3 reg4 reg5 reg7 reg9 using census_DD_hh,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress;
   
 
 
