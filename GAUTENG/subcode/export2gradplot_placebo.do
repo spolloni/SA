@@ -47,14 +47,12 @@ cd Generated/GAUTENG;
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;
 
-
 * set up ;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 
 * create date variables and dummies;
 gen abs_yrdist = abs(purch_yr - placebo_yr); 
-
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen hy_date  = hofd(dofm(mo_date)); // half-years;

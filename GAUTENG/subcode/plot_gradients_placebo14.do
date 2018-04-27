@@ -23,7 +23,8 @@ if $LOCAL==1{;
 };
 
 * import plotreg program;
-do subcode/import_plotreg.do;
+cd "/Users/stefanopolloni/GoogleDrive/Year4/SouthAfrica_Analysis/Code/GAUTENG/";
+do subcode/import_plotreg14.do;
 
 * load data; 
 cd ../..;
@@ -99,16 +100,20 @@ global iftsregs = "
        sixmonths > 0 &
        ";
 
+
+/*
 * distance regression;
 reg lprice b$max.dists_placebo#b0.post i.purch_yr#i.purch_mo i.cluster_placebo erf*  if $ifregs, cl(cluster_placebo);
 plotreg distplot distplot_placebo;
+*/
 
-pause on;
-pause;
+
+
 
 * time regression;
 reg lprice b1001.mo2con_reg#b0.treat i.purch_yr#i.purch_mo i.cluster_placebo erf* if $ifregs, cl(cluster_placebo);
 plotreg timeplot timeplot;
+
 
 /*
 * time-series regression;
@@ -116,6 +121,7 @@ reg lprice i.sixmonths#b0.treat i.dists_rdp i.clust_placebo erf* if $iftsregs;
 plotreg timeseries timeseries_placebo;
 */
 
+/*
 gen post2 = (mo2con>=0  & mo2con <=12);
 replace post2 = 2 if (mo2con> 12  & mo2con <=24); 
 replace post2 = 3 if (mo2con> 24  & mo2con <=36);  
@@ -139,10 +145,11 @@ eststo reg3;
 reg lprice i.post##i.treat2 i.purch_yr#i.purch_mo i.clust_placebo erf* if $ifregs, cl(clust_placebo) r;
 eststo reg4;
 
-esttab reg1 reg2 reg3 reg4 using gradient_regressions_placebo,
+esttab reg1 reg2 reg3 reg4 using regtable,
 keep(*post* *treat*) 
 replace nodep nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
    compress;
+*/
 
 * exit stata;
 *exit, STATA clear; 

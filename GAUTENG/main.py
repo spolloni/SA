@@ -74,7 +74,7 @@ counts = {
 keywords = ['Planning','Proposed', # keywords to identify 
             'Investigating','future','Implementation','Essential','Informal'] 
 
-_5_a_DISTS_ = 1  # buffers and hull creation
+_5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU distance
 _5_d_DISTS_ = 0  # EA distance 
@@ -252,8 +252,7 @@ if _5_a_DISTS_ ==1:
     grids = glob.glob(rawgis+'grid_7*')
     for grid in grids: shutil.copy(grid, tempdir)
 
-    #for hull in hulls:
-    for hull in ['placebo']:
+    for hull in hulls:
 
         ## 5a.1 intersecting EAs
         #intersGEOM(db,tempdir,'ea',hull,'2001')   
@@ -265,8 +264,8 @@ if _5_a_DISTS_ ==1:
         print '\n'," -- Self-Intersections: done! ({}) "'\n'.format(hull)
     
         # 5a.3 assemble coordinates for hull edges
-        #hulls_coordinates(db,tempdir,hull)
-        #print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
+        hulls_coordinates(db,tempdir,hull)
+        print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
 if _5_b_DISTS_ ==1:
 
@@ -313,7 +312,7 @@ if _5_c_DISTS_ ==1:
     
         # 5c.2 BBLU in/out of hulls
         fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'reg',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -345,7 +344,7 @@ if _5_d_DISTS_ ==1:
     
         # 5d.2 EA and SAL in/out of hulls
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,'reg',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
     

@@ -33,7 +33,15 @@ if $DATA_PREP==1 {;
 
   local qry = " 
 
-  	SELECT AA.*, (RANDOM()/(2*9223372036854775808)+.5) as random FROM
+  	SELECT 
+
+        AA.*, (RANDOM()/(2*9223372036854775808)+.5) as random,
+
+        BB.mode_yr, BB.frac1,
+
+        CC.placebo_yr 
+
+    FROM
 
   	(
 
@@ -48,7 +56,7 @@ if $DATA_PREP==1 {;
 
     FROM census_pers_2001 AS A 
     JOIN distance_sal_2001_rdp AS B ON B.sal_code=A.SAL
-    WHERE area_int > $area
+    /* WHERE area_int > $area */
 
     UNION ALL 
 
@@ -63,7 +71,7 @@ if $DATA_PREP==1 {;
 
     FROM census_pers_2001 AS A  
     JOIN distance_sal_2001_placebo AS B ON B.sal_code=A.SAL
-    WHERE area_int > $area
+    /* WHERE area_int > $area */
 
     UNION ALL 
 
@@ -78,7 +86,7 @@ if $DATA_PREP==1 {;
 
     FROM census_pers_2011 AS A  
     JOIN distance_sal_2011_rdp AS B ON B.sal_code=A.SAL_code
-    WHERE area_int > $area
+    /* WHERE area_int > $area */
 
     UNION ALL 
 
@@ -93,11 +101,16 @@ if $DATA_PREP==1 {;
 
     FROM census_pers_2011 AS A  
     JOIN distance_sal_2011_placebo AS B ON B.sal_code=A.SAL_code
-    WHERE area_int > $area
+    /* WHERE area_int > $area */
 
     ) AS AA
 
-    WHERE random < .2
+    LEFT JOIN (SELECT DISTINCT cluster, cluster_siz, mode_yr, frac1, frac2 
+    FROM rdp_clusters) AS BB on AA.cluster = BB.cluster
+
+    LEFT JOIN placebo_conhulls AS CC on CC.cluster = AA.cluster
+
+    WHERE random < .5
 
     ";
 
@@ -110,10 +123,55 @@ if $DATA_PREP==1 {;
 
 use DDcensus_pers, clear;
 
-
 * go to working dir;
 cd ../..;
 cd Output/GAUTENG/censusregs;
+
+global ifsample = "
+  (cluster < 1000 & frac1>.5 & mode_yr>2002 &
+    cluster != 1   &
+    cluster != 23  &
+    cluster != 72  &
+    cluster != 132 &
+    cluster != 170 &
+    cluster != 171 )
+  |(cluster >= 1009 & placebo_yr!=. & placebo_yr > 2002 &
+    cluster != 1013 &
+    cluster != 1019 &
+    cluster != 1046 &
+    cluster != 1071 &
+    cluster != 1074 &
+    cluster != 1075 &
+    cluster != 1078 &
+    cluster != 1079 &
+    cluster != 1084 &
+    cluster != 1085 &
+    cluster != 1092 &
+    cluster != 1095 &
+    cluster != 1117 &
+    cluster != 1119 &
+    cluster != 1125 &
+    cluster != 1126 &
+    cluster != 1127 &
+    cluster != 1164 &
+    cluster != 1172 &
+    cluster != 1185 &
+    cluster != 1190 &
+    cluster != 1202 &
+    cluster != 1203 &
+    cluster != 1218 &
+    cluster != 1219 &
+    cluster != 1220 &
+    cluster != 1224 &
+    cluster != 1225 &
+    cluster != 1230 &
+    cluster != 1239)
+  ";
+
+* group definitions;
+gen gr = .;
+replace gr=1 if area_int >= .3;
+replace gr=2 if area_int < .3 ;
 
 * drop clusters with no SAL;
 bys cluster year: gen N = _N;
@@ -123,36 +181,77 @@ drop if sd==0;
 drop N sd;
 
 * treatment and post vars;
-gen post  	= (year==2011);
-gen treat 	= (cluster<1000);
-gen ptreat 	= post*treat; 
+gen post   = (year==2011);
+gen treat  = (cluster<1000);
+gen ptreat = post*treat; 
+
+* schooling;
+gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
+gen schooling_hschool = (education>=0 & education<=12) if !missing(education);
+
+* race;
+gen black = (race==1) if !missing(race);
+
+* income;
+gen inc_value = . ;
+replace inc_value = 0      if income ==1;
+replace inc_value = 200    if income ==2;
+replace inc_value = 600    if income ==3;
+replace inc_value = 1200   if income ==4;
+replace inc_value = 2400   if income ==5;
+replace inc_value = 4800   if income ==6;
+replace inc_value = 9600   if income ==7;
+replace inc_value = 19200  if income ==8;
+replace inc_value = 38400  if income ==9;
+replace inc_value = 76800  if income ==10;
+replace inc_value = 153600 if income ==11;
+replace inc_value = 307200 if income ==12;
+gen inc_value_earners = inc_value ;
+replace inc_value_earners = . if inc_value==0;
+
+* employment;
+gen unemployed = .;
+replace unemployed = 1 if employment ==2;
+replace unemployed = 0 if employment ==1;
 
 
-/*
-* flush toilet?;
-gen toilet_flush = (toilet_typ==1|toilet_typ==2);
+eststo clear;
+areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster); 
+eststo reg1;
+*areg inc_value 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg2;
+areg inc_value_earners 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg3;
+areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg4;
+*areg black 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg5;
+*areg age 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg6;
 
-* piped water?;
-gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001);
-gen water_yard   = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001);
+esttab reg1 reg3 reg4 using census_DD_pers_sample,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress; 
 
-* water source?;
-gen water_utility = (water_source==1);
+eststo clear;
+areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+eststo reg1;
+*areg inc_value 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+*eststo reg2;
+areg inc_value_earners 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg3;
+areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+eststo reg4;
+*areg black 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr, a(cluster) cl(cluster);
+*eststo reg5;
+*areg age 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr, a(cluster) cl(cluster);
+*eststo reg6;
 
-* electricity?;
-gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1);
-gen electric_cooking  = enrgy_cooking==1;
-gen electric_heating  = enrgy_heating==1;
-gen electric_lighting = enrgy_lighting==1;
-
-* tenure?;
-gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
-
-* house?;
-gen house = dwelling_typ==1;
-*/
-
-
+esttab reg1 reg3 reg4 using census_DD_pers,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress;
 
 
 

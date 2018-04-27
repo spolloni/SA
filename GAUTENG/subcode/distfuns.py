@@ -71,33 +71,30 @@ def selfintersect(db,dir,bw,hull):
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
-    def drop_qry(name):
-        chec_qry = '''
-                   SELECT type,name from SQLite_Master
-                   WHERE type="table" AND name ="{}";
-                   '''.format(name)
-        drop_qry = '''
-                   SELECT DisableSpatialIndex('{}','GEOMETRY');
-                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
-                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
-                   DROP TABLE IF EXISTS {};
-                   '''.format(name,name,name,name)
-        # create hulls table
-        cur.execute(chec_qry)
-        result = cur.fetchall()
-        if result:
-            cur.executescript(drop_qry)
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="{}_buffers_reg";
+               '''.format(hull)
 
+    drop_qry = '''
+               SELECT DisableSpatialIndex('{}_buffers_reg','GEOMETRY');
+               SELECT DiscardGeometryColumn('{}_buffers_reg','GEOMETRY');
+               DROP TABLE IF EXISTS idx_{}_buffers_reg_GEOMETRY;
+               DROP TABLE IF EXISTS {}_buffers_reg;
+               '''.format(hull,hull,hull,hull)
 
-    drop_qry('{}_buffers_reg'.format(hull))
     make_qry = '''
-                   CREATE TABLE {}_buffers_reg AS 
-                   SELECT CastToMultiPolygon(
-                   ST_SelfIntersections(ST_Buffer(A.GEOMETRY,{}))
-                   ) AS GEOMETRY,
-                   A.cluster AS cluster
-                   FROM {}_conhulls AS A;
-                   '''.format(hull,bw,hull)
+               CREATE TABLE {}_buffers_reg AS 
+               SELECT CastToMultiPolygon(ST_Buffer(A.GEOMETRY,{})) AS GEOMETRY,
+               A.cluster AS cluster
+               FROM {}_conhulls AS A;
+               '''.format(hull,bw,hull)
+
+    # create hulls table
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
     cur.execute(make_qry)
     cur.execute("SELECT RecoverGeometryColumn('{}_buffers_reg','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(hull))
     cur.execute("SELECT CreateSpatialIndex('{}_buffers_reg','GEOMETRY');".format(hull))
@@ -105,30 +102,30 @@ def selfintersect(db,dir,bw,hull):
     con.commit()
     con.close()
 
-    # qry  = "SELECT * FROM {}_buffers_reg".format(hull)
-    # out1 = dir+'{}_buff.shp'.format(hull)
-    # out2 = dir+'{}_interbuff.shp'.format(hull)
-    # 
-    # # fetch buffers
-    # if os.path.exists(out1): os.remove(out1)
-    # cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
-    # subprocess.call(' '.join(cmd),shell=True)
-    # 
-    # # self-intersect
-    # cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
-    #        '-ID cluster -INTERSECT', out2]
-    # subprocess.call(' '.join(cmd),shell=True)
-    # 
-    # # push back to DB
-    # con = sql.connect(db)
-    # cur = con.cursor()
-    # cur.execute('''CREATE TABLE IF NOT EXISTS {}_buffers_intersect (mock INT);'''.format(hull))
-    # con.commit()
-    # con.close()
-    # cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
-    #         db, out2,'-select cluster', '-where "cluster > 0"',
-    #         '-nlt PROMOTE_TO_MULTI','-nln {}_buffers_intersect'.format(hull), '-overwrite']
-    # subprocess.call(' '.join(cmd),shell=True)
+    qry  = "SELECT * FROM {}_buffers_reg".format(hull)
+    out1 = dir+'{}_buff.shp'.format(hull)
+    out2 = dir+'{}_interbuff.shp'.format(hull)
+
+    # fetch buffers
+    if os.path.exists(out1): os.remove(out1)
+    cmd = ['ogr2ogr -f "ESRI Shapefile"', out1, db, '-sql "'+qry+'"']
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # self-intersect
+    cmd = ['saga_cmd shapes_polygons 12 -POLYGONS', out1,
+           '-ID cluster -INTERSECT', out2]
+    subprocess.call(' '.join(cmd),shell=True)
+
+    # push back to DB
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS {}_buffers_intersect (mock INT);'''.format(hull))
+    con.commit()
+    con.close()
+    cmd = ['ogr2ogr -f "SQLite" -update','-a_srs http://spatialreference.org/ref/epsg/2046/',
+            db, out2,'-select cluster', '-where "cluster > 0"',
+            '-nlt PROMOTE_TO_MULTI','-nln {}_buffers_intersect'.format(hull), '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
 
     return
 

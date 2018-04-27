@@ -51,11 +51,12 @@ program plotreg;
       sum contin;
       global plotmin = `r(min)';
       global step = 2*$bin;
-      *replace contin = contin + 5 if group==1;
+      replace contin = contin + 4 if group==1;
+      replace contin = contin - 4 if group==0;
       
       tw 
-      (rcap max95 min95 contin if group==0, lc(gs0) lw(thin))
-      (rcap max95 min95 contin if group==1, lc(sienna) lw(thin) lp(none))
+      (rbar max95 min95 contin if group==0, lc(gs0%30) lw(thin))
+      (rbar max95 min95 contin if group==1, lc(sienna%30) lw(thin) lp(none))
       (connected estimate contin if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin))
       (connected estimate contin if group==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin))
       ,
@@ -77,19 +78,21 @@ program plotreg;
       replace contin = -1*(contin - 1000) if contin>1000;
       replace contin = $mbin*contin;
       global bound = 12*$tw;
-      *replace contin = contin + .25 if group==1;
+      replace contin = contin + .25 if group==1;
+      replace contin = contin - .25 if group==0;
+      replace max95=.5 if max95>.5;
       sort contin;
 
 
       tw 
-      (rcap max95 min95 contin if group==0, lc(gs0) lw(thin) )
-      (rcap max95 min95 contin if group==1, lc(sienna) lw(thin))
+      (rspike max95 min95 contin if group==0, lc(gs0%30) lw(thin) )
+      (rspike max95 min95 contin if group==1, lc(sienna%30) lw(thin))
       (connected estimate contin if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin))
       (connected estimate contin if group==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin)),
       xtitle("months to modal construction month",height(5))
       ytitle("log-price coefficients",height(5))
       xlabel(-$bound(12)$bound)
-      ylabel(-.75(.25).75,labsize(small))
+      ylabel(-.75(.25).5,labsize(small))
       xline(0,lw(thin)lp(shortdash))
       legend(order(3 "far" 4 "near (< ${treat}m)")
       ring(0) position(7) bm(tiny) rowgap(tiny) textw(small) 
