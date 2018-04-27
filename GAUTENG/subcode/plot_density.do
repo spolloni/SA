@@ -88,7 +88,7 @@ bys cluster dists post formal: g n =_n;
 global ifregs = "
        frac1 > $fr1  &
        frac2 > $fr2  &
-       mode_yr>2002 
+       mode_yr>2002  
        ";
 
 preserve;
@@ -105,4 +105,4 @@ plotreg bbluplot bbluplot;
 restore;
 
 * exit stata;
-exit, STATA clear; 
+*exit, STATA clear; 

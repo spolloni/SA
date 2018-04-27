@@ -29,7 +29,7 @@ local qry = "
   LEFT JOIN distance_nrdp_rdp AS D ON B.property_id = D.property_id 
   LEFT JOIN (SELECT property_id, cluster, mode_yr, frac1, frac2, cluster_siz
        FROM rdp_clusters WHERE cluster != 0 ) AS E ON B.property_id = E.property_id
-  WHERE NOT (D.cluster IS NULL AND E.cluster IS NULL)
+  WHERE NOT (D.cluster IS NULL AND E.cluster IS NULL) 
   ";
 
 * set cd;
@@ -56,14 +56,19 @@ gen abs_yrdist = abs(purch_yr - mode_yr);
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen hy_date  = hofd(dofm(mo_date)); // half-years;
-gen con_day  = mdy(07,02,mode_yr);
-replace con_day = mdy(01,01,mode_yr+1 ) if mod(mode_yr,1)>0;
-gen con_mo   = ym(mode_yr,07);
+*******************;
+bys mo_date cluster rdp_all: gen N = _N if purch_yr == mode_yr;
+replace N = -99 if rdp_all==0 | N==.;
+bys cluster: egen maxN  = max(N);
+gen NN = mo_date if N==maxN;
+bys cluster: egen con_mo  = max(NN);
+drop N maxN NN;
+*gen con_mo   = ym(mode_yr,07);
+*******************;
+gen mo2con  = mo_date - con_mo;
 format day_date %td;
 format mo_date %tm;
 format hy_date %th;
-gen day2con = day_date - con_day;
-gen mo2con  = mo_date - con_mo;
 
 * non-rdp cluster size;
 bys cluster rdp_never: gen n = _n;

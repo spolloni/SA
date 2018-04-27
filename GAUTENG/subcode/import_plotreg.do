@@ -47,9 +47,11 @@ program plotreg;
 
    if "`1'" == "distplot" {;
 
+      drop if contin > 9000;
       sum contin;
       global plotmin = `r(min)';
       global step = 2*$bin;
+      *replace contin = contin + 5 if group==1;
       
       tw 
       (rcap max95 min95 contin if group==0, lc(gs0) lw(thin))
@@ -71,24 +73,26 @@ program plotreg;
 
    if "`1'" == "timeplot" {;
 
+      drop if contin > 9000;
       replace contin = -1*(contin - 1000) if contin>1000;
       replace contin = $mbin*contin;
-      *drop if contin == 0;
-      global step = 2*$mbin;
       global bound = 12*$tw;
+      *replace contin = contin + .25 if group==1;
       sort contin;
 
+
       tw 
-      (rcap max95 min95 contin if group==0, lc(gs0) lw(thin))
-      (rcap max95 min95 contin if group==1, lc(sienna) lw(thin) lp(none))
+      (rcap max95 min95 contin if group==0, lc(gs0) lw(thin) )
+      (rcap max95 min95 contin if group==1, lc(sienna) lw(thin))
       (connected estimate contin if group==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin))
       (connected estimate contin if group==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin)),
-      xtitle("months to modal construction year",height(5))
+      xtitle("months to modal construction month",height(5))
       ytitle("log-price coefficients",height(5))
-      xlabel(-$bound($step)$bound)
-      ylabel(-1(.5)1,labsize(small))
+      xlabel(-$bound(12)$bound)
+      ylabel(-.75(.25).75,labsize(small))
+      xline(0,lw(thin)lp(shortdash))
       legend(order(3 "far" 4 "near (< ${treat}m)")
-      ring(0) position(5) bm(tiny) rowgap(small) 
+      ring(0) position(7) bm(tiny) rowgap(tiny) textw(small) 
       colgap(small) size(medsmall) region(lwidth(none))) note("`3'");
       graphexportpdf `2', dropeps;
 
