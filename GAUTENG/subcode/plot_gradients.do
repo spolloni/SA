@@ -139,8 +139,8 @@ graphexportpdf summary_densitytime, dropeps;
 reg lprice b$max.dists#b0.post i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster);
 plotreg distplot distplot;
 
-pause on;
-pause;
+* pause on;
+* pause;
 
 * time regression;
 reg lprice b1001.mo2con_reg#b0.treat i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster);
