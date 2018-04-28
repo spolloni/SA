@@ -439,6 +439,9 @@ write_string_match "${present}string_match.tex";
 * write_census_hh_table "${figures}census_hh_table.tex";
 write_census_hh_table "${present}census_hh_table.tex";
 
+* write_project_joint_table "${figures}project_joint_table.tex"; 
+write_project_joint_table "${present}project_joint_table.tex";
+
 * write_descriptive_table "${figures}descriptive_table.tex";
 write_descriptive_table "${present}descriptive_table.tex";
 
