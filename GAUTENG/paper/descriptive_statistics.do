@@ -1,7 +1,5 @@
 
 
-
-
 clear all
 set more off
 set scheme s1mono
@@ -13,130 +11,35 @@ set maxvar 32767
 
 global LOCAL = 1;
 
-
 if $LOCAL==1{;
     cd ..;
 };
 cd ../..;
 
+*** SET CD;
+global figures="Code/GAUTENG/paper/figures/";
+global present="Code/GAUTENG/presentations/presentation_lunch/";
 
-*** IMPORT DATA ;
 
 program drop_99p;
         qui sum `1', detail;
-        drop if `1'>=`=r(p99)' & `1'<.;
+        replace `1'=. if `1'>=`=r(p99)' & `1'<.;
 end;
-program write_blank;
+
+program print_blank;
     forvalues r=1/$cat_num {;
     file write newfile  " & ";
     };    
     file write newfile " \\ " _n;
 end;
 
-
-global figures="Code/GAUTENG/paper/figures/";
-global present="Code/GAUTENG/presentations/presentation_lunch/";
-
-
-
-********* ********* ********* ********* ;
-********* PREP TRANSACTION DATA ;
-********* PREP TRANSACTION DATA ;
-********* PREP TRANSACTION DATA ;
-********* ********* ********* ********* ;
-
-
-prog generate_descriptive_temp_sample;
-    local qry = "
-      SELECT 
-             A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day,
-             A.purch_price, A.trans_id, A.property_id, A.seller_name,
-             B.erf_size, B.latitude, B.longitude, 
-             C.rdp_all, C.rdp_gcroonly, C.rdp_notownship, C.rdp_phtownship, C.gov,
-             C.no_seller_rdp, C.big_seller_rdp, C.rdp_never, C.trans_id as trans_id_rdp,
-             D.distance, D.cluster, 
-
-             E.cluster as cl, E.mode_yr, E.frac1, E.frac2, E.cluster_siz,
-
-             F.cluster_placebo, 
-
-             G.cluster_placebo_buffer
-
-      FROM transactions AS A
-      JOIN erven AS B ON A.property_id = B.property_id
-      JOIN rdp   AS C ON B.property_id = C.property_id
-      LEFT JOIN distance_nrdp_rdp AS D ON B.property_id = D.property_id 
-      LEFT JOIN (SELECT property_id, cluster, mode_yr, frac1, frac2, cluster_siz
-           FROM rdp_clusters WHERE cluster != 0 ) AS E ON B.property_id = E.property_id
-      LEFT JOIN erven_in_placebo AS F ON  B.property_id = F.property_id
-      LEFT JOIN erven_in_placebo_buffer AS G ON B.property_id = G.property_id
-      ";
-
-    qui odbc query "gauteng";
-    odbc load, exec("`qry'") clear;
-
-    drop if frac1<.5;
-    drop if mode_yr<=2002;
-
-    *** trim outliers ;
-    keep if purch_price>1000;
-    drop if purch_price>2000000;
-
-    drop_99p purch_price;
-    drop_99p erf_size;
-
-    *** destring variables;
-    destring purch_yr cluster_placebo cluster_placebo_buffer, replace force;
-
-    *** in buffer areas ;
-    g in_rdp = rdp_all==1 & rdp_never==0;
-    g in_rdp_buffer = cluster!=. & rdp_never==1;
-
-    *** in placebo;
-    g in_placebo = cluster_placebo!=. & rdp_never==1;
-    g in_placebo_buffer = cluster_placebo_buffer!=. & rdp_never==1 & in_placebo==0;
-
-    ** clean up;
-    *replace in_placebo_buffer=0 if in_rdp==1 | in_rdp_buffer==1;
-    *replace in_rdp_buffer=0 if in_placebo==1 | in_placebo_buffer==1;
-
-    g o=1;
-    egen repeat_trans = sum(o), by(property_id);
-    g plus_trans = repeat_trans>1 & repeat_trans<.;
-    bys property_id: replace plus_trans=. if _n!=1;
-    *** ;
-
-    save "Generated/GAUTENG/temp/descriptive_sample.dta", replace;
+program print_table_start;
+    file write newfile  "\begin{tabu}{l";
+    forvalues r=1/$cat_num {;
+    file write newfile  "c";
+    };
+    file write newfile "}" _n  ;
 end;
-
-
-
-
-
-prog project_sample_temp;
-    local qry = "
-      SELECT cluster, formal_pre, formal_post, informal_pre, informal_post, placebo_yr, 0 AS frac1, 0 AS frac2 
-      FROM placebo_conhulls
-      UNION 
-      SELECT A.cluster, A.formal_pre, A.formal_post, A.informal_pre, A.informal_post, B.mode_yr as placebo_yr, B.frac1, B.frac2
-      FROM rdp_conhulls AS A JOIN rdp_clusters AS B ON A.cluster=B.cluster
-      ";
-
-    qui odbc query "gauteng";
-    odbc load, exec("`qry'") clear;
-
-    g rdp=cluster<1000;
-
-    save "Generated/GAUTENG/temp/project_sample_temp.dta", replace;
-end;
-
-
-
-
-
-
-
-*** TABLE PROGRAMS;
 
 program in_stat ;
     preserve ;
@@ -159,7 +62,6 @@ program print_1;
         };      
     file write newfile " \\ " _n;
 end;
-
 
 program print_2;
     file write newfile " `1' ";
@@ -200,123 +102,121 @@ program print_m2;
         in_stat_m2 newfile `2' `3' `4' "0" "${cat`r'}";
         };      
     file write newfile " \\ " _n;
-
 end;
 
 
+********* ********** ********* ;
+********* ** DATA ** ********* ;
+********* ********** ********* ;
 
+prog descriptive_sample;
 
-************************;
-***** WRITE DESCRIPTIVE TABLE Housing Projects NO AGGREGATION ******;
-************************;
+    *** GET RDPs FROM RDP PRICE REGRESSION;
+    global fr1   = "0.5";
+    global fr2   = "0.5";
+    global msiz  = 20;    /* minimum obs per cluster            */
+    use "Generated/GAUTENG/gradplot.dta", clear ;
+    drop if purch_price == 6900000 ;
+    global ifregs = "   frac1 > $fr1  & frac2 > $fr2  & rdp_never ==1 & purch_price > 2500 &  cluster_siz_nrdp > $msiz &  mode_yr>2002 &  distance >0 &  purch_yr > 2000  ";
+    keep if $ifregs==1 ;
+    keep property_id cluster;
+    g type = "rdp";
+    save "Generated/GAUTENG/temp/sample_key_rdp.dta", replace ;
 
-program write_project_joint_table;
-    *import delimited using 
-    *"/Users/williamviolette/southafrica/Generated/GAUTENG/temp/housing_project_table.csv", 
-    *delimiter(",") clear;
+    *** GET PLACEBOS FROM PLACEBO PRICE REGRESSION;
+    global msiz  = 100;    /* minimum obs per cluster            */
+    use "Generated/GAUTENG/gradplot_placebo.dta", clear;
+    drop if seller_name == "STADSRAAD VAN PRETORIA";
+    global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000  &  cluster_placebo != 1025 &  cluster_placebo != 1036 &  cluster_placebo != 1201 &   cluster_placebo != 1205 &   cluster_placebo != 1215 &    cluster_placebo != 1220 &   cluster_placebo != 1264   ";
+    keep if $ifregs==1;
+    ren cluster_placebo cluster;
+    keep property_id  cluster;
+    g type = "placebo";
+    save "Generated/GAUTENG/temp/sample_key_placebo.dta", replace ;
 
+    *** GET PROPERTY IDs FOR ALL REGRESSION OBS;
+    use "Generated/GAUTENG/temp/sample_key_rdp.dta", clear;
+      append using "Generated/GAUTENG/temp/sample_key_placebo.dta";
+      duplicates drop property_id, force;
+      drop cluster;
+    save "Generated/GAUTENG/temp/rdp_placebo_property_id.dta", replace;
 
-    use "Generated/GAUTENG/temp/project_sample_temp.dta", clear;
+    *** GET CLUSTER IDs FOR ALL REGRESSION CLUSTERS;
+    use "Generated/GAUTENG/temp/sample_key_rdp.dta", clear;
+      append using "Generated/GAUTENG/temp/sample_key_placebo.dta";
+      duplicates drop cluster, force;
+      drop property_id;
+    save "Generated/GAUTENG/temp/cluster_ids.dta", replace;
 
-    keep if (rdp==0 & placebo_yr>2002 & placebo_yr<=2010) 
-          | (frac1>.5 & frac2>.5 & placebo_yr>2002 & placebo_yr<=2010);
+    *** MERGE TO FULL AND SAVE price_sample.dta  ;
+    local qry = "  SELECT A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day, A.purch_price, A.trans_id, A.property_id, A.seller_name, C.rdp_all, C.rdp_never, D.erf_size
+                    FROM transactions AS A LEFT JOIN rdp AS C ON A.property_id = C.property_id  
+                    LEFT JOIN erven AS D ON A.property_id=D.property_id";
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
 
-        global cat1="keep if  rdp==1" ;
-        global cat2="keep if  rdp==0" ;
-        
-        global cat_num=2;
+    merge m:1 property_id using "Generated/GAUTENG/temp/rdp_placebo_property_id.dta";
+    tab _merge;
 
-    file open newfile using "`1'", write replace;
-    file write newfile  "\begin{tabu}{l";
-    forvalues r=1/$cat_num {;
-    file write newfile  "c";
-    };
-    file write newfile "}" _n  ;
+    *** trim outliers ;
+    drop if purch_price<2500 & _merge!=3;
+    drop if purch_price>6000000 & _merge!=3;
+    destring purch_yr, force replace;
+    drop if purch_yr<=2000 & _merge!=3;
+    drop if rdp_never!=1 & _merge!=3;
+    replace type="other" if type=="";
 
-   * file write newfile " & \multicolumn{2}{c}{Completed} & \multicolumn{2}{c}{Planned but} \\ " _n ;
-    file write newfile " & Completed & Uncompleted \\ " _n  ;
-   * file write newfile  " & 2001 & 2011 & 2001 & 2011 \\" _n "\midrule" _n;
+    g o=1;
+    egen trans_count=sum(o), by(property_id);
+    g plus_trans=trans_count>1 & trans_count<.;
+    bys property_id: g p_n=_n==1;
+    replace plus_trans=. if p_n!=1;
+    drop o trans_count _merge;
+    save "Generated/GAUTENG/temp/price_sample.dta", replace;
 
-    print_1 "Formal Density: 2001" formal_pre  "mean" "%10.1fc"   ;
-    print_1 "Formal Density: 2011" formal_post "mean" "%10.1fc"   ;
+    *** GENERATE PROJECT LEVEL TEMP TABLE project_sample.dta;
+    local qry = "
+      SELECT PC.cluster, PC.formal_pre, PC.formal_post, PC.informal_pre, PC.informal_post, PC.placebo_yr, 0 AS frac1, 0 AS frac2, C.cbd_dist 
+      FROM placebo_conhulls AS PC
+      LEFT JOIN cbd_dist AS C ON PC.cluster = C.cluster
+      UNION 
+      SELECT A.cluster, A.formal_pre, A.formal_post, A.informal_pre, A.informal_post, B.mode_yr as placebo_yr, B.frac1, B.frac2, E.cbd_dist
+      FROM rdp_conhulls AS A JOIN rdp_clusters AS B ON A.cluster=B.cluster
+      LEFT JOIN cbd_dist AS E ON A.cluster = E.cluster
+      ";
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
+    
+    merge 1:1 cluster using "Generated/GAUTENG/temp/cluster_ids.dta";
+    tab _merge;
+    keep if _merge==3;
+    drop _merge;
 
-    forvalues r=1/$cat_num {;
-    file write newfile  " & ";
-    };    
-    file write newfile " \\ " _n;    
-
-    print_1 "Informal Density: 2001" informal_pre  "mean" "%10.1fc"   ;
-    print_1 "Informal Density: 2011" informal_post "mean" "%10.1fc"   ;
-
-    forvalues r=1/$cat_num {;
-    file write newfile  " & ";
-    };    
-    file write newfile " \\ " _n;    
-
-   * print_m2 "Area (km2)"   area  "mean" "%10.2fc"  ;
-    ** add counts ;
-    *file write newfile "\midrule" _n;
-    *    print_m2 "Total Projects " area "N" "%10.0fc" ;
-
-    print_1 "Median Year (est.)" placebo_yr "p50" "%10.0f" ;
-
- 
-    forvalues r=1/$cat_num {;
-    file write newfile  " & ";
-    };    
-    file write newfile " \\ " _n;    
-
-    print_1 "Total Projects " formal_pre "N" "%10.0fc" ;
-
-
-    file write newfile "\bottomrule" _n "\end{tabu}" _n;
-    file close newfile;
-
+    g rdp=cluster<1000;
+    
+    save "Generated/GAUTENG/temp/project_sample.dta", replace;
 end;
 
 
-*write_project_joint_table "${figures}project_joint_table.tex";
-*write_project_joint_table "${present}project_joint_table.tex";
-
-
-
 ************************;
-***** WRITE DESCRIPTIVE TABLE ******;
+***** PRICE TABLE ******;
 ************************;
 
 program write_descriptive_table;
-    use "Generated/GAUTENG/temp/descriptive_sample.dta", clear;
-
-    drop if in_rdp==1 & purch_price>150000;
-
-        global cat1="keep if in_rdp==1" ;
-        global cat2="keep if in_rdp_buffer==1" ;
-        global cat3="keep if in_placebo==1" ;
-        global cat4="keep if in_placebo_buffer==1" ;
-        global cat5="keep if in_rdp==0 & in_rdp_buffer==0 & in_placebo==0 & in_placebo_buffer==0" ;        
-        global cat_num=5;
+    use "Generated/GAUTENG/temp/price_sample.dta", clear;
+    g rdp=type=="rdp";
+    g placebo=type=="placebo";
+        global cat1="keep if rdp==1" ;
+        global cat2="keep if placebo==1" ;
+        global cat3="keep if rdp==0 & placebo==0" ;        
+        global cat_num=3;
 
     file open newfile using "`1'", write replace;
     file write newfile  "\begin{tabu}{l";
     forvalues r=1/$cat_num {;
     file write newfile  "c";
     };
-    file write newfile "}" _n  
-    "\toprule" _n 
-    " & Completed Project
-      & Completed Buffer
-      & Uncompleted Project
-      & Uncompleted Buffer
-      & Other 
-    \\" _n ;
-
-    file write newfile 
-    " & 
-      & ($<$1.2 km)
-      & 
-      & ($<$1.2 km)
-      & 
-    \\" _n  "\midrule" _n;
+    file write newfile "}" _n "\toprule" _n   " & Completed & Uncompleted & Other  \\" _n ;
 
     *** HERE ARE THE MAIN VARIABLES ;
     print_2 "Purchase Price (Rand)" purch_price "mean" "%10.1fc"   ;
@@ -324,228 +224,162 @@ program write_descriptive_table;
 
     print_1 "Sold At Least Once"   plus_trans  "mean" "%10.3fc"  ;
     print_1 "Median Purchase Year"  purch_yr    "p50"  "%10.0f"   ;
-
-    ** add distance only for in_cluster ;
-  *  file write newfile " Distance to Project (meters) & " ;
-  *      in_stat newfile distance "mean" "%10.1f" "0" "${cat2}"  ; 
-  *  file write newfile " & \\" _n ;
-  *  file write newfile " \rowfont{\footnotesize} & " ;
-  *     in_stat newfile distance "sd"   "%10.1f" "1" "${cat2}" ;
-  *  file write newfile " & \\" _n ;
-
-    ** add counts ;
     file write newfile "\midrule" _n;
         print_1 Observations purch_price "N" "%10.0fc" ;
     file write newfile "\bottomrule" _n "\end{tabu}" _n;
     file close newfile;
 end;
 
+**************************;
+***** PROJECT TABLE ******;
+**************************;
 
-  *  file write newfile 
-  *  " & \multicolumn{3}{c}{Completed}
-  *    &  \multicolumn{3}{c}{Uncompleted}
-  *  \\" _n;
-  *  file write newfile
-  *  " & No Overlap
-  *    & 0\%$<$ Overlap $\leq$50\%
-  *    & 50\%$<$ Overlap 
-  *    & No Overlap
-  *    & 0\%$<$ Overlap $\leq$50\%
-  *    & 50\%$<$ Overlap 
-  *  \\" _n ;
-  *  file write newfile "\midrule" _n;
-
-
-
-************************;
-***** WRITE DESCRIPTIVE CENSUS TABLE ******;
-************************;
-
-
-program write_census_hh_table;
-    use "Generated/GAUTENG/DDcensus_hh.dta", clear;
-    g rdp=hulltype=="rdp";
-    
-        global cat1="keep if area_int==0 & rdp==1 " ;
-        global cat2="keep if area_int==0 & rdp==0 " ;
-        global cat3="keep if area_int>0 & area_int<=.5 & rdp==1 " ;
-        global cat4="keep if area_int>0 & area_int<=.5 & rdp==0 " ;
-        global cat5="keep if area_int>.5 & rdp==1 " ;
-        global cat6="keep if area_int>.5 & rdp==0 " ;           
-        global cat_num=6;
-
+program write_project_joint_table;
+    use "Generated/GAUTENG/temp/project_sample.dta", clear;
+        global cat1="keep if  rdp==1" ;
+        global cat2="keep if  rdp==0" ;
+        global cat_num=2;
     file open newfile using "`1'", write replace;
-    file write newfile  "\begin{tabu}{l";
-    forvalues r=1/$cat_num {;
-    file write newfile  "c";
-    };
-    file write newfile "}" _n ;
-
-    file write newfile 
-    " & \multicolumn{2}{c}{In Buffer but No Overlap}
-      &  \multicolumn{2}{c}{0\%$<$ Overlap $\leq$50\%}
-      &  \multicolumn{2}{c}{50\%$<$ Overlap}
-    \\" _n;
-    
-    forvalues r=1/$cat_num {;
-    file write newfile  " & ";
-    };    
-    file write newfile " \\ " _n;   
-
-    file write newfile
-    " & Completed 
-      & Uncompleted
-      & Completed 
-      & Uncompleted
-      & Completed
-      & Uncompleted
-    \\" _n ;
-    file write newfile "\midrule" _n;
-
-        * flush toilet?;
-    gen toilet_flush = (toilet_typ==1|toilet_typ==2);
-
-    * piped water?;
-    gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001);
-
-    * tenure?;
-    gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
-
-    * house?;
-    gen house = dwelling_typ==1;
-
-    *** HERE ARE THE MAIN VARIABLES ;
-    print_1 "Flush Toilet" toilet_flush "mean" "%10.2fc"   ;
-    print_1 "Piped Water Inside" water_inside       "mean" "%10.2fc"   ;
-    print_1 "Owner" owner       "mean" "%10.2fc"   ;
-    print_1 "House" house       "mean" "%10.2fc"   ;
-
-    ** add counts ;
-    file write newfile "\midrule" _n;
-        print_1 Observations water_piped "N" "%10.0fc" ;
+    print_table_start;
+    file write newfile " & Completed & Uncompleted \\ " _n  ;
+      print_1 "Formal Density: 2001" formal_pre  "mean" "%10.1fc"   ;
+      print_1 "Formal Density: 2011" formal_post "mean" "%10.1fc"   ;
+        print_blank;
+      print_1 "Informal Density: 2001" informal_pre  "mean" "%10.1fc"   ;
+      print_1 "Informal Density: 2011" informal_post "mean" "%10.1fc"   ;
+        print_blank;
+      print_1 "Median Year (est.)" placebo_yr "p50" "%10.0f" ;
+      print_1 "Distance to CBD (km)" cbd_dist "mean" "%10.1fc";
+        print_blank;
+      print_1 "Total Projects " formal_pre "N" "%10.0fc" ;
     file write newfile "\bottomrule" _n "\end{tabu}" _n;
     file close newfile;
 end;
 
 
-
-
 ************************;
-***** PRE//POST CENSUS TABLE ******;
+***** JUST CENSUS TABLE ******;
 ************************;
 
+** IN CASE OF LOOKING AT PRE/POST ; 
 program time_gen;
-  g `1'_pre = `1' if year==2001;
+  g `1'_pre  = `1' if year==2001;
   g `1'_post = `1' if year==2011;
 end;
 
-program write_census_hh_time_table;
+
+program write_census_hh_table;
+    ** do the analysis ; 
     use "Generated/GAUTENG/DDcensus_hh.dta", clear;
+      merge m:1 cluster using "Generated/GAUTENG/temp/cluster_ids.dta";
+      tab _merge;
+      keep if _merge==3;
+      drop _merge;
+
     g rdp=hulltype=="rdp";
-    
-        global cat1="keep if area_int==0 & rdp==1 " ;
-        global cat2="keep if area_int==0 & rdp==0 " ;
-        global cat3="keep if area_int>0 & area_int<=.5 & rdp==1 " ;
-        global cat4="keep if area_int>0 & area_int<=.5 & rdp==0 " ;
-        global cat5="keep if area_int>.5 & rdp==1 " ;
-        global cat6="keep if area_int>.5 & rdp==0 " ;           
-        global cat_num=6;
-
+        global cat1="keep if area_int>.3 & rdp==1 " ;
+        global cat2="keep if area_int>.3 & rdp==0 " ;
+        global cat3="keep if area_int<.3 & distance<=400 & rdp==1 " ;
+        global cat4="keep if area_int<.3 & distance<=400 & rdp==0 " ;           
+        global cat_num=4;
+  
     file open newfile using "`1'", write replace;
-    file write newfile  "\begin{tabu}{l";
-    forvalues r=1/$cat_num {;
-    file write newfile  "c";
-    };
-    file write newfile "}" _n ;
-
-    file write newfile 
-    " & \multicolumn{2}{c}{In Buffer but No Overlap}
-      &  \multicolumn{2}{c}{0\%$<$ Overlap $\leq$50\%}
-      &  \multicolumn{2}{c}{50\%$<$ Overlap}
-    \\" _n;
+    print_table_start;
     
-    forvalues r=1/$cat_num {;
-    file write newfile  " & ";
-    };    
-    file write newfile " \\ " _n;   
-
-    file write newfile
-    " & Completed 
-      & Uncompleted
-      & Completed 
-      & Uncompleted
-      & Completed
-      & Uncompleted
-    \\" _n ;
+    file write newfile  " & \multicolumn{2}{c}{Within Project}     & \multicolumn{2}{c}{Outside Project}    \\" _n;
+    file write newfile  " & \multicolumn{2}{c}{($>$30\% Overlap)}  & \multicolumn{2}{c}{($<$30\% Overlap)}   \\" _n;
+    print_blank; 
+    file write newfile " & Completed & Uncompleted & Completed  & Uncompleted  \\" _n ;
     file write newfile "\midrule" _n;
 
-        * flush toilet?;
     gen toilet_flush = (toilet_typ==1|toilet_typ==2);
-    time_gen toilet_flush;
-    
-    * piped water?;
+      time_gen toilet_flush;
     gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001);
-    time_gen water_inside; 
-
-    * tenure?;
-    gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
-    time_gen owner;
-
-    * house?;
+      time_gen water_inside; 
+    gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
+      time_gen electricity;
+    gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
+      time_gen electric_cooking;
+    gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);  
+      time_gen electric_lighting;
+    *gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
+    *  time_gen owner;
     gen house = dwelling_typ==1;
-    time_gen house;
-
-    g rooms  = tot_rooms if tot_rooms<=12;
-    time_gen rooms;
+      time_gen house;
+    gen rooms  = tot_rooms if tot_rooms<=12;
+      time_gen rooms;
 
     *** HERE ARE THE MAIN VARIABLES ;
-    print_1 "Flush Toilet: 2001" toilet_flush_pre "mean" "%10.2fc"   ;
-    print_1 "Flush Toilet: 2011" toilet_flush_post "mean" "%10.2fc"   ;
-    write_blank;
-
-    print_1 "Piped Water: 2001" water_inside_pre    "mean" "%10.2fc"   ;
-    print_1 "Piped Water: 2011" water_inside_post   "mean" "%10.2fc"   ;
-    write_blank;
-
-    print_1 "Owner: 2001" owner_pre       "mean" "%10.2fc"   ;
-    print_1 "Owner: 2011" owner_post      "mean" "%10.2fc"   ;
-    write_blank;
-
-    print_1 "House: 2001" house_pre       "mean" "%10.2fc"   ;
-    print_1 "House: 2011" house_post      "mean" "%10.2fc"   ;
-    write_blank;
-
-    print_1 "Rooms: 2001" rooms_pre      "mean" "%10.2fc"   ;
-    print_1 "Rooms: 2011" rooms_post     "mean" "%10.2fc"   ;
-    write_blank;
-
-    ** add counts ;
+    print_1 "Flush Toilet" toilet_flush_pre "mean" "%10.2fc"   ;    
+      print_blank;
+    print_1 "Piped Water" water_inside_pre    "mean" "%10.2fc"   ;
+      print_blank;
+    *print_1 "Owner" owner_pre       "mean" "%10.2fc"   ;
+    *  print_blank;
+    print_1 "Elec. Cooking" electric_cooking_pre     "mean" "%10.2fc"   ;
+      print_blank;   
+    print_1 "Elec. Light" electric_lighting_pre     "mean" "%10.2fc"   ;
+      print_blank;   
+    print_1 "Single House" house_pre       "mean" "%10.2fc"   ;
+      print_blank;
+    *print_1 "Number of Rooms" rooms_pre      "mean" "%10.2fc"   ;
+    *  print_blank;
     file write newfile "\midrule" _n;
-        print_1 Observations water_piped "N" "%10.0fc" ;
+        print_1 Observations water_inside_pre "N" "%10.0fc" ;
     file write newfile "\bottomrule" _n "\end{tabu}" _n;
     file close newfile;
 end;
 
 
 
+***************************************;
+***** EVALUATE STRING MATCHING ALGORITHM *****;
+***************************************;
 
+program write_string_match;
+  
+    ** get cluster identifiers to clean the data ; 
+    local qry = "  SELECT A.*, B.hectares FROM gcro_publichousing_stats AS A JOIN gcro_publichousing AS B ON A.OGC_FID_gcro = B.OGC_FID  " ;
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
 
+        global cat1="keep if placebo_yr!=. " ;
+        global cat2="keep if placebo_yr==. " ;          
+        global cat_num=2;
 
+    file open newfile using "`1'", write replace;
+    print_table_start;  
+    file write newfile  " & Matched  & Unmatched  \\" _n ;
+    file write newfile "\midrule" _n;
+      print_1 "Formal Density: 2001" formal_pre  "mean" "%10.1fc"   ;
+      print_1 "Formal Density: 2011" formal_post "mean" "%10.1fc"   ;
+    print_blank;
+      print_1 "Informal Density: 2001" informal_pre  "mean" "%10.1fc"   ;
+      print_1 "Informal Density: 2011" informal_post "mean" "%10.1fc"   ;
+    print_blank;
+      print_1 "Project House Density" RDP_density  "mean" "%10.1fc"   ;
+      print_1 "Project Mode Year" RDP_mode_yr "mean" "%10.0f"   ;
+    print_blank;
+      print_1 "Hectares" hectares "mean" "%10.1fc"   ;
+    print_blank;
+    file write newfile "\midrule" _n;
+        print_1 Observations OGC_FID_gcro "N" "%10.0fc" ;
+    file write newfile "\bottomrule" _n "\end{tabu}" _n;
+    file close newfile;
 
-
-
-
-*use "Generated/GAUTENG/DDcensus_hh.dta", clear;
-
-
-
+end;
 
 ***************************************;
 ***** WRITE BIGGETS SELLERS TABLE *****;
 ***************************************;
 
 program write_biggest_sellers;
-    use "Generated/GAUTENG/temp/descriptive_sample.dta", clear;
+    local qry = "  SELECT A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day, A.purch_price, A.trans_id, A.property_id, A.seller_name, C.rdp_all, C.rdp_never, D.erf_size
+                    FROM transactions AS A LEFT JOIN rdp AS C ON A.property_id = C.property_id  
+                    LEFT JOIN erven AS D ON A.property_id=D.property_id";
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
+
     keep seller_name;
     g total_obs = _N;
     replace seller_name = proper(seller_name);
@@ -575,7 +409,11 @@ end;
 ***********************************************;
 
 program write_price_histogram;
-    use "Generated/GAUTENG/temp/descriptive_sample.dta", clear;
+    local qry = "  SELECT A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day, A.purch_price, A.trans_id, A.property_id, A.seller_name, C.rdp_all, C.rdp_never, D.erf_size
+                    FROM transactions AS A LEFT JOIN rdp AS C ON A.property_id = C.property_id  
+                    LEFT JOIN erven AS D ON A.property_id=D.property_id";
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
 
     keep if rdp_never==1 | rdp_all==1;
     
@@ -591,31 +429,24 @@ end;
 
 
 
-
-
 ***** IMPlEMENT PROGRAMS ***** ;
 
+descriptive_sample;
 
-*** GENERATE TEMP SAMPLES
-*** saves in generated/temp/ for the other tables to be generated (only needs to run once)
+* write_string_match "${figures}string_match.tex";
+write_string_match "${present}string_match.tex";
 
-* project_sample_temp ;
-* generate_descriptive_temp_sample;
-
-*write_census_hh_time_table "${figures}census_hh_time_table.tex";
-write_census_hh_time_table "${present}census_hh_time_table.tex";
-
-*write_census_hh_table "${figures}census_hh_table.tex";
-*write_census_hh_table "${present}census_hh_table.tex";
+* write_census_hh_table "${figures}census_hh_table.tex";
+write_census_hh_table "${present}census_hh_table.tex";
 
 * write_descriptive_table "${figures}descriptive_table.tex";
-* write_descriptive_table "${present}descriptive_table.tex";
+write_descriptive_table "${present}descriptive_table.tex";
 
-*write_price_histogram "${figures}price_histogram.pdf";
-*write_price_histogram "${present}price_histogram.pdf";
+* write_price_histogram "${figures}price_histogram.pdf";
+write_price_histogram "${present}price_histogram.pdf";
 
-*write_biggest_sellers "${figures}biggest_sellers_table.tex";
-*write_biggest_sellers "${present}biggest_sellers_table.tex";
+* write_biggest_sellers "${figures}biggest_sellers_table.tex";
+write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 
