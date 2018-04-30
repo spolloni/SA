@@ -6,7 +6,7 @@ set maxvar 32767
 #delimit;
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 
 local qry = "
   SELECT 

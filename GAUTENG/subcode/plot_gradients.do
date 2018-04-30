@@ -20,7 +20,7 @@ global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 400;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 if $LOCAL==1{;
 	cd ..;
 	global rdp  = "all";
