@@ -9,6 +9,11 @@ set maxvar 32767
 *  PLOT GRADIENTS FOR PLACEBO *;
 *******************************;
 
+* SET OUTPUT LOCATION;
+* global output = "Output/GAUTENG/gradplots_placebo";
+global output = "Code/GAUTENG/paper/figures";
+
+
 * PARAMETERS;
 global tw    = "3";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
@@ -17,7 +22,7 @@ global msiz  = 100;    /* minimum obs per cluster            */
 global treat = 400;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 if $LOCAL==1{;
 	cd ..;
 };
@@ -32,7 +37,7 @@ use gradplot_placebo.dta, clear;
 
 * go to working dir;
 cd ../..;
-cd Output/GAUTENG/gradplots_placebo;
+cd $output ;
 
 * regression dummies;
 gen post =  mo2con>=0;
@@ -69,6 +74,17 @@ drop if seller_name == "STADSRAAD VAN PRETORIA";
 
 * data subset for regs;
 
+/*
+       cluster_placebo != 1025 & 
+       cluster_placebo != 1036 & 
+       cluster_placebo != 1201 & 
+       cluster_placebo != 1205 & 
+       cluster_placebo != 1215 & 
+       cluster_placebo != 1220 & 
+       cluster_placebo != 1264  
+*/
+
+
 global ifregs = "
        purch_price > 2500 &
        purch_price < 6000000 &
@@ -77,15 +93,9 @@ global ifregs = "
        distance_placebo !=. &
        placebo_yr>2002 &
        placebo_yr!= . &
-       purch_yr > 2000  & 
-       cluster_placebo != 1025 & 
-       cluster_placebo != 1036 & 
-       cluster_placebo != 1201 & 
-       cluster_placebo != 1205 & 
-       cluster_placebo != 1215 & 
-       cluster_placebo != 1220 & 
-       cluster_placebo != 1264  
+       purch_yr > 2000  
        ";
+
 
 global iftsregs = "
        purch_price > 2500 &
@@ -103,8 +113,8 @@ global iftsregs = "
 reg lprice b$max.dists_placebo#b0.post i.purch_yr#i.purch_mo i.cluster_placebo erf*  if $ifregs, cl(cluster_placebo);
 plotreg distplot distplot_placebo;
 
-pause on;
-pause;
+* pause on;
+* pause;
 
 * time regression;
 reg lprice b1001.mo2con_reg#b0.treat i.purch_yr#i.purch_mo i.cluster_placebo erf* if $ifregs, cl(cluster_placebo);

@@ -206,7 +206,7 @@ def fetch_coordinates(db,hull):
 
 def fetch_data(db,dir,bufftype,hull,i):
 
-    distinct = ''
+    distinct = 'DISTINCT'
     if bufftype == 'reg': distinct = 'DISTINCT'
 
     if i=='BBLU_pre_buff':
@@ -286,16 +286,17 @@ def fetch_data(db,dir,bufftype,hull,i):
         if plygn == 'buff':  
  
             qry = ''' 
-                  SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
+                  SELECT st_x(st_centroid(e.GEOMETRY)) AS x, 
                          st_y(st_centroid(e.GEOMETRY)) AS y, e.{}_code,
-                         coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
-                         /st_area(e.GEOMETRY),0) AS area_int
+                         MAX(coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
+                         /st_area(e.GEOMETRY),0)) AS area_int
                   FROM {}_{} AS e, {}_buffers_{} AS b
                   JOIN {}_conhulls AS h ON h.cluster = b.cluster  
                   WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                           WHERE f_table_name = '{}_{}' AND search_frame=b.GEOMETRY)
                   AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
-                  '''.format(distinct,geom,geom,yr,hull,bufftype,hull,geom,yr)
+                  GROUP BY e.{}_code ;
+                  '''.format(geom,geom,yr,hull,bufftype,hull,geom,yr,geom)
 
         if plygn == 'hull':
 

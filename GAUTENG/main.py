@@ -76,18 +76,19 @@ keywords = ['Planning','Proposed', # keywords to identify
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
-_5_c_DISTS_ = 1  # BBLU distance
-_5_d_DISTS_ = 1  # EA distance 
+_5_c_DISTS_ = 0  # BBLU distance
+_5_d_DISTS_ = 0  # EA distance 
 bw = 1200        # bandwidth for buffers
-hulls = ['placebo'] # choose 
+hulls = ['rdp','placebo'] # choose 
+buffer_type = 'intersect' # reg or intersect
 
-_6_a_PLOTS_ = 1  # distance plots for RDP: house prices
-_6_b_PLOTS_ = 1  # distance plots for RDP: BBLU
+_6_a_PLOTS_ = 0  # distance plots for RDP: house prices
+_6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
 
-_7_a_PLOTS_ = 1  # distance plots for placebo: house prices
-_7_b_PLOTS_ = 1  # distance plots for placebo: BBLU
+_7_a_PLOTS_ = 0  # distance plots for placebo: house prices
+_7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
 
-_8_DD_REGS_ = 0  # DD regressions with census data
+_8_DD_REGS_ = 1  # DD regressions with census data
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -281,7 +282,7 @@ if _5_b_DISTS_ ==1:
     
         # 5b.2 non-rdp in/out of hulls
         fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -312,7 +313,7 @@ if _5_c_DISTS_ ==1:
     
         # 5c.2 BBLU in/out of hulls
         fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
 
@@ -344,7 +345,7 @@ if _5_d_DISTS_ ==1:
     
         # 5d.2 EA and SAL in/out of hulls
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
     

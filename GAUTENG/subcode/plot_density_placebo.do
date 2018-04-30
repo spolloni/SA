@@ -9,6 +9,10 @@ set maxvar 32767
 *  PLOT PLACRBO DENSITY  *;
 **************************;
 
+* SET OUTPUT LOCATION
+* global output = "Output/GAUTENG/bbluplots_placebo";
+global output = "Code/GAUTENG/paper/figures";
+
 * PARAMETERS;
 global bin = 10; /* distance bin width */
 
@@ -16,7 +20,7 @@ global bin = 10; /* distance bin width */
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 1;
+global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -77,7 +81,7 @@ drop if placebo_yr==.;
 
 * go to working dir;
 cd ../..;
-cd Output/GAUTENG/bbluplots_placebo;
+cd $output ;
 
 * cut distances;
 sum distance_placebo;

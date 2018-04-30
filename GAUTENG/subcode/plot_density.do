@@ -9,6 +9,10 @@ set maxvar 32767
 *  PLOT DENSITY  *;
 ******************;
 
+* SET OUTPUT;
+* global output="Output/GAUTENG/bbluplots";
+global output = "Code/GAUTENG/paper/figures";
+
 * PARAMETERS;
 global fr1 = "0";
 global fr2 = "0";
@@ -73,7 +77,7 @@ use bbluplot, clear;
 
 * go to working dir;
 cd ../..;
-cd Output/GAUTENG/bbluplots;
+cd $output ;
 
 * cut distances;
 sum distance;

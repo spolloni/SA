@@ -11,6 +11,12 @@ set maxvar 32767
 
 * PARAMETERS;
 
+* SET OUTPUT GLOBAL;
+* global output = "Output/GAUTENG/censusregs" ;
+global output = "Code/GAUTENG/paper/figures" ;
+
+
+
 * RUN LOCALLY?;
 global LOCAL = 1;
 
@@ -121,7 +127,7 @@ use DDcensus_hh, clear;
 
 * go to working dir;
 cd ../..;
-cd Output/GAUTENG/censusregs;
+cd $output ;
 
 global ifsample = "
   (cluster < 1000 & frac1>.5 & mode_yr>2002 &

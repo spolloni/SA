@@ -9,6 +9,12 @@ set maxvar 32767
 *  PLOT GRADIENTS *;
 *******************;
 
+
+* SET OUTPUT FOLDER ;
+* global output = "Output/GAUTENG/gradplots";
+global output = "Code/GAUTENG/paper/figures";
+
+
 * PARAMETERS;
 global rdp   = "`1'";
 global fr1   = "0.5";
@@ -20,7 +26,7 @@ global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 400;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 if $LOCAL==1{;
 	cd ..;
 	global rdp  = "all";
@@ -36,7 +42,7 @@ use gradplot.dta, clear;
 
 * go to working dir;
 cd ../..;
-cd Output/GAUTENG/gradplots;
+cd $output ;
 
 * regression dummies;
 gen post = mo2con>0;

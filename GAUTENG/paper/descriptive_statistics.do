@@ -127,7 +127,9 @@ prog descriptive_sample;
     global msiz  = 100;    /* minimum obs per cluster            */
     use "Generated/GAUTENG/gradplot_placebo.dta", clear;
     drop if seller_name == "STADSRAAD VAN PRETORIA";
-    global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000  &  cluster_placebo != 1025 &  cluster_placebo != 1036 &  cluster_placebo != 1201 &   cluster_placebo != 1205 &   cluster_placebo != 1215 &    cluster_placebo != 1220 &   cluster_placebo != 1264   ";
+  * global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000  &  cluster_placebo != 1025 &  cluster_placebo != 1036 &  cluster_placebo != 1201 &   cluster_placebo != 1205 &   cluster_placebo != 1215 &    cluster_placebo != 1220 &   cluster_placebo != 1264   ";
+    global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000 ";
+
     keep if $ifregs==1;
     ren cluster_placebo cluster;
     keep property_id  cluster;
@@ -433,22 +435,22 @@ end;
 
 descriptive_sample;
 
-* write_string_match "${figures}string_match.tex";
+*write_string_match "${figures}string_match.tex";
 write_string_match "${present}string_match.tex";
 
-* write_census_hh_table "${figures}census_hh_table.tex";
+*write_census_hh_table "${figures}census_hh_table.tex";
 write_census_hh_table "${present}census_hh_table.tex";
 
-* write_project_joint_table "${figures}project_joint_table.tex"; 
+*write_project_joint_table "${figures}project_joint_table.tex"; 
 write_project_joint_table "${present}project_joint_table.tex";
 
-* write_descriptive_table "${figures}descriptive_table.tex";
+*write_descriptive_table "${figures}descriptive_table.tex";
 write_descriptive_table "${present}descriptive_table.tex";
 
-* write_price_histogram "${figures}price_histogram.pdf";
+*write_price_histogram "${figures}price_histogram.pdf";
 write_price_histogram "${present}price_histogram.pdf";
 
-* write_biggest_sellers "${figures}biggest_sellers_table.tex";
+*write_biggest_sellers "${figures}biggest_sellers_table.tex";
 write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 

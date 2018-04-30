@@ -88,11 +88,11 @@ In practice, these guidelines are only loosely followed.  Recent reports point t
 
 Beneficiaries are expected to pay a small one-time payment in order to receive title for their houses.  Guidelines also prevent beneficiaries from reselling their houses (and discourage renting) within their first 7 years of ownership.  Despite these guidelines, only 82\% of project houses are reported being still occupied by their original beneficiaries within five years of construction.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Anecdotal evidence suggests that project managers are aware of this active secondary market but have difficulty policing these transactions (\cite{resale}).
 
-\subsection{Data}
+\section{Data}
 
 Understanding the spillover impacts of public housing requires (1) outcome measures at high spatial and geographic resolutions as well as (2) a precise measure of the location, timing, and size of housing projects.  
 
-\subsubsection{Measuring Spillover Outcomes}
+\subsection{Measuring Spillover Outcomes}
 
 To measure formal housing market impacts, we use over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).\footnote{The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.}  These data include the price, exact location, plot size, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 1.2 kilometers of a housing project bringing the final sample to around 100,000 transactions.  We exclude the top 1\% of prices as well as prices below 1,000 Rand, which are likely composed of measurement error or the exchange of property title between family members.
 
@@ -100,19 +100,64 @@ Since government deeds records are unlikely to capture informal housing markets,
 
 For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 as well as the yearly General Household Survey for 2005 through 2014.  Both surveys include information about dwelling type, employment, income, and demographics for each household.  The General Household Survey includes additional details on participation in housing programs over time for a random sample of around 35,000 households in the Gauteng Province.  To spatially link these households in both samples to their corresponding housing projects, we conduct the analysis at the census block level, which is the smallest geography available with \input{figures/total_small_areas}blocks in the Gauteng Province and \input{figures/total_small_areas_in_buffer}within 1.2 kilometers of a housing project.  
 
-\subsubsection{Defining Housing Projects}
+\subsection{Defining Housing Projects}
 
 Our primary measure of housing projects matches a set of housing program characteristics using the transaction records in the deeds data.  This procedure results in clusters of dwellings that form our housing projects (\cite{serihistory}).
 
-\begin{enumerate}
-	\item \textbf{Seller Identity:}  We focus on transactions from government entities or housing authorities from seller name records.  To account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most frequently.  We exclude transactions flagged as large buildings used for commercial purposes.
-	\item \textbf{Subsidy Value:}  We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value.
-	\item \textbf{Pre-Existing Formal Dwellings:}  We exclude transactions that occur on land plots with at least one pre-existing formal residential structure in the 2001 building census.  This method not only helps to reduce error in matching seller identities to housing programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented by local housing agencies over the same time period.
-	\item \textbf{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other small-scale housing programs.
-	\item \textbf{Temporal Clustering:}  Because our empirical design exploits the sudden timing of project construction, we assign a date for each housing project according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year.  This approach rules out gradual construction 
-\end{enumerate}
 
-We validate our measure of housing projects using administrative spatial data from the Gauteng government, which maps a subsample of [XX] housing projects.  Following Figure [XX] (put a nice map here), we find a substantial degree of overlap between our measure and the administrative subsample.  
+
+\subsubsection{Seller Identity:}
+% prob yes and large : 2770 / 127600 = 2\%
+We focus on transactions from government entities or housing authorities from seller name records.  To account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most frequently.  We exclude transactions flagged as large buildings used for commercial purposes ($<$2\% of records).  Figure~\ref{figure:topfivesellers} shows the top five sellers, which account for a large share of the total transactions and all represent government housing programs in the region.  
+
+\begin{figure}
+\caption{Top-Five Sellers}\label{figure:topfivesellers}
+\centering
+\input{figures/biggest_sellers_table}
+\end{figure}
+
+
+\subsubsection{Subsidy Value:}
+
+% above 50,000 : 4,369 / 127,600 = 3.4\%
+We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value ($<$4\% of remaining records).  Figure~\ref{figure:transactionhist} provides a histogram of deed prices under R100,000 for transactions that meet our project definition and transactions that do not.  Since project houses are distributed for free by government agencies, these agencies often record either zero price or the value of the subsidy in the deeds, which produces substantial bunching at these values compared to non-project transactions.  We find some prices scattered away from subsidy values consistent with some measurement error in deeds reporting or miscategorization of non-project properties as project properties.  
+
+%Non-project transactions also demonstrate some bunching at round numbers, which may add 
+
+\begin{figure}
+\caption{Transaction Price Histogram}\label{figure:transactionhist}
+\centering
+\includegraphics[scale=1]{figures/price_histogram.pdf}\\
+Note: Transactions are censored at R100,000.
+\end{figure}
+
+
+\subsubsection{Pre-Existing Formal Dwellings:}  
+
+% pre-existing transactions : 38468 / 127600 = 30\%
+
+We exclude transactions that occur on land plots with at least one preexisting formal residential structure in the 2001 building census (31\% of remaining records).  This method not only helps to reduce error in matching seller identities to housing programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented by local housing agencies over the same time period.   
+
+\subsubsection{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other small-scale housing programs.  
+
+\begin{figure}
+\caption{Convex Hull Example}\label{figure:conhull}
+\centering
+\includegraphics[scale=.27]{figures/rdp_conhull_pic.png}
+\end{figure}
+
+\subsubsection{Temporal Clustering:}  Because our empirical design exploits the sudden timing of project construction, we assign a date for each housing project according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year.  This approach rules out incremental projects as well as helps to exclude possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
+
+
+%\begin{enumerate}
+%	\item \textbf{Seller Identity:}  We focus on transactions from government entities or housing authorities from seller name records.  To %account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most %frequently.  We exclude transactions flagged as large buildings used for commercial purposes.
+%	\item \textbf{Subsidy Value:}  We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value.
+%	\item \textbf{Pre-Existing Formal Dwellings:}  We exclude transactions that occur on land plots with at least one pre-existing formal %residential structure in the 2001 building census.  This method not only helps to reduce error in matching seller identities to housing %programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented %by local housing agencies over the same time period.
+%	\item \textbf{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a %density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By %eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other %small-scale housing programs.
+%	\item \textbf{Temporal Clustering:}  Because our empirical design exploits the sudden timing of project construction, we assign a date %for each housing project according to the modal year of transactions for houses within each project.  We then include only clusters %where over 50\% of transactions occur during the modal year.  This approach rules out gradual construction 
+%\end{enumerate}
+
+We validate our measure of housing projects using administrative spatial data from the Gauteng government, which maps a subsample of [XX] housing projects.  Following Figure [XX] (put a nice map here), we find a substantial degree of overlap between our measure and the administrative subsample.  SHOW MAP PLEASE!!!
 
 \subsubsection{Defining Planned but Unconstructed Housing Projects}
 
