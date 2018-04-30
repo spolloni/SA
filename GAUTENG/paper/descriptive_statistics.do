@@ -279,8 +279,8 @@ program write_census_hh_table;
     g rdp=hulltype=="rdp";
         global cat1="keep if area_int>.3 & rdp==1 " ;
         global cat2="keep if area_int>.3 & rdp==0 " ;
-        global cat3="keep if area_int<.3 & distance<=400 & rdp==1 " ;
-        global cat4="keep if area_int<.3 & distance<=400 & rdp==0 " ;           
+        global cat3="keep if area_int<.3 & rdp==1 " ;
+        global cat4="keep if area_int<.3 & rdp==0 " ;           
         global cat_num=4;
   
     file open newfile using "`1'", write replace;
