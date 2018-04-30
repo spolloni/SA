@@ -76,10 +76,10 @@ keywords = ['Planning','Proposed', # keywords to identify
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 _5_b_DISTS_ = 0  # non-RDP distance
-_5_c_DISTS_ = 0  # BBLU distance
-_5_d_DISTS_ = 0  # EA distance 
+_5_c_DISTS_ = 1  # BBLU distance
+_5_d_DISTS_ = 1  # EA distance 
 bw = 1200        # bandwidth for buffers
-hulls = ['rdp','placebo'] # choose 
+hulls = ['placebo'] # choose 
 
 _6_a_PLOTS_ = 1  # distance plots for RDP: house prices
 _6_b_PLOTS_ = 1  # distance plots for RDP: BBLU
@@ -281,7 +281,7 @@ if _5_b_DISTS_ ==1:
     
         # 5b.2 non-rdp in/out of hulls
         fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'reg',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
     
@@ -312,7 +312,7 @@ if _5_c_DISTS_ ==1:
     
         # 5c.2 BBLU in/out of hulls
         fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'reg',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
 
@@ -344,7 +344,7 @@ if _5_d_DISTS_ ==1:
     
         # 5d.2 EA and SAL in/out of hulls
         fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,'reg',hull)
+        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
         matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
         print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
     
