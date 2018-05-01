@@ -96,15 +96,13 @@ Understanding the spillover impacts of public housing requires (1) outcome measu
 
 To measure formal housing market impacts, we use over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).\footnote{The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.}  These data include the price, exact location, plot size, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 1.2 kilometers of a housing project bringing the final sample to around 100,000 transactions.  We exclude the top 1\% of prices as well as prices below 1,000 Rand, which are likely composed of measurement error or the exchange of property title between family members.
 
-Since government deeds records are unlikely to capture informal housing markets, we also include a building census of all structures in the Gauteng Province in 2001 and 2011.  Using a combination of high-resolution satellite imagery and local field teams, these data record the precise location of each structure, identifying structures within over 30 categories including formal and informal residential dwellings.  Out of \input{figures/total_bblu}structures, this building census includes \input{figures/total_bblu_formal}formal structures and \input{figures/total_bblu_informal}informal structures.  This data serves as both an outcome measure of informal housing development as well as an additional measure for public housing construction.
+Since government deeds records are unlikely to capture informal housing markets, we also include a building census of all structures in the Gauteng Province in 2001 and 2011.  Using a combination of high-resolution satellite imagery and local field teams, these data record the precise location of each structure, identifying structures within over 30 categories including formal and informal residential dwellings.  Out of \input{figures/total_bblu}structures, this building census includes \input{figures/total_bblu_formal}formal structures and \input{figures/total_bblu_informal}informal structures.  These data serve as both outcome measures of informal housing development as well as additional measures of public housing construction.
 
 For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 as well as the yearly General Household Survey for 2005 through 2014.  Both surveys include information about dwelling type, employment, income, and demographics for each household.  The General Household Survey includes additional details on participation in housing programs over time for a random sample of around 35,000 households in the Gauteng Province.  To spatially link these households in both samples to their corresponding housing projects, we conduct the analysis at the census block level, which is the smallest geography available with \input{figures/total_small_areas}blocks in the Gauteng Province and \input{figures/total_small_areas_in_buffer}within 1.2 kilometers of a housing project.  
 
 \subsection{Defining Housing Projects}
 
-Our primary measure of housing projects matches a set of housing program characteristics using the transaction records in the deeds data.  This procedure results in clusters of dwellings that form our housing projects (\cite{serihistory}).
-
-
+Our primary measure of housing projects matches a set of housing program characteristics using the transaction records in the deeds data.  This procedure results in spatially distinct clusters that form the definition of housing projects for the empirical analysis (\cite{serihistory}).
 
 \subsubsection{Seller Identity:}
 % prob yes and large : 2770 / 127600 = 2\%
@@ -120,7 +118,7 @@ We focus on transactions from government entities or housing authorities from se
 \subsubsection{Subsidy Value:}
 
 % above 50,000 : 4,369 / 127,600 = 3.4\%
-We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value ($<$4\% of remaining records).  Figure~\ref{figure:transactionhist} provides a histogram of deed prices under R100,000 for transactions that meet our project definition and transactions that do not.  Since project houses are distributed for free by government agencies, these agencies often record either zero price or the value of the subsidy in the deeds, which produces substantial bunching at these values compared to non-project transactions.  We find some prices scattered away from subsidy values consistent with some measurement error in deeds reporting or miscategorization of non-project properties as project properties.  
+We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value ($<$4\% of remaining transactions).  Figure~\ref{figure:transactionhist} provides a histogram of deed prices under R100,000 for transactions that meet our project definition and transactions that do not.  Since project houses are distributed for free by government agencies, these agencies often record either zero price or the value of the subsidy in the deeds, which produces substantial bunching at these values compared to non-project transactions.  We find some prices scattered away from subsidy values consistent with some measurement error in deeds reporting or miscategorization of non-project properties as project properties.  
 
 %Non-project transactions also demonstrate some bunching at round numbers, which may add 
 
@@ -140,85 +138,119 @@ We exclude transactions that occur on land plots with at least one preexisting f
 
 \subsubsection{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other small-scale housing programs.  
 
+Figure~\ref{figure:conhull} provides an example convex hulls formed around project housing transactions.  The algorithm groups nearby transactions into two large projects on the right.  Some non-project transactions (pink circles) are also included in the convex hulls, which are likely miscoded project houses or privately constructed houses within housing projects.  The upper left collection of non-project houses contains a small group of houses coded as project houses (green circles).  However, since there are very few of these houses and they are loosely clustered within a large group of non-project houses, they are not clustered into a convex hull.  These more isolated cases are likely to be small-scale land-titling programs or home-financing programs launching by local NGOs in collaboration with the housing authorities.  
+
 \begin{figure}
 \caption{Convex Hull Example}\label{figure:conhull}
 \centering
-\includegraphics[scale=.27]{figures/rdp_conhull_pic.png}
+\includegraphics[scale=.5]{figures/convex_hull_v3_test.pdf}
 \end{figure}
 
-\subsubsection{Temporal Clustering:}  Because our empirical design exploits the sudden timing of project construction, we assign a date for each housing project according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year.  This approach rules out incremental projects as well as helps to exclude possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
+\subsubsection{Temporal Clustering:}  Because the empirical design exploits the sudden timing of project construction, we assign a date for each cluster according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year, which excludes half of total clusters.  This approach rules out incremental projects as well as helps to exclude possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
+
+Figure~\ref{figure:densitytime} indicates the distribution of transaction dates for properties within a 1.2 km buffer around clusters (above panel) and within the selected project areas (below panel).  Project areas exhibit substantial bunching during a single month when projects were completed.  There are also more transactions after the modal year than before the modal year, consistent with either a gradual roll-out for some project areas or immediate resale of projects houses after construction, which would be counter to housing regulations.  
+
+Evidence of similar bunching around the modal year for transactions coded as non-project transactions (above panel) would suggest that we may be miscoding project transactions as non-project transactions; instead, we find a smooth pattern relative to the modal year for these non-project transactions.  The slight increase in density around and just following the mode year may also be consistent with housing projects having an immediate impact on local housing markets, which we will explore further below.
+
+\begin{figure}
+\caption{Transaction Densities Relative to Modal Project Month}\label{figure:densitytime}
+\centering
+\includegraphics[scale=.5]{figures/summary_densitytime.pdf} \\
+The above panel includes transactions within a 1.2 kilometer buffer around a project cluster relative to the modal year of that cluster.  The below panel includes all transactions within the final sample of clusters.
+\end{figure}
 
 
-%\begin{enumerate}
-%	\item \textbf{Seller Identity:}  We focus on transactions from government entities or housing authorities from seller name records.  To %account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most %frequently.  We exclude transactions flagged as large buildings used for commercial purposes.
-%	\item \textbf{Subsidy Value:}  We exclude transactions with purchase prices that are more than R50,000 above the yearly subsidy value.
-%	\item \textbf{Pre-Existing Formal Dwellings:}  We exclude transactions that occur on land plots with at least one pre-existing formal %residential structure in the 2001 building census.  This method not only helps to reduce error in matching seller identities to housing %programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented %by local housing agencies over the same time period.
-%	\item \textbf{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a %density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By %eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other %small-scale housing programs.
-%	\item \textbf{Temporal Clustering:}  Because our empirical design exploits the sudden timing of project construction, we assign a date %for each housing project according to the modal year of transactions for houses within each project.  We then include only clusters %where over 50\% of transactions occur during the modal year.  This approach rules out gradual construction 
-%\end{enumerate}
+\subsection{Defining Planned but Unconstructed Housing Projects}
 
-We validate our measure of housing projects using administrative spatial data from the Gauteng government, which maps a subsample of [XX] housing projects.  Following Figure [XX] (put a nice map here), we find a substantial degree of overlap between our measure and the administrative subsample.  SHOW MAP PLEASE!!!
+The administrative spatial data identifies many project areas that do not appear to have received housing projects, as measured by having fewer than 15 housing project transactions per square kilometer.  We use these areas to create a sample of planned but unconstructed housing projects to serve as counterfactuals areas in our analysis.
 
-\subsubsection{Defining Planned but Unconstructed Housing Projects}
+To construct an estimated completion date for planned but unconstructed housing projects, we digitized National Treasury budget reports that detail the start date, expected completion date, and cost of each housing project.  We use a fuzzy-string matching algorithm with bigrams to successfully link project names from the budget reports for over 300 project names in our administrative spatial data (including both completed and uncompleted projects).  Appendix~\ref{table:stringmatch} compares unmatched and matched projects finding that matched projects have a higher density of formal and informal houses although they are smaller in total area.  We find that for completed projects, the mode transaction year observed in the deeds data falls an average of three years after the start date indicated in the budget reports.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Therefore, we assign a expected completion date for unconstructed projects that is three years after the announced start-date in the project.  
 
-The administrative spatial data identifies many project areas that do not appear to have received housing projects, as measured by comparing changes in formal structure counts between the 2001 and 2011 building censuses.  We use these areas to create a sample of planned but unconstructed housing projects to serve as counterfactuals areas in our analysis.
 
-To construct an estimated completion date for planned but unconstructed housing projects, we digitized National Treasury budget reports that detail the start date, expected completion date, and cost of each housing project.  We use a fuzzy-string matching algorithm with bigrams to successfully link project names from the budget reports to over 300 project names in our administrative spatial data (including both completed and uncompleted projects).  We find that for completed projects, the mode transaction year observed in the deeds data falls an average of three years after the start date indicated in the budget reports.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Therefore, we assign a expected completion date for unconstructed projects that is three years after the announced start-date in the project.
+\subsection{Assessing Project Measures}
 
-To differentiate between greenfield and in-situ upgrading projects, we use the building survey to measure the density of informal structures per project area in 2001, prior to the construction of large housing projects.
+To assess the extent to which our definitions accurately measure housing projects, Figure~\ref{figure:gcrooverlap} maps our cluster definitions on top of administrative data on housing projects.  We see strong overlap between clusters and administrative projects, providing additional support for our deeds-based cluster measure.  A few smaller clusters do not overlap with administrative definitions, which is consistent with the administrative data recording larger, higher-cost projects.  Similarly, administrative boundaries that do not contain clusters are likely to be projects that were planned but were not completed or are scheduled to be completed in the future.
 
+\begin{figure}
+\caption{Clusters and Administrative Project Boundaries}\label{figure:gcrooverlap}
+\centering
+\includegraphics[scale=.5]{figures/gcro_convexhull_overlap.pdf} \\
+This figure includes the northern half of housing projects.
+\end{figure}
+
+Table~\ref{table:projectdescriptives} provides descriptive statistics for the final sample of 56 completed and 51 uncompleted projects.  At baseline in the 2001 building census, we find that completed and uncompleted project areas have similar formal building density although uncompleted projects have much higher densities of informal structures.  Consistent with this finding, slum areas may face greater challenges in organizing funding as well as infrastructure provision necessary to complete large housing projects.  As a result of project follow-through, completed areas experience dramatic increases in formal building density between 2001 and 2011 compared to uncompleted projects.  Interestingly, both areas also experience substantial and similar growth in their levels of informal settlement growth.  The median year of completion as well as distance to Central Business District match well between completed and uncompleted projects 
 
 \begin{table}
 	\centering
 	\caption{Housing Project Descriptives}\label{table:projectdescriptives}
-\input{figures/housing_project_table}
+\input{figures/project_joint_table}\\
+Density measures number structures per $\text{km}^2$. \\  Central Business Districts (CBD) are measured with respect to Johannesburg and Tshwane.
 \end{table}
 
-In order to focus on public housing projects as separate from land-titling programs or 
+\subsection{Defining Buffer Areas}
 
 
-We combine this data with 
+
+
+
+
+
+
+PUT IN BUFFER PICTURE AND DISCUSS
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% THEN PUT IN THE THEORY!! %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%To differentiate between greenfield and in-situ upgrading projects, we use the building survey to measure the density of informal structures per project area in 2001, prior to the construction of large housing projects.
+%\begin{table}
+%	\centering
+%	\caption{Housing Project Descriptives}\label{table:projectdescriptives}
+%\input{figures/housing_project_table}
+%\end{table}
+
+% In order to focus on public housing projects as separate from land-titling programs or 
+
+% We combine this data with 
 
 
 %% reference a map of BBLU data ?!
 
-For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 includes information about dwelling type, employment, income, and demographics for each household. 
+% For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 includes information about dwelling type, employment, income, and demographics for each household. 
 
 
 
 
-Table~\ref{table:descriptives} provides descriptive statistics dividing transactions between properties outside and inside a 1.2 kilometer radius of the nearest housing project.  We find that 
+% Table~\ref{table:descriptives} provides descriptive statistics dividing transactions between properties outside and inside a 1.2 kilometer radius of the nearest housing project.  We find that 
 
 
 
-  The population census  The smallest level of geography available is census block where 
+%  The population census  The smallest level of geography available is census block where 
 
-We are able to identify households within a census block,
+%We are able to identify households within a census block,
 
-We use the smallest level of geography available, which leaves us with 1,00
+%We use the smallest level of geography available, which leaves us with 1,00
 
+% We capture demographic responses to the 
 
-
- General Household Survey
-
-
+% and where administrative data on housing projects.  
 
 
 
-
-
-We capture demographic responses to the 
-
-and where administrative data on housing projects.  
-
-
-\begin{table}
-	\centering
-	\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
-	\input{figures/descriptive_table} \\
-	\vspace{.2cm}
-\footnotesize{Buffers include properties within 1.2 kilometers of a housing project.  These data exclude public housing projects themselves.}
-\end{table}
+% \begin{table}
+%	\centering
+%	\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
+%	\input{figures/descriptive_table} \\
+%	\vspace{.2cm}
+%\footnotesize{Buffers include properties within 1.2 kilometers of a housing project.  These data exclude public housing projects themselves.}
+%\end{table}
 
 
 
@@ -244,10 +276,11 @@ and where administrative data on housing projects.
 
 \begin{table}
 	\centering
-	\caption{Ten Biggest Sellers}\label{table:biggestsellers}
-	\input{figures/biggest_sellers_table}
-\end{table}
+	\caption{Assessing Name Matching between \\Budget and Spatial Administrative Data}\label{table:stringmatch}
+\input{figures/string_match} \\
+Density is measured in structures per $\text{km}^{2}$.
 
+\end{table}
 
 
 \end{document}

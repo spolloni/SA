@@ -178,7 +178,7 @@ prog descriptive_sample;
 
     *** GENERATE PROJECT LEVEL TEMP TABLE project_sample.dta;
     local qry = "
-      SELECT PC.cluster, PC.formal_pre, PC.formal_post, PC.informal_pre, PC.informal_post, PC.placebo_yr, 0 AS frac1, 0 AS frac2, C.cbd_dist 
+      SELECT PC.cluster, PC.formal_pre, PC.formal_post, PC.informal_pre, PC.informal_post, PC.placebo_yr, 0 AS frac1, 0 AS frac2, C.cbd_dist,  
       FROM placebo_conhulls AS PC
       LEFT JOIN cbd_dist AS C ON PC.cluster = C.cluster
       UNION 
