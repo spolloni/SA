@@ -1,10 +1,10 @@
 \documentclass[12pt]{article}
 
 % TEMPLATE DEFAULT PACKAGES
-\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,subfigure,array,hyperref}
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,subfigure,array,hyperref,adjustbox}
 
 % ADDED PACKAGES FOR THIS MANUSCRIPT
-\usepackage{mathptmx,multirow,titlesec,threeparttable,tabu,booktabs}
+\usepackage{mathptmx,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm}
 % endfloat,
 
 % SECTION TITLE SETTINGS
@@ -29,19 +29,19 @@
 \begin{document}
 
 \begin{titlepage}
-\title{In da house!\thanks{I am grateful to Matthew Turner and Jesse Shapiro for their feedback, advice and support. I also thank Nathaniel Baum-Snow, John Friedman, Nicolas Gendron-Carrier, William Violette, Jacob Robbins, and all the participants of the Brown University applied microeconomics seminar for their helpful comments. I am indebted to Aaron Kilbey for granting me access to a beta version of Portland Maps's API and allowing me to complete the data collection for this project. Ian Hackett also provided invaluable help in obtaining data necessary for this project. Finally, financial support from the Fonds de Recherche Soci\'et\'e et Culture du Qu\'ebec is gratefully acknowledged.}}
+\title{In da house!\thanks{We are grateful to Matthew Turner and Jesse Shapiro for their feedback, advice and support.}}
 \vspace{2mm}
 \author{Stefano Polloni\thanks{Department of Economics, Brown University, Box B, Providence, RI 02912  E-mail: stefano\textunderscore polloni@brown.edu}\\[-0.4em] \normalsize{\it Brown University}\\}
 \vspace{30mm}
 \date{\vspace{5mm}This Version: \today}
 \maketitle
 \begin{abstract}
-\noindent We estimate economic spillovers from subsidized housing projects on local neighborhoods using housing transaction records and high-resolution census data in South Africa.  With a differences-in-differences design, we find that projects lead to a X\% decline in nearby housing prices.  We attribute this decline to externalities from informal settlements constructed within housing projects.   \\
-\vspace{0in}\\
-\noindent\textbf{Keywords:} traffic externalities; street livability; urban policy; housing market.\\
-\vspace{0in}\\
-\noindent\textbf{JEL Codes:} O18; H4; R2; R4.\\
-
+ We estimate economic spillovers from subsidized housing projects on local neighborhoods using housing transaction records and high-resolution census data in South Africa.  With a differences-in-differences design, we find that projects lead to a X\% decline in nearby housing prices.  We attribute this decline to externalities from informal settlements constructed within housing projects.   
+ %\\
+%\vspace{0in}\\
+%\textbf{Keywords:} traffic externalities; street livability; urban policy; housing market.\\
+%\vspace{0in}\\
+%\textbf{JEL Codes:} O18; H4; R2; R4.\\
 \bigskip
 \end{abstract}
 \setcounter{page}{0}
@@ -53,8 +53,12 @@
 
 \section{Introduction} \label{sec:introduction}
 
+In developing countries, 30\% of urban populations live in slums where households often suffer high rates of crime, low access to infrastructure, insecure property rights, and unsanitary conditions (\cite{mdg}).  These negative externalities often combine to create poverty traps, preventing long-term economic development (\cite{10.1257/jep.27.4.187}). Governments have responded by replacing slums with new homes and moving slum dwellers to public housing projects.  While these policies are often motivated by immediate health and economic benefits for recipients, economic theory emphasizes how eliminating negative externalities can foster growth
 
-In developing countries, 30\% of urban populations live in slums where households often suffer high rates of crime, low access to infrastructure, insecure property rights, and unsanitary conditions (\cite{mdg}).  These negative externalities often combine to create poverty traps, preventing long-term economic development (\cite{10.1257/jep.27.4.187}). Governments have responded by replacing slums with new homes and moving slum dwellers to public housing projects.  While these policies are often motivated by immediate health and economic benefits for recipients, economic theory emphasizes how high-quality public housing provides an incentive for neighbors to invest more in their own homes and communities, reducing negative externalities and steering communities away from poverty traps.
+high-quality public housing 
+
+
+provides an incentive for neighbors to invest more in their own homes and communities, reducing negative externalities and steering communities away from poverty traps.
 
 In this paper, we analyze the impacts of public housing on the development of surrounding neighborhoods.  We study a large-scale housing program in South Africa, which has allocated over 4.3 million dwellings and houses over 13\% of the total population (\cite{dhsreports}; GHS 2009-2013).  Already one of the largest housing programs in the developing world, this program continues to respond to large backlogs in housing demand with an even mix of upgrading slum areas with new houses as well as constructing large public housing developments.  This program is intended to not only serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also generate community-wide benefits, ``leveraging growth in the economy,'' ``combating crime, promoting social cohesion and improving quality of life for the poor,'' and ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' (\cite{bng}). 
 
@@ -88,6 +92,168 @@ In practice, these guidelines are only loosely followed.  Recent reports point t
 
 Beneficiaries are expected to pay a small one-time payment in order to receive title for their houses.  Guidelines also prevent beneficiaries from reselling their houses (and discourage renting) within their first 7 years of ownership.  Despite these guidelines, only 82\% of project houses are reported being still occupied by their original beneficiaries within five years of construction.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Anecdotal evidence suggests that project managers are aware of this active secondary market but have difficulty policing these transactions (\cite{resale}).
 
+
+
+\section{A Model of Residential Choice and Public Housing}
+
+We develop a simple model of residential choice in order to both guide the reduced form empirical analysis as well as provide a framework evaluating the welfare effects of public housing policy.  The key insight of the model is that while public housing projects provide high-quality houses and infrastructure, they also cross-subsidize informal housing markets, which can exacerbate congestion externalities caused by these informal markets.
+
+\subsection*{Basic Setup}
+A city is comprised of $N$ residential neighborhoods indexed $n\in\{1,...,N\}$.  Each neighborhood has a formal and informal housing sector, indexed $s\in\{F,I\}$.  Each neighborhood is distinguished by its local housing supply and later by negative congestion externalities from informal housing.  All jobs are in the central business district and pay a fixed wage rate, and commuting to the CBD is costly.
+
+\subsection*{Housing Demand}
+
+Measure one of freely-mobile agents inelastically demand one unit of housing. An agent $i$ has idiosyncratic tastes for neighborhoods, represented by the vector $\bm{\epsilon}_i \in \mathbb{R}^{2N}$ of neighborhood-sector specific valuations. The distribution of preferences in the population is given by the continuous and well-behaved function $f(\bm{\epsilon})$ such that $\int f(\bm{\epsilon}) d\bm{\epsilon} = 1$.
+The indirect utility of individual $i$ living in sector $s$ of neighborhood $n$ is given by:
+\begin{equation*}
+\begin{aligned}
+u_{ins} \,& =\, A_{ns}\,-\, R_{ns} \,+\, \epsilon_{ins} \\
+        \,& =\, v_{ns} \,+\, \epsilon_{ins}
+\end{aligned}
+\end{equation*}
+ where $A_{ns}$ may be interpreted as the net-of-commuting and amenity-adjusted wage received in $n$ when living in sector $s$, $R_{ns}$ is the rental rate of housing, and $\epsilon_{ins}$ is individual $i$'s idiosyncratic taste for neighborhood-sector pair $(n,s)$.  In this framework, neighborhood-sector tastes, $\epsilon_{ins}$, are assumed to be uncorrelated across space and sector.  This assumption rules out cases where households may prefer living closer to certain areas or in certain types of housing.
+
+ For notational convenience, we denote the array of quantities $A_{ns}$, $R_{ns}$ and $\epsilon_{ins}$ in their matrix form as $\bm{A}$, $\bm{R}$ and $\bm{\epsilon}_i$. Individual $i$ takes exogenous quantities $\{\bm{A},\bm{\epsilon}_i\}$ and endogenous rents $\bm{R}$ as given, and locates in pair $(n,s)$ yielding the highest indirect utility. Aggregate housing demand $H_{ns}$ in $(n,s)$ is given by:
+\begin{equation*}
+\begin{aligned}
+H_{ns} \,\,& =\,\, \int I\Big( \, u_{ins} \,=\, \max_{n's'}\{u_{in' s'} \,\,|\,\, \bm{A},\bm{R}\,\} \Big)f(\bm{\epsilon}) d\bm{\epsilon}    \\[.2em]
+        \,\,& =\,\, D_{ns}(\bm{A},\bm{R})
+\end{aligned}
+\end{equation*}
+
+
+\subsection*{Housing Supply}
+
+ Neighborhoods are endowed with $L_n$ units of land. A share $\theta_{nF}$ of the total land stock is available for formal residential development, while the rest, $\theta_{nI} = 1-\theta_{nF}$, is vacant or public land suited for informal housing. We assume that $\theta_{nF}$ is determined exogenously. In each sector, price-taking landlords supply housing by combining land and materials $M$ with CRS technology $q(L,M)$. Materials are supplied at fixed cost $c$ on a large national market. Because land is fixed in every market, the marginal cost of housing is increasing. The government may also choose to subsidize housing in market $(n,s)$ at a rate of $\delta_{ns}$ per unit. The inverse supply curve in $(n,s)$ is:
+\begin{equation*}
+R_{ns} \,\, =\,\, S(H_{ns},\theta_{ns}L_n) - \delta_{ns}
+\end{equation*} \\[-1.99em]
+ where $\partial S/\partial H > 0$ and $\partial S/\partial L < 0$. For notational convenience, we denote the array of quantities $H_{nh}$, $L_n$ and $\theta_n$ in their vector form as $\bm{H}$, $\bm{L}$ and $\bm{\theta}$, respectively.
+
+\subsection*{Equilibrium}
+
+Given density $f(\bm{\epsilon})$ and the exogenous quantities $\{\bm{A},\bm{L},\bm{\theta}\}$, an equilibrium in this city consists of rents $\bm{R}^*$ and housing quantities $\bm{H}^*$ such that all housing markets clear, that is, $\forall (n,h)$:
+\begin{equation}
+\begin{aligned}
+& H^*_{ns} \,\, =\,\, D_{ns}(\bm{A}, \bm{R}^*) \\
+\text{and}\quad & R^*_{ns} \,\, =\,\, S(H^*_{ns},\theta_{ns}L_n) - \delta_{ns} \text{,}
+\end{aligned}
+\end{equation}\\[-1.99em]\\[-1.99em]
+ and all agents live somewhere:
+\begin{equation*}
+\sum_{n}\sum_{s} H^*_{ns} = 1 
+\end{equation*} \\[-1.99em]
+
+\subsection*{Welfare Implications of Housing Subsidies}
+
+ The sum of individuals' utility is given by:
+\begin{equation*}
+U \,\, =\,\, \int \max_{n's'}\{u_{in' s'}\,\,|\,\, \bm{A},\bm{R}^*\,\}f(\bm{\epsilon}) d\bm{\epsilon} 
+\end{equation*} \\[-1.99em]
+ and total landlords' profit is:
+\begin{equation*}
+\begin{aligned}
+\Pi \,\, &=\,\, \sum_{n}\sum_{s} \Bigg(\,\int_0^{H^*_{ns}} [R^*_{ns} - (S(x,\theta_{ns}L_n) - \delta_{ns})]dx \, \Bigg) \\[.6em]
+\,\, &=\,\, \sum_{n}\sum_{s} \Bigg(\, R^*_{ns}H^*_{ns} +  \delta_{ns}H^*_{ns} -  \int_0^{H^*_{ns}}S(x,\theta_{ns}L_n)dx  \,\Bigg)
+\end{aligned}
+\end{equation*} \\[-1.99em]
+ Total social welfare in this economy is therefore $W = U + \Pi$. We are interested in the welfare implications of the government subsidizing formal housing in a subset $\mathcal{N}\subset\{1,...,N\}$ of neighborhoods. Let $\delta_{ns}=\delta$ if $n\in\mathcal{N}$ and $s=F$, and $\delta_{ns}=0$ otherwise.  To characterize the marginal social benefit from the subsidy, $\partial W/\partial \delta$,  we first note a result shown in \cite{busso2013assessing}:
+
+\begin{equation*}
+\begin{aligned}
+\frac{\partial U}{\partial v_{ns}} \,\, & =\,\, \int \frac{\partial }{\partial v_{ns}} \max_{n's'}\{u_{in' s'}\,\,|\,\, \bm{A},\bm{R}\,\}f(\bm{\epsilon}) d\bm{\epsilon} \\[.6em]
+\,\, & =\,\, \int I\Big( \, u_{ins} \,=\, \max_{n's'}\{u_{in' s'} \,\,|\,\, \bm{A},\bm{R}\,\} \Big)f(\bm{\epsilon}) d\bm{\epsilon} \\[.6em]
+\,\, & =\,\  H_{ns}
+\end{aligned}
+\end{equation*} \\[-1.99em]
+
+ Using the above, we write the derivative of total utility with respect to subsidy $\delta$ as:
+
+\begin{equation*}
+\frac{\partial U}{\partial\delta} \,\,=\,\,  \sum_{n}\sum_{s}\,\, H^*_{ns}\Big(-\frac{\partial R_{ns}^*}{\partial \delta}\Big) 
+\end{equation*} \\[-1.99em]
+
+ The derivative of total profits with respect to $\delta$ is:
+
+\begin{equation*}
+\frac{\partial \Pi}{\partial\delta} \,\,=\,\, \sum_{n\in\mathcal{N}} H^*_{nF} \,\,+\,\, \sum_{n}\sum_{s}\, \Big[ H^*_{ns}\frac{\partial R^*_{ns}}{\partial \delta} \,\,+\,\, R^*_{ns}\frac{\partial H^*_{ns}}{\partial \delta} \,\,+\,\, \delta_{ns}\frac{\partial H^*_{ns}}{\partial \delta} \,\,-\,\, \frac{\partial H^*_{ns}}{\partial \delta}\big( R^*_{ns} \,\, + \,\, \delta_{ns} \big) \Big]
+\end{equation*} \\[-1.99em]
+
+ Summing and simplifying:
+
+\begin{equation}
+\frac{\partial W}{\partial\delta} \,\,=\,\, \frac{\partial U}{\partial\delta} \,\,+\,\, \frac{\partial \Pi}{\partial\delta} \,\,=\,\, \sum_{n\in\mathcal{N}} H^*_{nF}
+\end{equation} \\[-1.99em]
+
+ The total cost of the subsidy is given by $TC = \sum_n\sum_s H^*_{ns}\delta_{ns}$ and its marginal cost is thus:
+\begin{equation*}
+ \frac{\partial TC}{\partial \delta} \,\,=\,\, \sum_{n\in\mathcal{N}} \Big( H^*_{nF} \,\,+\,\, \delta\frac{\partial H^*_{nF}}{\partial \delta} \Big)
+ \end{equation*} \\[-1.99em]
+
+  The extra term in this expression relative to (2) represents the marginal deadweight loss from an increase in $\delta$. Unsurprisingly, we find that subsidies in an economy with perfect housing markets lead to economic inefficiencies. Furthermore, the magnitude of these inefficiencies depends critically on the population responses in subsidized markets.
+
+ \subsection*{Housing subsidies with Slum Externalities}
+
+ Densely populated slums pose fire hazards, increase health risks and overburden existing public infrastructure, e.g. water and sewage networks. We consider an external utility cost from informal housing of the form:
+
+\begin{equation*}
+A_{ns} \,\,=\,\, \bar{A}_{ns} \,\,+\,\, a\Big(\frac{H_{nI}}{L_n}\Big)
+\end{equation*} \\[-1.99em]
+
+ where $a'(.)<0$. With this specification, the private decision of locating in $(n,I)$ negatively impacts all residents in $n$ because of congestion effects. The utility response to $\delta$ now depends on how both rents and amenities change in equilibrium:
+
+\begin{equation*}
+\frac{\partial U}{\partial\delta} \,\,=\,\,  \sum_{n}\sum_{s} \,\, H^*_{ns}\Big(a'\Big(\frac{H^*_{nI}}{L_n}\Big)\frac{\partial H^*_{nI}}{L_n\partial \delta}\,\,-\,\,\frac{\partial R_{ns}^*}{\partial \delta}\Big) 
+\end{equation*} \\[-1.99em]
+
+ Therefore:
+
+\begin{equation*}
+\frac{\partial W}{\partial\delta} \,\,=\,\, \sum_{n\in\mathcal{N}} H^*_{nF} \,\,+\,\, \sum_{n} a'\Big(\frac{H^*_{nI}}{L_n}\Big)\,\frac{\partial H^*_{nI}}{\partial \delta}\,\frac{(H^*_{nF}+H^*_{nI})}{L_n}
+\end{equation*} \\[-1.99em]
+
+ Combining the equilibrium conditions in (1) and using the implicit function theorem, it is possible to show formally that $\partial H^*_{nI}/\partial \delta < 0 \,\,\forall n$. The extra term in the above expression -- relative to equation (2) -- represents the marginal welfare {\it gain} from reduced slum density. The subsidy $\delta$ makes formal housing in $\mathcal{N}$ more attractive relative to informal housing. Marginal residents moving to $\mathcal{N}$ make remaining residents better-off because of reduced congestion. The marginal deadweight loss (MDWL) of the subsidy is now :
+
+\begin{equation*}
+\begin{aligned}
+MDWL \,\,&=\,\, \frac{\partial TC}{\partial \delta} - \frac{\partial W}{\partial \delta} \\[.6em]
+     \,\,&=\,\, \sum_{n\in\mathcal{N}} \,\delta\frac{\partial H^*_{nF}}{\partial \delta} \,\,-\,\, \sum_{n} \, a'\Big(\frac{H^*_{nI}}{L_n}\Big)\,\frac{\partial H^*_{nI}}{\partial \delta}\,\frac{(H^*_{nF}+H^*_{nI})}{L_n} \\
+\end{aligned}
+\end{equation*} \\[-1.99em]
+
+ Efficiency considerations in this setting depend on the population responses in subsidized markets, but also on responses in informal markets and on the shape of slum externality $a(\,)$. We note that $\delta=0$ implies $MDWL<0$, that is, some level of subsidy $\delta$ is welfare improving when compared to no subsidy. This is expected since the social benefits exceed the private benefits of moving from informal to formal housing. 
+
+\subsection*{Subsidy Spillovers}
+
+South Africa's housing program involves low density housing projects as well as large improvements to surrounding infrastructure such as electricity, water, and sanitation to service these new houses.  Both have the additional impact of lowering construction costs for informal housing by providing space in and around housing projects to set up new informal dwellings as well as improving access to bulk services.  Since the policy effectively lowers construction costs for informal housing, we model this by assuming subsidies in the formal sector spillover to the informal sector at no additional cost for the government. Formally, we let $\delta_{ns} = \delta$ if $n\in\mathcal{N}$ and $s=F$, $\delta_{ns} = \alpha\delta$ if $n\in\mathcal{N}$ and $s=I$, and $\delta_{ns} = 0$ otherwise, where $\alpha\in\mathbb{R}^+$. 
+
+Construction cost spillovers for the informal sector alter the welfare implications in two ways. First, suppliers of informal housing benefit from an increase in profit due to the indirect subsidies. Second, for $n\in\mathcal{N}$, the sign of informal housing response $\frac{\partial H^*_{nI}}{\partial\delta}$ is now ambiguous and depends on the magnitude of $\alpha$.\footnote{ This can also be shown formally by combining the equilibrium conditions in (1) and using the implicit function theorem. For $n\in\mathcal{N}^C$, $\frac{\partial H^*_{nI}}{\partial\delta}$ remains unambiguously negative.} We use the notation $\frac{\partial H^*_{nI}}{\partial\delta}(\alpha)$ to represent this dependence. When $\alpha$ is large, the indirect subsidies in $(n,I)$ dominate and net-migration is positive, i.e. $\frac{\partial H^*_{nI}}{\partial\delta}>0$, making incumbent residents in $(n,I)$ and $(n,F)$ worse-off. With similar derivations as above, we obtain:
+
+\begin{equation*}
+\frac{\partial W}{\partial\delta} \,\,=\,\, \sum_{n\in\mathcal{N}} \big( H^*_{nF} + \alpha H^*_{nI} \big)  \,\,+\,\, \sum_{n} a'\Big(\frac{H^*_{nI}}{L_n}\Big)\,\frac{\partial H^*_{nI}}{\partial \delta}(\alpha)\,\Big(\frac{H^*_{nF}+H^*_{nI}}{L_n} \Big)
+\end{equation*} \\[-1.99em]
+
+ and therefore:
+
+\begin{equation*}
+MDWL \,\,=\,\, \sum_{n\in\mathcal{N}} \,\delta\frac{\partial H^*_{nF}}{\partial \delta} \,\,-\,\, \sum_{n\in\mathcal{N}} \alpha H^*_{nI}\,\,-\,\, \sum_{n} \, a'\Big(\frac{H^*_{nI}}{L_n}\Big)\,\frac{\partial H^*_{nI}}{\partial \delta}(\alpha)\,\Big(\frac{H^*_{nF}+H^*_{nI}}{L_n} \Big)
+\end{equation*} \\[-1.99em]
+
+\subsubsection*{Empirical Predictions}
+
+First, in terms of direct impacts, this model predicts that the housing subsidy program increases local formal and informal housing, improves public services, and attracts informal housing growth in nearby areas.  
+
+Second, informal settlement growth nearby public housing projects exacerbates congestion externalities, depressing housing prices in nearby formal and informal housing markets relative to housing markets further away.  While this model attributes decreases in nearby home prices to congestion externalities, other mechanisms that may generate a similar decline in home prices that are not modeled here.  
+
+One mechanism includes housing externalities for formal housing where changes in the quality of neighbor's houses affects an individual's own decision to invest in their house.  If subsidy houses have low quality relative to their neighborhoods, then local homeowners may simply invest less in improving their houses.  This theory implies that project houses have lower quality than preexisting formal houses, which can be tested in the data.  Another mechanism involves allowing for heterogeneity in tastes for neighboring households.  If subsidy programs target recipients unlike preexisting households (ie. lower income), then neighboring home prices may decline simply because recipients are undesirable neighbors.  We can similarly test for evidence of changing demographics in project neighborhoods to address this alternative theory. 
+
+%Without congestion externalities, the model predicts no differential change in housing prices near and far from housing projects.  
+% In the context of this model, we understand congestion externalities to be a feature of 
+%%%We test these hypotheses directly by tracking growth in informal and formal structures within and nearby housing projects as well as improvements in local service provision.
+% Second, the model predicts that the increase in informal housing will exacerbate congestion externalities, depressing nearby housing rents in both the informal and formal sectors  
+%This model highlights key quantities to be estimated in order to assess the incidence and efficiency of formal housing subsidies. Specifically, welfare considerations depend critically on the magnitude of spillovers $\alpha$, the shape of slum externalities $a(\,)$, and the population (housing) responses in both subsidized formal markets, $\frac{\partial H^*_{nF}}{\partial \delta}\,\,\forall n\in\mathcal{N}$,  and informal markets, $\frac{\partial H^*_{nI}}{\partial \delta}\,\,\forall n$. Empirical analysis should therefore focus on obtaining reliable estimates of theses quantities.
+
+
 \section{Data}
 
 Understanding the spillover impacts of public housing requires (1) outcome measures at high spatial and geographic resolutions as well as (2) a precise measure of the location, timing, and size of housing projects.  
@@ -102,11 +268,11 @@ For demographic and economic outcomes, we turn to the census of population for 2
 
 \subsection{Defining Housing Projects}
 
-Our primary measure of housing projects matches a set of housing program characteristics using the transaction records in the deeds data.  This procedure results in spatially distinct clusters that form the definition of housing projects for the empirical analysis (\cite{serihistory}).
+Our primary measure of housing projects matches a set of housing program characteristics using the transaction records in the deeds data.  This procedure results in spatially distinct clusters that form the definition of housing projects for the empirical analysis (\cite{serihistory}).  Due to data limitations, we are not able to differentiate between greenfield and in-situ upgrading projects in the analysis.
 
 \subsubsection{Seller Identity:}
 % prob yes and large : 2770 / 127600 = 2\%
-We focus on transactions from government entities or housing authorities from seller name records.  To account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most frequently.  We exclude transactions flagged as large buildings used for commercial purposes ($<$2\% of records).  Figure~\ref{figure:topfivesellers} shows the top five sellers, which account for a large share of the total transactions and all represent government housing programs in the region.  
+We focus on transactions from government entities or housing authorities from seller name records.  To account for large developers or banks being listed as sellers for housing projects, we also include seller names that appear most frequently.  We exclude transactions flagged as large buildings used for commercial purposes ($<$2\% of transactions).  Figure~\ref{figure:topfivesellers} shows the top five sellers, which account for a large share of the total transactions and all represent government housing programs in the region.  
 
 \begin{figure}
 \caption{Top-Five Sellers}\label{figure:topfivesellers}
@@ -134,7 +300,7 @@ Note: Transactions are censored at R100,000.
 
 % pre-existing transactions : 38468 / 127600 = 30\%
 
-We exclude transactions that occur on land plots with at least one preexisting formal residential structure in the 2001 building census (31\% of remaining records).  This method not only helps to reduce error in matching seller identities to housing programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented by local housing agencies over the same time period.   
+We exclude transactions that occur on land plots with at least one preexisting formal residential structure in the 2001 building census (31\% of remaining transactions).  This method not only helps to reduce error in matching seller identities to housing programs, but also works to distinguish new housing projects from titling, home loan, or other programs that may have been implemented by local housing agencies over the same time period.   
 
 \subsubsection{Spatial Clustering:}  Since housing projects are characterized by large plots of adjacent dwellings, we use a density-based clustering algorithm to group transactions that satisfy the above criteria according to their geographic proximity.  By eliminating loosely clustered or singleton transactions, this method additionally helps to distinguish large housing projects from other small-scale housing programs.  
 
@@ -146,7 +312,7 @@ Figure~\ref{figure:conhull} provides an example convex hulls formed around proje
 \includegraphics[scale=.5]{figures/convex_hull_v3_test.pdf}
 \end{figure}
 
-\subsubsection{Temporal Clustering:}  Because the empirical design exploits the sudden timing of project construction, we assign a date for each cluster according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year, which excludes half of total clusters.  This approach rules out incremental projects as well as helps to exclude possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
+\subsubsection{Temporal Clustering:}  Because the empirical design exploits the sudden timing of project construction, we assign a date for each cluster according to the modal year of transactions for houses within each project.  We then include only clusters where over 50\% of transactions occur during the modal year, which excludes half of total clusters.  This approach helps to exclude incremental projects as well as possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
 
 Figure~\ref{figure:densitytime} indicates the distribution of transaction dates for properties within a 1.2 km buffer around clusters (above panel) and within the selected project areas (below panel).  Project areas exhibit substantial bunching during a single month when projects were completed.  There are also more transactions after the modal year than before the modal year, consistent with either a gradual roll-out for some project areas or immediate resale of projects houses after construction, which would be counter to housing regulations.  
 
@@ -178,7 +344,7 @@ To assess the extent to which our definitions accurately measure housing project
 This figure includes the northern half of housing projects.
 \end{figure}
 
-Table~\ref{table:projectdescriptives} provides descriptive statistics for the final sample of 56 completed and 51 uncompleted projects.  At baseline in the 2001 building census, we find that completed and uncompleted project areas have similar formal building density although uncompleted projects have much higher densities of informal structures.  Consistent with this finding, slum areas may face greater challenges in organizing funding as well as infrastructure provision necessary to complete large housing projects.  As a result of project follow-through, completed areas experience dramatic increases in formal building density between 2001 and 2011 compared to uncompleted projects.  Interestingly, both areas also experience substantial and similar growth in their levels of informal settlement growth.  The median year of completion as well as distance to Central Business District match well between completed and uncompleted projects 
+Table~\ref{table:projectdescriptives} provides descriptive statistics for the final sample of 56 completed and 51 uncompleted projects.  At baseline in the 2001 building census, we find that completed and uncompleted project areas have similar formal building density although uncompleted projects have much higher densities of informal structures.  Consistent with this finding, slum areas may face greater challenges in organizing funding as well as infrastructure provision necessary to complete large housing projects.  As a result of project follow-through, completed areas experience dramatic increases in formal building density between 2001 and 2011 compared to uncompleted projects.  Both areas also experience substantial and similar growth in their levels of informal settlement growth.  The median year of completion as well as distance to Central Business District match well between completed and uncompleted projects 
 
 \begin{table}
 	\centering
@@ -187,70 +353,180 @@ Table~\ref{table:projectdescriptives} provides descriptive statistics for the fi
 Density measures number structures per $\text{km}^2$. \\  Central Business Districts (CBD) are measured with respect to Johannesburg and Tshwane.
 \end{table}
 
-\subsection{Defining Buffer Areas}
+\section{Descriptive Evidence for Spillover Areas}
+
+Examining the spillover effects of housing projects requires focusing the analysis on areas just around these housing projects, which may also limit the extent to which results may generalize more broadly.  To identify the spillover effects of public housing projects, we focus on all outcomes within a 1.2 kilometer buffer around each cluster.  Figure~\ref{figure:bufferdesign} shows an example.  Areas where buffers overlap are excluded to ensure that the empirical exercise is able to recover the impacts due to the nearest housing project.  
+
+\begin{figure}
+\caption{Buffer Design Properties Example}\label{figure:bufferdesign}
+\centering
+\includegraphics[scale=.4]{figures/design.png} 
+\begin{itemize}
+\item Project Properties : red circles
+\item Non-Project Properties : dark green circles
+\item Buffer Area (1.2 km from clusters) : light blue area
+\end{itemize}
+\end{figure}
+
+To assess the extent to which these project areas are representative, Table~\ref{table:pricedescriptives} average characteristics for transactions in buffer areas for completed projects, buffer areas for uncompleted projects, and all other transactions outside of all buffer areas.  Average prices for completed projects closely resemble prices outside of buffer areas while uncompleted projects have much lower prices, supporting earlier evidence that these uncompleted projects are located in areas with greater slum density.  Plot sizes for properties in completed and uncompleted project buffers are similar and much smaller than plots outside of these areas.  This finding is consistent with housing projects being located nearby dense residential or slum areas instead of in rural locations throughout the province.  Close to a third of all properties are sold multiple times and all share the same median purchase year.
+
+\begin{table}
+\caption{Property Prices within Buffer Areas}\label{table:pricedescriptives}
+\centering
+\input{figures/descriptive_table} \\
+Standard errors are in parentheses.  \\ This figure excludes transactions within project areas.
+\end{table}
+
+We use a similar buffer approach to examine census characteristics by including census blocks with centroids that fall within 1.2 km buffers of projects.  Figure~\ref{figure:bufferdesigncensus} provides an example project that distinguishes between census blocks (in yellow) with greater than 30\% overlapping area with project areas and census blocks (in blue) with less than 30\% area overlap but whose centroids fall within the 1.2 km buffer.  This criteria allows for separating the direct effects of the housing projects within their footprint from the spillover effects of housing projects on the surrounding areas.  We focus on the 30\% area overlap threshold to account for cases where housing project areas are small relative to the nearest census blocks.
+
+\begin{figure}
+\caption{Buffer Design Census Block Example}\label{figure:bufferdesigncensus}
+\centering
+\includegraphics[scale=.4]{figures/design_7.png} 
+\begin{itemize}
+\item Census Blocks with $\geq$30\% project area overlap : yellow polygons 
+\item Census Blocks with $<$30\% project area overlap : blue polygons
+\item Buffer Area (1.2 km from clusters) : dotted line
+\item Project Area : red polygon
+\end{itemize}
+\end{figure}
+
+To compare census characteristics for these areas at baseline, Table~\ref{table:censusdescriptives} provides averages for households within and nearby both completed and uncompleted projects.  The first two columns find that relative to census blocks within uncompleted project areas, census blocks within completed projects have much better infrastructure (flush toilets, piped water, and electricity), but have similar household sizes and similarly likely to own and reside in formal single houses.  Lower service provision matches previous evidence that uncompleted projects are more often in areas with greater informal settlements.  These differences between uncompleted and completed projects disappear for census areas located just outside of these project areas as shown in the last two columns.  Taken together, these results suggest that despite differences in service provision within the project footprints at baseline, neighboring, spillover areas may serve as useful comparison groups.
+
+\begin{table}
+\caption{Census Characteristics in 2001 \\ by Overlap with Project Areas}\label{table:censusdescriptives}
+\centering
+\input{figures/census_hh_table} \\
+All variables are dummies for having each household attribute.
+\end{table}
+
+\subsection{Building Growth around Housing Projects}
+
+Given this descriptive evidence at baseline, we use the building structures survey to provide a first look at changes in development around completed and uncompleted projects.  Figure~\ref{figure:buildingchanges} plots the average number of new structures between 2001 and 2011 in distance rings from the boundary of both completed and uncompleted project areas.  Negative distances measure new structures within the project areas themselves.  
+
+Focusing on the left panel for completed projects, strong growth in formal residential structures at negative distances provides another measure of the direct impact of the housing projects.  We also observe strong growth in informal residential structures within project areas.  This finding is consistent with anecdotal evidence from fieldwork in South Africa pointing to the prevalence of backyard shacks where owners of project houses use the rest of their land plots to construct informal housing.  At positive distances, the growth in formal structures immediately dissipates while the growth in informal structures remains substantial up to at least 400 meters from the project border.  This sustained growth in nearby informal dwellings matches a common complaint of local housing authorities and NGOs who notice crowding-in of slum areas around project areas possibly to utilize the public services offered within the projects.  	
+
+Results for uncompleted projects in the left panel indicate a similar pattern of informal structure growth in project areas, which is consistent with these areas remaining undeveloped by housing projects.  Compared to completed projects, lower levels of formal structure growth occur within uncompleted project footprints before quickly dissipating outside of the projects.  Unlike completed project areas, informal structure growth also decreases suddenly outside of the projects, providing evidence that completed housing projects may play an important role in generating nearby growth in informal settlements.  The flat, smooth trends in structure growth past 500 meters for both completed and uncompleted projects support interpreting these regions as capturing the types of local development that we might expect in the absence of the housing projects.
+
+\begin{figure}
+\caption{Growth in Structures between 2001 and 2011}\label{figure:buildingchanges}
+\centering
+\includegraphics[scale=.58]{figures/bbluplot.pdf}
+\includegraphics[scale=.58]{figures/bbluplot_placebo.pdf}\\
+\hspace{.7cm} Completed Projects \hspace{4.2cm} Uncompleted Projects
+\end{figure}
+
+
+\section{Results: Price Spillovers}
+
+To identify the spillover effects of public housing on residential home prices in the formal market, we use a difference-in-differences approach comparing prices for areas close and far from project areas before and after project implementation.  Our main empirical strategy takes the following specification:
+\begin{equation*}
+P_{itp} \, = \, \alpha D_{tp}T_{ip} \, + \,\theta_1 D_{tp} \, + \, \,\theta_2 T_{ip}+ \, X^{'}_{i}\beta \, +  \lambda_p \,  + \, \eta_{t} \, + \, \varepsilon_{itp}
+\end{equation*}
+The outcome, $P_{itp}$, is measured in terms of the log-purchase price of property $i$ sold at time $t$ in the vicinity of project $p$.  To capture changes in prices over time within project areas, $D_{tp}$ is equal to one if date $t$ is after the month of project implementation and zero otherwise.  $T_{ip}$ takes a value of one if property $i$ is within 400m of the project boundary.  The coefficient of interest, $\alpha$ captures the differential change in prices between near and far properties before and after project construction.  $X_i$ controls for a quadratic in lot size, which can affect prices over time.  Additionally, $\lambda_p$ includes a project fixed affect controlling for any fixed, unobserved drivers of house prices that vary between projects.  Likewise, $\eta_{t}$ controls for a calendar month (year$\,\times\,$month) fixed-effect to account for any factors such as shifts in aggregate housing demand that may be correlated with prices and the timing of housing projects.
+
+Interpreting the coefficient, $\alpha$, as the causal effect of housing projects on nearby home prices requires the following assumption:
+\begin{equation*}
+E[\varepsilon_{itp}|X_{i},T_{ip},D_{tp},\lambda_p,\eta_{t}]=0
+\end{equation*}
+This assumption implies that there are no other factors occurring in the same time and place as the housing projects which may otherwise impact home prices.  One possibility is that housing markets anticipate the construction of these projects so that transactions in the pre-period may be partially treated by the advent of a housing project.  Anecdotal evidence suggests that completion dates for these projects are very uncertain due to the large coordination of stakeholders needed for each project, making it difficult to accurately anticipate implementation.  Another concern would be that housing projects are accompanied by other social programs that would stimulate investments in neighborhoods near project areas.  In order to isolate market anticipation or accompanying social programs from the actual impacts of housing projects, we estimate an identical model for planned but uncompleted projects to test the robustness of the results.
+
+Similarly, in targeting housing projects to particular areas, governments may be responding to local trends in housing markets or economic conditions.  To separate project impacts from secular market trends, we leverage the sudden roll-out of housing projects under the assumption that market trends are relatively smooth over space and time relative to the construction of housing projects.  In order to non-parametrically assess identification in this way, we also estimate a more flexible model both in terms of distance to project, $D_{tp}$ and time relative to project construction, $T_{ip}$.  Specifically, we estimate separate treatment effects for each 100 meters of distance, $\sum_{d=100}^{1200} \alpha_d D_{tpd} T_{ip}$.  We also allow effects to vary according to two-month intervals relative to construction, $\sum_{l=-36}^{36} \alpha_l D_{tp}T_{ipl}$.  All regressions cluster standard errors at the project level in order to account for potentially correlation in prices within very localized housing markets.
+
+Figure~\ref{figure:distplot} separately plots coefficients for average home prices before construction, $\alpha_{d,pre}$ and after construction, $\alpha_{d,post}$ for each 100m distance ring from housing project boundaries.  The left panel presents price gradients for completed projects.  The pre-project gradient slopes slightly upwards consistent with housing projects being located in undeveloped land or preexisting informal settlements.  After implementation, the price gradient slopes downwards sharply within 400 meters of the project area while remaining unchanged past this 400 meters threshold.  This result is consistent both with the growth of informal settlements concentrated in the same spatial interval as observed in Figure~\ref{figure:buildingchanges}.
+
+Uncompleted projects in the right panel exhibit a flat price gradient before project implementation; since uncompleted projects are more often located in large slum neighborhoods, spillover areas may closely resemble these project areas.  After the estimated date of project completion, the price gradient remains flat shifting slightly, but noisily downward at all distances from the project boundary.  These findings suggest little local spillovers from the uncompleted projects alongside a deterioration in the local housing market affecting all properties evenly.  Additionally, these results provide suggestive evidence that exact location of housing projects does not appear to be strongly correlated with housing market trends at a very local level.
+
+\begin{figure}
+\caption{Price Estimates over Distance}\label{figure:distplot}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/distplot.pdf}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/distplot_placebo.pdf}\\
+{\color{white}dddddddddddddd}Completed Projects \hspace{4.2cm} Uncompleted Projects
+\end{figure}
+
+Complementing these distance gradients, Figure~\ref{figure:timeplot} plots coefficients for average price changes over time relative to the modal construction month for properties within and beyond 400 meters of a project boundary.  Focusing on completed projects in the left panel, both areas far and near project boundaries follow a smooth, parallel evolution in prices over time.  This parallel trend provides evidence against large shifts in policy or economic conditions that may be correlated with the onset of these housing programs.  The price trajectories begin to deviate in the few months preceding the construction of the housing project.  While further away properties maintain a steady price level following the housing project, nearby properties experience a sustained dip in prices that persists up to three years after the project is implemented.  The sustained reduction in housing prices provides evidence for a lasting structural change in local housing market instead of a temporary resorting of households from nearby residences to project houses.  The dip in prices begins in the couple months before the modal transaction year, which is consistent with nearby housing markets anticipating projects during their construction periods.  One hypothesis is that given the large observed decline in house prices, it would rational for housing markets to anticipate construction, producing a declining pretrend in prices before completion date.  The absence of an extended pretrend may speak to the unpredictability of the timing for these projects, especially given high coordination costs and frequent unplanned delays.
+
+\begin{figure}
+\caption{Price Estimates over Time}\label{figure:timeplot}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/timeplot.pdf}
+   \hfill
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/timeplot_placebo.pdf}\\
+{\color{white}dddddddddddddd}Completed Projects \hspace{4.2cm} Uncompleted Projects
+\end{figure}
+
+For uncompleted projects in the right panel, areas far and near project boundaries follow similar parallel trends to completed projects leading up to the expected completion date, but then remain indistinguishable for the entire duration after this date.  This null result helps to exclude competing explanations that rely on the timing of housing projects such as targeting housing programs according to hyper-local housing market trends or pairing housing projects with other place-based policies.  
+
+Table~\ref{table:priceestcomplete} and Table~\ref{table:priceestplacebo} provide the difference-in-differences regression analogues to Figure~\ref{figure:distplot} and Figure~\ref{figure:timeplot}.  In the first column of Table~\ref{table:priceestcomplete}, we estimate a simple difference-in-differences specification and report the coefficient for properties within 400 meters of the project and 3 years of the start date.  Since the outcome is measured in log-prices, the coefficient indicates that housing prices in this range decline by 23.8\% as a result of the housing program.  Including project fixed-effects in the second column attenuates this effect to 16.6\% and reduces its statistical significance from 5\% to 10\% by accounting for fixed differences in the housing markets between clusters.  The third column disaggregates the coefficients by years following project completion.  Comparing coefficients, we only find a statistically significant coefficient for the first year of the project although effect sizes remain similar for all time intervals.  With just over 150 projects, significant noise in the housing price data, and a rich set of fixed effects, the specification has difficulty precisely recovering a price estimate.  In the spirit of Figure~\ref{figure:distplot}, the fourth column examines price effects at a finer spatial scale, finding an especially large and statistically significant price decline in the immediate 200 meters of a housing project which sharply attenuates past 200 meters.
+
+\begin{table}
+\caption{Price Estimates for Completed Projects}\label{table:priceestcomplete}
+\centering
+\input{figures/gradient_regressions}
+\end{table}
+
+Table~\ref{table:priceestplacebo} repeats the same differences-in-differences exercise in Table~\ref{table:priceestcomplete} but for uncompleted projects.  Across all four columns, estimates are statistically insignificant and very small in magnitude compared to results in Table~\ref{table:priceestcomplete}.  In column three, we find one statistically significant coefficient at the 10\% level for price effects in third year, which appears to be driven by an outlier in the 36th month (according to the right panel in Figure~\ref{figure:timeplot}).  Taken together, these results provide additional evidence that price effects are primarily driven by the construction of housing projects rather than local trends in housing markets or economic conditions.
+
+\begin{table}
+\caption{Price Estimates for Uncompleted Projects}\label{table:priceestplacebo}
+\centering
+\input{figures/gradient_regressions_placebo}
+\end{table}
+
+
+\section{Results: Infrastructure and Demographic Changes}
+
+To provide additional evidence on how the demographics and infrastructure may be changing as a result of these projects, we use slightly modified differences-in-differences design where uncompleted project areas are directly treated as counterfactuals.  The specification for analyzing the census data takes the following form:
+\begin{equation*}
+Y_{hbtp} \, = \, \alpha_{O} D_{tp} T_{bp} O_{bp} \, + \alpha_{S} D_{tp} T_{bp} S_{bp} \, + \,\theta_1 D_{tp} O_{bp} + \,\theta_2 D_{tp} S_{bp} \, + \theta_3 T_{bp} S_{bp}  \, +  \, \theta_4 S_{bp} \, +  \lambda_p \, + \, \varepsilon_{hbtp}
+\end{equation*}
+The outcome, $Y_{btph}$, includes demographic characteristics for household (or person) $h$ living in census block $b$ and project area $p$ in year $t$.  $O_{bp}$ takes a value of one for census blocks with greater than 30\% area overlap with housing projects (zero otherwise) while $S_{bp}$ is the converse identifying ``spillover'' census bocks that have less than 30\% overlap but whose centroids are still within a 1.2 km buffer of the housing project boundaries.  To account for secular changes in outcomes between 2001 and 2011 affecting all census blocks, $D_{tp}$ is equal to one if year $t$ is equal to 2011 and zero otherwise.  $T_{ip}$ takes a value of one for census blocks near completed projects and a value of zero for census blocks near uncompleted projects.  Controlling for differential time trends for overlap and spillover projects, $D_{tp} O_{bp} $ and $D_{tp} S_{bp}$ as well as separate means for both completed, $T_{bp} S_{bp}$, and uncompleted, $S_{bp}$, spillover areas leaves census blocks that overlap with uncompleted projects in the pre-period as the reference group.  $\lambda_p$ includes a project-level fixed effect to control for fixed differences in census characteristics between different projects.  The coefficients of interest, $\alpha_O$ and $\alpha_{S}$ capture the differential change in outcomes between completed and uncompleted projects separately for overlapping and spillover census blocks.  
+
+To interpret the coefficients, $\alpha_O$ and $\alpha_S$, as the causal effects of housing projects on both overlapping and spillover outcomes, we make the following assumption:
+\begin{equation*}
+E[\varepsilon_{hitp}|T_{ip},D_{bp},S_{bp},O_{bp},\lambda_p]=0
+\end{equation*}
+Intuitively, this assumption requires that there are no other factors occurring at the same time both within and around the completed housing projects that may drive changes in local demographics.  By limiting the control group to only include uncompleted projects, we make the following parallel trends assumption: outcomes in areas with completed projects would have evolved in the same ways as outcomes near uncompleted projects in the absence of the housing projects.  This design leverages the similarities in areas around completed and uncompleted projects instead of comparing project areas to the entire region of Gauteng.  To the extent that locations of housing project may be targeted to local economic conditions, other areas in the province may be less likely to satisfy this assumption.  
+
+At the same time, local economic and political conditions may determine which projects are completed and which are either canceled or delays.  To the extent that these conditions may be correlated with changes in local demographics, the assumption of parallel trends would not hold in the analysis.  Table~\ref{table:censusdescriptives} and Table~\ref{table:projectdescriptives} provide evidence that uncompleted project areas have more informal settlements and fewer services at baseline, consistent with policymakers placing less priority on finishing projects in these areas.  At the same time, spillover areas appear very similar in Table~\ref{table:censusdescriptives} suggesting that differences in trends in these areas may be more plausibly associated with completion of housing projects.  
+
+Table~\ref{table:censusestimates} provides difference-in-differences estimates for a range of household level outcomes.  The first two rows include the coefficients of interests, which measure the differential change in outcomes for completed and uncompleted projects.  The first row reports effects for census blocks with greater than 30\% overlap (Project) and the second row includes census blocks with less than 30\% overlap (Spillover).  Broadly, infrastructure and home quality measures (flush toilet, piped water, single house, and number of rooms)increase in overlapping areas while these same measures decrease in spillover areas.  Many effects ares statistically significant at the 5 to 1\% level, and are large in magnitude.  For example, the estimates predict a 21\% increase in piped water for project areas with a corresponding decrease of 7\% in spillover areas.  While we observe large changes in infrastructure provision, estimates are small and insignificant for household size and home ownership.
+
+The third and fourth rows capture secular changes in outcomes over time for uncompleted project areas.  These measures indicate large overall increases in infrastructure and home quality measures in roughly similar magnitude for spillover and project areas.
+
+\begin{table}
+\caption{Census Household-level Estimates}\label{table:censusestimates}
+\centering
+\begin{adjustbox}{angle=90}
+\resizebox{\textheight}{!}{  
+\input{figures/census_DD_hh_sample}
+%Project census blocks have $>$30\% project overlap.  Spillover census blocks have $\leq$30\% project overlap.
+}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{table:censusestimatesperson} repeats the same exercise focusing on changes in demographic composition for households living in these areas.  In the first row of column one, we find a statistically significant decrease in the share of high school (or greater) educated adults by around 3.6\%.  One explanation is that the housing policies are able to target recipients based on means and many of the original beneficiaries continue to reside in project areas.  For spillover areas and measures of household income and employment, we find no detectable effect of the housing program.
+
+\begin{table} 
+\caption{Census Person-level Demographic Estimates}\label{table:censusestimatesperson}
+\centering 
+\input{figures/census_DD_pers_sample}
+\end{table}
+
+
+\section{Discussion}
+
+
+Taken together, these census results suggest that ...
 
 
 
 
 
-
-
-
-PUT IN BUFFER PICTURE AND DISCUSS
-
+\section{Conclusion}
 
 
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%% THEN PUT IN THE THEORY!! %%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-%To differentiate between greenfield and in-situ upgrading projects, we use the building survey to measure the density of informal structures per project area in 2001, prior to the construction of large housing projects.
-%\begin{table}
-%	\centering
-%	\caption{Housing Project Descriptives}\label{table:projectdescriptives}
-%\input{figures/housing_project_table}
-%\end{table}
-
-% In order to focus on public housing projects as separate from land-titling programs or 
-
-% We combine this data with 
-
-
-%% reference a map of BBLU data ?!
-
-% For demographic and economic outcomes, we turn to the census of population for 2001 and 2011 includes information about dwelling type, employment, income, and demographics for each household. 
-
-
-
-
-% Table~\ref{table:descriptives} provides descriptive statistics dividing transactions between properties outside and inside a 1.2 kilometer radius of the nearest housing project.  We find that 
-
-
-
-%  The population census  The smallest level of geography available is census block where 
-
-%We are able to identify households within a census block,
-
-%We use the smallest level of geography available, which leaves us with 1,00
-
-% We capture demographic responses to the 
-
-% and where administrative data on housing projects.  
-
-
-
-% \begin{table}
-%	\centering
-%	\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
-%	\input{figures/descriptive_table} \\
-%	\vspace{.2cm}
-%\footnotesize{Buffers include properties within 1.2 kilometers of a housing project.  These data exclude public housing projects themselves.}
-%\end{table}
 
 
 

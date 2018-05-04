@@ -130,44 +130,8 @@ cd ../..;
 cd $output ;
 
 global ifsample = "
-  (cluster < 1000 & frac1>.5 & mode_yr>2002 &
-    cluster != 1   &
-    cluster != 23  &
-    cluster != 72  &
-    cluster != 132 &
-    cluster != 170 &
-    cluster != 171 )
-  |(cluster >= 1009 & placebo_yr!=. & placebo_yr > 2002 &
-    cluster != 1013 &
-    cluster != 1019 &
-    cluster != 1046 &
-    cluster != 1071 &
-    cluster != 1074 &
-    cluster != 1075 &
-    cluster != 1078 &
-    cluster != 1079 &
-    cluster != 1084 &
-    cluster != 1085 &
-    cluster != 1092 &
-    cluster != 1095 &
-    cluster != 1117 &
-    cluster != 1119 &
-    cluster != 1125 &
-    cluster != 1126 &
-    cluster != 1127 &
-    cluster != 1164 &
-    cluster != 1172 &
-    cluster != 1185 &
-    cluster != 1190 &
-    cluster != 1202 &
-    cluster != 1203 &
-    cluster != 1218 &
-    cluster != 1219 &
-    cluster != 1220 &
-    cluster != 1224 &
-    cluster != 1225 &
-    cluster != 1230 &
-    cluster != 1239)
+  (cluster < 1000 & frac1>.5 & mode_yr>2002 )
+  |(cluster >= 1000 & placebo_yr!=. & placebo_yr > 2002 )
   ";
 
 * group definitions;
@@ -189,9 +153,12 @@ gen ptreat 	= post*treat;
 
 * flush toilet?;
 gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
+lab var toilet_flush "Flush Toilet";
 
 * piped water?;
 gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
+lab var water_inside "Piped Water Inside";
+
 gen water_yard   = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
 
 * water source?;
@@ -200,72 +167,72 @@ gen water_utility = (water_source==1) if !missing(water_source);
 * electricity?;
 gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
 gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
+lab var electric_cooking "Electric Cooking";
+
 gen electric_heating  = enrgy_heating==1 if !missing(enrgy_heating);
 gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);
+lab var electric_lighting "Electric Lighting";
 
 * tenure?;
 gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001) if !missing(tenure);
+lab var owner "Owns House";
+
 
 * house?;
 gen house = dwelling_typ==1 if !missing(dwelling_typ);
+lab var house "Single House";
+
+replace tot_rooms=. if tot_rooms>9;
+lab var tot_rooms "No. Rooms";
+
+replace hh_size=. if hh_size>10;
+lab var hh_size "Household Size";
 
 
-eststo clear;
-*areg hh_size 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-*eststo reg1; 
-*areg tot_rooms 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-*eststo reg2;
-areg toilet_flush 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-eststo reg3; 
-areg water_inside 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-eststo reg4;
-areg electric_cooking 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-eststo reg5;
-*areg electric_heating 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-*eststo reg6;
-areg electric_lighting 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster); 
-eststo reg7;
-*areg owner 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-*eststo reg8; 
-areg house 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
-eststo reg9; 
+g gr_1=gr==1;
+lab var gr_1 "Project Area";
 
-esttab reg3 reg4 reg5 reg7 reg9 using census_DD_hh_sample,
-keep(*ptreat*) 
-replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
-compress;
+g gr_2=gr==2;
+lab var gr_2 "Spillover";
 
+g gr_1_treat = gr_1*treat;
+lab var gr_1_treat "Project X Complete";
 
-eststo clear;
-*areg hh_size 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
-*eststo reg1;  
-*areg tot_rooms 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
-*eststo reg2; 
-areg toilet_flush 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-eststo reg3;  
-areg water_inside 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-eststo reg4; 
-areg electric_cooking 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-eststo reg5; 
-*areg electric_heating 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-*eststo reg6; 
-areg electric_lighting 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-eststo reg7; 
-*areg owner 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-*eststo reg8; 
-areg house 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
-eststo reg9; 
+g gr_2_treat = gr_2*treat;
+lab var gr_2_treat "Spillover X Complete";
 
-esttab reg3 reg4 reg5 reg7 reg9 using census_DD_hh,
-keep(*ptreat*) 
-replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
-compress;
-  
+g gr_1_post = gr_1*post;
+lab var gr_1_post "Project X Post";
+
+g gr_2_post = gr_2*post;
+lab var gr_2_post "Spillover X Post";
+
+g gr_1_post_treat = gr_1*post*treat;
+lab var gr_1_post_treat "Project X Post X Complete";
+
+g gr_2_post_treat = gr_2*post*treat;
+lab var gr_2_post_treat "Spillover X Post X Complete";
 
 
 
+global vars "  gr_1_post_treat gr_2_post_treat  gr_1_post gr_2_post gr_2_treat gr_2 ";
+global outcomes "water_inside electric_cooking electric_lighting house owner tot_rooms hh_size";
+order $vars;
 
+local table_name "census_DD_hh_sample.tex";
 
+areg toilet_flush $vars if $ifsample , a(cluster) cl(cluster);
+       outreg2 using "`table_name'", label  tex(frag) 
+replace addtext(Project FE, YES) keep(gr_*) 
+addnote("Standard errors are clustered at the project level.");
+
+foreach var of varlist $outcomes {;
+areg `var' $vars if $ifsample , a(cluster) cl(cluster);
+       outreg2 using "`table_name'", label  tex(frag) 
+append addtext(Project FE, YES) keep(gr_*) ;
+};
+
+exit STATA, clear;
 
 
 

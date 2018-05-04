@@ -19,10 +19,10 @@ global fr2 = "0";
 global bin = 10; /* distance bin width */
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 
 * MAKE DATASET?;
-global DATA_PREP = 0;
+global DATA_PREP = 1;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -108,5 +108,4 @@ reg delta b1190.dists_reg#b1.formal i.cluster if $ifregs;
 plotreg bbluplot bbluplot;
 restore;
 
-* exit stata;
-*exit, STATA clear; 
+exit, STATA clear; 

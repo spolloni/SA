@@ -17,10 +17,10 @@ global output = "Code/GAUTENG/paper/figures";
 global bin = 10; /* distance bin width */
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 
 * MAKE DATASET?;
-global DATA_PREP = 0;
+global DATA_PREP = 1;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -93,37 +93,7 @@ bys cluster_placebo dists_placebo post formal: g count =_N;
 bys cluster_placebo dists_placebo post formal: g n =_n;
 
 global ifregs = "
-   (cluster_placebo >= 1009 & placebo_yr!=. & placebo_yr > 2002 &
-    cluster_placebo != 1013 &
-    cluster_placebo != 1019 &
-    cluster_placebo != 1046 &
-    cluster_placebo != 1071 &
-    cluster_placebo != 1074 &
-    cluster_placebo != 1075 &
-    cluster_placebo != 1078 &
-    cluster_placebo != 1079 &
-    cluster_placebo != 1084 &
-    cluster_placebo != 1085 &
-    cluster_placebo != 1092 &
-    cluster_placebo != 1095 &
-    cluster_placebo != 1117 &
-    cluster_placebo != 1119 &
-    cluster_placebo != 1125 &
-    cluster_placebo != 1126 &
-    cluster_placebo != 1127 &
-    cluster_placebo != 1164 &
-    cluster_placebo != 1172 &
-    cluster_placebo != 1185 &
-    cluster_placebo != 1190 &
-    cluster_placebo != 1202 &
-    cluster_placebo != 1203 &
-    cluster_placebo != 1218 &
-    cluster_placebo != 1219 &
-    cluster_placebo != 1220 &
-    cluster_placebo != 1224 &
-    cluster_placebo != 1225 &
-    cluster_placebo != 1230 &
-    cluster_placebo != 1239)
+   (cluster_placebo >= 1009 & placebo_yr!=. & placebo_yr > 2002)
   ";
 
 preserve;
@@ -139,5 +109,4 @@ reg delta b1190.dists_reg#b1.formal if $ifregs;
 plotreg bbluplot bbluplot_placebo;
 restore;
 
-* exit stata;
-*exit, STATA clear; 
+exit, STATA clear; 
