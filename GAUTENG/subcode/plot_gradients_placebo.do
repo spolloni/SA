@@ -11,7 +11,8 @@ set maxvar 32767
 
 * SET OUTPUT LOCATION;
 * global output = "Output/GAUTENG/gradplots_placebo";
-global output = "Code/GAUTENG/paper/figures";
+* global output = "Code/GAUTENG/paper/figures";
+global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 
 * PARAMETERS;

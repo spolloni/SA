@@ -101,6 +101,8 @@
 \setbeamertemplate{enumerate items}[circle]
 \usepackage{tikz}
 
+\usepackage{dsfont}
+
 \newcommand\mynum[1]{
   \usebeamercolor{enumerate item}
   \tikzset{beameritem/.style={circle,inner sep=0,minimum size=2ex,text=enumerate item.bg,fill=enumerate item.fg,font=\footnotesize}}%
@@ -143,81 +145,113 @@ joint with Ben Bradlow and Will Violette}
 %\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
 %\end{frame}
 
+
+%------------------------------------------------
+
+%\begin{frame}
+%\frametitle{Slums and Development}
+%\input{gradient_regressions_het}
+%\end{frame}
+
+
+
+
 %----------------------------------------------------------------------------------------
 %	PRESENTATION SLIDES
 %----------------------------------------------------------------------------------------
 \section{Introduction}
 %------------------------------------------------
 
+
+
+
 \begin{frame}
-\frametitle{Slums and Development}
+\frametitle{Public Housing and Development}
 
 % In developing countries, 30\% of urban pop live in slums (UN, 2015)
 
 \begin{itemize}
-  \item Slum externalities $\rightarrow$ lasting poverty traps (Marx, 2013) 
-    \begin{itemize}
-      \item Poor infrastructure, high crime, health externalities
-      \item Weak incentives to invest in housing/public goods
-    \end{itemize}  
-\vspace{.2cm}
-\pause
-  \item \textbf{Public Housing} $\rightarrow$ primary government response
-\end{itemize}
-    \pause
-\begin{enumerate}
-  \item Direct Recipient Impacts
-    \begin{itemize}
-      \item Health, Wellbeing, Employment, Redistribution \\ \footnotesize{(Cateneo et al. [2009], Franklin et al. [2016], Galiani et al. [2017])}
-    \end{itemize}
-% ``key strategy for poverty alleviation'' {\footnotesize{South Africa}}
-    \pause
-    \vspace{.1cm}
-\item Neighborhood Development
-  \begin{itemize}
-    \item ``combating crime, promoting social cohesion... spatial restructuring'' South Africa Dept. of Human Settlements
-    \pause
-    \item Little research on spillovers \footnotesize{(Diamond and McQuade (2016))}
-  \end{itemize}
-\end{enumerate}
-
-\begin{itemize}
-  \item \textbf{Question} \\ 
+%  \item Slum externalities $\rightarrow$ lasting poverty traps (Marx, 2013) 
+%    \begin{itemize}
+%      \item Poor infrastructure, high crime, health externalities
+%      \item Weak incentives to invest in housing/public goods
+%    \end{itemize}  
+%\vspace{.2cm}
+%\pause
+  \item Public Housing $\rightarrow$ primary government response to slums
   \vspace{.1cm}
-  What are the spillovers from public housing in developing contexts?
+  \item Positive effects on direct recipients \\ 
+  {\footnotesize (Cateneo et al. [2009], Franklin et al. [2016], Galiani et al. [2017])}
+  \vspace{.1cm}
+  \item \textbf{Question:}  What are the spillover effects of public housing in developing countries?
+      \begin{itemize}
+      \item \textit{Positive:} Amenity value
+      \item \textit{Negative:} Crowd-in slums
+    \end{itemize}
+  \vspace{.1cm}
+  \item \textbf{Setting:} 150+ projects in South Africa; GPS price and slum data
+  \vspace{.1cm}
+  \item \textbf{Findings:} Home prices drop by 16\% within 3 yrs and 400m of a project
+    \begin{itemize}
+      \item Home quality improves within project footprint but declines nearby (slum crowd-in)
+    \end{itemize}
 \end{itemize}
-% ``combating crime, promoting social cohesion... spatial restructuring,'' {\footnotesize{South Africa}}
+%    \pause
+
+%\begin{enumerate}
+%
+%% ``key strategy for poverty alleviation'' {\footnotesize{South Africa}}
+%%    \pause
+%    \vspace{.1cm}
+%\item Neighborhood Development
+%  \begin{itemize}
+%%    \item ``combating crime, promoting social cohesion... spatial restructuring'' South Africa Dept. of Human Settlements
+%%    \pause
+%%    \item \footnotesize{In US: Diamond \& McQuade [2016], Baum-Snow \& Marion [2008]}
+%  \end{itemize}
+%\end{enumerate}
+%\begin{itemize}
+%  \item \textbf{Question} \\ 
+%  \vspace{.1cm}
+%  What are the spillovers from public housing in developing contexts?
+%\end{itemize}
+%% ``combating crime, promoting social cohesion... spatial restructuring,'' {\footnotesize{South Africa}}
 \end{frame}
 
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{This Paper}
-
-\begin{itemize}
-  \item \textbf{Question} \\ 
-  \vspace{.1cm}
-  What are the spillovers from public housing in developing contexts?
-  \vspace{.1cm}
-    \begin{itemize}
-      \item \textbf{Positive:} Incentivize investments in housing/public goods
-      \item \textbf{Negative:} Crowd in slum growth
-    \end{itemize}
-
-\pause
-\vspace{1mm}
-\item \textbf{Approach} \\ Leverage precise timing/geography of large housing projects
-\vspace{1mm}
-\item \textbf{New Data and Setting} \\ 172 projects in South Africa combined with GPS property transactions and slum growth data
-\vspace{1mm}
-\item \textbf{Initial Findings} \\ Housing projects depress home prices by 5\% within 300 meters
-\begin{itemize}
-  \item heterogeneity
-  \item ballpark estimates
-\end{itemize}
-\end{itemize}
-
-\end{frame}
+% \begin{frame}
+% \frametitle{This Paper}
+% 
+% \begin{itemize}
+%   \item \textbf{Question} \\ 
+%   \vspace{.1cm}
+%   What are the spillovers from public housing in developing contexts?
+%   \vspace{.1cm}
+%     \begin{itemize}
+%       \item \textbf{Positive:} Amenity value
+%       \item \textbf{Negative:} Crowd-in slums
+%     \end{itemize}
+% 
+% %\pause
+% \vspace{1mm}
+% \item \textbf{Approach} \\ Leverage precise timing/geography of large housing projects
+% \vspace{1mm}
+% \item \textbf{New Data and Setting} \\ Over 150 projects in South Africa combined with GPS property transactions and slum % growth data
+% \vspace{1mm}
+% \item \textbf{Initial Findings} \\ Housing projects depress home prices by 5\% within 300 meters
+% \begin{itemize}
+%   \item heterogeneity
+%   \item ballpark estimates
+% \end{itemize}
+% %%%%%%%%%%%%%%%%%%%%%%%%% FIX THIS!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%% FIX THIS!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%% FIX THIS!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%% FIX THIS!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% \end{itemize}
+% 
+% \end{frame}
 
 
 %------------------------------------------------
@@ -230,20 +264,28 @@ joint with Ben Bradlow and Will Violette}
 %      \item Single-story, two-room (30-40$\text{m}^2$) dwellings
       \begin{itemize}
         \item 50 to 500 houses per project
+        \item Fully serviced (roads, water, sanitation, electricity)
+        \item Greenfield projects on undeveloped land near slums
+        \item In-Situ upgrading replacing existing slums
       \end{itemize}
+     %     \begin{enumerate}
+     %       \item \textbf{Greenfield projects} on undeveloped land near slums
+     %       \item \textbf{In-Situ upgrading} replacing existing slums
+     %     \end{enumerate}
   \end{itemize}
     %%% insert picture
 
 
 \begin{itemize}
         \item Who gets a house?
+          \vspace{.1cm}
       \begin{itemize}
         \item Official Policy: 
           \begin{itemize}
-            \item National/provincial waiting lists
-            \item No resale within 7 years
-            \item Citizens, new homeowners, married or dependents, inc/month $<$R3,500
+            \item National/provincial waiting list; no resale within 7 years
+            \item Must be eligible: Citizens, new homeowners, married or dependents, inc/month $<$R3,500
           \end{itemize}
+          \vspace{.1cm}
         \item In Practice:
           \begin{itemize}
             \item Waiting lists/eligibility weakly enforced
@@ -251,55 +293,37 @@ joint with Ben Bradlow and Will Violette}
           \end{itemize}
       \end{itemize}
 \end{itemize}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Where are these houses built?}
-
-\begin{enumerate}
-  \item \textbf{Greenfield projects} on undeveloped land near slums
-  \item \textbf{In-Situ upgrading} replacing existing slums
-\end{enumerate}
-
-\begin{itemize}
-  \item insert picture here
-\end{itemize}
-
-\begin{itemize}
-  \item Projects are fully serviced (roads, water, sanitation, electricity)
-\end{itemize}
-    %%% insert small maps of pre-post periods (with cherry picked examples) (with google maps? or bblu?) or find good sattelite from an evaluation?
 
 \end{frame}
+
 
 %------------------------------------------------
 
 
-
-\begin{frame}
-\frametitle{Conceptual Framework: Public Housing Impacts}
-
-\begin{enumerate}
-  \item \textbf{Amenity Effect:} Upgrading housing stock/services
-    \begin{itemize}
-        \item Increase value of neighboring homes (Rossi-Hansberg [2010])
-    \end{itemize}
-\vspace{.2cm} 
-
-  \item \textbf{Crowd-In Slums:} Reduce costs of informal housing
-    \begin{itemize}
-        \item Overburden services, health/crime externalities
-        \item Reduce value of nearby houses
-    \end{itemize}
-\vspace{.2cm}
-
-  \item \textbf{Demographic Effect:} New people in the neighborhood
-    \begin{itemize}
-        \item Taste-based discrimination (Diamond and McQuade [2016])
-    \end{itemize}
-\end{enumerate}
+%\begin{frame}
+%\frametitle{Conceptual Framework}
+%
+%How would housing projects spillover to neighborhood outcomes?
+%\vspace{.2cm}
+%\begin{enumerate}
+%  \item \textbf{Amenity Effect:} Upgrading housing stock/services
+%    \begin{itemize}
+%        \item Increase value of neighboring homes (Rossi-Hansberg [2010])
+%    \end{itemize}
+%\vspace{.2cm} 
+%
+%  \item \textbf{Crowd-In Slums:} Reduce costs of informal housing
+%    \begin{itemize}
+%        \item Overburden services, health/crime externalities
+%        \item Reduce value of nearby houses
+%    \end{itemize}
+%\vspace{.2cm}
+%
+%  \item \textbf{Demographic Effect:} New people in the neighborhood
+%    \begin{itemize}
+%        \item Taste-based discrimination (Diamond and McQuade [2016])
+%    \end{itemize}
+%\end{enumerate}
 
 %\begin{enumerate}
 %  \item Housing externalities  {\small (Rossi-Hansberg [2010]) }
@@ -316,8 +340,7 @@ joint with Ben Bradlow and Will Violette}
 %\vspace{.1cm}
 %  \item Access to public goods (water, sewer, road infrastructure)
 %\end{enumerate}
-
-\end{frame}
+%\end{frame}
 
 
 
@@ -333,34 +356,40 @@ joint with Ben Bradlow and Will Violette}
 \end{itemize}
 
 \begin{enumerate}
-\item \textbf{Property Transactions} measure housing projects and price impacts
+\item \textbf{Property Transactions} 500,000 deeds records (bottom 20\% of formal housing market)
   \begin{itemize}
-    \item 500,000 deeds records (bottom 20\% of formal housing market)
     \item Buyer/seller name, GPS, price, date from 2002-2011
   \end{itemize}
-\vspace{.2cm}
-\item \textbf{Building Census} identifies slum-growth and in-situ upgrading
+\vspace{.1cm}
+\item \textbf{Building Census:} GPS for over 4 mil. buildings in 2001 and 2011
+\vspace{.1cm}
+\item \textbf{Population Census:} in 2001 and 2011
+\vspace{.1cm}
+\item \textbf{Admin. Project Records:} location, dates, costs
   \begin{itemize}
-    \item 4 mil. residential buildings (50\% informal) GPS in 2001 and 2011
-  \end{itemize}
-\vspace{.2cm}
-\item \textbf{Population Census} measures demographic and economic impacts
-  \begin{itemize}
-    \item Full census for 18,000 census blocks in 2001 and 2011
-  \end{itemize}
-\vspace{.2cm}
-\item \textbf{Administrative Data} map projects (construction dates and costs)
-  \begin{itemize}
-    \item Not comprehensive
     \item Includes planned but unconstructed projects
   \end{itemize}
-
-
 \end{enumerate}
 
 \end{frame}
 
 %------------------------------------------------
+
+\begin{frame}
+\frametitle{Identifying Housing Projects}
+
+Completed projects:
+\begin{itemize}
+\item Use sales from government sellers on previously empty land plots
+\item Cluster sales into projects based on geographic proximity
+\item Include projects where over 50\% of sales occurred in the same year
+\end{itemize}
+
+\end{frame}
+
+
+
+
 
 %  
 %  
@@ -379,13 +408,13 @@ joint with Ben Bradlow and Will Violette}
 \onslide<2->\node[overlay,anchor=west,align=left] at (0, 1.5) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{1}
-  \item \textbf{Subsidy Value:} exclude purchase prices R50,000 above subsidy value
+  \item \textbf{Subsidy Value:} exclude purchase prices R50,000 above subsidy value ($<$4\% of remaining transactions)
 \end{enumerate}}\end{minipage}};
 
 \onslide<3->\node[overlay,anchor=west,align=left] at (0, .5) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{2}
-  \item \textbf{Pre-Existing Formal Dwellings:} exclude land plots with formal structures in 2001 building census
+  \item \textbf{Pre-Existing Formal Dwellings:} exclude land plots with formal structures in 2001 building census (31\% of remaining transactions)
 \end{enumerate}}\end{minipage}};
 
 \onslide<4->\node[overlay,anchor=west,align=left] at (0, -.5) {    \begin{minipage}{1\textwidth} { 
@@ -397,7 +426,7 @@ joint with Ben Bradlow and Will Violette}
 \onslide<5->\node[overlay,anchor=west,align=left] at (0, -1.5) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{4}
-  \item \textbf{Temporal Clustering:} include clusters with $>$50\% of transactions during modal year
+  \item \textbf{Temporal Clustering:} include clusters with $>$50\% of transactions during modal year (\%50 of clusters)
 \end{enumerate}}\end{minipage}};
 
 \onslide<5->\node[overlay,anchor=west,align=left] at (0, -2.6) {    \begin{minipage}{1\textwidth} { 
@@ -418,11 +447,11 @@ joint with Ben Bradlow and Will Violette}
 % descriptive_statistics.do   program: write_biggest_sellers
 
 
-\onslide<2>\node[overlay,anchor=west,align=left] at (0, -1.7) { 
+\onslide<2>\node[overlay,anchor=west,align=left] at (0, -2) { 
 \begin{minipage}{1\textwidth} { 
 \begin{figure}
 \caption{Purchase Price Densities}
- \includegraphics[scale=.53]{price_histogram.pdf} 
+ \includegraphics[scale=.5]{price_histogram.pdf} 
 \end{figure}
 }\end{minipage} 
 } ;
@@ -469,26 +498,202 @@ joint with Ben Bradlow and Will Violette}
       \item Delays often exceed 12 years 
     \end{itemize} 
 \end{itemize}
-
 \end{frame}
-
 
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Housing Projects}
-\begin{table}
-\caption{Housing Projects and Building Growth}
+\begin{center}
 \input{project_joint_table}
-\end{table}
-\vspace{.2cm} 
-Density is building number per square kilometer.
+\end{center}
+Home counts are from building census.
+\end{frame}
+
+
+
+%-------------------- BUILDING COUNTS --------------
+\begin{frame}
+\frametitle{How do projects affect housing growth?}
+\begin{itemize}
+  \item Count structures within 50 by 50 meter grids
+\end{itemize}
+\begin{center}
+\includegraphics[scale=0.33]{bblu_map.pdf}
+\vspace{-3mm}
+\end{center}
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Measure outcomes in close neighborhoods}
+\frametitle{Estimating Differences-in-Differences}
+
+\begin{align*}
+H_{gtp} \, &= \, \sum_{d=1}^{D} \alpha_d \mathds{1}[dist=d] Post_{tp} C_p + \sum_{d=1}^{D} \beta_d \mathds{1}[dist=d] Post_{tp} U_p   \\
+& +  \lambda_g \, + \, \varepsilon_{gtp}
+\end{align*}
+
+\begin{itemize}
+\item $g$: grid cell, $t$: year (2001, 2011), $p$: project
+\item $H_{gtp}$: Houses per grid cell
+\item $dist$: distance from boundary ($<0$ within project)
+\item $Post_{tp}$: After project
+\item $C_{bp}$: Completed, $U_{bp}$: Uncompleted
+\item $\lambda_g$: grid cell fixed effect
+\end{itemize}
+
+\begin{itemize}
+  \item \textbf{Identification}: Counterfactual outcomes for completed projects would have changed in the same way as uncompleted projects.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+%\begin{frame}
+%\frametitle{All Houses}
+%\begin{center}
+%\includegraphics[scale=.78]{distplot_bblu_b.pdf}
+%\vspace{-3mm}
+%\end{center}
+%\end{frame}
+
+\begin{frame}
+\frametitle{Formal Houses}
+\begin{center}
+\includegraphics[scale=.78]{distplot_bblu_for.pdf}
+\vspace{-3mm}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Informal Houses (Slums)}
+\begin{center}
+\includegraphics[scale=.78]{distplot_bblu_inf.pdf}
+\vspace{-3mm}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Commercial Buildings}
+\begin{center}
+\includegraphics[scale=.78]{distplot_bblu_shops.pdf}
+\vspace{-3mm}
+\end{center}
+\end{frame}
+
+%---------------------  CENSUS EFFECTS  ---------------------------
+
+\begin{frame}
+\frametitle{How do projects affect census demographics?}
+\begin{itemize}
+  \item Project Blocks: $>$30\% overlap (yellow)
+  \item Spillover Blocks: $<$30\% overlap, centroids within 1.2 km (blue)
+\end{itemize}
+\begin{center}
+\begin{figure}
+\includegraphics[scale=0.27]{design_7.png}
+\vspace{-3mm}
+\end{figure}
+\end{center}
+\end{frame}
+
+
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Census Descriptives at Baseline (2001)}
+\begin{itemize}
+    \item Uncompleted project areas have worse outcomes
+    \item Spillover areas are comparable
+\end{itemize}
+\vspace{.1cm}
+\centering
+\resizebox{\textwidth}{!}{  
+\input{census_hh_table}
+}
+% descriptive_statistics.do program: write_census_hh_table
+\end{frame}
+
+
+%------------------------------------------------
+
+
+
+\begin{frame}
+\frametitle{Census Difference-in-Differences}
+\begin{align*}
+Y_{hbtp} \, &= \, \alpha_{1} \, Post_{tp}\,  C_{bp}\,  Project_{bp} \, + \alpha_{2} \, Post_{tp} \, C_{bp} \, Spillover_{bp} \,   \\
+&\\
+&+ \,\theta_1\,  Post_{tp} \, Project_{bp} + \,\theta_2 \, Post_{tp} \, Spillover_{bp}  \,  \\
+&\\
+& + \theta_3\,  C_{bp} \, Spillover_{bp} \, +  \, \theta_4 \, Spillover_{bp} \, +  \lambda_p \, + \, \varepsilon_{hbtp}
+\end{align*}
+
+\begin{itemize}
+\item $h$: household, $b$: census block, $t$: year (2001, 2011), $p$: project
+\item $Post_{tp}$: After project
+\item $C_{bp}$: Completed
+\item $Project_{bp}$: $>$\%30 overlap
+\item $Spillover_{bp}$: $\leq$\%30 overlap
+\item $\lambda_p$: Project fixed effect
+\end{itemize}
+
+\begin{itemize}
+  \item \textbf{Identification}: Counterfactual outcomes for completed projects would have changed in the same way as uncompleted projects.
+\end{itemize}
+
+
+% descriptive_statistics.do program: write_census_hh_table
+\end{frame}
+
+
+
+%------------------------------------------------
+
+
+
+\begin{frame}
+\frametitle{Census Differences-in-Differences Estimates}
+
+\resizebox{\textwidth}{!}{  
+\input{census_DD_hh_sample_1}
+%Project census blocks have $>$30\% project overlap.  Spillover census blocks have $\leq$30\% project overlap.
+}
+
+% descriptive_statistics.do program: write_census_hh_table
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Census Differences-in-Differences Estimates}
+
+\resizebox{\textwidth}{!}{  
+\input{census_DD_hh_sample_2}
+%Project census blocks have $>$30\% project overlap.  Spillover census blocks have $\leq$30\% project overlap.
+}
+
+% descriptive_statistics.do program: write_census_hh_table
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+%-------------------- PRICE EFFECTS --------------
+
+\begin{frame}
+\frametitle{How do projects affect local housing prices?}
 \begin{itemize}
   \item Focus on 1.2 km buffers around housing projects
 \end{itemize}
@@ -502,42 +707,72 @@ Density is building number per square kilometer.
 
 %------------------------------------------------
 
+
 \begin{frame}
 \frametitle{Housing Price Descriptives}
-\begin{table}
-\caption{Price Descriptives}
 \centering
+\vspace{.1cm}
 \resizebox{.95\textwidth}{!}{  
 \input{descriptive_table}
 }
-\end{table}
 % descriptive_statistics.do program: write_descriptive_table
 \end{frame}
 
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{Census Descriptives}
 
-\centering
-\resizebox{\textwidth}{!}{  
-\input{census_hh_table}
-}
-% descriptive_statistics.do program: write_census_hh_table
+\begin{frame}
+\frametitle{Estimating Differences-in-Differences}
+
+\begin{align*}
+P_{itp} \, =& \, \sum_{d=1}^{D} \alpha_d \mathds{1}[dist=d] Post_{tp} \, + \sum_{d=1}^{D} \alpha_d \mathds{1}[dist=d] Pre_{tp} \\
+& + \, \gamma_t \, + \, \lambda_p \, + \theta X_{i} + \, \varepsilon_{itp} \\
+P_{itp} \, =& \, \sum_{e=1}^{E} \alpha_j \mathds{1}[time=e] Near_{tp} + \sum_{e=1}^{E} \alpha_j \mathds{1}[time=e] Far_{tp} \\
+& \, + \, \gamma_t \, + \, \lambda_p \, + \theta X_{i} + \, \varepsilon_{btp}
+\end{align*}
+
+\begin{itemize}
+\item $i$: transaction, $t$: year-month, $p$: project
+\item $P_{gtp}$: Purchase price (formal houses)
+\item $dist$: dist to project, $Near_{tp}$: $<$400m, $Far_{tp}$: $\geq$400m \& $<$1200
+\item $time$: months to project, $Post_{tp}$: 36 months after, $Pre_{tp}$ 36 before
+\item $\lambda_p$: project fixed effect, $\gamma_t$: calendar month fixed effect
+\end{itemize}
+
 
 \end{frame}
 
 
+\begin{frame}
+\begin{figure}
+\caption{Price Estimates over Distance}\label{figure:distplot}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{distplot.pdf}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{distplot_placebo.pdf}\\
+{\color{white}dd}Completed Projects \hspace{4.2cm} Uncompleted Projects
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}
+\begin{figure}
+\caption{Price Estimates over Time}\label{figure:timeplot}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{timeplot.pdf}
+   \hfill
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{timeplot_placebo.pdf}\\
+{\color{white}dd}Completed Projects \hspace{4.2cm} Uncompleted Projects
+\end{figure}
+\end{frame}
 %------------------------------------------------
 
 %% THIS SLIDE INCLUDES THE MATCHING METHOD %% 
-\begin{frame}
-\frametitle{Matching Method}
 
-\centering
-\input{string_match}
-
-\end{frame}
+%\begin{frame}
+%\frametitle{Matching Method}
+%\centering
+%\input{string_match}
+%\end{frame}
 
 
 

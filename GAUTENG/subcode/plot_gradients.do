@@ -12,7 +12,9 @@ set maxvar 32767
 
 * SET OUTPUT FOLDER ;
 * global output = "Output/GAUTENG/gradplots";
-global output = "Code/GAUTENG/paper/figures";
+* global output = "Code/GAUTENG/paper/figures";
+global output = "Code/GAUTENG/presentations/presentation_lunch";
+
 
 
 * PARAMETERS;

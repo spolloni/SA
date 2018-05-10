@@ -15,12 +15,32 @@ from pysqlite2 import dbapi2 as sql
 import subprocess, ntpath, glob, pandas, csv
 
 
+### CREATES BBLU XY COORDINATE TABLE
+
+def bblu_xy(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    for name in ['bblu_pre', 'bblu_post']:
+        table=name+'_xy'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                CREATE TABLE {} AS
+                SELECT OGC_FID, ST_X(GEOMETRY) AS X, ST_Y(GEOMETRY) AS Y
+                FROM {};
+                '''.format(table,name))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'OGC_FID'))
+
 
 ### CREATES A GRID AROUND THE RDP AND PLACEBO BUFFER AREAS
 
+
 def add_grid(db,grid_size,buffer_type):
     
-    name = 'grid'
+    name = 'grid_2'
 
     con = sql.connect(db)
     cur = con.cursor()
@@ -54,6 +74,19 @@ def add_grid(db,grid_size,buffer_type):
     drop_full_table('grid_temp_3')    
     drop_full_table('buffer_union')
     drop_full_table('buffer_union_hull')
+
+    #drop_full_table('placebo_buffers_{}_valid'.format(buffer_type))
+    #drop_full_table('placebo_conhulls_valid')
+    #con.execute('''
+    #        CREATE TABLE placebo_buffers_{}_valid AS
+    #        SELECT CastToMultiPolygon(ST_MAKEVALID(GEOMETRY)) AS GEOMETRY FROM placebo_buffers_{};
+    #    '''.format(buffer_type,buffer_type))
+    #add_index('placebo_buffers_{}_valid'.format(buffer_type),'none')
+    #con.execute('''
+    #        CREATE TABLE placebo_conhulls_valid AS
+    #        SELECT CastToMultiPolygon(ST_MAKEVALID(GEOMETRY)) AS GEOMETRY FROM placebo_conhulls;
+    #    ''')
+    #add_index('placebo_conhulls_valid','none')
     
 
     ## create convex hull for easier grid creation
@@ -67,7 +100,7 @@ def add_grid(db,grid_size,buffer_type):
                         UNION ALL
                 SELECT GEOMETRY FROM rdp_conhulls
                         UNION ALL
-                SELECT GEOMETRY FROM placebo_conhulls                               
+                SELECT GEOMETRY FROM placebo_conhulls                              
                  );
             '''.format(buffer_type,buffer_type))
     add_index('buffer_union_hull','none')
@@ -83,7 +116,7 @@ def add_grid(db,grid_size,buffer_type):
                         UNION ALL
                 SELECT GEOMETRY FROM rdp_conhulls
                         UNION ALL
-                SELECT GEOMETRY FROM placebo_conhulls                               
+                SELECT GEOMETRY FROM placebo_conhulls                             
                  );
             '''.format(buffer_type,buffer_type))
     add_index('buffer_union','none')
@@ -137,7 +170,7 @@ def add_grid_counts(db):
     con.execute("SELECT load_extension('mod_spatialite');")
 
     # add formal and informal building counts
-    name = 'grid'
+    name = 'grid_2'
     ID = 'grid_id'
     for t in ['pre','post']:
         quality_control=' '
@@ -194,7 +227,7 @@ def grid_to_erven(db):
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
 
-    name = 'grid'
+    name = 'grid_2'
     ID = 'grid_id'
     cur.execute('DROP TABLE IF EXISTS {}_to_erven;'.format(name)) 
     make_qry=  ''' CREATE TABLE {}_to_erven AS 

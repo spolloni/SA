@@ -1,0 +1,23 @@
+		(1)	(2)	(3)	(4)
+VARIABLES	LABELS	Log Price	Log Price	Log Price	Log Price
+					
+post_1_treat	3 yrs 0-400m	-0.238**	-0.166*		
+		(0.106)	(0.0835)		
+post2_1_treat	1st yr 0-400m			-0.147*	
+				(0.0754)	
+post2_2_treat	2nd yr 0-400m			-0.180	
+				(0.115)	
+post2_3_treat	3rd yr 0-400m			-0.118	
+				(0.0971)	
+post_1_treat2_1	3 yrs 0-200m				-0.224**
+					(0.0961)
+post_1_treat2_2	3 yrs 200-400m				-0.0701
+					(0.0664)
+					
+Observations		28,701	28,701	28,701	28,701
+R-squared		0.229	0.488	0.489	0.489
+Project FE		NO	YES	YES	YES
+Year-Month FE		YES	YES	YES	YES
+Robust standard errors in parentheses					
+*** p<0.01, ** p<0.05, * p<0.1					
+All control for cubic in plot size.  Standard errors are clustered at the project level.					

@@ -9,9 +9,7 @@ set maxvar 32767
 *  PLOT DENSITY  *;
 ******************;
 
-* SET OUTPUT;
-* global output="Output/GAUTENG/bbluplots";
-global output = "Code/GAUTENG/paper/figures";
+global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
 global fr1 = "0";
@@ -19,10 +17,10 @@ global fr2 = "0";
 global bin = 10; /* distance bin width */
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 1;
+global DATA_PREP = 0;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -75,9 +73,10 @@ if $DATA_PREP==1 {;
 
 use bbluplot, clear;
 
+
 * go to working dir;
 cd ../..;
-cd $output ;
+cd $ouput;
 
 * cut distances;
 sum distance;
@@ -95,7 +94,7 @@ global ifregs = "
        mode_yr>2002  
        ";
 
-preserve;
+*preserve;
 keep if n==1;
 drop n STR_FID distance s_lu_code; 
 reshape wide count, i(cluster mode_yr frac1 frac2 dists formal ) j(post);
@@ -104,8 +103,12 @@ gen delta = count1 - count0;
 gen delta_prcnt = (count1 - count0)/count0;
 gen dists_reg = dists;	
 replace dists_reg = 2000+abs(dists) if dists < 0;
+
+/*
+
 reg delta b1190.dists_reg#b1.formal i.cluster if $ifregs;
 plotreg bbluplot bbluplot;
 restore;
 
-exit, STATA clear; 
+* exit stata;
+*exit, STATA clear; 

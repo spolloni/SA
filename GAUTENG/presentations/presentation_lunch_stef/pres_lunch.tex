@@ -118,11 +118,22 @@
 
 \setbeamertemplate{footline}[frame number]
 
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title{ Subsidized Housing as a Place-Based Policy: \\ Evidence from South Africa } % The short title appears at the bottom of every slide, the full title is only on the title page
+\title{Spillovers of Subsidized Housing Programs: \\ Evidence from South Africa } % The short title appears at the bottom of every slide, the full title is only on the title page
 
 \author{Ben Bradlow, Stefano Polloni, Will Violette} 
 
@@ -146,13 +157,56 @@
 %----------------------------------------------------------------------------------------
 %	PRESENTATION SLIDES
 %----------------------------------------------------------------------------------------
-\section{Introduction}
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Slums and Development}
-
+\frametitle{Introduction}
+\centering
 % In developing countries, 30\% of urban pop live in slums (UN, 2015)
+
+\begin{itemize}
+  \item<1-> In developing countries, 30\% of urban pop lives in informal housing (UN, 2015)
+  \vspace{2mm}
+  \item<2-> Slums can be lasting poverty traps (Marx, 2013): 
+    \begin{itemize}
+      \vspace{1mm}
+      \item Poor infrastructure, High crime, Health externalities
+      \vspace{1mm}
+      \item Weak incentives to invest in housing/public goods
+  \vspace{2mm}
+    \end{itemize}
+  \item<3-> \textbf{Public Housing Provision} $\rightarrow$ primary government response
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{What do we know?}
+\centering
+
+\begin{enumerate}
+  \item<1-> {\bf Direct Recipient Impacts}
+  \vspace{2mm}
+  \begin{itemize}
+      \item {Health, Well-Being}: \\ Cattaneo et al. [2009], Galiani et al. [2017]
+      \vspace{2mm}
+      \item {Employment, Income}: \\ Barnhardt et al. [2015], Picarelli [2017], Franklin [2018]
+    \end{itemize}
+  \vspace{2mm}
+  \item<2-> {\bf Indirect Recipient Impacts}
+  \begin{itemize}
+  \vspace{2mm}
+      \item Amenity value to neighboring residents: \\ Diamond \& McQuade [2016], Baum-Snow \& Marion [2008]
+      \vspace{2mm}
+      \item Informal housing possibilities / indirect access to provided services.
+    \end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+\begin{comment}
 
 \begin{itemize}
   \item Slum externalities $\rightarrow$ lasting poverty traps (Marx, 2013) 
@@ -187,6 +241,22 @@
   What are the spillovers from public housing in developing contexts?
 \end{itemize}
 % ``combating crime, promoting social cohesion... spatial restructuring,'' {\footnotesize{South Africa}}
+
+
+\end{comment}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Introduction}
+\centering
+% In developing countries, 30\% of urban pop live in slums (UN, 2015)
+
+\begin{figure}
+ \includegraphics[scale=.25]{shacks.jpg} 
+ \caption{Public Housing with Backyard Shacks in Soweto}
+\end{figure}
+
 \end{frame}
 
 %------------------------------------------------
@@ -194,63 +264,113 @@
 \begin{frame}
 \frametitle{This Paper}
 
-\begin{itemize}
-  \item \textbf{Question} \\ 
-  \vspace{.1cm}
-  What are the spillovers from public housing in developing contexts?
-  \vspace{.1cm}
-    \begin{itemize}
-      \item \textbf{Positive:} Incentivize investments in housing/public goods
-      \item \textbf{Negative:} Crowd in slum growth
-    \end{itemize}
+\centering
 
-%\pause
-\vspace{1mm}
-\item \textbf{Approach} \\ Leverage precise timing/geography of large housing projects
-\vspace{1mm}
-\item \textbf{New Data and Setting} \\ 172 projects in South Africa combined with GPS property transactions and slum growth data
-\vspace{1mm}
-\item \textbf{Initial Findings} \\ Housing projects depress home prices by 5\% within 300 meters
 \begin{itemize}
-  \item heterogeneity
-  \item ballpark estimates
-\end{itemize}
+  \item<1-> \textbf{Question}: \\ 
+  \vspace{.2cm}
+  {What are the spillovers from public housing in developing contexts?}
+  \vspace{.2cm}
+    \begin{itemize}
+      \item<2-> Examine effect on nearby home values in the private housing market. 
+      \vspace{1mm}
+      \item<3-> Assess extent of slum crowd-in response (backyard shacks and nearby slum density).
+      \vspace{1mm}
+      \item<4-> Evaluate household's access to services within projects and nearby.
+    \end{itemize}
+\vspace{.2cm}
+\item<5-> \textbf{Approach:} 
+\vspace{1mm}
+\begin{itemize}
+      \item Leverage precise timing/geography of large housing projects.
+      \vspace{1mm}
+      \item Use planned but unconstructed projects for falsification and as controls.
+    \end{itemize}
+\vspace{.2cm}
+\item<6-> \textbf{Data and Setting:} \\
+\vspace{.1cm} 
+{\small 57 public housing projects in Gauteng province combined with GPS property transactions, building-based land information, and census data.}
 \end{itemize}
 
 \end{frame}
 
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Preview of Findings}
+
+\centering
+\begin{enumerate}
+
+
+\item<1-> Housing projects depress home prices within 400 meters by 14\% for 3 years after construction.
+\vspace{2mm}
+\item<2-> Slum growth twice as large inside and in vicinity of projects, compared with more distant locations.
+\vspace{2mm}
+\item<3-> Share of households with direct access to water and sanitation improves within project areas, but decreases in vicinity.
+
+\end{enumerate}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Background}
 
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Public Housing in South Africa}
   \begin{itemize}
-      \item Over 4.3 million houses since 1994 (13\% of pop.)
+    \item Large national subsidy scheme providing housing opportunities to eligible households.
+    \vspace{2mm}
+    \item 3 million houses delivered since program inception in 1994.\
+        \begin{itemize}
+          \item free-standing, single-story, two-bedrooms, 30-40$\text{m}^2$ dwellings
+        \end{itemize}
+    \vspace{2mm}
+    \item Annual expenditure of 6bn Rands (US\$500M).
+    \vspace{2mm}
+    \item Supply planned by municipal and provincial housing agencies, project construction outsourced to private developers.
+    \vspace{2mm} 
+    \item Constraints on costs per unit, services access, and rooms/lot sizes.
+  \end{itemize}
+\end{frame}
+
+        %\item Over 4.3 million houses since 1994 (13\% of pop.)
 %      \item Houses 13\% of the population
 %      \item Single-story, two-room (30-40$\text{m}^2$) dwellings
-      \begin{itemize}
-        \item 50 to 500 houses per project
-      \end{itemize}
-  \end{itemize}
+      %\begin{itemize}
+      %  \item 50 to 500 houses per project
+      %\end{itemize}
+  
     %%% insert picture
 
-
-\begin{itemize}
-        \item Who gets a house?
+%------------------------------------------------
+\begin{frame}
+\frametitle{Who gets a house?}
+  \begin{itemize}
+    \item<1-> {\bf Official Policy:}
+    \vspace{2mm} 
       \begin{itemize}
-        \item Official Policy: 
-          \begin{itemize}
-            \item National/provincial waiting lists
-            \item No resale within 7 years
-            \item Citizens, new homeowners, married or dependents, inc/month $<$R3,500
-          \end{itemize}
-        \item In Practice:
-          \begin{itemize}
-            \item Waiting lists/eligibility weakly enforced
-            \item Only 82\% of houses occupied by initial owners within 5 yrs
-          \end{itemize}
+        \item Must be eligible: South African Citizen, Married or with dependents, Monthly income $<$ R3,500
+        \vspace{1mm}
+        \item National/provincial waiting lists
+        \vspace{1mm}
+        \item No resale within 7 years
       \end{itemize}
-\end{itemize}
+    \vspace{2mm}
+    \item<2-> {\bf In Practice}:
+      \begin{itemize}
+        \vspace{2mm} 
+        \item Wait-lists and eligibility weakly enforced (corruption).
+        \vspace{1mm}
+        \item 20\% of houses occupied not occupied by initial owners after 5 years.
+        \vspace{1mm}
+        \item More than a third have backyard shacks after 2 or less years.
+      \end{itemize}
+  \end{itemize}
+
 \end{frame}
 
 %------------------------------------------------
@@ -259,13 +379,13 @@
 \frametitle{Where are these houses built?}
 
 \begin{enumerate}
-  \item \textbf{Greenfield projects} on undeveloped land near slums
-  \item \textbf{In-Situ upgrading} replacing existing slums
+  \item \textbf{Greenfield projects} on undeveloped land near slums.
+  \item \textbf{In-Situ upgrading} replacing existing slums.
 \end{enumerate}
 
-\begin{itemize}
-  \item insert picture here
-\end{itemize}
+\begin{figure}
+ \includegraphics[scale=.125]{rdp_houses.jpg} 
+\end{figure}
 
 \begin{itemize}
   \item Projects are fully serviced (roads, water, sanitation, electricity)
@@ -274,32 +394,32 @@
 
 \end{frame}
 
-%------------------------------------------------
+
+%\begin{frame}
+%\frametitle{Conceptual Framework: Public Housing Impacts}
+%
+%\begin{enumerate}
+%  \item \textbf{Amenity Effect:} Upgrading housing stock/services
+%    \begin{itemize}
+%        \item Increase value of neighboring homes (Rossi-Hansberg [2010])
+%    \end{itemize}
+%\vspace{.2cm} 
+%
+%  \item \textbf{Crowd-In Slums:} Reduce costs of informal housing
+%    \begin{itemize}
+%        \item Overburden services, health/crime externalities
+%        \item Reduce value of nearby houses
+%    \end{itemize}
+%\vspace{.2cm}
+%
+%  \item \textbf{Demographic Effect:} New people in the neighborhood
+%    \begin{itemize}
+%        \item Taste-based discrimination (Diamond and McQuade [2016])
+%    \end{itemize}
+%\end{enumerate}
+% \end{frame}
 
 
-
-\begin{frame}
-\frametitle{Conceptual Framework: Public Housing Impacts}
-
-\begin{enumerate}
-  \item \textbf{Amenity Effect:} Upgrading housing stock/services
-    \begin{itemize}
-        \item Increase value of neighboring homes (Rossi-Hansberg [2010])
-    \end{itemize}
-\vspace{.2cm} 
-
-  \item \textbf{Crowd-In Slums:} Reduce costs of informal housing
-    \begin{itemize}
-        \item Overburden services, health/crime externalities
-        \item Reduce value of nearby houses
-    \end{itemize}
-\vspace{.2cm}
-
-  \item \textbf{Demographic Effect:} New people in the neighborhood
-    \begin{itemize}
-        \item Taste-based discrimination (Diamond and McQuade [2016])
-    \end{itemize}
-\end{enumerate}
 
 %\begin{enumerate}
 %  \item Housing externalities  {\small (Rossi-Hansberg [2010]) }
@@ -317,48 +437,147 @@
 %  \item Access to public goods (water, sewer, road infrastructure)
 %\end{enumerate}
 
+
+%------------------------------------------------
+\section{Data}
+%------------------------------------------------
+
+
+\begin{frame}
+\frametitle{Data Sources}
+
+\begin{itemize}
+  \item Focus on Gauteng Province (includes Johannesburg and Pretoria)
+
+  \vspace{2mm}
+
+  \item<2-> Four main data sources:
+  \vspace{2mm}
+  \begin{enumerate}
+    \item \textbf{Property Transactions} 
+    \vspace{2mm}
+    \item \textbf{Building-Based Land Use}
+    \vspace{2mm}
+    \item \textbf{Population Census} 
+    \vspace{2mm}
+    \item \textbf{Additional Administrative Data} 
+  \end{enumerate}
+
+\end{itemize}
+
 \end{frame}
 
+%------------------------------------------------
 
+\begin{frame}
+\frametitle{Property Transactions}
+
+\begin{itemize}
+
+  \item Sourced from South African deeds registry. 
+  \vspace{2mm}
+  \item Universe of formal housing transactions recorded during 2001-2011 in
+affordable areas. (460K transactions)
+  \vspace{2mm}
+  \item Exact geographic location of traded property, but limited information
+on characteristics other than price and lot size.
+  \vspace{2mm}
+  \item Includes buyer and seller name.
+%\footnote{defined as census enumeration areas with mean house price value less than R500,000 in 2010.} (460K transactions) 
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Building Based Land-Use}
+
+\begin{itemize}
+
+  \item Exhaustive hand-coded building identification  from aerial imagery. 
+  \vspace{2mm}
+  \item 2 cross-sections: 2001 and 2012. 
+  \vspace{2mm}
+  \item Building type differentiated by category: residential, commercial, industrial, etc.
+  \vspace{2mm}
+  \item Within residential, ability to differentiate formal from informal housing, including backyard shacks.
+  \vspace{2mm}
+  \item High Correlation ($>$80\%) with reported dwelling type from census data at coarser spatial resolution.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Other Data Sources}
+
+
+
+ {\bf Census Data} 
+
+
+
+  \begin{itemize}
+    \item Full coverage from 2001 and 2011 censuses at the individual and household level.
+
+    \item Smallest identifiable geography is {\it census small area}.
+    \begin{itemize}
+    \item 11,000 small areas in 2001, 17,000 in 2011.
+    \item average of 170 household per small area.
+    \end{itemize}
+  \end{itemize}
+
+  \vspace{2mm}
+
+  {\bf Administrative Data Sources} 
+
+
+
+  \begin{itemize}
+    \item Data on location of government housing initiatives as of 2008.
+    \begin{itemize} 
+      \item Includes planned but unconstructed projects.
+    \end{itemize}
+
+    \item Annual Budget Reports from National Treasury. 
+    
+  \end{itemize}
+
+\end{frame}
 
 %------------------------------------------------
 
 
 
-\begin{frame}
-\frametitle{Measuring Public Housing and Spillovers}
-
-\begin{itemize}
-  \item Focus on Gauteng Province (includes Johannesburg and Pretoria)
-\end{itemize}
-
-\begin{enumerate}
-\item \textbf{Property Transactions} measure housing projects and price impacts
-  \begin{itemize}
-    \item 500,000 deeds records (bottom 20\% of formal housing market)
-    \item Buyer/seller name, GPS, price, date from 2002-2011
-  \end{itemize}
-\vspace{.2cm}
-\item \textbf{Building Census} identifies slum-growth and in-situ upgrading
-  \begin{itemize}
-    \item 4 mil. residential buildings (50\% informal) GPS in 2001 and 2011
-  \end{itemize}
-\vspace{.2cm}
-\item \textbf{Population Census} measures demographic and economic impacts
-  \begin{itemize}
-    \item Full census for 18,000 census blocks in 2001 and 2011
-  \end{itemize}
-\vspace{.2cm}
-\item \textbf{Administrative Data} map projects (construction dates and costs)
-  \begin{itemize}
-    \item Not comprehensive
-    \item Includes planned but unconstructed projects
-  \end{itemize}
 
 
-\end{enumerate}
 
-\end{frame}
+
+%\begin{enumerate}
+%\item \textbf{Property Transactions} measure housing projects and price impacts
+%  \begin{itemize}
+%    \item 500,000 deeds records (bottom 20\% of formal housing market)
+%    \item Buyer/seller name, GPS, price, date from 2002-2011
+%  \end{itemize}
+%\vspace{.2cm}
+%\item \textbf{Building Census} identifies slum-growth and in-situ upgrading
+%  \begin{itemize}
+%    \item 4 mil. residential buildings (50\% informal) GPS in 2001 and 2011
+%  \end{itemize}
+%\vspace{.2cm}
+%\item \textbf{Population Census} measures demographic and economic impacts
+%  \begin{itemize}
+%    \item Full census for 18,000 census blocks in 2001 and 2011
+%  \end{itemize}
+%\vspace{.2cm}
+%\item \textbf{Administrative Data} map projects (construction dates and costs)
+%  \begin{itemize}
+%    \item Not comprehensive
+%    \item Includes planned but unconstructed projects
+%  \end{itemize}
+
+
+
 
 %------------------------------------------------
 
@@ -373,34 +592,34 @@
 \begin{tikzpicture}[overlay]
 
 \onslide<1->\node[overlay,anchor=west,align=left] at (0, 2.5) {    \begin{minipage}{1\textwidth} {\begin{enumerate}
-  \item \textbf{Seller Identity:} match government names and housing authorities in seller-names from transactions 
+  \item \textbf{Filter on Seller Identity:} Match governments and housing authorities from seller-names in transactions. 
 \end{enumerate}}\end{minipage}};
 
-\onslide<2->\node[overlay,anchor=west,align=left] at (0, 1.5) {    \begin{minipage}{1\textwidth} { 
+\onslide<2->\node[overlay,anchor=west,align=left] at (0, 1.4) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{1}
-  \item \textbf{Subsidy Value:} exclude purchase prices R50,000 above subsidy value
+  \item \textbf{Filter on Price:} Exclude purchase prices R50,000 above yearly subsidy value for government houses.
 \end{enumerate}}\end{minipage}};
 
-\onslide<3->\node[overlay,anchor=west,align=left] at (0, .5) {    \begin{minipage}{1\textwidth} { 
+\onslide<3->\node[overlay,anchor=west,align=left] at (0, .3) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{2}
-  \item \textbf{Pre-Existing Formal Dwellings:} exclude land plots with formal structures in 2001 building census
+  \item \textbf{Pre-Existing Formal Dwellings:} Exclude land plots containing formal structures from 2001 building-based land-use data.
 \end{enumerate}}\end{minipage}};
 
-\onslide<4->\node[overlay,anchor=west,align=left] at (0, -.5) {    \begin{minipage}{1\textwidth} { 
+\onslide<4->\node[overlay,anchor=west,align=left] at (0, -.8) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{3}
-  \item \textbf{Spatial Clustering:} collect nearby houses into projects with density-based clustering algorithm
+  \item \textbf{Spatial Clustering:} collect nearby houses into projects with density-based clustering algorithm. (DBSCAN)
 \end{enumerate}}\end{minipage}};
 
-\onslide<5->\node[overlay,anchor=west,align=left] at (0, -1.5) {    \begin{minipage}{1\textwidth} { 
+\onslide<5->\node[overlay,anchor=west,align=left] at (0, -2.1) {    \begin{minipage}{1\textwidth} { 
 \begin{enumerate}
   \setcounter{enumi}{4}
-  \item \textbf{Temporal Clustering:} include clusters with $>$50\% of transactions during modal year
+  \item \textbf{Attribute project completion date:} Examine within-cluster distribution of transactions date. Assign modal transaction month as completion date. 
 \end{enumerate}}\end{minipage}};
 
-\onslide<5->\node[overlay,anchor=west,align=left] at (0, -2.6) {    \begin{minipage}{1\textwidth} { 
+\onslide<6->\node[overlay,anchor=west,align=left] at (0, -3.2) {    \begin{minipage}{1\textwidth} { 
 \begin{itemize}
   \item Overlaps well with completed projects from admin. data
 \end{itemize}}\end{minipage}};
@@ -421,7 +640,7 @@
 \onslide<2>\node[overlay,anchor=west,align=left] at (0, -1.7) { 
 \begin{minipage}{1\textwidth} { 
 \begin{figure}
-\caption{Purchase Price Densities}
+%\caption{Purchase Price Densities}
  \includegraphics[scale=.53]{price_histogram.pdf} 
 \end{figure}
 }\end{minipage} 
@@ -429,7 +648,7 @@
 % descriptive_statistics.do   program: write_price_histogram
 
 
-\onslide<4>\node[overlay,anchor=west,align=left] at (2, -2.8) {  \includegraphics[scale=.16]{rdp_conhull_pic.png}  };
+%\onslide<4>\node[overlay,anchor=west,align=left] at (2, -2.8) {  \includegraphics[scale=.16]{rdp_conhull_pic.png}  };
 % generated from QGIS
 
 
@@ -437,9 +656,22 @@
 
 \end{frame}
 
+%------------------------------------------------
 
-
-
+\begin{frame}
+\frametitle{Census Areas Exposure Measures}
+\begin{center}
+\begin{figure}
+\frame{\includegraphics[scale=0.25]<1>{datainfo/datainfo_1.jpg}}
+\frame{\includegraphics[scale=0.25]<2>{datainfo/datainfo_2.jpg}}
+\frame{\includegraphics[scale=0.25]<3>{datainfo/datainfo_3.jpg}}
+\frame{\includegraphics[scale=0.25]<4>{datainfo/datainfo_4.jpg}}
+\frame{\includegraphics[scale=0.25]<5>{datainfo/datainfo_6.jpg}}
+\frame{\includegraphics[scale=0.25]<6>{datainfo/datainfo_7.jpg}}
+\vspace{-3mm}
+\end{figure}
+\end{center}
+\end{frame}
 
 %------------------------------------------------
 
@@ -514,22 +746,18 @@ Density is building number per square kilometer.
 
 %------------------------------------------------
 
+%------------------------------------------------
+
 \begin{frame}
-\frametitle{Census Areas Exposure Measures}
-\begin{center}
-\begin{figure}
-\frame{\includegraphics[scale=0.25]<1>{datainfo/datainfo_1.jpg}}
-\frame{\includegraphics[scale=0.25]<2>{datainfo/datainfo_2.jpg}}
-\frame{\includegraphics[scale=0.25]<3>{datainfo/datainfo_3.jpg}}
-\frame{\includegraphics[scale=0.25]<4>{datainfo/datainfo_4.jpg}}
-\frame{\includegraphics[scale=0.25]<5>{datainfo/datainfo_6.jpg}}
-\frame{\includegraphics[scale=0.25]<6>{datainfo/datainfo_7.jpg}}
-\vspace{-3mm}
-\end{figure}
-\end{center}
+\frametitle{Census Descriptives}
+
+\centering
+\resizebox{\textwidth}{!}{  
+\input{census_hh_table}
+}
+% descriptive_statistics.do program: write_census_hh_table
+
 \end{frame}
-
-
 
 %------------------------------------------------
 
@@ -575,7 +803,7 @@ with:
 \end{frame}
 
 %------------------------------------------------
-
+\begin{comment}
 \begin{frame}
 \frametitle{Empirical Methodology}
 Identification:
@@ -592,6 +820,7 @@ Concerns:
 \item sorting.
 \end{itemize}
 \end{frame}
+\end{comment}
 %------------------------------------------------
 
 \begin{frame}
@@ -662,18 +891,6 @@ Concerns:
 \end{center}
 \end{frame}
 
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Transaction Densities}
-\begin{center}
-\begin{figure}
-\includegraphics[scale=0.72]{rdpvsnonrdp.pdf}
-\vspace{-3mm}
-\end{figure}
-\end{center}
-\end{frame}
-
 
 %------------------------------------------------
 
@@ -713,15 +930,15 @@ Concerns:
 
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{Housing Projects}
-\vspace{-1.5mm}
-\begin{table}
-{\footnotesize
-\input{census_regs_hh_all}
-}
-\end{table}
-\end{frame}
+%\begin{frame}
+%\frametitle{Housing Projects}
+%\vspace{-1.5mm}
+%\begin{table}
+%{\footnotesize
+%\input{census_regs_hh_all}
+%}
+%\end{table}
+%\end{frame}
 
 %------------------------------------------------
 
@@ -737,15 +954,15 @@ Concerns:
 
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{Housing Projects}
-\vspace{-1.5mm}
-\begin{table}
-{\footnotesize
-\input{census_regs_pers_all}
-}
-\end{table}
-\end{frame}
+%\begin{frame}
+%\frametitle{Housing Projects}
+%\vspace{-1.5mm}
+%\begin{table}
+%{\footnotesize
+%\input{census_regs_pers_all}
+%}
+%\end{table}
+%\end{frame}
 
 %------------------------------------------------
 
@@ -779,7 +996,17 @@ Concerns:
 %------------------------------------------------
 
 
+%------------------------------------------------
 
+%\begin{frame}
+%\frametitle{Transaction Densities}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[scale=0.72]{rdpvsnonrdp.pdf}
+%\vspace{-3mm}
+%\end{figure}
+%\end{center}
+%\end{frame}
 
 
 

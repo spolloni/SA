@@ -11,7 +11,9 @@ set maxvar 32767
 
 * SET OUTPUT LOCATION
 * global output = "Output/GAUTENG/bbluplots_placebo";
-global output = "Code/GAUTENG/paper/figures";
+* global output = "Code/GAUTENG/paper/figures";
+global output = "Code/GAUTENG/presentations/presentation_lunch";
+
 
 * PARAMETERS;
 global bin = 10; /* distance bin width */

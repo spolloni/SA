@@ -6,7 +6,7 @@ set maxvar 32767
 #delimit;
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 
 local qry = "
   SELECT 
@@ -21,12 +21,15 @@ local qry = "
 
          D.distance, D.cluster, 
 
-         E.cluster as cl, E.mode_yr, E.frac1, E.frac2, E.cluster_siz
+         E.cluster as cl, E.mode_yr, E.frac1, E.frac2, E.cluster_siz, 
+
+         F.formal_pre, F.informal_pre, F.formal_post, F.informal_post
 
   FROM transactions AS A
   JOIN erven AS B ON A.property_id = B.property_id
   JOIN rdp   AS C ON B.property_id = C.property_id
   LEFT JOIN distance_nrdp_rdp AS D ON B.property_id = D.property_id 
+  LEFT JOIN rdp_conhulls AS F ON F.cluster = D.cluster
   LEFT JOIN (SELECT property_id, cluster, mode_yr, frac1, frac2, cluster_siz
        FROM rdp_clusters WHERE cluster != 0 ) AS E ON B.property_id = E.property_id
   WHERE NOT (D.cluster IS NULL AND E.cluster IS NULL) 
@@ -45,7 +48,7 @@ odbc load, exec("`qry'") clear;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 replace cluster=cl if cluster==.;
-foreach var in mode_yr frac1 frac2 cluster_siz {;
+foreach var in mode_yr frac1 frac2 cluster_siz  formal_pre informal_pre formal_post informal_post {;
    bys cluster: egen max = max(`var');
    replace `var' = max if cl ==.;
    drop max;

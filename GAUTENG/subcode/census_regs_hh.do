@@ -13,7 +13,9 @@ set maxvar 32767
 
 * SET OUTPUT GLOBAL;
 * global output = "Output/GAUTENG/censusregs" ;
-global output = "Code/GAUTENG/paper/figures" ;
+* global output = "Code/GAUTENG/paper/figures" ;
+global output = "Code/GAUTENG/presentations/presentation_lunch";
+
 
 
 

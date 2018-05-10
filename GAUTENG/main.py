@@ -15,7 +15,10 @@ from subcode.placebofuns import make_gcro_placebo, import_budget
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
-from paper.descriptive_statistics import cbd_gen
+#, push_distGRID2db
+from subcode.add_grid import bblu_xy, add_grid, add_grid_counts, grid_to_erven
+#from paper.descriptive_statistics import cbd_gen
+
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -65,7 +68,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 1 
+_4_PLACEBO_ = 0 
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -78,24 +81,30 @@ counts = {
 
 keywords = []
 
-_5_a_DISTS_ = 1  # buffers and hull creation
-_5_b_DISTS_ = 1  # non-RDP distance
-_5_c_DISTS_ = 1  # BBLU distance
-_5_d_DISTS_ = 1  # EA distance 
+_5_a_DISTS_ = 0  # buffers and hull creation
+
+grid_gen    = 0  # grid generate
+grid_size = '100' # assign size of grid
+
+_5_b_DISTS_ = 0  # non-RDP distance
+_5_c_DISTS_ = 0  # BBLU distance
+_5_d_DISTS_ = 0  # EA distance
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
 buffer_type = 'intersect' # reg or intersect
 
+_5_e_DISTS_ = 0  # create x y table for BBLU
 
-_6_a_PLOTS_ = 1  # distance plots for RDP: house prices
-_6_b_PLOTS_ = 1  # distance plots for RDP: BBLU
 
-_7_a_PLOTS_ = 1  # distance plots for placebo: house prices
-_7_b_PLOTS_ = 1  # distance plots for placebo: BBLU
+_6_a_PLOTS_ = 0  # distance plots for RDP: house prices
+_6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
 
-_8_DD_REGS_ = 1  # DD regressions with census data
+_7_a_PLOTS_ = 0  # distance plots for placebo: house prices
+_7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
 
-_9_TABLES_  = 1  # DESCRIPTIVES
+_8_DD_REGS_ = 0  # DD regressions with census data
+
+_9_TABLES_  = 0  # DESCRIPTIVES
 
 
 #############################################
@@ -278,6 +287,17 @@ if _5_a_DISTS_ ==1:
         hulls_coordinates(db,tempdir,hull)
         print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
+if grid_gen ==1:
+
+    print '\n'," Generate spatial grid... ",'\n'
+    add_grid(db,grid_size,'reg')
+    print '\n'," Generate building counts... ",'\n'
+    #add_grid_counts(db)
+    print '\n'," Create table linking erven and grid... ",'\n'
+    #grid_to_erven(db)
+    print '\n'," - Grid: done! "'\n'
+
+
 if _5_b_DISTS_ ==1:
 
     print '\n'," Distance part B: distances for non-RDP... ",'\n'
@@ -341,6 +361,7 @@ if _5_c_DISTS_ ==1:
     pp.close()
     pp.join()
 
+
 if _5_d_DISTS_ ==1:
 
     print '\n'," Distance part D: distances for EAs and SALs... ",'\n'
@@ -373,6 +394,15 @@ if _5_d_DISTS_ ==1:
     # 5d.5 kill parallel workers
     pp.close()
     pp.join()
+
+
+if _5_e_DISTS_ == 1:
+
+    print '\n'," Making BBLU xy table...",'\n'
+
+    bblu_xy(db)
+
+    print '\n'," Done BBLU XY ! ",'\n'
 
 #############################################
 # STEP 6:  Make RDP Gradient/Density Plots  #

@@ -14,7 +14,8 @@ from subcode.spaclust import spatial_cluster, concavehull
 from subcode.placebofuns import make_gcro_placebo, import_budget
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
-from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db, push_distGRID2db
+from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
+#, push_distGRID2db
 from subcode.add_grid import add_grid, add_grid_counts, grid_to_erven
 
 
@@ -66,7 +67,7 @@ par1 = 700       # Parameter setting #1 for Clustering  #750,700
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 1
+_4_PLACEBO_ = 0
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -77,14 +78,14 @@ keywords = ['Planning','Proposed', # keywords to identify
             'Investigating','future','Implementation','Essential','Informal'] 
 
 _5_a_DISTS_ = 0  # buffers and hull creation
-grid_gen    = 0  # grid generate
+grid_gen    = 1  # grid generate
 _5_b_DISTS_ = 0  # non-RDP distance
 _5_c_DISTS_ = 0  # BBLU distance
 _5_d_DISTS_ = 0  # EA distance 
 _5_e_DISTS_ = 0  # grid distance 
 bw = 1200        # bandwidth for buffers
 hulls = ['rdp','placebo'] # choose 
-grid_size = '50' # assign size of grid
+grid_size = '1000' # assign size of grid
 
 _6_a_PLOTS_ = 0  # distance plots for RDP: house prices
 _6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
@@ -275,11 +276,11 @@ if _5_a_DISTS_ ==1:
 if grid_gen ==1:
 
     print '\n'," Generate spatial grid... ",'\n'
-    ##  add_grid(db,grid_size,'reg')
+    add_grid(db,grid_size,'intersect')
     print '\n'," Generate building counts... ",'\n'
-    add_grid_counts(db)
+    #add_grid_counts(db)
     print '\n'," Create table linking erven and grid... ",'\n'
-    grid_to_erven(db)
+    #grid_to_erven(db)
     print '\n'," - Grid: done! "'\n'
 
 
