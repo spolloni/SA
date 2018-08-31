@@ -13,6 +13,218 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+
+def make_gcro(db):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    # count number BBLU in shapes
+    for t in ['pre','post']:
+        quality_control=' '
+        if t=='post':
+            quality_control=' AND A.cf_units="High" '
+        cur.execute('DROP TABLE IF EXISTS gcro_temp_{};'.format(t))
+        make_qry = '''
+                    CREATE TABLE gcro_temp_{} AS 
+                    SELECT G.OGC_FID as OGC_FID, 
+                    1000000*SUM(CASE WHEN A.s_lu_code="7.1" {} THEN 1 ELSE 0 END)
+                    /st_area(G.GEOMETRY) AS formal_{},
+                    1000000*SUM(CASE WHEN A.s_lu_code="7.2" {} THEN 1 ELSE 0 END)
+                    /st_area(G.GEOMETRY) AS informal_{}
+                    FROM bblu_{} as A, gcro_publichousing as G
+                    WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                    WHERE f_table_name='bblu_{}' AND search_frame=G.GEOMETRY)
+                    AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                    GROUP BY G.OGC_FID;
+                   '''.format(t,quality_control,t,quality_control,t,t,t)
+        cur.execute(make_qry) 
+
+    # count number RDP in shapes
+    cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
+    make_qry = '''
+                CREATE TABLE gcro_temp_rdp_count AS 
+                SELECT G.OGC_FID as OGC_FID, 
+                1000000*SUM(CASE WHEN R.rdp_all=1 THEN 1 ELSE 0 END)
+                /st_area(G.GEOMETRY) AS RDP_density,
+                cast(MAX(RC.mode_yr)AS INT) as RDP_mode_yr
+                FROM  gcro_publichousing as G, erven AS E
+                JOIN rdp AS R on E.property_id=R.property_id  
+                JOIN rdp_clusters AS RC on E.property_id=RC.property_id                
+                WHERE E.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                             WHERE f_table_name='erven' AND search_frame=G.GEOMETRY)
+                    AND st_intersects(E.GEOMETRY,G.GEOMETRY)
+                    AND RC.cluster >0
+                GROUP BY G.OGC_FID;
+               '''
+    cur.execute(make_qry) 
+
+    # make placebo event-year
+    dofile = "subcode/generate_placebo_year.do"
+    cmd = ['stata-mp', 'do', dofile]
+    subprocess.call(cmd)
+
+    # join information into stats table
+    cur.execute('DROP TABLE IF EXISTS gcro_publichousing_stats;')
+    make_qry = '''
+                CREATE TABLE gcro_publichousing_stats AS 
+                SELECT G.OGC_FID as OGC_FID_gcro , 
+                     cast(coalesce(R.RDP_density,0) AS FLOAT) as RDP_density, 
+                     R.RDP_mode_yr as RDP_mode_yr,
+                     cast(coalesce(A.formal_pre,0) AS FLOAT) as formal_pre,
+                     cast(coalesce(A.informal_pre,0) AS FLOAT) as informal_pre, 
+                     cast(coalesce(B.formal_post,0) AS FLOAT) as formal_post, 
+                     cast(coalesce(B.informal_post,0) AS FLOAT) as informal_post,
+                     Y.start_yr as start_yr, Y.placebo_year as placebo_yr, Y.score
+                FROM gcro_publichousing as G
+                LEFT JOIN gcro_temp_pre as A ON A.OGC_FID = G.OGC_FID 
+                LEFT JOIN gcro_temp_post as B ON B.OGC_FID = G.OGC_FID
+                LEFT JOIN gcro_temp_rdp_count as R ON R.OGC_FID = G.OGC_FID
+                LEFT JOIN gcro_temp_year AS Y on Y.OGC_FID = G.OGC_FID;
+               '''
+    cur.execute(make_qry) 
+
+    # create table with Union of shapes that make the cut
+    union_name = 'gcro'
+    cur.execute('DROP TABLE IF EXISTS {}_union;'.format(union_name))
+    make_qry = '''
+               CREATE TABLE {}_union AS 
+               SELECT ST_UNION(ST_MAKEVALID(G.GEOMETRY)) AS GEOMETRY
+               FROM gcro_publichousing as G
+               JOIN gcro_publichousing_stats as H on G.OGC_FID = H.OGC_FID_gcro;
+               '''.format(union_name)
+    cur.execute(make_qry)
+    cur.execute(''' SELECT RecoverGeometryColumn('{}_union',
+                        'GEOMETRY',2046,'MULTIPOLYGON','XY');'''.format(union_name))
+
+    # create table of elementary geometries;
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="{}";
+               '''.format(union_name)
+    drop_qry = '''
+               SELECT DisableSpatialIndex('{}','GEOMETRY');
+               SELECT DiscardGeometryColumn('{}','GEOMETRY');
+               DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+               DROP TABLE IF EXISTS {};
+               '''.format(union_name,union_name,union_name,union_name)
+    make_qry = '''
+                SELECT ElementaryGeometries('{}_union', 'GEOMETRY',
+                      '{}', 'cluster', 'parent');
+                UPDATE {} SET cluster = cluster + 1000;
+                ALTER TABLE {} ADD COLUMN area FLOAT;
+                UPDATE {} SET area = ST_AREA(GEOMETRY)/1000000;
+               '''.format(union_name,union_name,union_name,union_name,union_name)
+
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+    cur.executescript(make_qry)
+
+    # grab matched report year via interect;
+    cur.execute('DROP TABLE IF EXISTS {}_yr;'.format(union_name))
+    make_qry = '''
+               CREATE TABLE {}_yr AS 
+               SELECT A.cluster as cluster, 
+
+               cast(MIN(C.placebo_yr) AS INT) as placebo_yr,
+               cast(MAX(C.formal_pre) AS FLOAT) as formal_pre,
+               cast(MAX(C.informal_pre) AS FLOAT) as informal_pre,
+               cast(MAX(C.formal_post) AS FLOAT) as formal_post,
+               cast(MAX(C.informal_post) AS FLOAT) as informal_post,
+               cast(MAX(C.RDP_density) AS FLOAT) as RDP_density,
+               cast(MAX(C.RDP_mode_yr) AS FLOAT) as RDP_mode_yr
+
+               FROM {} AS A, gcro_publichousing AS B
+               JOIN gcro_publichousing_stats AS C on B.OGC_FID=C.OGC_FID_gcro
+               WHERE ST_Intersects(B.GEOMETRY,A.GEOMETRY)
+               GROUP BY A.cluster
+               '''.format(union_name,union_name)
+    cur.execute(make_qry)
+
+    # add report years and building counts to main conhulls table;
+    for column in ['placebo_yr','formal_pre','informal_pre','formal_post','informal_post','RDP_density','RDP_mode_yr']:
+        column_type='FLOAT'
+        if column=='placebo_yr':
+            column_type='INT'
+        make_qry = '''
+                   ALTER TABLE {} ADD COLUMN {} {};
+                   UPDATE {} SET {} = (SELECT
+                   B.{} FROM {}_yr AS B
+                   WHERE {}.cluster = B.cluster);
+                   '''.format(union_name,column,column_type,union_name,column,column,union_name,union_name)
+        cur.executescript(make_qry)
+
+
+    # create indices
+    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(union_name))
+    cur.execute("CREATE INDEX gcro_publichousing_stats_index ON gcro_publichousing_stats (OGC_FID_gcro);")
+
+    # clean-up
+    cur.execute('DROP TABLE IF EXISTS gcro_temp_pre;')    
+    cur.execute('DROP TABLE IF EXISTS gcro_temp_post;')  
+    cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
+    cur.execute('DROP TABLE IF EXISTS gcro_temp_year;')
+    cur.execute('''SELECT DiscardGeometryColumn('{}_union','GEOMETRY');'''.format(union_name))
+    cur.execute('DROP TABLE IF EXISTS {}_union;'.format(union_name))
+    cur.execute('DROP TABLE IF EXISTS {}_yr;'.format(union_name))
+
+    con.commit()
+    con.close()
+
+    return 
+
+
+def make_gcro_conhulls(db,hull):
+    if hull=='rdp':
+        cond = ' WHERE A.RDP_density>0 AND RDP_mode_yr>2002'
+    if hull=='placebo':
+        cond = ' WHERE A.RDP_density==0'
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="{}_conhulls";
+               '''.format(hull)
+    drop_qry = '''
+               SELECT DisableSpatialIndex('{}_conhulls','GEOMETRY');
+               SELECT DiscardGeometryColumn('{}_conhulls','GEOMETRY');
+               DROP TABLE IF EXISTS idx_{}_conhulls_GEOMETRY;
+               DROP TABLE IF EXISTS {}_conhulls;
+               '''.format(hull,hull,hull,hull)
+
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+    cur.execute('DROP TABLE IF EXISTS {}_conhulls;'.format(hull))   
+
+    make_qry = '''
+                   CREATE TABLE {}_conhulls AS 
+                   SELECT CastToMultiPolygon(A.GEOMETRY) AS GEOMETRY,
+                   A.cluster, A.parent, A.area, A.placebo_yr,
+                   A.formal_pre, A.informal_pre, A.formal_post, A.informal_post,
+                   A.RDP_density, A.RDP_mode_yr
+                    FROM gcro AS A {};
+                   '''.format(hull,cond)
+    cur.execute(make_qry)
+    
+    cur.execute("SELECT RecoverGeometryColumn('{}_conhulls','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(hull))
+    cur.execute("SELECT CreateSpatialIndex('{}_conhulls','GEOMETRY');".format(hull))
+
+    return
+
+
+
 def make_gcro_placebo(db,counts,keywords):
 
     # connect to DB

@@ -11,14 +11,14 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.spaclust import spatial_cluster, concavehull
-from subcode.placebofuns import make_gcro_placebo, import_budget
+from subcode.placebofuns import make_gcro, make_gcro_conhulls, make_gcro_placebo, import_budget
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 #, push_distGRID2db
 from subcode.add_grid import bblu_xy, add_grid, add_grid_counts, grid_to_erven
 #from paper.descriptive_statistics import cbd_gen
-
+from subcode.distfuns_nobuffer import dist_nobuffer
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -53,6 +53,10 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
+bd   = 'admin'     # 'admin' or 'cluster' boundaries
+buffers = 'no'     # yes or no
+
+
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
@@ -61,14 +65,14 @@ _1_e_IMPORT = 0  # import GHS
 
 _2_FLAGRDP_ = 0
 
-_3_CLUSTER_ = 0
+_3_CLUSTER_ = 0  ### UNNECESSARY IF BD = 'admin'
 rdp  = 'all'     # Choose rdp definition. 
 algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
 par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
 par2 = 50        # Parametr setting #2 for Clustering  #77,50
 sig  = 3         # sigma factor for concave hulls
 
-_4_PLACEBO_ = 0 
+_4_PLACEBO_ = 0
 counts = {
     'erven_rdp': '15', # upper-bound on rdp erven in project area 
     'formal_pre': '99999', # upper-bound on pre formal structures in project area
@@ -80,6 +84,9 @@ counts = {
 #            'current','Uncertain'] 
 
 keywords = []
+
+
+_5_DISTS_nobuffer_ = 1
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 
@@ -254,7 +261,14 @@ if _4_PLACEBO_ == 1:
     print '\n'," Defining Placebo RDPs ... ",'\n'
 
     import_budget(rawgcro)
-    make_gcro_placebo(db,counts,keywords)
+
+    if bd=='cluster':
+        make_gcro_placebo(db,counts,keywords)
+    if bd=='admin':
+        make_gcro(db)
+        for hull in hulls:
+            make_gcro_conhulls(db,hull)
+        print '\n', " generates placebo_conhulls and rdp_conhulls from gcro ", '\n'
 
     print '\n'," -- Placebo RDPs: done! "'\n'
 
@@ -274,14 +288,15 @@ if _5_a_DISTS_ ==1:
 
     for hull in hulls:
 
-        ## 5a.1 intersecting EAs
-        #intersGEOM(db,tempdir,'ea',hull,'2001')   
-        #intersGEOM(db,tempdir,'ea',hull,'2011')
-        #print '\n'," -- Intersecting EAs: done! ({}) "'\n'.format(hull)
-    
-        # 5a.2 buffers and self-intersections
-        selfintersect(db,tempdir,bw,hull)
-        print '\n'," -- Self-Intersections: done! ({}) "'\n'.format(hull)
+        # 5a.1 intersecting EAs
+        intersGEOM(db,tempdir,'ea',hull,'2001')   
+        intersGEOM(db,tempdir,'ea',hull,'2011')
+        print '\n'," -- Intersecting EAs: done! ({}) "'\n'.format(hull)
+        
+        if buffers == 'yes':
+            # 5a.2 buffers and self-intersections
+            selfintersect(db,tempdir,bw,hull)
+            print '\n'," -- Self-Intersections: done! ({}) "'\n'.format(hull)
     
         # 5a.3 assemble coordinates for hull edges
         hulls_coordinates(db,tempdir,hull)
@@ -292,14 +307,26 @@ if grid_gen ==1:
     print '\n'," Generate spatial grid... ",'\n'
     add_grid(db,grid_size,'reg')
     print '\n'," Generate building counts... ",'\n'
-    #add_grid_counts(db)
+    add_grid_counts(db)
     print '\n'," Create table linking erven and grid... ",'\n'
-    #grid_to_erven(db)
+    grid_to_erven(db)
     print '\n'," - Grid: done! "'\n'
 
 
-if _5_b_DISTS_ ==1:
+if _5_DISTS_nobuffer_ ==1:
 
+
+    hull       = 'rdp'
+    outcome    = 'erven'
+    identifier = 'property_id'
+    num_neighbors = 1
+    dist_nobuffer(db,hull,outcome,identifier,num_neighbors)
+
+
+
+
+
+if _5_b_DISTS_ ==1:
     print '\n'," Distance part B: distances for non-RDP... ",'\n'
 
     # 5b.0 instantiate parallel workers
