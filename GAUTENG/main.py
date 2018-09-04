@@ -563,29 +563,42 @@ if buffers == 'yes':
 
 if _8_DD_REGS_ == 1:
 
-    print '\n'," Doing DD census regs...",'\n'
+    if buffers== 'no':
+        print '\n'," Doing DD census regs...",'\n'
 
-    if not os.path.exists(outdir+'census_regs'):
-        os.makedirs(outdir+'census_regs')
+        if not os.path.exists(outdir+'census_regs'):
+            os.makedirs(outdir+'census_regs')
 
-    dofile = "subcode/census_regs_hh.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
+        dofile = "subcode/census_regs_hh.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
 
-    print '\n'," -- DD census regs: done! ",'\n'
+        print '\n'," -- DD census regs: done! ",'\n'
 
+    if buffers== 'yes':
+        print '\n'," Doing DD census regs...",'\n'
 
-if _9_TABLES_ == 1:
+        if not os.path.exists(outdir+'census_regs'):
+            os.makedirs(outdir+'census_regs')
 
-    print '\n'," Generate tables ... ", '\n'
+        dofile = "subcode/census_regs_hh_admin_both.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
 
-    cbd_gen()
+        print '\n'," -- DD census regs: done! ",'\n'
 
-    dofile = "figures/descriptive_statistics.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
+if buffers == 'yes':
+    if _9_TABLES_ == 1:
 
-    print '\n'," -- Tables: done! ", '\n'    
+        print '\n'," Generate tables ... ", '\n'
+
+        cbd_gen()
+
+        dofile = "figures/descriptive_statistics.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
+
+        print '\n'," -- Tables: done! ", '\n'    
 
 
 
