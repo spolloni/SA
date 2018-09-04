@@ -1,0 +1,24 @@
+		(1)	(2)
+VARIABLES	LABELS	Flush Toilet	Piped Water Inside
+			
+gr_1_post_treat	Project X Post X Complete	0.246***	0.128*
+		(0.0644)	(0.0677)
+gr_2_post_treat	Spillover X Post X Complete	0.0949**	-0.00321
+		(0.0481)	(0.0472)
+gr_1_post	Project X Post	-0.257***	-0.139***
+		(0.0449)	(0.0472)
+gr_2_post	Spillover X Post	0.0431	0.129***
+		(0.0309)	(0.0250)
+gr_2_treat	Spillover X Complete	-0.0541	0.0443
+		(0.0364)	(0.0377)
+gr_2	Spillover	-0.0619**	-0.119***
+		(0.0276)	(0.0280)
+Constant	Constant	0.824***	0.501***
+		(0.00449)	(0.00500)
+			
+Observations		4,573,682	4,573,682
+R-squared		0.257	0.152
+Project FE		YES	YES
+Robust standard errors in parentheses			
+*** p<0.01, ** p<0.05, * p<0.1			
+Standard errors are clustered at the project level.			

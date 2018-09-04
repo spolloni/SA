@@ -18,7 +18,7 @@ from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS
 #, push_distGRID2db
 from subcode.add_grid import bblu_xy, add_grid, add_grid_counts, grid_to_erven
 #from paper.descriptive_statistics import cbd_gen
-from subcode.distfuns_nobuffer import dist_nobuffer
+from subcode.distfuns_nobuffer import dist_nobuffer, intersPOINT
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -55,6 +55,7 @@ workers = int(multiprocessing.cpu_count()-1)
 
 bd   = 'admin'     # 'admin' or 'cluster' boundaries
 buffers = 'no'     # yes or no
+dist_threshold = 4000 # for non-buffer
 
 
 _1_a_IMPORT = 0  # import LIGHTSTONE
@@ -85,8 +86,6 @@ counts = {
 
 keywords = []
 
-
-_5_DISTS_nobuffer_ = 1
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 
@@ -313,123 +312,152 @@ if grid_gen ==1:
     print '\n'," - Grid: done! "'\n'
 
 
-if _5_DISTS_nobuffer_ ==1:
+####### WITHOUT BUFFERS HERE ########
+
+if buffers == 'no':
+    if _5_b_DISTS_ ==1:
+        print '\n'," Distance part B: distances for properties... ",'\n'
+        for hull in hulls:
+            import_script = 'SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.property_id FROM erven AS p'
+            #dist_nobuffer(db,hull,'erven',import_script,dist_threshold)
+            print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) ".format(hull), '\n'
+
+            intersPOINT(db,'erven',hull,'property_id')
+            print '\n'," -- Table with point intersections: done! ({}) ".format(hull), '\n'
+
+    if _5_c_DISTS_ ==1:
+        print '\n'," Distance part C: distances for BBLU... ",'\n'
+        for hull,bblu_type in product(hulls,['pre','post']):
+            import_script = 'SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID FROM bblu_{} AS p'.format(bblu_type)
+            #dist_nobuffer(db,hull,'bblu_'+bblu_type,import_script,dist_threshold)
+            print '\n'," -- BBLU distance, Populate table / push to DB: done! ({} {}) ".format(bblu_type, hull), '\n'
+
+            intersPOINT(db,'bblu_{}'.format(bblu_type),hull,'OGC_FID')            
+            print '\n'," -- Table with point intersections: done! ({}) ".format(hull), '\n'
+
+    if _5_d_DISTS_ ==1:
+        print '\n'," Distance part D: distances for EAs and SALs... ",'\n'        
+        for hull,geom,yr in product(hulls,['ea','sal'],['2001','2011']):
+            import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                    st_y(st_centroid(p.GEOMETRY)) AS y, e.{}_code
+                                    FROM  {}_{}  AS  p'''.format(geom,geom,yr)
+            #dist_nobuffer(db,hull,geom + '_' + yr,import_script,dist_threshold)
+            print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+
+            intersGEOM(db,geom,hull,yr) 
+            print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
 
 
-    hull       = 'rdp'
-    outcome    = 'erven'
-    identifier = 'property_id'
-    num_neighbors = 1
-    dist_nobuffer(db,hull,outcome,identifier,num_neighbors)
 
 
 
+####### WITH BUFFERS HERE #########
+
+if buffers == 'yes':
+    if _5_b_DISTS_ ==1:
+        print '\n'," Distance part B: distances for non-RDP... ",'\n'
+
+        # 5b.0 instantiate parallel workers
+        pp = multiprocessing.Pool(processes=workers)
+
+        for hull in hulls:
+
+            # 5b.1 fetch hull coordinates
+            coords = fetch_coordinates(db,hull)
+        
+            # 5b.2 non-rdp in/out of hulls
+            fetch_set = ['trans_buff','trans_hull']
+            part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
+            matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
+            print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
+        
+            # 5b.3 calculate distances for non-rdp
+            inmat = matrx['trans_buff'][matrx['trans_buff'][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
+            dist = dist_calc(inmat, coords[:,:2].astype(np.float)) # second input is targ_conhulls
+            print '\n'," -- Non-RDP distance calculation: done! ({}) "'\n'.format(hull)
+        
+            # 5b.4 retrieve IDs, populate table and push back to DB
+            push_distNRDP2db(db,matrx,dist,coords,hull)
+            print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
+
+        # 5b.5 kill parallel workers
+        pp.close()
+        pp.join()
+
+    if _5_c_DISTS_ ==1:
+
+        print '\n'," Distance part C: distances for BBLU... ",'\n'
+
+        # 5c.0 instantiate parallel workers
+        pp = multiprocessing.Pool(processes=workers)
+
+        for hull in hulls:
+
+            # 5c.1 fetch hull coordinates
+            coords = fetch_coordinates(db,hull)
+        
+            # 5c.2 BBLU in/out of hulls
+            fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
+            part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
+            matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
+            print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
+
+            # 5c.3 calculate distances for BBLU points   
+            dist_input= [matrx['BBLU_'+x+'_buff'][:,:2].astype(np.float) for x in ['pre','post']]
+            part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
+            dist = dict(zip(['BBLU_pre_buff','BBLU_post_buff'],pp.map(part_dist_calc,dist_input)))
+            print '\n'," -- BBLU distance calculation: done! ({}) "'\n'.format(hull)
+        
+            # 5c.4 retrieve IDs, populate table and push back to DB
+            push_distBBLU2db(db,matrx,dist,coords,hull)
+            print '\n'," -- BBLU distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
+
+        # 5c.5 kill parallel workers
+        pp.close()
+        pp.join()
 
 
-if _5_b_DISTS_ ==1:
-    print '\n'," Distance part B: distances for non-RDP... ",'\n'
+    if _5_d_DISTS_ ==1:
 
-    # 5b.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
+        print '\n'," Distance part D: distances for EAs and SALs... ",'\n'
 
-    for hull in hulls:
+        # 5d.0 instantiate parallel workers
+        pp = multiprocessing.Pool(processes=workers)
 
-        # 5b.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-    
-        # 5b.2 non-rdp in/out of hulls
-        fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
-    
-        # 5b.3 calculate distances for non-rdp
-        inmat = matrx['trans_buff'][matrx['trans_buff'][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
-        dist = dist_calc(inmat, coords[:,:2].astype(np.float)) # second input is targ_conhulls
-        print '\n'," -- Non-RDP distance calculation: done! ({}) "'\n'.format(hull)
-    
-        # 5b.4 retrieve IDs, populate table and push back to DB
-        push_distNRDP2db(db,matrx,dist,coords,hull)
-        print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
+        for hull,geom in product(hulls,['ea','sal']):
 
-    # 5b.5 kill parallel workers
-    pp.close()
-    pp.join()
+            # 5d.1 fetch hull coordinates
+            coords = fetch_coordinates(db,hull)
+        
+            # 5d.2 EA and SAL in/out of hulls
+            fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
+            part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
+            matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
+            print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
+        
+            # 5d.3 calculate distances for EA and SAL
+            dist_input=[matrx[x][:,:2].astype(np.float) for x in [geom+'_2001_buff',geom+'_2011_buff']]
+            part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
+            dist = dict(zip([geom+'_2001_buff',geom+'_2011_buff'],pp.map(part_dist_calc,dist_input)))
+            print '\n'," -- EA distance calculation: done! ({},{}) "'\n'.format(hull,geom)
+        
+            # 5d.4 retrieve IDs, populate table and push back to DB
+            for cen in [geom+'_2001',geom+'_2011']:
+                push_distCENSUS2db(db,matrx,dist,coords,cen,hull)
+            print '\n'," -- EA and SAL distance, Populate table / push to DB: done! ({},{}) "'\n'.format(hull,geom)
 
-if _5_c_DISTS_ ==1:
-
-    print '\n'," Distance part C: distances for BBLU... ",'\n'
-
-    # 5c.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
-
-    for hull in hulls:
-
-        # 5c.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-    
-        # 5c.2 BBLU in/out of hulls
-        fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
-
-        # 5c.3 calculate distances for BBLU points   
-        dist_input= [matrx['BBLU_'+x+'_buff'][:,:2].astype(np.float) for x in ['pre','post']]
-        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
-        dist = dict(zip(['BBLU_pre_buff','BBLU_post_buff'],pp.map(part_dist_calc,dist_input)))
-        print '\n'," -- BBLU distance calculation: done! ({}) "'\n'.format(hull)
-    
-        # 5c.4 retrieve IDs, populate table and push back to DB
-        push_distBBLU2db(db,matrx,dist,coords,hull)
-        print '\n'," -- BBLU distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
-
-    # 5c.5 kill parallel workers
-    pp.close()
-    pp.join()
+        # 5d.5 kill parallel workers
+        pp.close()
+        pp.join()
 
 
-if _5_d_DISTS_ ==1:
+    if _5_e_DISTS_ == 1:
 
-    print '\n'," Distance part D: distances for EAs and SALs... ",'\n'
+        print '\n'," Making BBLU xy table...",'\n'
 
-    # 5d.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
+        bblu_xy(db)
 
-    for hull,geom in product(hulls,['ea','sal']):
-
-        # 5d.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-    
-        # 5d.2 EA and SAL in/out of hulls
-        fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,buffer_type,hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
-    
-        # 5d.3 calculate distances for EA and SAL
-        dist_input=[matrx[x][:,:2].astype(np.float) for x in [geom+'_2001_buff',geom+'_2011_buff']]
-        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
-        dist = dict(zip([geom+'_2001_buff',geom+'_2011_buff'],pp.map(part_dist_calc,dist_input)))
-        print '\n'," -- EA distance calculation: done! ({},{}) "'\n'.format(hull,geom)
-    
-        # 5d.4 retrieve IDs, populate table and push back to DB
-        for cen in [geom+'_2001',geom+'_2011']:
-            push_distCENSUS2db(db,matrx,dist,coords,cen,hull)
-        print '\n'," -- EA and SAL distance, Populate table / push to DB: done! ({},{}) "'\n'.format(hull,geom)
-
-    # 5d.5 kill parallel workers
-    pp.close()
-    pp.join()
-
-
-if _5_e_DISTS_ == 1:
-
-    print '\n'," Making BBLU xy table...",'\n'
-
-    bblu_xy(db)
-
-    print '\n'," Done BBLU XY ! ",'\n'
+        print '\n'," Done BBLU XY ! ",'\n'
 
 #############################################
 # STEP 6:  Make RDP Gradient/Density Plots  #

@@ -30,7 +30,7 @@ def gp2shp(db,qrys,geocol,out,espg):
     return
 
 
-def intersGEOM(db,dir,geom,hull,year):
+def intersGEOM(db,geom,hull,year):
 
     # connect to DB
     con = sql.connect(db)
@@ -38,10 +38,10 @@ def intersGEOM(db,dir,geom,hull,year):
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
-    cur.execute('DROP TABLE IF EXISTS {}_{}_int_{};'.format(hull,geom,year))
+    cur.execute('DROP TABLE IF EXISTS int_{}_{}_{};'.format(hull,geom,year))
 
     make_qry = '''
-               CREATE TABLE {}_{}_int_{} AS 
+               CREATE TABLE int_{}_{}_{} AS 
                SELECT A.{}_code, B.cluster, 
                st_area(st_intersection(A.GEOMETRY,B.GEOMETRY)) / st_area(A.GEOMETRY) AS area_int
                FROM {}_{} as A, {}_conhulls as B
@@ -51,7 +51,7 @@ def intersGEOM(db,dir,geom,hull,year):
                '''.format(hull,geom,year,geom,geom,year,hull,geom,year)
 
     index_qry = '''
-                CREATE INDEX {}_{}_int_{}_index ON {}_{}_int_{} ({}_code);
+                CREATE INDEX int_{}_{}_{}_index ON int_{}_{}_{} ({}_code);
                 '''.format(hull,geom,year,hull,geom,year,geom)
 
     cur.execute(make_qry)

@@ -12,10 +12,41 @@ import fiona, glob, multiprocessing
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import datetime
 
 
+def intersPOINT(db,data,hull,id_var):
 
-def dist_nobuffer(db,hull,outcome,identifier,num_neighbors):
+	con = sql.connect(db)
+	con.enable_load_extension(True)
+	con.execute("SELECT load_extension('mod_spatialite');")
+	cur = con.cursor()
+
+	cur.execute('DROP TABLE IF EXISTS int_{}_{};'.format(hull,data))
+
+	make_qry = '''
+               CREATE TABLE int_{}_{} AS 
+               SELECT A.{}, B.cluster
+               FROM {} as A, {}_conhulls as B
+               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+               WHERE f_table_name='{}' AND search_frame=B.GEOMETRY)
+               AND st_intersects(A.GEOMETRY,B.GEOMETRY);
+				'''.format(hull,data,id_var,data,hull,data)
+
+	index_qry = '''
+				CREATE INDEX int_{}_{}_index ON int_{}_{} ({});
+				'''.format(hull,data,hull,data,id_var)
+
+	cur.execute(make_qry)
+	cur.execute(index_qry)
+
+	con.commit()
+	con.close()
+
+	return
+
+
+def dist_nobuffer(db,hull,outcome,import_script,dist_threshold):
 
 	print '\n', " start dist calc ... ", '\n'
 
@@ -29,35 +60,18 @@ def dist_nobuffer(db,hull,outcome,identifier,num_neighbors):
 	targ_mat = np.array(cur.fetchall())
 
 	# 2. import outcome coordinates
-	cur.execute('SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.{} FROM {} AS p'.format(identifier,outcome))
+	cur.execute(import_script)
 	in_mat = np.array(cur.fetchall())
 
-	# compute distance
-	def dist_calc(I_mat,T_mat,NUM):
-
-		nbrs = NearestNeighbors(n_neighbors=NUM, algorithm='auto').fit(T_mat)
+	# compute distance function
+	def dist_calc(I_mat,T_mat):
+		nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(T_mat)
 		dist, ind = nbrs.kneighbors(I_mat)
-
 		return [dist,ind]
 
-	res=dist_calc(in_mat[:,:2],targ_mat[:,:2],num_neighbors)
-
-	#print in_mat.size
-	#print in_mat[0]
-	#print in_mat[0].size
-	#print res[0].T
-	#print res[0][:,0]
-	#print res[0].size
-
-	#print '\n', "in_mat : ", '\n' , in_mat ,  '\n'
-
-	in_mat_full = np.concatenate( (in_mat,res[0]) ,axis=1)
-
-	#print '\n', "in_mat_full : ", '\n' , in_mat_full ,  '\n'
-
-	in_mat = in_mat_full[ in_mat_full[:,3].astype(int)<=1000,:3]
-
-	#print '\n', "new in_mat : ", '\n' , in_mat ,  '\n'
+	res=dist_calc(in_mat[:,:2],targ_mat[:,:2])
+	in_mat_full = np.concatenate( (in_mat,res[0]) ,axis=1) 
+	in_mat = in_mat_full[ in_mat_full[:,3].astype(int)<=dist_threshold,:3] ### trim input to within distance band
 
 	cur.execute('DROP TABLE IF EXISTS distance_{}_{};'.format(outcome,hull))
 	cur.execute(''' CREATE TABLE distance_{}_{} (
@@ -66,49 +80,19 @@ def dist_nobuffer(db,hull,outcome,identifier,num_neighbors):
 	                distance     numeric(10,10) );'''.format(outcome,hull))
 
 	rowsqry = '''INSERT INTO distance_{}_{} VALUES (?,?,?);'''.format(outcome,hull)
+	un_set = np.unique(targ_mat[:,2]) ### loop through clusters
 
-	un_set = np.unique(targ_mat[:,2])
+	print len(un_set)
 
 	for l in range(0,len(un_set)):
+		print l
+		print(datetime.datetime.now())
 		K = un_set[l].astype(int)
-		#print K
-		targ_test = targ_mat[targ_mat[:,2].astype(int)==K,:]
-		res=dist_calc(in_mat[:,:2], targ_test[:,:2],1)
-		#print res
-
-		#print '\n', "targ_mat : ", '\n' , targ_mat ,  '\n'
-
-		#print '\n', "targ_test : ", '\n' , targ_test ,  '\n'
-
+		targ_test = targ_mat[targ_mat[:,2].astype(int)==K,:] ### limit to K cluster
+		res=dist_calc(in_mat[:,:2], targ_test[:,:2])
 		for i in range(0,len(in_mat)):
-			if res[0][i][0]<=1000:
+			if res[0][i][0]<=dist_threshold:
 				cur.execute(rowsqry, [in_mat[i][2],targ_test[res[1][i][0]][2],res[0][i][0]])
-
-		###for i in range(0,len(in_mat)):
-		#print in_mat[i,:2]
-		#####input_test = in_mat[i,:2].reshape(1, -1)
-		#print input_test
-		#####res=dist_calc(input_test, targ_mat[:,:2],1)	
-		#####dist_res = res[0][0][0]
-		#####index_res = res[1][0][0]
-		#print '\n','results:', res, '\n'
-		#print '\n','results 0:', res[0][0][0], '\n'
-		#print '\n','results 1:', res[1][0][0], '\n'
-		#print '\n','input_id :', in_mat[i][2], '\n'
-		#print '\n','target_id :', targ_mat[index_res][2], '\n'
-		#print res[1][0]
-		#print 
-		#print in_mat[i][2][0]
-		#print targ_mat[res[1][i]][2][0]
-
-		#cur.execute(rowsqry, [in_mat[i][2],targ_mat[index_res][2],1,dist_res])	
-		#tm = targ_mat[targ_mat[2]!=]
-		#res=dist_calc(in_mat[i,:2], targ_mat[:,:2],1)	
-		#cur.execute(rowsqry, [in_mat[i][2],targ_mat[res[1][i][j]][2],j+1,res[0][i][j]])		
-		#for j in range(0,num_neighbors):
-		#print i
-		#cur.execute(rowsqry, [in_mat[i][2],targ_mat[res[1][i][j]][2],j+1,res[0][i][j]])	
-
 	
 	cur.execute('''CREATE INDEX distance_{}_{}_input_id_ind ON distance_{}_{} (input_id);'''.format(outcome,hull,outcome,hull))
 	cur.execute('''CREATE INDEX distance_{}_{}_target_id_ind ON distance_{}_{} (target_id);'''.format(outcome,hull,outcome,hull))
