@@ -44,10 +44,9 @@ local qry = "
   LEFT JOIN  (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_erven_placebo WHERE distance<=4000
   GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS F ON F.input_id = B.property_id
 
-  LEFT JOIN int_rdp_erven AS G  ON G.property_id = B.property_id
+  LEFT JOIN int_placebo_erven AS G  ON G.property_id = B.property_id
 
-  JOIN gcro AS H ON H.cluster = F.target_id
-  ";
+  JOIN gcro AS H ON H.cluster = F.target_id  ";
 
 
 * set cd;
@@ -63,27 +62,29 @@ odbc load, exec("`qry'") clear;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 
+* get rid of missing distances;
 drop if distance_placebo==. & distance_rdp==. ;
 
+* make distances negative if within projects ;
+replace distance_placebo = distance_placebo*-1 if cluster_placebo==cluster_placebo_int;
+replace distance_rdp = distance_rdp*-1 if cluster_rdp==cluster_rdp_int;
+
+* purchase years for transactions that intersect with projects;
 g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int;
 egen mode_yr_rdp = mode(purch_yr), by(cluster_rdp) maxmode;
 
-ren placebo_yr mode_yr_placebo;
-
-drop if cluster_rdp==cluster_rdp_int;
 drop cluster_rdp_int;
-drop if cluster_placebo==cluster_placebo_int;
 drop cluster_placebo_int;
 
-
 * create date variables and dummies;
+ren placebo_yr mode_yr_placebo;
 gen abs_yrdist_rdp = abs(purch_yr - mode_yr_rdp); 
 gen abs_yrdist_placebo = abs(purch_yr - mode_yr_placebo); 
-
 
 gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen hy_date  = hofd(dofm(mo_date)); // half-years;
+
 *******************;
 bys mo_date cluster_rdp rdp_all: gen N = _N if purch_yr == mode_yr_rdp;
 replace N = -99 if rdp_all==0 | N==.;
@@ -96,7 +97,6 @@ set seed 1; /* set random month for placebo */
 g mo_placebo = ceil(12 * uniform()) ;
 g mo_date_placebo = ym(mode_yr_placebo,mo_placebo);
 g con_mo_placebo = mo_date_placebo;
-
 
 *gen con_mo   = ym(mode_yr,07);
 *******************;
@@ -115,17 +115,18 @@ gen erf_size3 = erf_size^3;
 save "gradplot_admin.dta", replace;
 
 
+
+
+* KEY : EXPORT THE RELEVANT CLUSTERS AND CONSTRUCTION DATES to sql tables ;
+
+use "gradplot_admin.dta", clear;
+
 cap program drop gentable;
 program define gentable;
   odbc exec("DROP TABLE IF EXISTS `1';"), dsn("gauteng");
   odbc insert, table("`1'") dsn("gauteng") create;
   odbc exec("CREATE INDEX `1'_conacct_ind ON `1' (`1');"), dsn("gauteng");
 end;
-
-
-
-
-/* KEY : EXPORT THE RELEVANT CLUSTERS AND DATES */
 
 preserve;
   keep mo_date cluster_rdp;

@@ -89,7 +89,6 @@ keywords = []
 
 _5_a_DISTS_ = 0  # buffers and hull creation
 
-grid_gen    = 0  # grid generate
 grid_size = '100' # assign size of grid
 
 _5_b_DISTS_ = 0  # non-RDP distance
@@ -301,16 +300,6 @@ if _5_a_DISTS_ ==1:
         hulls_coordinates(db,tempdir,hull)
         print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
-if grid_gen ==1:
-
-    print '\n'," Generate spatial grid... ",'\n'
-    add_grid(db,grid_size,'reg')
-    print '\n'," Generate building counts... ",'\n'
-    add_grid_counts(db)
-    print '\n'," Create table linking erven and grid... ",'\n'
-    grid_to_erven(db)
-    print '\n'," - Grid: done! "'\n'
-
 
 ####### WITHOUT BUFFERS HERE ########
 
@@ -346,9 +335,6 @@ if buffers == 'no':
 
             intersGEOM(db,geom,hull,yr) 
             print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
-
-
-
 
 
 ####### WITH BUFFERS HERE #########
@@ -451,13 +437,15 @@ if buffers == 'yes':
         pp.join()
 
 
-    if _5_e_DISTS_ == 1:
+### DO FOR BOTH ###
 
-        print '\n'," Making BBLU xy table...",'\n'
+if _5_e_DISTS_ == 1:
 
-        bblu_xy(db)
+    print '\n'," Making BBLU xy table...",'\n'
 
-        print '\n'," Done BBLU XY ! ",'\n'
+    bblu_xy(db)
+
+    print '\n'," Done BBLU XY ! ",'\n'
 
 #############################################
 # STEP 6:  Make RDP Gradient/Density Plots  #
@@ -465,67 +453,109 @@ if buffers == 'yes':
 
 if _6_a_PLOTS_ == 1:
 
-    print '\n'," Making Housing Prices plots...",'\n'
+    ### NEW NO BUFFER APPROACH ### BOTH RDP AND PLACEBO
+    if buffers== 'no':
+        print '\n'," Making Housing Prices plots...",'\n'
 
-    dofile = "subcode/export2gradplot.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
+        dofile = "subcode/export2gradplot_admin_both.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
 
-    if not os.path.exists(outdir+'gradplots'):
-        os.makedirs(outdir+'gradplots')
+        if not os.path.exists(outdir+'gradplots'):
+            os.makedirs(outdir+'gradplots')
 
-    dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',dofile,rdp]
-    subprocess.call(cmd)
+        dofile = "subcode/plot_gradients_admin_both.do"
+        cmd = ['stata-mp','do',dofile,rdp]
+        subprocess.call(cmd)
 
-    print '\n'," -- Price Gradient Plots: done! ",'\n'
+        print '\n'," -- Price Gradient Plots: done! ",'\n'
+
+        dofile = "subcode/plot_freq_admin_both.do"
+        cmd = ['stata-mp','do',dofile,rdp]
+        subprocess.call(cmd)
+
+        print '\n'," -- Transaction Frequency Plots: done! ",'\n'
+
+    ### OLD BUFFER APPROACH
+    if buffers == 'yes':
+        print '\n'," Making Housing Prices plots...",'\n'
+
+        dofile = "subcode/export2gradplot.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
+
+        if not os.path.exists(outdir+'gradplots'):
+            os.makedirs(outdir+'gradplots')
+
+        dofile = "subcode/plot_gradients.do"
+        cmd = ['stata-mp','do',dofile,rdp]
+        subprocess.call(cmd)
+
+        print '\n'," -- Price Gradient Plots: done! ",'\n'
+
 
 if _6_b_PLOTS_ == 1:
 
-    print '\n'," Making BBLU plots...",'\n'
+    ### NEW NO BUFFER APPROACH ### BOTH RDP AND PLACEBO
+    if buffers == 'no':
+        print '\n'," Making BBLU plots...",'\n'
 
-    if not os.path.exists(outdir+'bbluplots'):
-        os.makedirs(outdir+'bbluplots')
+        if not os.path.exists(outdir+'bbluplots'):
+            os.makedirs(outdir+'bbluplots')
 
-    dofile = "subcode/plot_density.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
+        dofile = "subcode/plot_density.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
 
-    print '\n'," -- BBLU Plots: done! ",'\n'
+        print '\n'," -- BBLU Plots: done! ",'\n'        
+
+    ### OLD BUFFER APPROACH
+    if buffers == 'yes':
+        print '\n'," Making BBLU plots...",'\n'
+
+        if not os.path.exists(outdir+'bbluplots'):
+            os.makedirs(outdir+'bbluplots')
+
+        dofile = "subcode/plot_density_admin_both.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
+
+        print '\n'," -- BBLU Plots: done! ",'\n'
+
 
 #################################################
 # STEP 7:  Make Placebo Gradient/Density Plots  #
 #################################################
+if buffers == 'yes':
+    if _7_a_PLOTS_ == 1:
 
-if _7_a_PLOTS_ == 1:
+        print '\n'," Making Housing Prices plots...",'\n'
 
-    print '\n'," Making Housing Prices plots...",'\n'
+        dofile = "subcode/export2gradplot_placebo.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
 
-    dofile = "subcode/export2gradplot_placebo.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
+        if not os.path.exists(outdir+'gradplots_placebo'):
+            os.makedirs(outdir+'gradplots_placebo')
 
-    if not os.path.exists(outdir+'gradplots_placebo'):
-        os.makedirs(outdir+'gradplots_placebo')
+        dofile = "subcode/plot_gradients_placebo.do"
+        cmd = ['stata-mp','do',dofile,rdp]
+        subprocess.call(cmd)
 
-    dofile = "subcode/plot_gradients_placebo.do"
-    cmd = ['stata-mp','do',dofile,rdp]
-    subprocess.call(cmd)
+        print '\n'," -- Placebo Price Gradient Plots: done! ",'\n'
 
-    print '\n'," -- Placebo Price Gradient Plots: done! ",'\n'
+    if _7_b_PLOTS_ == 1:
 
-if _7_b_PLOTS_ == 1:
+        print '\n'," Making BBLU plots...",'\n'
 
-    print '\n'," Making BBLU plots...",'\n'
+        if not os.path.exists(outdir+'bbluplots_placebo'):
+            os.makedirs(outdir+'bbluplots_placebo')
 
-    if not os.path.exists(outdir+'bbluplots_placebo'):
-        os.makedirs(outdir+'bbluplots_placebo')
+        dofile = "subcode/plot_density_placebo.do"
+        cmd = ['stata-mp','do',dofile]
+        subprocess.call(cmd)
 
-    dofile = "subcode/plot_density_placebo.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
-
-    print '\n'," -- Placebo BBLU Plots: done! ",'\n'
+        print '\n'," -- Placebo BBLU Plots: done! ",'\n'
 
 ##########################################
 # STEP 8:  Make census Diff-n-diff regs  #

@@ -9,7 +9,6 @@ set maxvar 32767
 *  PLOT GRADIENTS *;
 *******************;
 
-
 * SET OUTPUT FOLDER ;
 * global output = "Output/GAUTENG/gradplots";
 * global output = "Code/GAUTENG/paper/figures";
@@ -17,9 +16,9 @@ global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
 global rdp   = "`1'";
-global tw    = "3";   /* look at +-tw years to construction */
+global tw    = "4";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
-global mbin  =  2;    /* months bin width for time-series   */
+global mbin  =  4;    /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 700;   /* distance to be considered treated  */
 
@@ -45,12 +44,9 @@ cd $output ;
 drop if distance_rdp==. & distance_placebo==.;
 destring count_rdp count_placebo, replace force;
 
-*replace post = 2 if (mo2con<-36  | mo2con >36 );
-gen treat_rdp  = (distance_rdp <= $treat);
-gen treat_placebo = (distance_placebo <= $treat);
 
-* create distance dummies;
 foreach v in _rdp _placebo {;
+* create distance dummies;
 sum distance`v';
 global max = round(ceil(`r(max)'),100);
 egen dists`v' = cut(distance`v'),at(0($bin)$max); 
@@ -70,25 +66,17 @@ gen day_date_cu = day_date^3;
 
 drop if purch_price == 6900000;
 
-
-* data subset for regs;
-global ifregs = "
-       rdp_never ==1 &
-       purch_price > 2500 & purch_price<500000 &
-       purch_yr > 2000 
-       ";
+g cluster_reg = cluster_rdp;
+replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 
-* time regression;
-reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_rdp);
-
-
+cap program drop coeffgraph;
+program define  coeffgraph;
   preserve;
    parmest, fast;
    
       local contin = "mo2con";
       local group  = "treat";
-      local 2 = "timeplot_admin";
    
    keep if strpos(parm,"`contin'")>0 & strpos(parm,"`group'") >0;
    gen dot1 = strpos(parm,".");
@@ -96,12 +84,12 @@ reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_p
    gen hash = strpos(parm,"#");
    gen distalph = substr(parm,1,dot1-1);
    egen contin = sieve(distalph), keep(n);
-   destring contin, replace;
+   destring  contin, replace;
    gen postalph = substr(parm,hash +1,dot2-1-hash);
    egen group = sieve(postalph), keep(n);
-   destring group, replace;
+   destring  group, replace;
 
-   keep if group==1;
+   keep if group==1;  /* only graph diff-in-diff coefficients */
 
       drop if contin > 9000;
       replace contin = -1*(contin - 1000) if contin>1000;
@@ -119,18 +107,77 @@ reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_p
       xtitle("months to modal construction month",height(5))
       ytitle("log-price coefficients",height(5))
       xlabel(-$bound(12)$bound)
-      ylabel(-.75(.25).75,labsize(small))
+      ylabel(-.5(.25).5,labsize(small))
       xline(0,lw(thin)lp(shortdash))
       legend(order(3 "rdp" 4 "placebo") 
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
        note("`3'");
-      graphexportpdf `2', dropeps;
+
+      graphexportpdf `1', dropeps;
 
    restore;
+end;
 
 
 
+* data subset for regs (1);
+global ifregs = "
+       rdp_never ==1 &
+       purch_price > 2500 & purch_price<500000 &
+       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
+       ";
+
+gen treat_rdp  = (distance_rdp <= $treat);
+gen treat_placebo = (distance_placebo <= $treat);
+
+* time regression;
+reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
+
+coeffgraph timeplot_admin_${treat} ;
+graph export timeplot_admin_${treat}.pdf, as(pdf) replace;
+
+
+* time regression with prop fixed effects;
+areg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo if $ifregs, absorb(property_id) cl(cluster_reg);
+
+coeffgraph timeplot_admin_prop_${treat} ;
+graph export timeplot_admin_prop_${treat}.pdf, as(pdf) replace;
+
+
+
+*** This piece of code looks at impacts within project boundaries ;
+*** (not a big sample tho, probably not worth including) ;
+
+/*
+global ifregs = "
+       rdp_never ==1 &
+       purch_price > 2500 & purch_price<500000 &
+       purch_yr > 2000
+       ";
+
+g treat_rdp_wn = (distance_rdp <0);
+g treat_placebo_wn = (distance_placebo <0);
+
+* time regression;
+reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp_wn b1001.mo2con_reg_placebo#b0.treat_placebo_wn 
+i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
+
+coeffgraph timeplot_admin_wn_${treat};
+graph export timeplot_admin_wn_${treat}.pdf, as(pdf) replace;
+
+
+* time regression with prop fixed effects;
+areg lprice b1001.mo2con_reg_rdp#b0.treat_rdp_wn b1001.mo2con_reg_placebo#b0.treat_placebo_wn 
+i.purch_yr#i.purch_mo if $ifregs, absorb(property_id) cl(cluster_reg);
+
+coeffgraph timeplot_admin_prop_wn_${treat};
+graph export timeplot_admin_prop_wn_${treat}.pdf, as(pdf) replace;
+*/
+
+
+
+*** This code is for a regression analogue that we could put together at some point ;
 
 
 /*

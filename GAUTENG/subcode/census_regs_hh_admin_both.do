@@ -16,8 +16,6 @@ set maxvar 32767
 * global output = "Code/GAUTENG/paper/figures" ;
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
-
-
 * RUN LOCALLY?;
 global LOCAL = 1;
 
@@ -32,23 +30,15 @@ if $LOCAL==1 {;
 cd ../..;
 cd Generated/Gauteng;
 
-
 if $DATA_PREP==1 {;
-
-
 
   local qry = " 
 
   	SELECT 
 
-      AA.*, 
+      AA.*, GP.mo_date_placebo, GR.mo_date_rdp
 
-      GP.mo_date_placebo, GR.mo_date_rdp
-
-    FROM 
-
-  	(
-
+    FROM 	(
     SELECT A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
            A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
            A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
@@ -102,12 +92,10 @@ if $DATA_PREP==1 {;
     LEFT JOIN (SELECT sal_code, area_int AS area_int_rdp     FROM int_rdp_sal_2011)     AS IR ON IR.sal_code = A.SAL_CODE
     LEFT JOIN (SELECT sal_code, area_int AS area_int_placebo FROM int_placebo_sal_2011) AS IP ON IP.sal_code = A.SAL_CODE
 
-
   ) AS AA
 
   LEFT JOIN (SELECT cluster_placebo, mo_date_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
   LEFT JOIN (SELECT cluster_rdp, mo_date_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
-
     ";
 
   odbc query "gauteng";
@@ -232,69 +220,6 @@ append addtext(Project FE, YES) keep(gr_*) ;
 exit STATA, clear;
 
 
-
-
-
-
-/*
-
-
-if $GEN_AVERAGE_TABLES == 1 {;
-
-
-cap program drop var_list;
-program define var_list;
-  local pvs "$var_list";
-  local pv : list sizeof pvs;
-  global vtempavg="";
-  scalar define vs=0;
-  foreach v in $var_list {;
-    scalar define vs=vs+1;
-    if `=vs'<`=`pv''{;
-      global vtempavg = "$vtempavg AVG(`v') AS `v',";
-    };
-    else {;
-      global vtempavg = "$vtempavg AVG(`v') AS `v'";
-    };
-  };
-end;
-cap program drop gentable;
-program define gentable;
-  odbc exec("DROP TABLE IF EXISTS `1';"), dsn("gauteng");
-  odbc insert, table("`1'") dsn("gauteng") create;
-  odbc exec("CREATE INDEX `1'_ind ON `1' (`2');"), dsn("gauteng");
-end;
-
-global var_list = "H23_Quarters H23a_HU H24_Room   H25_Tenure H26_Piped_Water  
-H26a_Sourc_Water H27_Toilet_Facil H28a_Cooking H28b_Heating  
-H28c_Lghting H30_Refuse  DER2_HHSIZE";
-var_list;
-
-local qry = "SELECT MAX(SAL) AS SAL, $vtempavg FROM census_hh_2001 GROUP BY SAL";
-
-odbc query "gauteng";
-odbc load, exec("`qry'") clear allstring; 
-foreach var of varlist * {;
-destring `var', replace force;
-};
-gentable census_hh_2001_avg SAL;
-
-
-global var_list = " H01_QUARTERS H02_MAINDWELLING H03_TOTROOMS H04_TENURE 
-H07_WATERPIPED H08_WATERSOURCE H10_TOILET H11_ENERGY_COOKING H11_ENERGY_HEATING 
-H11_ENERGY_LIGHTING H12_REFUSE DERH_HSIZE";
-var_list;
-
-local qry = "SELECT MAX(SAL_CODE) AS SAL_CODE, $vtempavg FROM census_hh_2011 GROUP BY SAL_CODE";
-
-odbc query "gauteng";
-odbc load, exec("`qry'") clear allstring; 
-foreach var of varlist * {;
-destring `var', replace force;
-};
-gentable census_hh_2011_avg SAL_CODE;
-
-};
 
 
 
