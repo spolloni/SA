@@ -46,7 +46,7 @@ def intersPOINT(db,data,hull,id_var):
 	return
 
 
-def dist_nobuffer(db,hull,outcome,import_script,dist_threshold):
+def dist(db,hull,outcome,import_script,dist_threshold):
 
 	print '\n', " start dist calc ... ", '\n'
 

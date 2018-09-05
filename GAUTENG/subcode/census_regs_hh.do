@@ -16,21 +16,15 @@ set maxvar 32767
 * global output = "Code/GAUTENG/paper/figures" ;
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
-
-
-
 * RUN LOCALLY?;
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 0;
+global DATA_PREP = 1;
 
 if $LOCAL==1 {;
 	cd ..;
 };
-
-* import plotreg program;
-do subcode/import_plotcoeffs.do;
 
 * load data;
 cd ../..;
@@ -42,44 +36,36 @@ if $DATA_PREP==1 {;
 
   	SELECT 
 
-      AA.*, 
+      AA.*, GP.mo_date_placebo, GR.mo_date_rdp
 
-      BB.mode_yr, BB.frac1,
-
-      CC.placebo_yr
-
-    FROM 
-
-  	(
-
+    FROM 	(
     SELECT A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
            A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
            A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
            A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
            A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size,
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int,
+           cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
+           cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+           area_int_rdp, area_int_placebo,
 
-           'census2001hh' AS source, 'rdp' AS hulltype, 2001 AS year
+           'census2001hh' AS source, 2001 AS year
 
     FROM census_hh_2001 AS A  
-    JOIN distance_sal_2001_rdp AS B ON B.sal_code=A.SAL
 
-    UNION ALL 
+    LEFT JOIN (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_sal_2001_rdp WHERE distance<=4000
+  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) 
+    AS B ON A.SAL=B.input_id
 
-    SELECT A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
-           A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
-           A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
-           A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
-           A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size,
+    LEFT JOIN (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_sal_2001_placebo WHERE distance<=4000
+  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) 
+    AS BP ON A.SAL=BP.input_id
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int, 
+    LEFT JOIN (SELECT sal_code, area_int AS area_int_rdp     FROM int_rdp_sal_2001)     AS IR ON IR.sal_code = A.SAL
+    LEFT JOIN (SELECT sal_code, area_int AS area_int_placebo FROM int_placebo_sal_2001) AS IP ON IP.sal_code = A.SAL
 
-           'census2001hh' AS source, 'placebo' AS hulltype, 2001 AS year
-    FROM census_hh_2001 AS A  
-    JOIN distance_sal_2001_placebo AS B ON B.sal_code=A.SAL
 
-    UNION ALL 
+        UNION ALL 
 
     SELECT A.H01_QUARTERS AS quarters_typ, A.H02_MAINDWELLING AS dwelling_typ,
            A.H03_TOTROOMS AS tot_rooms, A.H04_TENURE AS tenure, A.H07_WATERPIPED AS water_piped,
@@ -87,70 +73,66 @@ if $DATA_PREP==1 {;
            A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
            A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size,
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int,
+           cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
+           cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+           area_int_rdp, area_int_placebo,
 
-           'census2011hh' AS source, 'rdp' AS hulltype, 2011 AS year
-
-    FROM census_hh_2011 AS A  
-    JOIN distance_sal_2011_rdp AS B ON B.sal_code=A.SAL_code
-
-    UNION ALL 
-
-    SELECT A.H01_QUARTERS AS quarters_typ, A.H02_MAINDWELLING AS dwelling_typ,
-           A.H03_TOTROOMS AS tot_rooms, A.H04_TENURE AS tenure, A.H07_WATERPIPED AS water_piped,
-           A.H08_WATERSOURCE AS water_source, A.H10_TOILET AS toilet_typ, 
-           A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
-           A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size,
-
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int,
-
-           'census2011hh' AS source, 'placebo' AS hulltype, 2011 AS year
+           'census2011hh' AS source, 2011 AS year
 
     FROM census_hh_2011 AS A  
-    JOIN distance_sal_2011_placebo AS B ON B.sal_code=A.SAL_code
 
-    ) AS AA
+    LEFT JOIN (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_sal_2011_rdp WHERE distance<=4000
+  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) 
+    AS B ON A.SAL_CODE=B.input_id
 
-    LEFT JOIN (SELECT DISTINCT cluster, cluster_siz, mode_yr, frac1, frac2 
-    FROM rdp_clusters) AS BB on AA.cluster = BB.cluster
+    LEFT JOIN (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_sal_2011_placebo WHERE distance<=4000
+  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) 
+    AS BP ON A.SAL_CODE=BP.input_id
 
-    LEFT JOIN placebo_conhulls AS CC on CC.cluster = AA.cluster
+    LEFT JOIN (SELECT sal_code, area_int AS area_int_rdp     FROM int_rdp_sal_2011)     AS IR ON IR.sal_code = A.SAL_CODE
+    LEFT JOIN (SELECT sal_code, area_int AS area_int_placebo FROM int_placebo_sal_2011) AS IP ON IP.sal_code = A.SAL_CODE
 
+  ) AS AA
+
+  LEFT JOIN (SELECT cluster_placebo, mo_date_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
+  LEFT JOIN (SELECT cluster_rdp, mo_date_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
     ";
 
   odbc query "gauteng";
   odbc load, exec("`qry'") clear;	
-  		
-  save DDcensus_hh, replace;
+  
+
+save DDcensus_hh_admin, replace;
 
 };
 
-use DDcensus_hh, clear;
+
+use DDcensus_hh_admin, clear;
+destring area_int_placebo area_int_rdp, replace force;  
 
 * go to working dir;
 cd ../..;
 cd $output ;
 
-global ifsample = "
-  (cluster < 1000 & frac1>.5 & mode_yr>2002 )
-  |(cluster >= 1000 & placebo_yr!=. & placebo_yr > 2002 )
-  ";
+ /* throw out clusters that were too early in the process */
+  replace distance_placebo =. if mo_date_placebo<521;
+  replace area_int_placebo =. if mo_date_placebo<521;
+  replace distance_rdp =. if mo_date_rdp<512;
+  replace area_int_rdp =. if mo_date_rdp<512;
+
+drop if distance_rdp==. & distance_placebo==.;
 
 * group definitions;
 gen gr = .;
-replace gr=1 if area_int >= .3;
-replace gr=2 if area_int < .3 ;
+replace gr=1 if (area_int_rdp >= .3 & area_int_rdp<.)
+            | (area_int_placebo >= .3 & area_int_placebo<.) ;
+replace gr=2 if (area_int_rdp < .3)  
+            | (area_int_placebo < .3) ;
 
-* drop clusters with no SAL;
-bys cluster year: gen N = _N;
-drop if N<100;
-bys cluster: egen sd = sd(year);
-drop if sd==0;
-drop N sd;
 
 * treatment and post vars;
 gen post  	= (year==2011);
-gen treat 	= (cluster<1000);
+gen treat 	= area_int_rdp>0 & area_int_rdp<. ;
 gen ptreat 	= post*treat; 
 
 * flush toilet?;
@@ -215,30 +197,27 @@ lab var gr_1_post_treat "Project X Post X Complete";
 g gr_2_post_treat = gr_2*post*treat;
 lab var gr_2_post_treat "Spillover X Post X Complete";
 
-
+g cluster_reg = cluster_rdp;
+replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 global vars "  gr_1_post_treat gr_2_post_treat  gr_1_post gr_2_post gr_2_treat gr_2 ";
 global outcomes "water_inside electric_cooking electric_lighting house owner tot_rooms hh_size";
 order $vars;
 
-local table_name "census_DD_hh_sample.tex";
+local table_name "census_DD_hh_sample_admin.tex";
 
-areg toilet_flush $vars if $ifsample , a(cluster) cl(cluster);
+areg toilet_flush $vars  , a(cluster_reg) cl(cluster_reg);
        outreg2 using "`table_name'", label  tex(frag) 
 replace addtext(Project FE, YES) keep(gr_*) 
 addnote("Standard errors are clustered at the project level.");
 
 foreach var of varlist $outcomes {;
-areg `var' $vars if $ifsample , a(cluster) cl(cluster);
+areg `var' $vars , a(cluster_reg) cl(cluster_reg);
        outreg2 using "`table_name'", label  tex(frag) 
 append addtext(Project FE, YES) keep(gr_*) ;
 };
 
 exit STATA, clear;
-
-
-
-
 
 
 

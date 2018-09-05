@@ -9,23 +9,18 @@ set maxvar 32767
 *  PLOT GRADIENTS *;
 *******************;
 
-
 * SET OUTPUT FOLDER ;
 * global output = "Output/GAUTENG/gradplots";
 * global output = "Code/GAUTENG/paper/figures";
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
-
-
 * PARAMETERS;
 global rdp   = "`1'";
-global fr1   = "0.5";
-global fr2   = "0.5";
-global tw    = "3";   /* look at +-tw years to construction */
+global tw    = "4";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
-global mbin  =  2;    /* months bin width for time-series   */
+global mbin  =  4;    /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
-global treat = 400;   /* distance to be considered treated  */
+global treat = 700;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -34,38 +29,33 @@ if $LOCAL==1{;
 	global rdp  = "all";
 };
 
-* import plotreg program;
-do subcode/import_plotreg.do;
-
 * load data; 
 cd ../..;
 cd Generated/GAUTENG;
-use gradplot.dta, clear;
+use gradplot_admin.dta, clear;
 
 * go to working dir;
 cd ../..;
 cd $output ;
 
-* regression dummies;
-gen post = mo2con>0;
-replace post = 2 if (mo2con<-36  | mo2con >36 );
-gen treat  = (distance <= $treat);
+drop if distance_rdp==. & distance_placebo==.;
+destring count_rdp count_placebo, replace force;
 
+
+foreach v in _rdp _placebo {;
 * create distance dummies;
-sum distance;
+sum distance`v';
 global max = round(ceil(`r(max)'),100);
-egen dists = cut(distance),at(0($bin)$max); 
-replace dists = $max if distance <0;
-replace dists = dists+$bin;
-
+egen dists`v' = cut(distance`v'),at(0($bin)$max); 
+replace dists`v' = $max if distance`v' <0;
+replace dists`v' = dists`v'+$bin;
 * create date dummies;
-gen mo2con_reg = ceil(abs(mo2con)/$mbin) if abs(mo2con)<=12*$tw; 
-replace mo2con_reg = mo2con_reg + 1000 if mo2con<0;
-replace mo2con_reg = 9999 if mo2con_reg ==.;
+gen mo2con_reg`v'= ceil(abs(mo2con`v')/$mbin) if abs(mo2con`v')<=12*$tw; 
+replace mo2con_reg`v' = mo2con_reg`v' + 1000 if mo2con`v'<0;
+replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
 *replace mo2con_reg = 1 if mo2con_reg ==0;
+};
 
-gen sixmonths = hy_date if mo_date>tm(2000m12) & mo_date<tm(2012m1);
-replace sixmonths = 0 if sixmonths ==.;
 
 *extra time-controls;
 gen day_date_sq = day_date^2;
@@ -73,93 +63,123 @@ gen day_date_cu = day_date^3;
 
 drop if purch_price == 6900000;
 
-* data subset for regs;
+g cluster_reg = cluster_rdp;
+replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
+
+
+cap program drop coeffgraph;
+program define  coeffgraph;
+  preserve;
+   parmest, fast;
+   
+      local contin = "mo2con";
+      local group  = "treat";
+   
+   keep if strpos(parm,"`contin'")>0 & strpos(parm,"`group'") >0;
+   gen dot1 = strpos(parm,".");
+   gen dot2 = strpos(subinstr(parm, ".", "-", 1), ".");
+   gen hash = strpos(parm,"#");
+   gen distalph = substr(parm,1,dot1-1);
+   egen contin = sieve(distalph), keep(n);
+   destring  contin, replace;
+   gen postalph = substr(parm,hash +1,dot2-1-hash);
+   egen group = sieve(postalph), keep(n);
+   destring  group, replace;
+
+   keep if group==1;  /* only graph diff-in-diff coefficients */
+
+      drop if contin > 9000;
+      replace contin = -1*(contin - 1000) if contin>1000;
+      replace contin = $mbin*contin;
+      global bound = 12*$tw;
+      *replace contin = contin + .25 if group==1;
+      sort contin;
+      g placebo = regexm(parm,"placebo")==1;
+
+      tw
+      (rcap max95 min95 contin if placebo==0, lc(gs0) lw(thin) )
+      (rcap max95 min95 contin if placebo==1, lc(sienna) lw(thin) )
+      (connected estimate contin if placebo==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin)) 
+      (connected estimate contin if placebo==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin)),
+      xtitle("months to modal construction month",height(5))
+      ytitle("log-price coefficients",height(5))
+      xlabel(-$bound(12)$bound)
+      ylabel(-.5(.25).5,labsize(small))
+      xline(0,lw(thin)lp(shortdash))
+      legend(order(3 "rdp" 4 "placebo") 
+      ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(medsmall) region(lwidth(none)))
+       note("`3'");
+
+      graphexportpdf `1', dropeps;
+
+   restore;
+end;
+
+
+
+* data subset for regs (1);
 global ifregs = "
-       frac1 > $fr1  &
-       frac2 > $fr2  &
        rdp_never ==1 &
-       purch_price > 2500 &
-       cluster_siz_nrdp > $msiz &
-       mode_yr>2002 &
-       distance >0 &
-       purch_yr > 2000 
+       purch_price > 2500 & purch_price<500000 &
+       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
        ";
 
-global iftsregs = "
-       frac1 > $fr1  &
-       frac2 > $fr2  &
-       rdp_never ==1 &
-       purch_price > 2500 &
-       cluster_siz_nrdp > $msiz &
-       distance >0 
-       ";
-
-global ifhist = "
-       frac1 > $fr1  &
-       frac2 > $fr2  &
-       abs_yrdist <= $tw &
-       purch_price > 2500 &
-       cluster_siz_nrdp > $msiz &
-       mo2con <= 36 &
-       mo2con >= -36 &
-       mode_yr>2002 &
-       cluster != . 
-       ";
-
-
-local b = 12*$tw;
-tw
-(hist mo2con if rdp_$rdp ==1 & $ifhist & trans_id_rdp==trans_id, 
-freq w(2) lc(gs0) fc(gs14) lw(thin)), xlabel(-`b'(12)`b')
-name(b) yla(0 6000 "6" 12000 "12" 18000 "18")
-xtitle("") ytitle("");
-tw
-(hist mo2con if rdp_never==1 & $ifhist & trans_id_rdp==trans_id, 
-freq w(2) lc(gs0) fc(gs14) lw(thin)), xlabel(-`b'(12)`b')
-name(a) yla(0  1000 "1" 2000 "2" 3000 "3" )
-xtitle("") xla("") ytitle("");
-/*
-graph combine a b, cols(1) xcommon 
-l1(" transactions (thousands)",size(medsmall)) 
-b1("months to event modal project month",size(medsmall))
-xsize(13) ysize(8.5) imargin(0 0 -2 -2);
-graphexportpdf summary_densitytime, dropeps;
-*/
-
-/*
-* histogram transactions;
-local b = 12*$tw;
-tw
-(hist mo2con if rdp_never==1 & $ifhist, freq w(2) fc(none) lc(gs0) lw(thin))
-(hist mo2con if rdp_$rdp ==1 & $ifhist & trans_id_rdp==trans_id, freq w(2) lc(gs0) fc(sienna) lw(thin)),
-xtitle("months to event mode year",height(5))
-ytitle("transactions (thousands)",height(5))
-xlabel(-`b'(12)`b')
-yla(0 2000 "2" 4000 "4" 6000 "6" 8000 "8" 10000 "10")
-legend(order(1 "non-RDP" 2 "RDP")
-ring(0) position(2) bm(tiny) rowgap(small) 
-colgap(small) cols(1) size(small) region(lwidth(none)));
-graphexportpdf summary_densitytime, dropeps;
-*/
-
-
-* distance regression;
-reg lprice b$max.dists#b0.post i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster);
-plotreg distplot distplot;
-
-* pause on;
-* pause;
+gen treat_rdp  = (distance_rdp <= $treat);
+gen treat_placebo = (distance_placebo <= $treat);
 
 * time regression;
-reg lprice b1001.mo2con_reg#b0.treat i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster);
-plotreg timeplot timeplot;
+reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
+
+coeffgraph timeplot_admin_${treat} ;
+graph export timeplot_admin_${treat}.pdf, as(pdf) replace;
+
+
+* time regression with prop fixed effects;
+areg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo if $ifregs, absorb(property_id) cl(cluster_reg);
+
+coeffgraph timeplot_admin_prop_${treat} ;
+graph export timeplot_admin_prop_${treat}.pdf, as(pdf) replace;
+
+
+exit, STATA clear; 
+
+
+*** This piece of code looks at impacts within project boundaries ;
+*** (not a big sample tho, probably not worth including) ;
 
 /*
-* time-series regression;
-reg lprice i.sixmonths#b0.treat i.cluster erf* if $iftsregs;
-plotreg timeseries timeseries;
+global ifregs = "
+       rdp_never ==1 &
+       purch_price > 2500 & purch_price<500000 &
+       purch_yr > 2000
+       ";
+
+g treat_rdp_wn = (distance_rdp <0);
+g treat_placebo_wn = (distance_placebo <0);
+
+* time regression;
+reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp_wn b1001.mo2con_reg_placebo#b0.treat_placebo_wn 
+i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
+
+coeffgraph timeplot_admin_wn_${treat};
+graph export timeplot_admin_wn_${treat}.pdf, as(pdf) replace;
+
+
+* time regression with prop fixed effects;
+areg lprice b1001.mo2con_reg_rdp#b0.treat_rdp_wn b1001.mo2con_reg_placebo#b0.treat_placebo_wn 
+i.purch_yr#i.purch_mo if $ifregs, absorb(property_id) cl(cluster_reg);
+
+coeffgraph timeplot_admin_prop_wn_${treat};
+graph export timeplot_admin_prop_wn_${treat}.pdf, as(pdf) replace;
 */
 
+
+
+*** This code is for a regression analogue that we could put together at some point ;
+
+
+/*
 
 gen post2 = (mo2con>=0  & mo2con <=12);
 replace post2 = 2 if (mo2con> 12  & mo2con <=24); 
@@ -224,4 +244,4 @@ sortvar(post_1_treat);
 
 
 
-exit, STATA clear; 
+

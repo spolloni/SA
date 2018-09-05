@@ -9,7 +9,6 @@ set maxvar 32767
 *  PLOT GRADIENTS *;
 *******************;
 
-
 * SET OUTPUT FOLDER ;
 * global output = "Output/GAUTENG/gradplots";
 * global output = "Code/GAUTENG/paper/figures";
@@ -37,6 +36,7 @@ if $LOCAL==1{;
 * load data; 
 cd ../..;
 cd Generated/GAUTENG;
+* take data from plot_density;
 use gradplot_admin.dta, clear;
 
 * go to working dir;
@@ -56,8 +56,6 @@ g o = 1;
 keep if rdp_never == 1;
 egen freq = sum(o), by(id purch_yr purch_mo);
 duplicates drop id purch_yr purch_mo, force;
-
-
 
 *replace post = 2 if (mo2con<-36  | mo2con >36 );
 gen treat_rdp  = (distance_rdp <= $treat);
@@ -137,4 +135,4 @@ reg freq b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_pla
 
 
 
-* exit, STATA clear; 
+exit, STATA clear; 
