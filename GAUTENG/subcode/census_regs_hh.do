@@ -217,7 +217,7 @@ areg `var' $vars , a(cluster_reg) cl(cluster_reg);
 append addtext(Project FE, YES) keep(gr_*) ;
 };
 
-exit STATA, clear;
+exit, STATA clear;
 
 
 
