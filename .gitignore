@@ -8,3 +8,6 @@
 *.fls
 *.out
 *.gz
+*.toc
+*.nav
+*.snm
