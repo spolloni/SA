@@ -23,7 +23,7 @@ global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 700;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 if $LOCAL==1{;
 	cd ..;
 	global rdp  = "all";
@@ -132,15 +132,15 @@ gen treat_placebo = (distance_placebo <= $treat);
 reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
 
 coeffgraph timeplot_admin_${treat} ;
-graph export timeplot_admin_${treat}.pdf, as(pdf) replace;
-
+*graph export timeplot_admin_${treat}.pdf, as(pdf) replace;
+graphexportpdf timeplot_admin_${treat}, dropeps;
 
 * time regression with prop fixed effects;
 areg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo if $ifregs, absorb(property_id) cl(cluster_reg);
 
 coeffgraph timeplot_admin_prop_${treat} ;
-graph export timeplot_admin_prop_${treat}.pdf, as(pdf) replace;
-
+*graph export timeplot_admin_prop_${treat}.pdf, as(pdf) replace;
+graphexportpdf timeplot_admin_prop_${treat}, dropeps;
 
 exit, STATA clear; 
 

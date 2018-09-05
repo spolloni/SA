@@ -51,7 +51,7 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
-dist_threshold  = 4000   # neighbor radius in meters
+dist_threshold  = 4000   # define neighborhood radius in meters
 hulls           = ['rdp','placebo'] 
 
 _1_a_IMPORT = 0  # import LIGHTSTONE
@@ -61,18 +61,19 @@ _1_d_IMPORT = 0  # import GCRO + landplots
 _1_e_IMPORT = 0  # import GHS
 
 _2_FLAGRDP_ = 0
-_3_GCRO_    = 1
+_3_GCRO_    = 0
 
-_4_a_DISTS_ = 1  # buffers and hull creation
-_4_b_DISTS_ = 1  # ERVEN distance
-_4_c_DISTS_ = 1  # BBLU distance
-_4_d_DISTS_ = 1  # EA distance
+_4_a_DISTS_ = 0  # buffers and hull creation
+_4_b_DISTS_ = 0  # ERVEN distance
+_4_c_DISTS_ = 0  # BBLU distance
+_4_d_DISTS_ = 0  # EA distance
 _4_e_DISTS_ = 0  # create x y table for BBLU
 
-_5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
-_6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
-_7_DD_REGS_ = 0  # DD regressions with census data
-_8_TABLES_  = 0  # DESCRIPTIVES (haven't updated yet)
+_5_PLOTS_erven_ = 1  # distance plots:  prices and transaction frequencies
+_6_PLOTS_bblu_  = 1  # distance plots:  bblu densities
+_7_DD_REGS_     = 1  # DD regressions with census data
+
+_8_TABLES_      = 0  # DESCRIPTIVES (haven't updated yet)
 
 
 #############################################
@@ -212,11 +213,11 @@ if _3_GCRO_ == 1:
     for hull in hulls:
         make_gcro_conhulls(db,hull)
 
-    print '\n', " generates GCRO tables NAMED placebo_conhulls and rdp_conhulls  ", '\n'
+    print '\n', " generated GCRO tables NAMED placebo_conhulls and rdp_conhulls : DONE! ", '\n'
 
 
 #############################################
-# STEP 5:  Distance to RDP for non-RDP      #
+# STEP 4:  Distance to RDP for non-RDP      #
 #############################################
 
 if _4_a_DISTS_ ==1:
@@ -230,11 +231,6 @@ if _4_a_DISTS_ ==1:
     for grid in grids: shutil.copy(grid, tempdir)
 
     for hull in hulls:
-
-        # 5a.1 intersecting EAs
-        intersGEOM(db,tempdir,'ea',hull,'2001')   
-        intersGEOM(db,tempdir,'ea',hull,'2011')
-        print '\n'," -- Intersecting EAs: done! ({}) "'\n'.format(hull)
     
         # 5a.3 assemble coordinates for hull edges
         hulls_coordinates(db,tempdir,hull)
@@ -277,7 +273,7 @@ if _4_e_DISTS_ == 1:
     print '\n'," Done BBLU XY ! ",'\n'
 
 #############################################
-# STEP 6:  Make RDP Gradient/Density Plots  #
+# STEP 5:  Make RDP Gradient/Density Plots  #
 #############################################
 
 if _5_PLOTS_erven_ == 1:
@@ -291,15 +287,19 @@ if _5_PLOTS_erven_ == 1:
         os.makedirs(outdir+'gradplots')
 
     dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',dofile,rdp]
+    cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
     print '\n'," -- Price Gradient Plots: done! ",'\n'
 
     dofile = "subcode/plot_freq.do"
-    cmd = ['stata-mp','do',dofile,rdp]
+    cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
     print '\n'," -- Transaction Frequency Plots: done! ",'\n'
 
+
+#####################################
+# STEP 6:  Make bblu density plots  #
+#####################################
 
 if _6_PLOTS_bblu_ == 1:
 
@@ -315,7 +315,7 @@ if _6_PLOTS_bblu_ == 1:
 
 
 ##########################################
-# STEP 8:  Make census Diff-n-diff regs  #
+# STEP 7:  Make census Diff-n-diff regs  #
 ##########################################
 
 if _7_DD_REGS_ == 1:

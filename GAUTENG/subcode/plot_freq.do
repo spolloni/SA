@@ -23,11 +23,11 @@ global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 700;   /* distance to be considered treated  */
 
 global size = .01;    /* x y rounding parameter */
-global meter_unit = $size*100000;
+global meter_unit = $size*100000; /* size of lat long square in meters squared */
 
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 if $LOCAL==1{;
 	cd ..;
 	global rdp  = "all";
@@ -129,8 +129,8 @@ reg freq b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_pla
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
        note("Mean Transations per `=${meter_unit}' m2 : `=$freq_mean' ");
-      *graphexportpdf `2', dropeps;
-      graph export `2', as(pdf) replace;
+      graphexportpdf `2', dropeps;
+      *graph export `2', as(pdf) replace;
    restore;
 
 

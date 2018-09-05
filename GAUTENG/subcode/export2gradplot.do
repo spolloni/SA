@@ -12,7 +12,7 @@ set maxvar 32767
 */
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 
 local qry = "
   SELECT 
@@ -145,4 +145,4 @@ restore;
 
 
 * exit stata;
-*exit, STATA clear; 
+exit, STATA clear; 

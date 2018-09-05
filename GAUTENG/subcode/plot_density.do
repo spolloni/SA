@@ -13,7 +13,7 @@ set maxvar 32767
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 
 * PARAMETERS;
 global bin      = 20;   /* distance bin width for dist regs   */
@@ -219,8 +219,8 @@ preserve;
   ring(0) position(6) bm(tiny) rowgap(small) 
   colgap(small) size(medsmall) region(lwidth(none)))
   ;
-  *graphexportpdf `1', dropeps;
-  graph export "`1'.pdf", as(pdf) replace;
+  graphexportpdf `1', dropeps;
+  *graph export "`1'.pdf", as(pdf) replace;
 restore;
 end;
 
@@ -277,8 +277,8 @@ program plotreg;
       colgap(small) size(medsmall) region(lwidth(none)))
       note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
       ;
-      *graphexportpdf `1', dropeps;
-      graph export "`1'.pdf", as(pdf) replace;
+      graphexportpdf `1', dropeps;
+      *graph export "`1'.pdf", as(pdf) replace;
    restore;
 end;
 
