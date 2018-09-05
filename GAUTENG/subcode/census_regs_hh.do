@@ -17,7 +17,7 @@ set maxvar 32767
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
-global LOCAL = 1;
+global LOCAL = 0;
 
 * MAKE DATASET?;
 global DATA_PREP = 1;

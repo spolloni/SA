@@ -69,8 +69,8 @@ _4_c_DISTS_ = 0  # BBLU distance
 _4_d_DISTS_ = 0  # EA distance
 _4_e_DISTS_ = 0  # create x y table for BBLU
 
-_5_PLOTS_erven_ = 1  # distance plots:  prices and transaction frequencies
-_6_PLOTS_bblu_  = 1  # distance plots:  bblu densities
+_5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
+_6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
 _7_DD_REGS_     = 1  # DD regressions with census data
 
 _8_TABLES_      = 0  # DESCRIPTIVES (haven't updated yet)
@@ -241,7 +241,7 @@ if _4_b_DISTS_ ==1:
     print '\n'," Distance part B: distances for properties... ",'\n'
     for hull in hulls:
         import_script = 'SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.property_id FROM erven AS p'
-        #dist(db,hull,'erven',import_script,dist_threshold)
+        dist(db,hull,'erven',import_script,dist_threshold)
         print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) ".format(hull), '\n'
         intersPOINT(db,'erven',hull,'property_id')
         print '\n'," -- Table with point intersections: done! ({}) ".format(hull), '\n'
@@ -250,7 +250,7 @@ if _4_c_DISTS_ ==1:
     print '\n'," Distance part C: distances for BBLU... ",'\n'
     for hull,bblu_type in product(hulls,['pre','post']):
         import_script = 'SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID FROM bblu_{} AS p'.format(bblu_type)
-        #dist(db,hull,'bblu_'+bblu_type,import_script,dist_threshold)
+        dist(db,hull,'bblu_'+bblu_type,import_script,dist_threshold)
         print '\n'," -- BBLU distance, Populate table / push to DB: done! ({} {}) ".format(bblu_type, hull), '\n'
         intersPOINT(db,'bblu_{}'.format(bblu_type),hull,'OGC_FID')            
         print '\n'," -- Table with point intersections: done! ({}) ".format(hull), '\n'
@@ -261,7 +261,7 @@ if _4_d_DISTS_ ==1:
         import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
                                 st_y(st_centroid(p.GEOMETRY)) AS y, e.{}_code
                                 FROM  {}_{}  AS  p'''.format(geom,geom,yr)
-        #dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
+        dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
         print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
         intersGEOM(db,geom,hull,yr) 
         print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
