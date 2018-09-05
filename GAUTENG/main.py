@@ -261,7 +261,7 @@ if _4_d_DISTS_ ==1:
     print '\n'," Distance part D: distances for EAs and SALs... ",'\n'        
     for hull,geom,yr in product(hulls,['ea','sal'],['2001','2011']):
         import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
-                                st_y(st_centroid(p.GEOMETRY)) AS y, e.{}_code
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.{}_code
                                 FROM  {}_{}  AS  p'''.format(geom,geom,yr)
         dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
         print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
