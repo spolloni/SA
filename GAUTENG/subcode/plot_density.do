@@ -13,7 +13,7 @@ set maxvar 32767
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 
 * PARAMETERS;
 global bin      = 20;   /* distance bin width for dist regs   */
@@ -56,7 +56,7 @@ if $bblu_query_data == 1 {;
     };
   local qry = " 
 
-    SELECT AA.*, GP.mo_date_placebo, GR.mo_date_rdp, IR.cluster AS cluster_int_rdp, 
+    SELECT AA.*, GP.con_mo_placebo, GR.con_mo_rdp, IR.cluster AS cluster_int_rdp, 
     IP.cluster AS cluster_int_placebo
 
     FROM 
@@ -83,8 +83,8 @@ if $bblu_query_data == 1 {;
 
     ) AS AA 
 
-    LEFT JOIN (SELECT cluster_placebo, mo_date_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
-    LEFT JOIN (SELECT cluster_rdp, mo_date_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
+    LEFT JOIN (SELECT cluster_placebo, con_mo_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
+    LEFT JOIN (SELECT cluster_rdp, con_mo_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
 
     LEFT JOIN int_placebo_bblu_`time' AS IP ON IP.OGC_FID = AA.OGC_FID
     LEFT JOIN int_rdp_bblu_`time' AS IR  ON IR.OGC_FID = AA.OGC_FID     
@@ -110,8 +110,8 @@ if $bblu_clean_data==1 {;
   drop if X==.;
 
   /* throw out clusters for early projects (before 2001) */
-  replace distance_placebo =. if mo_date_placebo<521;
-  replace distance_rdp =. if mo_date_rdp<512;
+  replace distance_placebo =. if con_mo_placebo<510;
+  replace distance_rdp =. if con_mo_rdp<510;
 
   drop if distance_rdp ==. & distance_placebo ==. ;
 

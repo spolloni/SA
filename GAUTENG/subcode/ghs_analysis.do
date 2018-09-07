@@ -74,7 +74,9 @@ g month = 6;
 g date = ym(year,month);
 
 g post = 0;
-replace post = 1 if mo_date_rdp>date;
+replace post = 1 if mo_date_rdp;
+
+*replace post = 1 if mo_date_rdp>date;
 
 
 egen dists = cut(distance),at(0($bin)$bw); 
@@ -107,7 +109,7 @@ do Code/GAUTENG/subcode/import_plotreg.do;
 
 *destring ea_code, replace force;
 
-reg  RDP_WAIT  b$max.dists#b0.post i.year i.mode_yr , cluster(cluster) robust ;
+reg  RDP_WAIT  b$max.dists#b0.post i.date i.mo_date_rdp , cluster(cluster_rdp) robust ;
 plotreg distplot distplot;
 
 

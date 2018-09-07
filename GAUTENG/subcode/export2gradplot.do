@@ -12,7 +12,7 @@ set maxvar 32767
 */
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 
 local qry = "
   SELECT 
@@ -129,16 +129,15 @@ program define gentable;
 end;
 
 preserve;
-  keep mo_date cluster_rdp;
-  drop if mo_date==.;
-  ren mo_date mo_date_rdp;
+  keep con_mo_rdp cluster_rdp;
+  drop if con_mo_rdp==.;
   duplicates drop cluster_rdp, force;
   gentable cluster_rdp;
 restore;
 
 preserve;
-  keep mo_date_placebo cluster_placebo;
-  drop if mo_date_placebo==.;
+  keep con_mo_placebo cluster_placebo;
+  drop if con_mo_placebo==.;
   duplicates drop cluster_placebo, force;
   gentable cluster_placebo;
 restore;

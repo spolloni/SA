@@ -71,7 +71,7 @@ _4_e_DISTS_ = 0  # create x y table for BBLU
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
 _6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
-_7_DD_REGS_     = 1  # DD regressions with census data
+_7_DD_REGS_     = 0  # DD regressions with census data
 
 
 ### NOT UPDATED YET ###

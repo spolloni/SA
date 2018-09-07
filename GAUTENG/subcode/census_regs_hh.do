@@ -20,7 +20,7 @@ global output = "Code/GAUTENG/presentations/presentation_lunch";
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global DATA_PREP = 0;
+global DATA_PREP = 1;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -36,7 +36,7 @@ if $DATA_PREP==1 {;
 
   	SELECT 
 
-      AA.*, GP.mo_date_placebo, GR.mo_date_rdp
+      AA.*, GP.con_mo_placebo, GR.con_mo_rdp
 
     FROM 	(
     SELECT A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
@@ -97,8 +97,8 @@ if $DATA_PREP==1 {;
 
   ) AS AA
 
-  LEFT JOIN (SELECT cluster_placebo, mo_date_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
-  LEFT JOIN (SELECT cluster_rdp, mo_date_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
+  LEFT JOIN (SELECT cluster_placebo, con_mo_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
+  LEFT JOIN (SELECT cluster_rdp, con_mo_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
     ";
 
   odbc query "gauteng";
@@ -120,10 +120,10 @@ cd ../..;
 cd $output ;
 
  /* throw out clusters that were too early in the process */
-  replace distance_placebo =. if mo_date_placebo<521;
-  replace area_int_placebo =. if mo_date_placebo<521;
-  replace distance_rdp =. if mo_date_rdp<512;
-  replace area_int_rdp =. if mo_date_rdp<512;
+  replace distance_placebo =.   if con_mo_placebo<510;
+  replace area_int_placebo =.   if con_mo_placebo<510;
+  replace distance_rdp =.       if con_mo_rdp<510;
+  replace area_int_rdp =.       if con_mo_rdp<510;
 
 *drop if distance_rdp==. & distance_placebo==.;
 
