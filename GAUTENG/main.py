@@ -323,8 +323,8 @@ if _7_DD_REGS_ == 1:
 
     print '\n'," Doing DD census regs...",'\n'
 
-    for year in ['2001','2011']:
-        areaGEOM(db,'sal_'+year,'sal_code')
+    for year, geom in product(['2001','2011'],['ea','sal']):
+        areaGEOM(db,geom+'_'+year,geom+'_code')
 
 
     if not os.path.exists(outdir+'census_regs'):
