@@ -16,7 +16,7 @@ from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coo
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 from subcode.add_grid import bblu_xy, add_grid, add_grid_counts, grid_to_erven
 #from paper.descriptive_statistics import cbd_gen
-from subcode.distfuns_admin import dist, intersPOINT
+from subcode.distfuns_admin import dist, intersPOINT, areaGEOM
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -71,7 +71,7 @@ _4_e_DISTS_ = 0  # create x y table for BBLU
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
 _6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
-_7_DD_REGS_     = 0  # DD regressions with census data
+_7_DD_REGS_     = 1  # DD regressions with census data
 
 
 ### NOT UPDATED YET ###
@@ -186,6 +186,7 @@ if _1_e_IMPORT ==1:
 
     print '\n'," - GHS data: done! "'\n'
 
+
 #############################################
 # STEP 2:  flag RDP properties              #
 #############################################
@@ -199,6 +200,7 @@ if _2_FLAGRDP_ ==1:
     subprocess.call(cmd)
 
     print '\n'," -- RDP flagging: done! ",'\n'
+
 
 #####################################
 # STEP 3:  GCRO Definition          #
@@ -225,19 +227,16 @@ if _3_GCRO_ == 1:
 if _4_a_DISTS_ ==1:
 
     print '\n'," Distance part A: Creating tables and polygons... ",'\n'
-
     # 5a.0 set-up
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
     grids = glob.glob(rawgis+'grid_7*')
-    for grid in grids: shutil.copy(grid, tempdir)
-
+    for grid in grids: 
+        shutil.copy(grid, tempdir)
     for hull in hulls:
-    
         # 5a.3 assemble coordinates for hull edges
         hulls_coordinates(db,tempdir,hull)
         print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
-
 
 if _4_b_DISTS_ ==1:
     print '\n'," Distance part B: distances for properties... ",'\n'
@@ -269,10 +268,10 @@ if _4_d_DISTS_ ==1:
         print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
 
 if _4_e_DISTS_ == 1:
-
     print '\n'," Making BBLU xy table...",'\n'
     bblu_xy(db)
     print '\n'," Done BBLU XY ! ",'\n'
+
 
 #############################################
 # STEP 5:  Make RDP Gradient/Density Plots  #
@@ -324,14 +323,22 @@ if _7_DD_REGS_ == 1:
 
     print '\n'," Doing DD census regs...",'\n'
 
+    for year in ['2001','2011']:
+        areaGEOM(db,'sal_'+year,'sal_code')
+
+
     if not os.path.exists(outdir+'census_regs'):
         os.makedirs(outdir+'census_regs')
 
     dofile = "subcode/census_regs_hh.do" # both makes dataset (suboption) and makes regressions
     cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
+    #subprocess.call(cmd)
 
     print '\n'," -- DD census regs: done! ",'\n'
+
+
+
+
 
 
 if _8_TABLES_ == 1: # haven't done yet

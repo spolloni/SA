@@ -15,6 +15,30 @@ import pandas as pd
 import datetime
 
 
+def areaGEOM(db,table,index):
+
+	con = sql.connect(db)
+	con.enable_load_extension(True)
+	con.execute("SELECT load_extension('mod_spatialite');")
+	cur = con.cursor()
+
+	cur.execute('DROP TABLE IF EXISTS area_{};'.format(table))
+
+	cur.execute('''
+		CREATE TABLE area_{} AS 
+		SELECT ST_AREA(GEOMETRY) AS area, {} FROM {};
+		'''.format(table,index,table))	
+	
+	cur.execute('''
+				CREATE INDEX area_{}_index ON area_{} ({});
+				'''.format(table,table,index))
+
+	con.commit()
+	con.close()
+
+	return
+
+
 def intersPOINT(db,data,hull,id_var):
 
 	con = sql.connect(db)

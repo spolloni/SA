@@ -1,0 +1,23 @@
+		(1)
+VARIABLES	LABELS	Households per m2
+		
+gr_1_post_treat	Project X Post X Complete	-0.00168***
+		(0.000639)
+gr_2_post_treat	Spillover X Post X Complete	0.000354
+		(0.000229)
+gr_1_post	Project X Post	0.00244***
+		(0.000581)
+gr_2_post	Spillover X Post	0.000415***
+		(0.000120)
+gr_2_treat	Spillover X Complete	-0.000252
+		(0.000281)
+gr_2	Spillover	-0.000679***
+		(0.000164)
+Constant	Constant	0.00258***
+		(5.48e-05)
+		
+Observations		21,671
+R-squared		0.275
+Project FE		YES
+Robust standard errors in parentheses		
+*** p<0.01, ** p<0.05, * p<0.1		
