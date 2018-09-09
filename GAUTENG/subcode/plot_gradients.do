@@ -10,8 +10,8 @@ set maxvar 32767
 *******************;
 
 * SET OUTPUT FOLDER ;
-* global output = "Output/GAUTENG/gradplots";
-* global output = "Code/GAUTENG/paper/figures";
+*global output = "Output/GAUTENG/gradplots";
+*global output = "Code/GAUTENG/paper/figures";
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
@@ -86,8 +86,6 @@ program define  coeffgraph;
    egen group = sieve(postalph), keep(n);
    destring  group, replace;
 
-   keep if group==1;  /* only graph diff-in-diff coefficients */
-
       drop if contin > 9000;
       replace contin = -1*(contin - 1000) if contin>1000;
       replace contin = $mbin*contin;
@@ -129,17 +127,13 @@ gen treat_rdp  = (distance_rdp <= $treat);
 gen treat_placebo = (distance_placebo <= $treat);
 
 * time regression;
-reg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
-
+reg lprice b1001.mo2con_reg_rdp b1001.mo2con_reg_rdp#1.treat_rdp b1001.mo2con_reg_placebo b1001.mo2con_reg_placebo#1.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
 coeffgraph timeplot_admin_${treat} ;
-*graph export timeplot_admin_${treat}.pdf, as(pdf) replace;
 graphexportpdf timeplot_admin_${treat}, dropeps;
 
 * time regression with prop fixed effects;
 areg lprice b1001.mo2con_reg_rdp#b0.treat_rdp b1001.mo2con_reg_placebo#b0.treat_placebo i.purch_yr#i.purch_mo if $ifregs, absorb(property_id) cl(cluster_reg);
-
 coeffgraph timeplot_admin_prop_${treat} ;
-*graph export timeplot_admin_prop_${treat}.pdf, as(pdf) replace;
 graphexportpdf timeplot_admin_prop_${treat}, dropeps;
 
 exit, STATA clear; 
