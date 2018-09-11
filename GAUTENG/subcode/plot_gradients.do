@@ -94,6 +94,8 @@ program define  coeffgraph;
       sort contin;
       g placebo = regexm(parm,"placebo")==1;
 
+      replace contin = cond(placebo==1, contin - 0.25, contin + 0.25);
+
       tw
       (rcap max95 min95 contin if placebo==0, lc(gs0) lw(thin) )
       (rcap max95 min95 contin if placebo==1, lc(sienna) lw(thin) )
