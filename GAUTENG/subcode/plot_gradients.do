@@ -56,6 +56,8 @@ replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
 *replace mo2con_reg = 1 if mo2con_reg ==0;
 };
 
+* transaction count per seller;
+bys seller_name: g s_N=_N;
 
 *extra time-controls;
 gen day_date_sq = day_date^2;
@@ -120,6 +122,7 @@ end;
 
 * data subset for regs (1);
 global ifregs = "
+       s_N <30 &
        rdp_never ==1 &
        purch_price > 2500 & purch_price<500000 &
        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
