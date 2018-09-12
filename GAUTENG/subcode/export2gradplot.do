@@ -74,9 +74,6 @@ replace distance_rdp = distance_rdp*-1 if cluster_rdp==cluster_rdp_int;
 
 * purchase years for transactions that intersect with projects;
 
-*g purch_yr_rdpo = purch_yr if cluster_rdp == cluster_rdp_int;
-*egen mode_yr_rdpo = mode(purch_yr_rdpo), by(cluster_rdp) maxmode;
-
 g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int & rdp_all==1;
 egen mode_yr_rdp = mode(purch_yr_rdp), by(cluster_rdp) maxmode ;
 
