@@ -30,7 +30,8 @@ local qry = "
 
          F.distance AS distance_placebo, F.target_id AS cluster_placebo, F.count AS count_placebo,
          G.cluster AS cluster_placebo_int,
-         H.placebo_yr AS placebo_yr
+         H.placebo_yr AS placebo_yr,
+         GC.RDP_density
 
   FROM transactions AS A
   JOIN erven AS B ON A.property_id = B.property_id
@@ -40,6 +41,8 @@ local qry = "
   GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS D ON D.input_id = B.property_id
 
   LEFT JOIN int_rdp_erven AS E  ON E.property_id = B.property_id
+
+  LEFT JOIN  gcro AS GC ON D.target_id = GC.cluster
 
   LEFT JOIN  (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_erven_placebo WHERE distance<=4000
   GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS F ON F.input_id = B.property_id
@@ -70,11 +73,16 @@ replace distance_placebo = distance_placebo*-1 if cluster_placebo==cluster_place
 replace distance_rdp = distance_rdp*-1 if cluster_rdp==cluster_rdp_int;
 
 * purchase years for transactions that intersect with projects;
-g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int;
-egen mode_yr_rdp = mode(purch_yr), by(cluster_rdp) maxmode;
 
-drop cluster_rdp_int;
-drop cluster_placebo_int;
+*g purch_yr_rdpo = purch_yr if cluster_rdp == cluster_rdp_int;
+*egen mode_yr_rdpo = mode(purch_yr_rdpo), by(cluster_rdp) maxmode;
+
+g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int & rdp_all==1;
+egen mode_yr_rdp = mode(purch_yr_rdp), by(cluster_rdp) maxmode ;
+
+
+*drop cluster_rdp_int;
+*drop cluster_placebo_int;
 
 * create date variables and dummies;
 ren placebo_yr mode_yr_placebo;
@@ -144,4 +152,4 @@ restore;
 
 
 * exit stata;
-exit, STATA clear; 
+*exit, STATA clear; 
