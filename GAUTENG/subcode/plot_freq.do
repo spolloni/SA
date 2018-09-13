@@ -5,8 +5,11 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+
+*** HAVEN'T UPDATED THIS YET BUT I CAN :)  ************************************************************* ;
+
 *******************;
-*  PLOT GRADIENTS *;
+*  PLOT FREQUENCY OF TRANSACTIONS *;
 *******************;
 
 * SET OUTPUT FOLDER ;

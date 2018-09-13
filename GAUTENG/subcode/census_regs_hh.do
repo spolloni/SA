@@ -5,6 +5,8 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+**** STILL NEED TO LABEL THE VARS ******************************************** ;
+
 ******************;
 *  CENSUS REGS   *;
 ******************;
@@ -193,32 +195,6 @@ replace hh_size=. if hh_size>10;
 lab var hh_size "Household Size";
 
 
-/*
-g gr_1=gr==1;
-lab var gr_1 "Project Area";
-
-g gr_2=gr==2;
-lab var gr_2 "Spillover";
-
-g gr_1_treat = gr_1*treat;
-lab var gr_1_treat "Project X Complete";
-
-g gr_2_treat = gr_2*treat;
-lab var gr_2_treat "Spillover X Complete";
-
-g gr_1_post = gr_1*post;
-lab var gr_1_post "Project X Post";
-
-g gr_2_post = gr_2*post;
-lab var gr_2_post "Spillover X Post";
-
-g gr_1_post_treat = gr_1*post*treat;
-lab var gr_1_post_treat "Project X Post X Complete";
-
-g gr_2_post_treat = gr_2*post*treat;
-lab var gr_2_post_treat "Spillover X Post X Complete";
-*/
-
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
@@ -234,8 +210,6 @@ g density_n = pop_n/area;
 lab var density_n "People per m2";
 
 
-
-/*
 
 global outcomes "water_inside electric_cooking electric_lighting house owner tot_rooms hh_size";
 
