@@ -26,9 +26,9 @@ global bblu_query_data  = 0 ; /* query data */
 global bblu_clean_data  = 0 ; /* clean data for analysis */
 global bblu_do_analysis = 1 ; /* do analysis */
 
-global graph_plotmeans      = 0 ;
-global graph_plotdiff       = 1 ;
-global graph_plottriplediff = 0 ;
+global graph_plotmeans      = 0 ;  /* plots means: 1) pre/post on same graph, 2) placebo and rdp same graph (pre only) */
+global graph_plotdiff       = 1 ;  /* plots changes over time for placebo and rdp */
+global graph_plottriplediff = 0 ;  /* can't figure out how to do this yet... */
 
 
 global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
@@ -240,8 +240,8 @@ end;
 
 foreach var in $outcomes {;
 global yl = "ylabel(0(1)7)";
-*plotmeans bblu_`var'_rdp_admin `var' rdp "Pre (2001)" "Post (2011)" $yl ;
-*plotmeans bblu_`var'_placebo_admin `var' placebo "Pre (2001)" "Post (2011)" $yl ;
+plotmeans bblu_`var'_rdp_admin `var' rdp "Pre (2001)" "Post (2011)" $yl ;
+plotmeans bblu_`var'_placebo_admin `var' placebo "Pre (2001)" "Post (2011)" $yl ;
 
 };
 

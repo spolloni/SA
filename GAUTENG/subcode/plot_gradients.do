@@ -35,9 +35,9 @@ cd Generated/GAUTENG;
 use gradplot_admin.dta, clear;
 
 
-global dd_graphs      = 1;
-global dd_graphs_het  = 0;
-global dd_graphs_inside = 0;
+global dd_graphs      = 0; /* standard graphs */
+global dd_graphs_het  = 0; /* separating RDP effect between high and low density projects */
+global dd_graphs_inside = 0; /* separating RDP and Placebo effects for being within project areas */
 
 * go to working dir;
 cd ../..;
