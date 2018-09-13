@@ -37,15 +37,27 @@ local qry = "
   JOIN erven AS B ON A.property_id = B.property_id
   JOIN rdp   AS C ON B.property_id = C.property_id
 
-  LEFT JOIN  (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_erven_rdp WHERE distance<=4000
-  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS D ON D.input_id = B.property_id
+  LEFT JOIN (
+    SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+    FROM distance_erven_rdp 
+    WHERE distance<=4000
+    GROUP BY input_id 
+    HAVING COUNT(input_id)<=50
+      AND distance == MIN(distance)
+  ) AS D ON D.input_id = B.property_id
 
   LEFT JOIN int_rdp_erven AS E  ON E.property_id = B.property_id
 
   LEFT JOIN  gcro AS GC ON D.target_id = GC.cluster
 
-  LEFT JOIN  (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_erven_placebo WHERE distance<=4000
-  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS F ON F.input_id = B.property_id
+  LEFT JOIN (
+    SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+    FROM distance_erven_placebo 
+    WHERE distance<=4000
+    GROUP BY input_id 
+    HAVING COUNT(input_id)<=50 
+      AND distance == MIN(distance)
+  ) AS F ON F.input_id = B.property_id
 
   LEFT JOIN int_placebo_erven AS G  ON G.property_id = B.property_id
 
@@ -68,12 +80,14 @@ gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 * get rid of missing distances;
 drop if distance_placebo==. & distance_rdp==. ;
 
+* get rid of missing prices;
+drop if purch_price==. ;
+
 * make distances negative if within projects ;
 replace distance_placebo = distance_placebo*-1 if cluster_placebo==cluster_placebo_int;
 replace distance_rdp = distance_rdp*-1 if cluster_rdp==cluster_rdp_int;
 
 * purchase years for transactions that intersect with projects;
-
 g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int & rdp_all==1;
 egen mode_yr_rdp = mode(purch_yr_rdp), by(cluster_rdp) maxmode ;
 
