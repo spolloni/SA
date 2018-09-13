@@ -80,12 +80,14 @@ gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
 * get rid of missing distances;
 drop if distance_placebo==. & distance_rdp==. ;
 
+* get rid of missing prices;
+drop if purch_price==. ;
+
 * make distances negative if within projects ;
 replace distance_placebo = distance_placebo*-1 if cluster_placebo==cluster_placebo_int;
 replace distance_rdp = distance_rdp*-1 if cluster_rdp==cluster_rdp_int;
 
 * purchase years for transactions that intersect with projects;
-
 g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int & rdp_all==1;
 egen mode_yr_rdp = mode(purch_yr_rdp), by(cluster_rdp) maxmode ;
 
