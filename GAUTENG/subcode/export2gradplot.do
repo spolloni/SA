@@ -37,15 +37,27 @@ local qry = "
   JOIN erven AS B ON A.property_id = B.property_id
   JOIN rdp   AS C ON B.property_id = C.property_id
 
-  LEFT JOIN  (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_erven_rdp WHERE distance<=4000
-  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS D ON D.input_id = B.property_id
+  LEFT JOIN (
+    SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+    FROM distance_erven_rdp 
+    WHERE distance<=4000
+    GROUP BY input_id 
+    HAVING COUNT(input_id)<=50
+      AND distance == MIN(distance)
+  ) AS D ON D.input_id = B.property_id
 
   LEFT JOIN int_rdp_erven AS E  ON E.property_id = B.property_id
 
   LEFT JOIN  gcro AS GC ON D.target_id = GC.cluster
 
-  LEFT JOIN  (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_erven_placebo WHERE distance<=4000
-  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) AS F ON F.input_id = B.property_id
+  LEFT JOIN (
+    SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+    FROM distance_erven_placebo 
+    WHERE distance<=4000
+    GROUP BY input_id 
+    HAVING COUNT(input_id)<=50 
+      AND distance == MIN(distance)
+  ) AS F ON F.input_id = B.property_id
 
   LEFT JOIN int_placebo_erven AS G  ON G.property_id = B.property_id
 
