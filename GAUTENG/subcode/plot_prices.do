@@ -5,6 +5,21 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+***************************************;
+*  PROGRAM TO OMIT VARS FROM GLOBAL   *;
+***************************************;
+cap program drop takefromglobal;
+program define takefromglobal;
+
+  local original ${`1'};
+  local temp1 `0';
+  local temp2 `1';
+  local except: list temp1 - temp2;
+  local new: list original - except;
+  global `1' `new';
+
+end;
+
 *******************;
 *  PLOT GRADIENTS *;
 *******************;
@@ -19,9 +34,9 @@ global rdp   = "`1'";
 global twl   = "3";   /* look at +-twl years before construction */
 global twu   = "4";   /* look at +-twl years after construction */
 global bin   = 100;   /* distance bin width for dist regs   */
-global mbin  =  12;    /* months bin width for time-series   */
+global mbin  =  6;    /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
-global treat = 700;   /* distance to be considered treated  */
+global treat = 600;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -75,15 +90,34 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 global ifregs = "
        s_N <30 &
        rdp_never ==1 &
-       purch_price > 2500 & purch_price<500000 &
+       purch_price > 40000 & purch_price<1000000 &
        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
        ";
 
 gen treat_rdp  = (distance_rdp <= $treat);
 gen treat_placebo = (distance_placebo <= $treat);
 
+foreach v in rdp placebo {;
+
+  levelsof mo2con_reg_placebo;
+  foreach level in `r(levels)' {;
+    gen  mo2con_reg_`v'_`level' = (mo2con_reg_`v' == `level');
+    gen  mo2con_reg_`v'_`level'_treat = (mo2con_reg_`v' == `level')*treat_`v';
+
+  };
+};
+
+ds mo2con_reg_placebo_*  mo2con_reg_rdp_*;
+global dummies = "`r(varlist)'"; 
+takefromglobal dummies mo2con_reg_placebo_1001_treat;
+
+
+
+
 * time regression;
 reg lprice b1001.mo2con_reg_rdp b1001.mo2con_reg_rdp#1.treat_rdp b1001.mo2con_reg_placebo b1001.mo2con_reg_placebo#1.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
+
+
 ******* PLOT THAT SHIT ********************************************;
 preserve;
     
@@ -122,8 +156,8 @@ preserve;
       xtitle("months to modal construction month",height(5))
       ytitle("log-price coefficients",height(5))
       xlabel(-$lbound(12)$ubound)
-      ylabel(-.5(.25).5,labsize(small))
-      xline(-6,lw(thin)lp(shortdash))
+      ylabel(-.3(.1).3,labsize(small))
+      xline(-3,lw(thin)lp(shortdash))
       legend(order(3 "rdp" 4 "placebo") 
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
