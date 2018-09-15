@@ -118,8 +118,8 @@ if $bblu_clean_data==1 {;
   drop if X==.;
 
   /* throw out clusters for early projects (before 2001) */
-  replace distance_placebo =. if con_mo_placebo<515;
-  replace distance_rdp =. if con_mo_rdp<515;
+  replace distance_placebo =. if con_mo_placebo<515 | con_mo_placebo==.;
+  replace distance_rdp =. if con_mo_rdp<515 | con_mo_rdp==.;
 
   drop if distance_rdp ==. & distance_placebo ==. ;
 
@@ -373,15 +373,15 @@ program plotreg;
 end;
 
 
-* foreach var in $outcomes {;
-*    preserve;
-*       keep if distance_rdp<=$dist_max | distance_placebo<=$dist_max;
-*       sum `var', detail;
-*       global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
-*       areg `var' b1100.dists_rdp b1100.dists_placebo, cl(cluster_reg) a(id);
-*    restore;
-*   plotreg distplot_bblu_`var'_admin  dists_rdp dists_placebo; 
-* };
+ foreach var in $outcomes {;
+    preserve;
+       keep if distance_rdp<=$dist_max | distance_placebo<=$dist_max;
+       sum `var', detail;
+       global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
+       areg `var' b1100.dists_rdp b1100.dists_placebo, cl(cluster_reg) a(id);
+    restore;
+   plotreg distplot_bblu_`var'_admin  dists_rdp dists_placebo; 
+ };
 
 
 sum RDP_density, detail;

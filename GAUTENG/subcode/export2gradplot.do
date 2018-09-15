@@ -117,7 +117,7 @@ g mo_placebo = ceil(12 * uniform()) ;
 g mo_date_placebo = ym(mode_yr_placebo,mo_placebo);
 g con_mo_placebo = mo_date_placebo;
 
-*gen con_mo   = ym(mode_yr,07);
+* gen con_mo   = ym(mode_yr,07);
 *******************;
 gen mo2con_rdp  = mo_date - con_mo_rdp;
 gen mo2con_placebo  = mo_date - con_mo_placebo;
