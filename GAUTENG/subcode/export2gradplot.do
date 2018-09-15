@@ -76,6 +76,7 @@ odbc load, exec("`qry'") clear;
 * set up frac vars;
 destring purch_yr purch_mo purch_day mun_code, replace;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.);
+destring trans_num, replace;
 
 * get rid of missing distances;
 drop if distance_placebo==. & distance_rdp==. ;
@@ -87,10 +88,9 @@ drop if purch_price==. ;
 replace distance_placebo = distance_placebo*-1 if cluster_placebo==cluster_placebo_int;
 replace distance_rdp = distance_rdp*-1 if cluster_rdp==cluster_rdp_int;
 
-* purchase years for transactions that intersect with projects;
-g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int & rdp_all==1;
-egen mode_yr_rdp = mode(purch_yr_rdp), by(cluster_rdp) maxmode ;
-
+* purchase years/mode yr for transactions that intersect with projects;
+g purch_yr_rdp = purch_yr if cluster_rdp == cluster_rdp_int & rdp_all==1 & trans_num==1;
+egen mode_yr_rdp = mode(purch_yr_rdp), by(cluster_rdp) maxmode;
 
 *drop cluster_rdp_int;
 *drop cluster_placebo_int;
@@ -104,7 +104,7 @@ gen day_date = mdy(purch_mo,purch_day,purch_yr);
 gen mo_date  = ym(purch_yr,purch_mo);
 gen hy_date  = hofd(dofm(mo_date)); // half-years;
 
-*******************;
+* construction mode month for rdp;
 bys mo_date cluster_rdp rdp_all: gen N = _N if purch_yr == mode_yr_rdp;
 replace N = -99 if rdp_all==0 | N==.;
 bys cluster_rdp: egen maxN  = max(N);
@@ -124,6 +124,17 @@ gen mo2con_placebo  = mo_date - con_mo_placebo;
 format day_date %td;
 format mo_date %tm;
 format hy_date %th;
+
+
+* joined to either placebo or rdp;
+gen placebo = (distance_placebo < distance_rdp);
+gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
+gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
+gen mo2con_joined   = cond(placebo==1, mo2con_placebo, mo2con_rdp);
+distance_joined = placebo*distance_placebo + (1-placebo)*distance_rdp;
+*gen distance_joined = min(distance_rdp,distance_placebo);
+*gen placebo = (abs(distance_joined-distance_placebo)<abs(distance_rdp-distance_placebo));
+
 
 * gen required vars;
 gen lprice = log(purch_price);
