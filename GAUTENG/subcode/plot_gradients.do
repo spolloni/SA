@@ -73,8 +73,6 @@ drop if purch_price == 6900000;
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
-bys seller_name: g s_N=_N;
-
 gen treat_rdp  = (distance_rdp>=0 & distance_rdp <= $treat);
 gen treat_placebo = (distance_placebo>=0 & distance_placebo <= $treat);
 
