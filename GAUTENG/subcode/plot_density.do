@@ -10,7 +10,9 @@ set maxvar 32767
 ******************;
 
 * SET OUTPUT;
-global output = "Code/GAUTENG/presentations/presentation_lunch";
+global output = "Output/GAUTENG/bbluplots";
+*global output = "Code/GAUTENG/paper/figures";
+*global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -43,7 +45,6 @@ prog outcome_gen;
 end;
 
 
-
 if $LOCAL==1 {;
 	cd ..;
 };
@@ -66,33 +67,55 @@ if $bblu_query_data == 1 {;
     FROM 
 
     (
-    SELECT B.distance AS distance_rdp, B.target_id AS cluster_rdp,  
-    BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+      SELECT 
 
-    A.OGC_FID, A.s_lu_code, A.t_lu_code, AXY.X, AXY.Y
+        B.distance AS distance_rdp, 
+        B.target_id AS cluster_rdp,
 
-    FROM bblu_`time'  AS A  
+        BP.distance AS distance_placebo, 
+        BP.target_id AS cluster_placebo, 
 
-    LEFT JOIN (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_bblu_`time'_rdp WHERE distance<=4000
-  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) 
-    AS B ON A.OGC_FID=B.input_id
+        A.OGC_FID, 
+        A.s_lu_code, 
+        A.t_lu_code, 
+        AXY.X, AXY.Y
 
-    LEFT JOIN (SELECT input_id, distance, target_id, COUNT(input_id) AS count FROM distance_bblu_`time'_placebo WHERE distance<=4000
-  GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)) 
-    AS BP ON A.OGC_FID=BP.input_id  
+      FROM 
+
+        bblu_`time'  AS A  
+
+      LEFT JOIN 
+        (SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+         FROM distance_bblu_`time'_rdp WHERE distance<=4000
+         GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)
+        ) AS B ON A.OGC_FID=B.input_id
+
+      LEFT JOIN 
+        (SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+         FROM distance_bblu_`time'_placebo WHERE distance<=4000
+         GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)
+        ) AS BP ON A.OGC_FID=BP.input_id  
 
       LEFT JOIN bblu_`time'_xy AS AXY ON AXY.OGC_FID = A.OGC_FID
 
-    WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) `where_post'
+      WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) `where_post'
 
     ) AS AA 
 
-    LEFT JOIN (SELECT cluster_placebo, con_mo_placebo FROM cluster_placebo) AS GP ON AA.cluster_placebo = GP.cluster_placebo
-    LEFT JOIN (SELECT cluster_rdp, con_mo_rdp FROM cluster_rdp) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
+    LEFT JOIN 
+      (SELECT cluster_placebo, con_mo_placebo 
+       FROM cluster_placebo
+      ) AS GP ON AA.cluster_placebo = GP.cluster_placebo
+
+    LEFT JOIN 
+      (SELECT cluster_rdp, con_mo_rdp 
+      FROM cluster_rdp
+      ) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
 
     LEFT JOIN gcro AS GC ON AA.cluster_rdp = GC.cluster
 
     LEFT JOIN int_placebo_bblu_`time' AS IP ON IP.OGC_FID = AA.OGC_FID
+
     LEFT JOIN int_rdp_bblu_`time' AS IR  ON IR.OGC_FID = AA.OGC_FID    
 
     ";
