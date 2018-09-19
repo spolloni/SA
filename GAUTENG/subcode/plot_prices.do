@@ -73,7 +73,7 @@ global ifregs = "
        ";
 
 * what to run?;
-global ddd_reg_joined = 1;
+global ddd_reg_joined = 0;
 global dd_reg_joined = 0;
 global dist_reg_joined = 0;
 global time_reg_joined = 0;
