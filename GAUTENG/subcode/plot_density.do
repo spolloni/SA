@@ -173,15 +173,23 @@ if $bblu_clean_data==1 {;
   outcome_gen;
 
   foreach var in $outcomes {;
-  egen `var'_s = sum(`var'), by(id post);  
-  drop `var';
-  ren `var'_s `var';
+    egen `var'_s = sum(`var'), by(id post);
+    drop `var';
+    ren `var'_s `var';
   };
 
-  foreach v in _rdp _placebo {;  /* replace mean distance within block */
-  egen dm`v' = mean(distance`v'), by(id);
-  drop distance`v';
-  ren dm`v' distance`v';
+  foreach v in _rdp _placebo {; 
+
+    /* replace mean distance within block */
+    egen dm`v' = mean(distance`v'), by(id);
+    drop distance`v';
+    ren dm`v' distance`v';
+
+    /* replace mode cluster within block */
+    egen dm`v' = mode(cluster`v'), maxmode by(id);
+    drop cluster`v';
+    ren dm`v' cluster`v';
+
   };
 
   keep  $outcomes  post id cluster_placebo cluster_rdp distance_rdp distance_placebo RDP_density;
