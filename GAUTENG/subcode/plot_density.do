@@ -26,22 +26,24 @@ global dist_min = -600;
 * MAKE DATASET?;
 global bblu_query_data  = 0 ; /* query data */
 global bblu_clean_data  = 0 ; /* clean data for analysis */
-global bblu_do_analysis = 1 ; /* do analysis */
+global bblu_do_analysis = 0 ; /* do analysis */
 
-global graph_plotmeans      = 0 ;  /* plots means: 1) pre/post on same graph, 2) placebo and rdp same graph (pre only) */
-global graph_plotdiff       = 1 ;  /* plots changes over time for placebo and rdp */
-global graph_plottriplediff = 0 ;  /* can't figure out how to do this yet... */
-
+global graph_plotmeans_prepost = 0; /* plots means: 1) pre/post on same graph */
+global graph_plotmeans_rdpplac = 0; /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotdiff       = 0;   /* plots changes over time for placebo and rdp */
+global graph_plotdiff_het   = 0;
+global graph_plottriplediff = 0;   /* can't figure out how to do this yet... */
 
 global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
-
 prog outcome_gen;
+
   g for    = s_lu_code == "7.1";
   g inf    = s_lu_code == "7.2";
-  g total_buildings      = for + inf ;
+  g total_buildings = for + inf ;
 
   g inf_backyard  = t_lu_code == "7.2.3";
   g inf_non_backyard  = inf_b==0 & inf==1;
+
 end;
 
 
@@ -49,9 +51,12 @@ if $LOCAL==1 {;
 	cd ..;
 };
 
-* load data;
 cd ../..;
 cd Generated/Gauteng;
+
+************************************************;
+********* LOAD DATA  ***************************;
+************************************************;
 
 if $bblu_query_data == 1 {;
 
@@ -62,7 +67,7 @@ if $bblu_query_data == 1 {;
   local qry = " 
 
     SELECT AA.*, GP.con_mo_placebo, GR.con_mo_rdp, IR.cluster AS cluster_int_rdp, 
-    IP.cluster AS cluster_int_placebo, GC.RDP_density
+    IP.cluster AS cluster_int_placebo, GC.RDP_density, GC.area
 
     FROM 
 
@@ -126,7 +131,13 @@ if $bblu_query_data == 1 {;
 };
 };
 
+************************************************;
+************************************************;
+************************************************;
 
+************************************************;
+********* CLEAN DATA  **************************;
+************************************************;
 
 if $bblu_clean_data==1 {;
 
@@ -138,13 +149,19 @@ if $bblu_clean_data==1 {;
   g formal = (s_lu_code=="7.1");
 
   destring X Y, replace force;
-  drop if X==.;
+  drop if X==. | Y==. ;
 
   /* throw out clusters for early projects (before 2001) */
   replace distance_placebo =. if con_mo_placebo<515 | con_mo_placebo==.;
+  replace cluster_placebo  =. if con_mo_placebo<515 | con_mo_placebo==.;
   replace distance_rdp =. if con_mo_rdp<515 | con_mo_rdp==.;
+  replace cluster_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
 
+  /* throw out placebo clusters that are too small */
+  replace distance_placebo =. if area < .5;
+  replace cluster_placebo  =. if area < .5;
   drop if distance_rdp ==. & distance_placebo ==. ;
+  drop if cluster_rdp ==. & cluster_placebo ==. ;
 
   /* reverse distances for intersection */
   replace distance_rdp = -1*distance_rdp if cluster_int_rdp!=.; 
@@ -190,11 +207,15 @@ if $bblu_clean_data==1 {;
 
   save bbluplot_reg_admin_$size, replace;
 
-
 };
 
+************************************************;
+************************************************;
+************************************************;
 
-
+************************************************;
+********* ANALYZE DATA  ************************;
+************************************************;
 
 if $bblu_do_analysis==1 {;
 
@@ -232,107 +253,217 @@ replace dists_placebo=`=r(max)' if dists_placebo==. | post==0;
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
+************************************************;
+************************************************;
+************************************************;
 
-* 1 * MAKE MEAN GRAPHS HERE ;
-if $graph_plotmeans == 1 {;
+************************************************;
+* 1.1 ** MAKE MEAN GRAPHS HERE PRE/POST ********;
+************************************************;
 
-cap program drop plotmeans;
-program plotmeans;
-preserve;
-  egen `2'_`3' = mean(`2'), by(post d`3');
+if $graph_plotmeans_prepost == 1 {;
 
-  bys post d`3': g nn_`3'=_n;
+  cap program drop plotmeans;
+  program plotmeans;
 
-  twoway 
-  (scatter `2'_`3' d`3' if post==0 & nn_`3'==1)
-  (scatter `2'_`3' d`3' if post==1 & nn_`3'==1)
-  ,
-  xtitle("meters from project border",height(5))
-  ytitle("Structures per `=${size}' m2",height(5))
-  xline(0,lw(thin)lp(longdash))
-  xlabel($dist_min(100)`=$max-2*$bin')
-  `6'
-  legend(order(1 "`4'" 2 "`5'") 
-  ring(0) position(6) bm(tiny) rowgap(small) 
-  colgap(small) size(medsmall) region(lwidth(none)))
-  ;
-  graphexportpdf `1', dropeps;
-  *graph export "`1'.pdf", as(pdf) replace;
-restore;
-end;
+  preserve;
 
-foreach var in $outcomes {;
-global yl = "ylabel(0(1)7)";
-plotmeans bblu_`var'_rdp_admin `var' rdp "Pre (2001)" "Post (2011)" $yl ;
-plotmeans bblu_`var'_placebo_admin `var' placebo "Pre (2001)" "Post (2011)" $yl ;
+    egen `2'_`3' = mean(`2'), by(post d`3');
+    bys post d`3': g nn_`3'=_n;
+
+    twoway 
+    (connected `2'_`3' d`3' if post==0 & nn_`3'==1, ms(o)  mlc(gs0) mfc(gs0) lc(gs7) lp(none) lw(thin))
+    (connected `2'_`3' d`3' if post==1 & nn_`3'==1, ms(T) msiz(medsmall)  mlc(sienna) mfc(sienna) lc("206 162 97") lw(thin))
+    ,
+    xtitle("meters from project border",height(5))
+    ytitle("Structures per `=${size}' m2",height(5))
+    xline(0,lw(thin)lp(shortdash))
+    `6'
+    `7'
+    legend(order(1 "`4'" 2 "`5'") 
+    ring(0) position(`8') bm(tiny) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(`9');
+    graphexportpdf `1', dropeps;
+
+  restore; 
+
+  end;
+
+  global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+  global yl = "ylabel(0(1)7)";
+
+  plotmeans 
+    bblu_total_buildings_rdp_admin total_buildings rdp 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(2(1)10)"  
+    4;
+
+  plotmeans 
+    bblu_total_buildings_rdp_admin total_buildings placebo 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(2(1)10)"  
+    4;
+
+
+  plotmeans 
+    bblu_for_rdp_admin for rdp 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(0(1)6)" 
+    4;
+
+  plotmeans 
+    bblu_for_placebo_admin for placebo 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(0(1)6)"
+    4;
+
+
+  plotmeans 
+    bblu_inf_rdp_admin inf rdp 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(1(1)7)"
+    4;
+
+  plotmeans 
+    bblu_inf_placebo_admin inf placebo 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(1(1)7)"
+    4;
+
+
+  plotmeans 
+    bblu_inf_backyard_rdp_admin inf_backyard rdp 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(0(1)5)"
+    4;
+
+  plotmeans 
+    bblu_inf_backyard_placebo_admin inf_backyard placebo 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(0(1)5)"
+    4;
+
+
+  plotmeans 
+    bblu_inf_non_backyard_rdp_admin inf_non_backyard rdp 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(0(1)6)"
+    4;
+
+  plotmeans bblu_inf_non_backyard_placebo_admin inf_non_backyard placebo 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(0(1)6)"
+    4;
 
 };
 
+************************************************;
+************************************************;
+************************************************;
 
+************************************************;
+* 1.2 * MAKE MEAN GRAPHS HERE PRE rdp/placebo **;
+************************************************;
 
-cap program drop plotmeans_pre;
-program plotmeans_pre;
-preserve;
-*  g sip_id = inf==1 & distance_placebo<0 & post==0;
-*  egen sip_ids = sum(sip_id), by(cluster_placebo);
-*  drop if sip_ids>10;
-  *replace `2'=. if `2'>100;
-  keep if post==0;
-  egen `2'_`3' = mean(`2'), by(d`3');
-  keep `2'_`3' d`3';
-  duplicates drop d`3', force;
-  ren d`3' D;
-  save "${temp}pmeans_`3'_temp.dta", replace;
-restore;
+if $graph_plotmeans_rdpplac == 1 {;
 
-preserve; 
-*  g sip_id = inf==1 & distance_placebo<0 & post==0;
-*  egen sip_ids = sum(sip_id), by(cluster_placebo);
-*  drop if sip_ids>10;
-  *replace `2'=. if `2'>100;
-  keep if post==0;
-  egen `2'_`4' = mean(`2'), by(d`4');
-  keep `2'_`4' d`4';
-  duplicates drop d`4', force;
-  ren d`4' D;
-  save "${temp}pmeans_`4'_temp.dta", replace;
-restore;
+  cap program drop plotmeans_pre;
+  program plotmeans_pre;
 
-preserve;
-  use "${temp}pmeans_`3'_temp.dta", clear;
-  merge 1:1 D using "${temp}pmeans_`4'_temp.dta";
-  keep if _merge==3;
-  drop _merge;
+  preserve;
 
-  twoway 
-  (scatter `2'_`3' D)
-  (scatter `2'_`4' D)
-  ,
-  xtitle("meters from project border",height(5))
-  ytitle("Structures per `=${size}' m2",height(5))
-  xline(0,lw(thin)lp(longdash))
-  xlabel($dist_min(`=2*$bin')`=$max-2*$bin')
-  `7'
-  legend(order(1 "`5'" 2 "`6'") 
-  ring(0) position(6) bm(tiny) rowgap(small) 
-  colgap(small) size(medsmall) region(lwidth(none)))
-  ;
-  graphexportpdf `1', dropeps;
-  *graph export "`1'.pdf", as(pdf) replace;
-restore;
-end;
+    *g sip_id = inf==1 & distance_placebo<0 & post==0;
+    *egen sip_ids = sum(sip_id), by(cluster_placebo);
+    *drop if sip_ids>10;
+    *replace `2'=. if `2'>100;
+    keep if post==0;
+    egen `2'_`3' = mean(`2'), by(d`3');
+    keep `2'_`3' d`3';
+    duplicates drop d`3', force;
+    ren d`3' D;
+    save "${temp}pmeans_`3'_temp.dta", replace;
+  restore;
 
-foreach var in $outcomes {;
+  preserve; 
+    *g sip_id = inf==1 & distance_placebo<0 & post==0;
+    *egen sip_ids = sum(sip_id), by(cluster_placebo);
+    *drop if sip_ids>10;
+    *replace `2'=. if `2'>100;
+    keep if post==0;
+    egen `2'_`4' = mean(`2'), by(d`4');
+    keep `2'_`4' d`4';
+    duplicates drop d`4', force;
+    ren d`4' D;
+    save "${temp}pmeans_`4'_temp.dta", replace;
+  restore;
 
-global yl = "ylabel(0(1)4)";
-plotmeans_pre bblu_`var'_pre_means `var' rdp placebo "Completed" "Uncompleted" $yl ;
+  preserve; 
+    use "${temp}pmeans_`3'_temp.dta", clear;
+    merge 1:1 D using "${temp}pmeans_`4'_temp.dta";
+    keep if _merge==3;
+    drop _merge;
+
+    twoway 
+    (connected `2'_`3' D, ms(o)  mlc(gs0) mfc(gs0) lc(gs7) lp(none) lw(thin))
+    (connected `2'_`4' D, ms(T) msiz(medsmall)  mlc(sienna) mfc(sienna) lc("206 162 97") lw(thin))
+    ,
+    xtitle("meters from project border",height(5))
+    ytitle("Structures per `=${size}' m2",height(5))
+    xline(0,lw(thin)lp(shortdash))
+    `7'
+    `8'
+    legend(order(1 "`5'" 2 "`6'") 
+    ring(0) position(`9') bm(tiny) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(`10');;
+    graphexportpdf `1', dropeps;
+  restore;
+
+  end;
+
+global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+global yl = "ylabel(2(1)7)";
+
+  plotmeans_pre 
+    bblu_total_buildings_pre_means total_buildings rdp placebo
+    "Completed" "Uncompleted"
+    "xlabel(-500(250)2000)" $yl   
+    4;
+
+  plotmeans_pre 
+    bblu_for_pre_means for rdp placebo
+    "Completed" "Uncompleted"
+    "xlabel(-500(250)2000)" "ylabel(0(1)5)"
+    4;
+
+  plotmeans_pre 
+    bblu_inf_pre_means inf rdp placebo
+    "Completed" "Uncompleted"
+    "xlabel(-500(250)2000)" "ylabel(0(1)5)"
+    4;
+
+  plotmeans_pre 
+    bblu_inf_backyard_pre_means inf_backyard rdp placebo
+    "Completed" "Uncompleted"
+    "xlabel(-500(250)2000)" "ylabel(0(1)4)" 
+    2;
+
+  plotmeans_pre 
+    bblu_inf_non_backyard_pre_means inf_non_backyard rdp placebo
+    "Completed" "Uncompleted"
+    "xlabel(-500(250)2000)" "ylabel(0(1)4)"  
+    2;
+
 };
 
-};
+************************************************;
+************************************************;
+************************************************;
 
-
-
-* 2 * MAKE CHANGE GRAPHS (REGRESSIONS) HERE ;
+************************************************;
+* 2.1 * MAKE CHANGE GRAPHS (REGRESSIONS) HERE **;
+************************************************;
 
 if $graph_plotdiff == 1 {;
 
@@ -345,56 +476,52 @@ program plotreg;
       egen contin = sieve(parm), keep(n);
       destring contin, replace force;
       replace contin=contin+${dist_min};
-   *  drop if contin>$max;
+      drop if contin>2000;
       local treat "Completed";
-      local control "Uncomplete";
+      local control "Uncompleted";
       local het "Large Projects";
 
-      global graph1 "";
-      global legend1 "";
-      if length("`2'")>0 {;
-      global legend1 " 2 "`treat'" ";
-      global graph1 "(rcap max95 min95 contin if regexm(parm,"`2'")==1, lc(gs5) lw(thin) )
-      (connected estimate contin if regexm(parm,"`2'")==1, ms(o) 
-      msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin))";
+      if length("`3'")>0 & length("`4'")==0  {;
+        replace contin = cond(regexm(parm,"`2'")==1, contin - 7.5, contin + 7.5);
       };
-      global graph2 "";
-      global legend2 "";
-      if length("`3'")>0 {;
-      global legend2 " 4 "`control'" ";
-      global graph2 "(rcap max95 min95 contin if regexm(parm,"`3'")==1, lc(gs5) lw(thin))
-      (connected estimate contin if regexm(parm,"`3'")==1, ms(o) 
-      msiz(small) mlc(black) mfc(black) lc(black) lp(none) lw(thin))";
-      };      
 
-      global graph3 "";
-      global legend3 "";
+      global graph "";
+      global legend "";
+
+      if length("`2'")>0 & length("`3'")>0 {;
+        global legend " 3 "`treat'" 4 "`control'" ";
+        global graph "
+        (rcap max95 min95 contin if regexm(parm,"`2'")==1, lc("206 162 97") lw(vthin))
+        (rcap max95 min95 contin if regexm(parm,"`3'")==1, lc(gs9) lw(vthin))
+        (connected estimate contin if regexm(parm,"`2'")==1, 
+        ms(T) msiz(medsmall) mlc("145 90 7") mfc("145 90 7") lc("145 90 7") lp(none) lw(thin) )
+        (connected estimate contin if regexm(parm,"`3'")==1, ms(o) 
+        msiz(small) mlc(black) mfc(black) lc(black) lp(none) lw(thin))";
+      };   
+
       if length("`4'")>0 {;
-      global legend3 " 6 "`het'" ";
-      global graph3 "(rcap max95 min95 contin if regexm(parm,"`4'")==1, lc(gs5) lw(thin))
-      (connected estimate contin if regexm(parm,"`4'")==1, ms(o) 
-      msiz(small) mlc(blue) mfc(blue) lc(blue) lp(none) lw(thin))";
-      };     
+        global legend " ${legend}  6 "`het'" ";
+        global graph " ${graph}  
+        (rcap max95 min95 contin if regexm(parm,"`4'")==1, lc(gs5) lw(thin))
+        (connected estimate contin if regexm(parm,"`4'")==1, ms(o) 
+        msiz(small) mlc(blue) mfc(blue) lc(blue) lp(none) lw(thin))";
+      };
+
       tw 
-      $graph1 
-      $graph2
-      $graph3
+      $graph
       ,
       yline(0,lw(thin)lp(shortdash))
-      xline(0,lw(thin)lp(longdash))
+      xline(0,lw(thin)lp(shortdash))
       xtitle("meters from project border",height(5))
       ytitle("Structures per `=${size}' m2",height(5))
-      xlabel(${dist_min}(`=2*$bin')${dist_max})
-      legend(order($legend1 $legend2 $legend3) 
+      xlabel(-500(250)2000)
+      legend(order($legend) 
       ring(0) position(1) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
-      note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
-      ;
+      note("Mean Structures per `=${size}' m2: `=$mean_outcome'");
       graphexportpdf `1', dropeps;
-      *graph export "`1'.pdf", as(pdf) replace;
    restore;
 end;
-
 
  foreach var in $outcomes {;
     preserve;
@@ -405,7 +532,17 @@ end;
     restore;
    plotreg distplot_bblu_`var'_admin  dists_rdp dists_placebo; 
  };
+};
 
+************************************************;
+************************************************;
+************************************************;
+
+************************************************;
+* 2.2 * MAKE HETEROGENEOUS CHANGE GRAPHS HERE **;
+************************************************;
+
+if $graph_plotdiff_het == 1 {;
 
 sum RDP_density, detail;
 
@@ -423,7 +560,6 @@ replace dists_rdp_het = `=r(max)' if het == 0;
        keep if distance_rdp<=$dist_max | distance_placebo<=$dist_max;
        sum `var', detail;
        global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
-
        areg `var' b1100.dists_rdp_no_het b1100.dists_placebo b1100.dists_rdp_het, cl(cluster_reg) a(id);
     restore;
    plotreg distplot_bblu_`var'_het_admin  dists_rdp_no_het dists_placebo dists_rdp_het ; 
@@ -431,8 +567,13 @@ replace dists_rdp_het = `=r(max)' if het == 0;
 
 };
 
+************************************************;
+************************************************;
+************************************************;
 
+************************************************;
 * 3 * MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
+************************************************;
 
 if $graph_plottriplediff == 1 {;
 
@@ -445,17 +586,20 @@ program plotregsingle;
       egen contin = sieve(parm), keep(n);
       destring contin, replace force;
       replace contin=contin+${dist_min};
-   *  drop if contin>$max;
+      drop if contin>$max;
       local treat "Completed";
 
+      replace contin = cond(post==1, contin - 7.5, contin + 7.5);
+
       global legend1 " 2 "`treat'" ";
-      global graph1 "(rcap max95 min95 contin if regexm(parm,"`2'")==1, lc(gs5) lw(thin) )
-      (connected estimate contin if regexm(parm,"`2'")==1, ms(o) 
-      msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin))";
+      global graph1 
+      "(rcap max95 min95 contin if regexm(parm,"`2'")==1, lc(gs5) lw(thin) )
+       (connected estimate contin if regexm(parm,"`2'")==1, ms(o) 
+        msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin))";
       tw 
       $graph1 
       ,
-      yline(0,lw(thin)lp(shortdash))
+      yline(0,lw(thin))
       xline(0,lw(thin)lp(longdash))
       xtitle("meters from project border",height(5))
       ytitle("Structures per `=${size}' m2",height(5))
@@ -466,7 +610,6 @@ program plotregsingle;
       note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
       ;
       graphexportpdf `1', dropeps;
-      *graph export "`1'.pdf", as(pdf) replace;
    restore;
 end;
 
@@ -490,9 +633,9 @@ g dist_t_rdp = dist_t*rdp;
 
 };
 
-
-
-
+************************************************;
+************************************************;
+************************************************;
 
 
 /*
