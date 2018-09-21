@@ -261,6 +261,7 @@ replace dists_placebo=`=r(max)' if dists_placebo==. | post==0;
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
+};
 ************************************************;
 ************************************************;
 ************************************************;
@@ -636,8 +637,6 @@ g dist_t_rdp = dist_t*rdp;
     restore;
    plotregsingle distplot_bblu_`var'_admin_d3  dists_t_rdp; 
  };
-
-};
 
 };
 
