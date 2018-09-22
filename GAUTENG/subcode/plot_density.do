@@ -239,7 +239,6 @@ drop if distance_placebo > $dist_max & distance_placebo<.;
 drop if distance_rdp < $dist_min ; /* get rid of way too close places */
 drop if distance_placebo < $dist_min ;
 
-
 sum distance_rdp;
 global max = round(ceil(`r(max)'),100);
 
