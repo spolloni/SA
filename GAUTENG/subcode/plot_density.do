@@ -309,7 +309,7 @@ if $graph_plotmeans_prepost == 1 {;
     4;
 
   plotmeans 
-    bblu_total_buildings_rdp_admin total_buildings placebo 
+    bblu_total_buildings_placebo_admin total_buildings placebo 
     "2001" "2011" 
     "xlabel(-500(250)2000)" "ylabel(2(1)10)"  
     4;
