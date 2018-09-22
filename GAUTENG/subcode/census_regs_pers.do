@@ -13,7 +13,6 @@ set maxvar 32767
 * global output = "Code/GAUTENG/paper/figures" ;
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
-
 * PARAMETERS;
 global area = .3;
 
