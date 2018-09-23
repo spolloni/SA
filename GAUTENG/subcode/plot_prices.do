@@ -15,8 +15,8 @@ if $LOCAL==1{;
 ***************************************;
 *  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
 ***************************************;
-cap program drop ommit;
-program define ommit;
+cap program drop omit;
+program define omit;
 
   local original ${`1'};
   local temp1 `0';
@@ -155,7 +155,7 @@ foreach level in `r(levels)' {;
 * dummies global for regs;
 ds dreg_* ;
 global dummies = "`r(varlist)'"; 
-ommit dummies dreg_far;
+omit dummies dreg_far;
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
@@ -224,7 +224,7 @@ foreach level in `r(levels)' {;
 * dummies global for regs;
 ds dreg_* ;
 global dummies = "`r(varlist)'"; 
-ommit dummies dreg_far;
+omit dummies dreg_far;
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
@@ -303,7 +303,7 @@ foreach level in `r(levels)' {;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-ommit dummies dreg_${max}_pre_rdp; 
+omit dummies dreg_${max}_pre_rdp; 
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
@@ -354,7 +354,7 @@ restore;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-ommit dummies dreg_${max}_pre_placebo; 
+omit dummies dreg_${max}_pre_placebo; 
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
@@ -433,7 +433,7 @@ foreach level in `r(levels)' {;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-ommit dummies dreg_1001_cntrl_rdp; 
+omit dummies dreg_1001_cntrl_rdp; 
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
@@ -486,7 +486,7 @@ restore;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-ommit dummies dreg_1001_cntrl_placebo; 
+omit dummies dreg_1001_cntrl_placebo; 
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
