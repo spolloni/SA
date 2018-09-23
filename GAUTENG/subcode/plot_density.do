@@ -5,6 +5,26 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+***************************************;
+*  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
+***************************************;
+cap program drop omit;
+program define omit;
+
+  local original ${`1'};
+  local temp1 `0';
+  local temp2 `1';
+  local except: list temp1 - temp2;
+  local modified;
+  foreach e of local except{;
+   local modified = " `modified' o.`e'"; 
+  };
+  local new: list original - except;
+  local new " `modified' `new'";
+  global `1' `new';
+
+end;
+
 ******************;
 *  PLOT DENSITY  *;
 ******************;
@@ -313,7 +333,6 @@ if $graph_plotmeans_prepost == 1 {;
     "xlabel(-500(250)2000)" "ylabel(2(1)10)"  
     4;
 
-
   plotmeans 
     bblu_for_rdp_admin for rdp 
     "2001" "2011" 
@@ -325,7 +344,6 @@ if $graph_plotmeans_prepost == 1 {;
     "2001" "2011" 
     "xlabel(-500(250)2000)" "ylabel(0(1)6)"
     4;
-
 
   plotmeans 
     bblu_inf_rdp_admin inf rdp 
@@ -339,7 +357,6 @@ if $graph_plotmeans_prepost == 1 {;
     "xlabel(-500(250)2000)" "ylabel(1(1)7)"
     4;
 
-
   plotmeans 
     bblu_inf_backyard_rdp_admin inf_backyard rdp 
     "2001" "2011" 
@@ -351,7 +368,6 @@ if $graph_plotmeans_prepost == 1 {;
     "2001" "2011" 
     "xlabel(-500(250)2000)" "ylabel(0(1)5)"
     4;
-
 
   plotmeans 
     bblu_inf_non_backyard_rdp_admin inf_non_backyard rdp 
@@ -531,15 +547,13 @@ program plotreg;
    restore;
 end;
 
- foreach var in $outcomes {;
-    preserve;
-       keep if distance_rdp<=$dist_max | distance_placebo<=$dist_max;
-       sum `var', detail;
-       global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
-       areg `var' b1100.dists_rdp b1100.dists_placebo, cl(cluster_reg) a(id);
-    restore;
-   plotreg distplot_bblu_`var'_admin  dists_rdp dists_placebo; 
- };
+foreach var in $outcomes {;
+  sum `var', detail;
+  global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
+  areg `var' b1100.dists_rdp b1100.dists_placebo, cl(cluster_reg) a(id);
+  plotreg distplot_bblu_`var'_admin  dists_rdp dists_placebo; 
+};
+
 };
 
 ************************************************;
@@ -562,16 +576,12 @@ replace dists_rdp_no_het = `=r(max)' if het == 1;
 g dists_rdp_het = dists_rdp;
 replace dists_rdp_het = `=r(max)' if het == 0;
 
-
- foreach var in $outcomes {;
-    preserve;
-       keep if distance_rdp<=$dist_max | distance_placebo<=$dist_max;
-       sum `var', detail;
-       global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
-       areg `var' b1100.dists_rdp_no_het b1100.dists_placebo b1100.dists_rdp_het, cl(cluster_reg) a(id);
-    restore;
-   plotreg distplot_bblu_`var'_het_admin  dists_rdp_no_het dists_placebo dists_rdp_het ; 
- };
+foreach var in $outcomes {;
+  sum `var', detail;
+  global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
+  areg `var' b1100.dists_rdp_no_het b1100.dists_placebo b1100.dists_rdp_het, cl(cluster_reg) a(id);
+  plotreg distplot_bblu_`var'_het_admin  dists_rdp_no_het dists_placebo dists_rdp_het ; 
+};
 
 };
 
@@ -588,61 +598,61 @@ if $graph_plottriplediff == 1 {;
 cap program drop plotregsingle;
 program plotregsingle;
 
-   preserve;
-   parmest, fast;
+  preserve;
+  parmest, fast;
 
-      egen contin = sieve(parm), keep(n);
-      destring contin, replace force;
-      replace contin=contin+${dist_min};
-      drop if contin>$max;
-      local treat "Completed";
+    egen contin = sieve(parm), keep(n);
+    destring contin, replace force;
+    replace contin=contin+${dist_min};
+    drop if contin>2000;
+    drop if strpos(parm, "all") >0;
 
-      replace contin = cond(post==1, contin - 7.5, contin + 7.5);
+    sort contin;
 
-      global legend1 " 2 "`treat'" ";
-      global graph1 
-      "(rcap max95 min95 contin if regexm(parm,"`2'")==1, lc(gs5) lw(thin) )
-       (connected estimate contin if regexm(parm,"`2'")==1, ms(o) 
-        msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin))";
-      tw 
-      $graph1 
-      ,
-      yline(0,lw(thin))
-      xline(0,lw(thin)lp(longdash))
-      xtitle("meters from project border",height(5))
-      ytitle("Structures per `=${size}' m2",height(5))
-      xlabel(${dist_min}(100)${dist_max})
-      legend(order($legend1) 
-      ring(0) position(1) bm(tiny) rowgap(small) 
-      colgap(small) size(medsmall) region(lwidth(none)))
-      note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
-      ;
-      graphexportpdf `1', dropeps;
-   restore;
+    global legend1 " 2 "Completed vs. Uncompleted difference" ";
+    global graph1 "
+    (rcap max95 min95 contin, lc("206 162 97") lw(vthin))
+    (connected estimate contin, ms(T) msiz(medsmall) 
+    mlc("145 90 7") mfc("145 90 7") lc("145 90 7") lp(none) lw(thin) )";
+    
+    tw 
+    $graph1 
+    ,
+    yline(0,lw(thin)lp(shortdash))
+    xline(0,lw(thin)lp(shortdash))
+    xtitle("meters from project border",height(5))
+    ytitle("Structures per `=${size}' m2",height(5))
+    xlabel(-500(250)2000)
+    legend(order($legend1) 
+    ring(0) position(1) bm(tiny) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
+    ;
+    graphexportpdf `1', dropeps;
+  restore;
 end;
 
+levelsof dists_rdp;
+global dists_all "";
+foreach level in `r(levels)' {;
+  gen dists_rdp_`level' = dists_rdp== `level';
+  gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
+  global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
+};
+omit dists_all dists_rdp_1100;
 
-g rdp = dists_rdp!=.;
-g dist_t = dists_rdp;
-replace dist_t = dists_placebo if dist_t==. & dists_placebo!=. ;
-g dist_t_rdp = dist_t*rdp;
-
- foreach var in $outcomes {;
-    preserve;
-       keep if distance_rdp<=$dist_max | distance_placebo<=$dist_max;
-       sum `var', detail;
-       global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
-       areg `var' b1100.dist_t rdp b1100.dist_t_rdp , cl(cluster_reg) a(id);
-    restore;
-   plotregsingle distplot_bblu_`var'_admin_d3  dists_t_rdp; 
- };
+foreach var in $outcomes {;
+  sum `var', detail;
+  global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
+  areg `var' $dists_all , cl(cluster_reg) a(id);
+  plotregsingle distplotDDD_bblu_`var'_admin; 
+};
 
 };
 
 ************************************************;
 ************************************************;
 ************************************************;
-
 
 /*
 
