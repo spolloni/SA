@@ -13,10 +13,10 @@ if $LOCAL==1{;
 };
 
 ***************************************;
-*  PROGRAMS TO OMIT VARS FROM GLOBAL   *;
+*  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
 ***************************************;
-cap program drop ommit;
-program define ommit;
+cap program drop omit;
+program define omit;
 
   local original ${`1'};
   local temp1 `0';
@@ -73,9 +73,12 @@ global ifregs = "
        ";
 
 * what to run?;
-global time_reg_sep = 1;
-*global time_reg_joined = 1;
-*global dist_reg_joined = 0;
+global dist_reg_joined = 1;
+global time_reg_joined = 0;
+global dd_reg_joined = 0;
+global ddd_regs = 0;
+
+
 
 * load data; 
 cd ../..;
@@ -88,8 +91,11 @@ cd $output ;
 
 * treatment dummies;
 gen treat_rdp  = (distance_rdp <= $treat);
+replace treat_rdp = 2 if distance_rdp > $max;
 gen treat_placebo = (distance_placebo <= $treat);
+replace treat_placebo = 2 if distance_placebo > $max;
 gen treat_joined = (distance_joined <= $treat);
+replace treat_joined = 2 if distance_joined > $max;
 
 foreach v in _rdp _placebo _joined {;
   * create distance dummies;
@@ -126,6 +132,167 @@ egen latlongroup = group(latbin lonbin);
 * cluster var for FE (arbitrary for obs contributing to 2 clusters?);
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
+*****************************************************************;
+*********** DISTANCE REGRESSIONS JOINED PLACEBO-RDP  ************;
+*****************************************************************;
+if $dist_reg_joined ==1 {;
+
+* program for plotting;
+cap program drop plotcoeffs_distance;
+program plotcoeffs_distance;
+  preserve;
+
+    parmest, fast;  
+
+    * grab continuous var from varname;
+    destring parm, gen(contin) i(dreg_ pre post placebo rdp .) force;
+
+    * keep only coeffs to plot;
+    drop if contin == .;
+    drop if strpos(parm,"long") >0;
+    keep if strpos(parm,"`1'") > 0;
+
+    * dummy for post coeffs;
+    g post = regexm(parm,"post")==1;
+
+    *reaarrange continuous var;
+    drop if contin > 9000;
+    replace contin = cond(post==1, contin - 7.5, contin + 7.5);
+    sort contin;
+
+    * bounds for plot;
+    global lbound = 500;
+    global ubound = $max;
+
+    tw
+      (rcap max95 min95 contin if post ==1, lc(gs7) lw(thin) )
+      (rcap max95 min95 contin if post ==0, lc("206 162 97") lw(thin) )
+      (connected estimate contin if post ==1, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
+      (connected estimate contin if post ==0, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
+      xtitle("meters to project border",height(5))
+      ytitle("log-price coefficients",height(5))
+      xlabel($lbound(500)$ubound,labsize(small))
+      ylabel(-.4(.1).4,labsize(small))
+      yline(0,lw(thin)lp(shortdash))
+      legend(order(3 "post" 4 "pre") 
+      ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(medsmall) region(lwidth(none)))
+      note("`3'");;
+
+      graphexportpdf `2', dropeps;
+
+  restore;
+end;
+
+*dummy construction;
+gen dreg_long_placebo = 0;
+gen dreg_long_rdp = 0;
+levelsof dists_joined;
+foreach level in `r(levels)' {;
+
+  gen dreg_`level'_pre_placebo  = (dists_placebo == `level' & prepost_reg_placebo==0);
+  gen dreg_`level'_post_placebo = (dists_placebo == `level' & prepost_reg_placebo==1);
+  replace dreg_long_placebo = 1 if dists_placebo == `level' & prepost_reg_placebo==2;
+
+  gen dreg_`level'_pre_rdp  = (dists_rdp == `level' & prepost_reg_rdp==0);
+  gen dreg_`level'_post_rdp = (dists_rdp == `level' & prepost_reg_rdp==1);
+  replace dreg_long_rdp = 1 if dists_rdp == `level' & prepost_reg_rdp==2;
+
+};
+
+foreach v in _rdp _placebo {;
+  replace dreg_long`v' = 1 if (dreg_9999_pre`v'==1 | dreg_9999_post`v'==1);
+  drop dreg_9999_pre`v' dreg_9999_post`v';
+};
+
+* dummies global for regs;
+ds dreg* ;
+global dummies = "`r(varlist)'"; 
+omit dummies dreg_long_placebo dreg_long_rdp; 
+
+* REG MONKEY;
+*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+plotcoeffs_distance rdp distance_plot_rdp;
+plotcoeffs_distance placebo distance_plot_placebo;
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
+/*
+*****************************************************************;
+*************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
+*****************************************************************;
+if $ddd_regs ==1 {;
+
+gen dreg_far = 0;
+levelsof mo2con_reg_rdp;
+foreach level in `r(levels)' {;
+
+  gen  dreg_`level' = (mo2con_reg_joined == `level')*(treat_joined==0 | treat_joined==1);
+  gen  dreg_`level'_treat = (mo2con_reg_joined == `level')*(treat_joined==1);
+  gen  dreg_`level'_rdp = (mo2con_reg_joined == `level')*(placebo==0)*(treat_joined==0 | treat_joined==1);
+  gen  dreg_`level'_treat_rdp = (mo2con_reg_joined == `level')*(treat_joined==1)*(placebo==0);
+
+  replace dreg_far = 1 if mo2con_reg_joined == `level' &  treat_joined==2;   
+
+};
+
+* dummies global for regs;
+ds dreg_* ;
+global dummies = "`r(varlist)'"; 
+omit dummies dreg_far;
+
+*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+* plot the coeffs;
+preserve;
+
+  parmest, fast;  
+
+  * grab continuous var from varname;
+  destring parm, gen(contin) i(dreg_ joined placebo rdp treat .) force;
+
+  * keep only coeffs to plot;
+  drop if contin == .;
+  keep if strpos(parm,"treat") >0 & strpos(parm,"rdp") >0;
+
+  *reaarrange continuous var;
+  drop if contin > 9000;
+  replace contin = -1*(contin - 1000) if contin>1000;
+  replace contin = $mbin*contin;
+  sort contin;
+
+  * bounds for plot;
+  global lbound = 12*$twl;
+  global ubound = 12*($twu-1);
+
+  tw
+    (rcap max95 min95 contin, lc("206 162 97") lw(thin) )
+    (connected estimate contin, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
+    xtitle("months to modal construction month",height(5))
+    ytitle("log-price coefficients",height(5))
+    xlabel(-$lbound(12)$ubound)
+    ylabel(-.4(.1).4,labsize(small))
+    xline(-3,lw(thin)lp(shortdash))
+    legend(off)
+    note("`3'");
+
+restore;
+graphexportpdf timeplot_admin_${treat}, dropeps;
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 
 *****************************************************************;
 ************* TIME REGRESSION SEPARATE PLACEBO-RDP  *************;
@@ -196,3 +363,4 @@ graphexportpdf timeplot_admin_${treat}, dropeps;
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
+*/
