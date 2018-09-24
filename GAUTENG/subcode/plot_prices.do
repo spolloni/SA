@@ -55,13 +55,13 @@ global output = "Output/GAUTENG/gradplots";
 
 * PARAMETERS;
 global rdp   = "`1'";
-global twl   = "3";   /* look at twl years before construction */
+global twl   = "4";   /* look at twl years before construction */
 global twu   = "4";   /* look at twu years after construction */
 global bin   = 250;   /* distance bin width for dist regs   */
 global max   = 2000;  /* distance maximum for distance bins */
 global mbin  =  12;   /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
-global treat = 1000;   /* distance to be considered treated  */
+global treat = 500;   /* distance to be considered treated  */
 global round = 0.15;  /* rounding for lat-lon FE */
 
 * data subset for regs (1);
@@ -73,12 +73,10 @@ global ifregs = "
        ";
 
 * what to run?;
-global dist_reg_joined = 1;
-global time_reg_joined = 0;
+global dist_regs = 0;
+global time_regs = 1;
 global dd_reg_joined = 0;
 global ddd_regs = 0;
-
-
 
 * load data; 
 cd ../..;
@@ -137,9 +135,9 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 *****************************************************************;
 
 *****************************************************************;
-*********** DISTANCE REGRESSIONS JOINED PLACEBO-RDP  ************;
+*************** DISTANCE REGRESSIONS PLACEBO-RDP  ***************;
 *****************************************************************;
-if $dist_reg_joined ==1 {;
+if $dist_regs ==1 {;
 
 * program for plotting;
 cap program drop plotcoeffs_distance;
@@ -154,7 +152,7 @@ program plotcoeffs_distance;
     * keep only coeffs to plot;
     drop if contin == .;
     drop if strpos(parm,"long") >0;
-    keep if strpos(parm,"`1'") > 0;
+    keep if strpos(parm,"`1'")  >0;
 
     * dummy for post coeffs;
     g post = regexm(parm,"post")==1;
@@ -215,9 +213,10 @@ global dummies = "`r(varlist)'";
 omit dummies dreg_long_placebo dreg_long_rdp; 
 
 * REG MONKEY;
-*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
-reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+*reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
 
+* plot coefficient;
 plotcoeffs_distance rdp distance_plot_rdp;
 plotcoeffs_distance placebo distance_plot_placebo;
 
@@ -225,6 +224,101 @@ plotcoeffs_distance placebo distance_plot_placebo;
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
+
+*****************************************************************;
+**************** TIME REGRESSIONS PLACEBO-RDP  ******************;
+*****************************************************************;
+if $time_regs ==1 {;
+
+* program for plotting;
+cap program drop plotcoeffs_time;
+program plotcoeffs_time;
+  preserve;
+
+    parmest, fast;  
+
+    * grab continuous var from varname;
+    destring parm, gen(contin) i(dreg_ treat cntrl placebo rdp .) force;
+
+    * keep only coeffs to plot;
+    drop if contin == .;
+    drop if strpos(parm,"long") >0;
+    keep if strpos(parm,"`1'")  >0;
+
+    * dummy for post coeffs;
+    g treat = regexm(parm,"treat")==1;
+
+    *reaarrange continuous var;
+    drop if contin > 9000;
+    replace contin = -1*(contin - 1000) if contin>1000;
+    replace contin = $mbin*contin;
+    replace contin = cond(treat==1, contin - 0.25, contin + 0.25);
+    sort contin;
+
+    * bounds for plot;
+    global lbound = 12*$twl;
+    global ubound = 12*($twu-1);
+
+    tw
+      (rcap max95 min95 contin if treat ==0, lc(gs7) lw(thin) )
+      (rcap max95 min95 contin if treat ==1, lc("206 162 97") lw(thin) )
+      (connected estimate contin if treat ==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
+      (connected estimate contin if treat ==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
+      xtitle("months to modal construction month",height(5))
+      ytitle("log-price coefficients",height(5))
+      xlabel(-$lbound(12)$ubound,labsize(small))
+      ylabel(-.4(.1).4,labsize(small))
+      xline(-6,lw(thin)lp(shortdash))
+      legend(order(3 "> ${treat}m" 4 "< ${treat}m" ) 
+      ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(small) region(lwidth(none)))
+      note("`3'");
+
+      graphexportpdf `2', dropeps;
+
+  restore;
+end;
+
+*dummy construction;
+gen dreg_far_rdp = 0;
+gen dreg_far_placebo = 0;
+levelsof mo2con_reg_rdp;
+
+foreach level in `r(levels)' {;
+  
+  gen dreg_`level'_treat_placebo  = (mo2con_reg_placebo == `level' & treat_placebo==1);
+  gen dreg_`level'_cntrl_placebo = (mo2con_reg_placebo == `level' & treat_placebo==0);
+  replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' & treat_placebo==2;
+
+  gen dreg_`level'_treat_rdp  = (mo2con_reg_rdp == `level' & treat_rdp==1);
+  gen dreg_`level'_cntrl_rdp = (mo2con_reg_rdp == `level' & treat_rdp==0);
+  replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' & treat_rdp==2;
+
+};
+
+foreach v in _rdp _placebo {;
+  replace dreg_far`v' = 1 if (dreg_9999_treat`v'==1 | dreg_9999_cntrl`v'==1);
+  drop dreg_9999_treat`v' dreg_9999_cntrl`v';
+};
+
+* dummies global for regs;
+ds dreg* ;
+global dummies = "`r(varlist)'"; 
+omit dummies dreg_far_placebo dreg_far_rdp; 
+
+* REG MONKEY;
+*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+* plot coefficient;
+plotcoeffs_time rdp time_plot_rdp;
+plotcoeffs_time placebo time_plot_placebo;
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
 
 /*
 *****************************************************************;
