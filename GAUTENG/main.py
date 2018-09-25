@@ -10,7 +10,7 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.placebofuns import make_gcro, make_gcro_conhulls, import_budget
+from subcode.placebofuns import make_gcro, make_gcro_conhulls, import_budget, make_gcro_link
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
@@ -61,7 +61,8 @@ _1_d_IMPORT = 0  # import GCRO + landplots
 _1_e_IMPORT = 0  # import GHS
 
 _2_FLAGRDP_ = 0
-_3_GCRO_    = 0
+_3_GCRO_a_  = 0
+_3_GCRO_b_  = 0
 
 _4_a_DISTS_ = 0  # buffers and hull creation
 _4_b_DISTS_ = 0  # ERVEN distance
@@ -206,7 +207,7 @@ if _2_FLAGRDP_ ==1:
 # STEP 3:  GCRO Definition          #
 #####################################
 
-if _3_GCRO_ == 1:
+if _3_GCRO_a_ == 1:
 
     print '\n'," Defining Placebo and RDPs from gcro ... ",'\n'
 
@@ -217,7 +218,18 @@ if _3_GCRO_ == 1:
     for hull in hulls:
         make_gcro_conhulls(db,hull)
 
-    print '\n', " generated GCRO tables NAMED placebo_conhulls and rdp_conhulls : DONE! ", '\n'
+    print  '\n',  " generated GCRO tables NAMED placebo_conhulls and rdp_conhulls : DONE! ", '\n'
+
+
+if _3_GCRO_b_ == 1:
+
+    print '\n', " link new gcro to gcro_publichousing ", '\n'
+
+    make_gcro_link(db)
+
+    print '\n', " linking : DONE! ", '\n'
+
+
 
 
 #############################################

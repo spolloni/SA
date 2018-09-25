@@ -14,6 +14,36 @@ import numpy as np
 import pandas as pd
 
 
+def make_gcro_link(db):
+    
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    cur.execute('DROP TABLE IF EXISTS gcro_link;')
+    make_qry = '''
+                CREATE TABLE gcro_link AS 
+                SELECT G.OGC_FID as cluster_original, 
+                       A.cluster as cluster_new
+                FROM gcro as A, gcro_publichousing as G
+                WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                WHERE f_table_name='gcro' AND search_frame=G.GEOMETRY)
+                AND st_intersects(A.GEOMETRY,G.GEOMETRY);
+               '''
+    cur.execute(make_qry) 
+    cur.execute("CREATE INDEX gcro_link_cluster_original ON gcro_link (cluster_original);")
+    cur.execute("CREATE INDEX gcro_link_cluster_new ON gcro_link (cluster_new);")
+
+
+    con.commit()
+    con.close()
+
+    return 
+
+
+
 def make_gcro(db):
 
     # connect to DB
