@@ -20,7 +20,7 @@ global output = "Output/GAUTENG/censusregs" ;
 global LOCAL = 1;
 
 * MAKE DATASET?;
-global data_prep = 1;
+global data_prep = 0;
 global data_anal = 0;
 
 if $LOCAL==1 {;
@@ -57,7 +57,8 @@ local qry = "
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2001hh' AS source, 2001 AS year
+      'census2001hh' AS source, 2001 AS year, A.SAL as area_code
+
 
     FROM census_hh_2001 AS A  
 
@@ -107,7 +108,7 @@ local qry = "
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2011hh' AS source, 2011 AS year
+      'census2011hh' AS source, 2011 AS year, A.SAL_CODE as area_code
 
     FROM census_hh_2011 AS A  
 
@@ -250,13 +251,15 @@ g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 g o = 1;
-egen pop = sum(o), by(area year);
+egen pop = sum(o), by(area_code year);
+replace pop=. if pop>1000;
 bys area: g a_n=_n;
-g density = pop/area;
+g density = pop/area_code; 
 lab var density "Households per m2";
 
-egen pop_n = sum(hh_size), by(area year);
-g density_n = pop_n/area;
+egen pop_n = sum(hh_size), by(area_code year);
+replace pop_n=. if pop>1000;
+g density_n = pop_n/area_code;
 lab var density_n "People per m2";
 
 
