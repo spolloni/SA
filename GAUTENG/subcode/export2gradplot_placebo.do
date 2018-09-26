@@ -6,7 +6,7 @@ set maxvar 32767
 #delimit;
 
 * RUN LOCALLY?;
-global LOCAL = 0;
+global LOCAL = 1;
 
 local qry = "
 

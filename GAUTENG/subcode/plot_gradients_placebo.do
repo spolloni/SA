@@ -9,21 +9,15 @@ set maxvar 32767
 *  PLOT GRADIENTS FOR PLACEBO *;
 *******************************;
 
-* SET OUTPUT LOCATION;
-* global output = "Output/GAUTENG/gradplots_placebo";
-* global output = "Code/GAUTENG/paper/figures";
-global output = "Code/GAUTENG/presentations/presentation_lunch";
-
-
 * PARAMETERS;
 global tw    = "3";   /* look at +-tw years to construction */
 global bin   = 100;   /* distance bin width for dist regs   */
 global mbin  =  2;    /* months bin width for time-series   */
-global msiz  = 5;    /* minimum obs per cluster            */
+global msiz  = 100;    /* minimum obs per cluster            */
 global treat = 400;   /* distance to be considered treated  */
 
 * RUN LOCALLY?;
-global LOCAL = 1 ;
+global LOCAL = 1;
 if $LOCAL==1{;
 	cd ..;
 };
@@ -38,7 +32,7 @@ use gradplot_placebo.dta, clear;
 
 * go to working dir;
 cd ../..;
-cd $output ;
+cd Output/GAUTENG/gradplots_placebo;
 
 * regression dummies;
 gen post =  mo2con>=0;
@@ -75,17 +69,6 @@ drop if seller_name == "STADSRAAD VAN PRETORIA";
 
 * data subset for regs;
 
-/*
-       cluster_placebo != 1025 & 
-       cluster_placebo != 1036 & 
-       cluster_placebo != 1201 & 
-       cluster_placebo != 1205 & 
-       cluster_placebo != 1215 & 
-       cluster_placebo != 1220 & 
-       cluster_placebo != 1264  
-*/
-
-
 global ifregs = "
        purch_price > 2500 &
        purch_price < 6000000 &
@@ -94,9 +77,15 @@ global ifregs = "
        distance_placebo !=. &
        placebo_yr>2002 &
        placebo_yr!= . &
-       purch_yr > 2000  
+       purch_yr > 2000  & 
+       cluster_placebo != 1025 & 
+       cluster_placebo != 1036 & 
+       cluster_placebo != 1201 & 
+       cluster_placebo != 1205 & 
+       cluster_placebo != 1215 & 
+       cluster_placebo != 1220 & 
+       cluster_placebo != 1264  
        ";
-
 
 global iftsregs = "
        purch_price > 2500 &
@@ -110,26 +99,22 @@ global iftsregs = "
        sixmonths > 0 &
        ";
 
-
 * distance regression;
 reg lprice b$max.dists_placebo#b0.post i.purch_yr#i.purch_mo i.cluster_placebo erf*  if $ifregs, cl(cluster_placebo);
 plotreg distplot distplot_placebo;
 
-* pause on;
-* pause;
+pause on;
+pause;
 
 * time regression;
 reg lprice b1001.mo2con_reg#b0.treat i.purch_yr#i.purch_mo i.cluster_placebo erf* if $ifregs, cl(cluster_placebo);
-plotreg timeplot timeplot_placebo;
+plotreg timeplot timeplot;
 
 /*
 * time-series regression;
 reg lprice i.sixmonths#b0.treat i.dists_rdp i.clust_placebo erf* if $iftsregs;
 plotreg timeseries timeseries_placebo;
 */
-
-
-ren cluster_placebo cluster;
 
 gen post2 = (mo2con>=0  & mo2con <=12);
 replace post2 = 2 if (mo2con> 12  & mo2con <=24); 
@@ -140,54 +125,24 @@ global treat2 = $treat/2;
 gen treat2 = distance_placebo <= $treat2;
 replace treat2 = 2 if distance_placebo > $treat2 & distance_placebo <= $treat;
 
-g post_1= post ==1;
-g post_2= post ==2;
-g post_1_treat = post_1*treat;
-g post_2_treat = post_2*treat;
+eststo clear;
 
-g treat2_1 = treat2==1;
-g treat2_2 = treat2==2;
+reg lprice i.post##i.treat i.purch_yr#i.purch_mo erf*  if $ifregs, cl(clust_placebo) r;
+eststo reg1;
 
-forvalues r=1/4 {;
-g post2_`r'=post2==`r';
-g post2_`r'_treat=post2_`r'*treat;
-};
+reg lprice i.post##i.treat i.purch_yr#i.purch_mo i.clust_placebo erf* if $ifregs, cl(clust_placebo) r;
+eststo reg2;
 
-forvalues r=1/2 {;
-forvalues z=1/2 {;
-g post_`r'_treat2_`z' = post_`r'*treat2_`z';
-};
-};
+reg lprice i.post2##i.treat i.purch_yr#i.purch_mo i.clust_placebo erf* if $ifregs, cl(clust_placebo) r;
+eststo reg3;
 
-lab var post_1_treat "3 yrs 0-400m";
-lab var lprice "Log Price";
- 
-lab var post2_1_treat "1st yr 0-400m";
-lab var post2_2_treat "2nd yr 0-400m";
-lab var post2_3_treat "3rd yr 0-400m";
+reg lprice i.post##i.treat2 i.purch_yr#i.purch_mo i.clust_placebo erf* if $ifregs, cl(clust_placebo) r;
+eststo reg4;
 
-lab var post_1_treat2_1 "3 yrs 0-200m";
-lab var post_1_treat2_2 "3 yrs 200-400m";
+esttab reg1 reg2 reg3 reg4 using gradient_regressions_placebo,
+keep(*post* *treat*) 
+replace nodep nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+   compress;
 
-local table_name "gradient_regressions_placebo.tex";
-
-reg lprice  post_1_treat  post_1 post_2 treat post_2_treat  i.purch_yr#i.purch_mo erf*  if $ifregs, cl(cluster) r;
-       outreg2 using "`table_name'", label  tex(frag) 
-replace addtext(Project FE, NO, Year-Month FE, YES) keep(post_1_treat) nocons 
-addnote("All control for cubic in plot size.  Standard errors are clustered at the project level.");
-
-reg lprice  post_1_treat  post_1 post_2 treat post_2_treat i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster) r;
-       outreg2 using "`table_name'", label  tex(frag) 
-append addtext(Project FE, YES, Year-Month FE, YES) keep(post_1_treat) nocons ;
-
-reg lprice post2_1 post2_2 post2_3 post2_4 treat post2_1_treat post2_2_treat post2_3_treat post2_4_treat i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster) r;
-       outreg2 using "`table_name'", label  tex(frag) 
-append addtext(Project FE, YES, Year-Month FE, YES) keep(post2_1_treat post2_2_treat post2_3_treat) nocons
-sortvar(post_1_treat) ;
-
-reg lprice post_1_treat2_1 post_1_treat2_2 post_2_treat2_1 post_2_treat2_2 treat2_1 treat2_2 post_1 post_2 i.purch_yr#i.purch_mo i.cluster erf*  if $ifregs, cl(cluster) r;
-       outreg2 using "`table_name'", label  tex(frag) 
-append addtext(Project FE, YES, Year-Month FE, YES) keep(post_1_treat2_1 post_1_treat2_2) nocons 
-sortvar(post_1_treat);
-
-exit, STATA clear; 
+* exit stata;
+*exit, STATA clear; 

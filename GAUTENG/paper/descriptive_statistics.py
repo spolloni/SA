@@ -20,18 +20,6 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
-### PUT FINAL CLUSTER IDs INTO SQL DATABASE
-
-def final_clusters():
-    con = sql.connect(db)
-    ids = pd.read_csv(gendata+'temp/clusterIDs.csv')
-    ids.to_sql('final_clusters',con,if_exists='replace')
-    con.commit()
-    con.close()
-    return    
-
-final_clusters()
-
 
 
 ### MAKE A TEMP TABLE TO KNOW WHICH ERVEN ARE IN PLACEBOS!
@@ -68,7 +56,7 @@ def erven_in_placebo():
     con.execute("CREATE INDEX e_i_pb ON erven_in_placebo_buffer (property_id);")
     con.close()
 
-# erven_in_placebo()
+erven_in_placebo()
 
 
 
@@ -208,7 +196,7 @@ def share_during_mode_year():
 
 
 
-# share_during_mode_year()
+#    share_during_mode_year()
 
 # count_ghs()
 

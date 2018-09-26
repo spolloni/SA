@@ -1,32 +1,6 @@
 \begin{table}
-\centering
-\caption{Housing Project Descriptives}\label{table:projectdescriptives}
-\input{figures/project_joint_table}\\
-Density measures number structures per $\text{km}^2$. \\  Central Business Districts (CBD) are measured with respect to Johannesburg and Tshwane.
-\end{table}
-\efloatseparator
- 
-\begin{table}
-\caption{Property Prices within Buffer Areas}\label{table:pricedescriptives}
-\centering
-\input{figures/descriptive_table} \\
-Standard errors are in parentheses.  \\ This figure excludes transactions within project areas.
-\end{table}
-\efloatseparator
- 
-\begin{table}
-\caption{Census Characteristics in 2001 \\ by Overlap with Project Areas}\label{table:censusdescriptives}
-\centering
-\input{figures/census_hh_table} \\
-All variables are dummies for having each household attribute.
-\end{table}
-\efloatseparator
- 
-\begin{table}
-\centering
-\caption{Assessing Name Matching between \\Budget and Spatial Administrative Data}\label{table:stringmatch}
-\input{figures/string_match} \\
-Density is measured in structures per $\text{km}^{2}$.
+\caption{Descriptive Statistics for Transaction Data}\label{table:descriptives}
+\input{figures/descriptive_test}
 
 \end{table}
 \efloatseparator

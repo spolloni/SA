@@ -1,0 +1,121 @@
+\begin{thebibliography}{15}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Cattaneo et~al.(2009)Cattaneo, Galiani, Gertler, Martinez, and
+  Titiunik]{cattaneo2009housing}
+M.~D. Cattaneo, S.~Galiani, P.~J. Gertler, S.~Martinez, and R.~Titiunik.
+\newblock Housing, health, and happiness.
+\newblock \emph{American Economic Journal: Economic Policy}, 1\penalty0
+  (1):\penalty0 75--105, 2009.
+
+\bibitem[{Department of Human Settlements}(2004)]{bng}
+{Department of Human Settlements}.
+\newblock Breaking new ground: A comprehensive plan for the development of
+  sustainable human settlements.
+\newblock Technical report, 2004.
+\newblock URL
+  \url{http://abahlali.org/files/Breaking%20new%20ground%20New_Housing_Plan_Cabinet_approved_version.pdf}.
+
+\bibitem[{Department of Human Settlements}(2012,2015)]{dhsreports}
+{Department of Human Settlements}.
+\newblock Annual reports.
+\newblock Technical report, 2012,2015.
+\newblock URL \url{http://www.dhs.gov.za/content/annual-reports}.
+
+\bibitem[Devoto et~al.(2012)Devoto, Duflo, Dupas, Parient{\'e}, and
+  Pons]{devoto2012happiness}
+F.~Devoto, E.~Duflo, P.~Dupas, W.~Parient{\'e}, and V.~Pons.
+\newblock Happiness on tap: piped water adoption in urban morocco.
+\newblock \emph{American Economic Journal: Economic Policy}, 4\penalty0
+  (4):\penalty0 68--99, 2012.
+
+\bibitem[Diamond and McQuade(2016)]{diamond2016wants}
+R.~Diamond and T.~McQuade.
+\newblock Who wants affordable housing in their backyard? an equilibrium
+  analysis of low income property development.
+\newblock Technical report, National Bureau of Economic Research, 2016.
+
+\bibitem[Dlmini(2017)]{protest}
+P.~Dlmini.
+\newblock R95m down the tubes as housing project picked apart brick by brick.
+\newblock 2017.
+\newblock URL
+  \url{https://www.timeslive.co.za/news/south-africa/2017-09-12-r95m-down-the-tubes-as-housing-project-picked-apart-brick-by-brick/}.
+
+\bibitem[Durojaye et~al.(2013)Durojaye, Mirugi-Mukundi, Munshi, and
+  Tissington]{seriq}
+E.~Durojaye, G.~Mirugi-Mukundi, N.~Munshi, and K.~Tissington.
+\newblock Jumping the queue, waiting lists and other myths: Perceptions and
+  practice around housing demand and allocation in south africa.
+\newblock Technical report, Socio-Economic Rights Institute of South Africa,
+  Community Law Centre University of the Western Cape, 2013.
+\newblock URL
+  \url{http://www.seri-sa.org/images/Jumping_the_Queue_MainReport_Jul13.pdf}.
+
+\bibitem[Franklin(2016)]{franklin2016enabled}
+S.~Franklin.
+\newblock Enabled to work: the impact of government housing on slum dwellers in
+  south africa.
+\newblock 2016.
+
+\bibitem[Galiani et~al.(2017)Galiani, Gertler, Undurraga, Cooper,
+  Mart{\'\i}nez, and Ross]{galiani2017shelter}
+S.~Galiani, P.~J. Gertler, R.~Undurraga, R.~Cooper, S.~Mart{\'\i}nez, and
+  A.~Ross.
+\newblock Shelter from the storm: Upgrading housing infrastructure in latin
+  american slums.
+\newblock \emph{Journal of Urban Economics}, 98:\penalty0 187--213, 2017.
+
+\bibitem[Marx et~al.(2013)Marx, Stoker, and Suri]{10.1257/jep.27.4.187}
+B.~Marx, T.~Stoker, and T.~Suri.
+\newblock The economics of slums in the developing world.
+\newblock \emph{Journal of Economic Perspectives}, 27\penalty0 (4):\penalty0
+  187--210, November 2013.
+\newblock \doi{10.1257/jep.27.4.187}.
+\newblock URL \url{http://www.aeaweb.org/articles?id=10.1257/jep.27.4.187}.
+
+\bibitem[Mathoho(2010)]{casestudytinazonke}
+M.~Mathoho.
+\newblock A case study of participation in the thinasonke ext 4 fedup pledge
+  project.
+\newblock 2010.
+\newblock URL
+  \url{http://www.planact.org.za/participation-and-development-from-the-perspective-of-the-poor-2008-2009/}.
+
+\bibitem[Matsena(2018)]{resale}
+D.~Matsena.
+\newblock Premier launches rdp housing project in north.
+\newblock 2018.
+\newblock URL
+  \url{https://rekordnorth.co.za/121824/premier-launches-rdp-housing-project-in-north/}.
+
+\bibitem[Takeuchi et~al.(2008)Takeuchi, Cropper, and
+  Bento]{takeuchi2008measuring}
+A.~Takeuchi, M.~Cropper, and A.~Bento.
+\newblock Measuring the welfare effects of slum improvement programs: The case
+  of mumbai.
+\newblock \emph{Journal of Urban Economics}, 64\penalty0 (1):\penalty0 65--84,
+  2008.
+
+\bibitem[Tissington(2011)]{serihistory}
+K.~Tissington.
+\newblock A resource guide to housing in south africa 1994-2010: Legislation,
+  policy, programmes and practice.
+\newblock Technical report, Socio-Economic Rights Institute of South Africa,
+  2011.
+\newblock URL
+  \url{https://www.seri-sa.org/images/stories/SERI_Housing_Resource_Guide_Feb11.pdf}.
+
+\bibitem[{United Nations}(2015)]{mdg}
+{United Nations}.
+\newblock Annex millennium development goals, targets and indicators, 2015:
+  statistical tables.
+\newblock 2015.
+\newblock URL
+  \url{http://mdgs.un.org/unsd/mdg/Resources/Static/Products/Progress2015/StatAnnex.pdf}.
+
+\end{thebibliography}

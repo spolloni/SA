@@ -19,10 +19,9 @@ gendata = project + 'Generated/GAUTENG/'
 figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
-
+shp = project + 'Raw/GIS/centroids.shp'
 
 def cbd_gen():
-    shp = project + 'Raw/GIS/centroids.shp'
     con = sql.connect(db)
     cur = con.cursor()
     con.enable_load_extension(True)

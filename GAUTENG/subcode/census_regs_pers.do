@@ -9,11 +9,6 @@ set maxvar 32767
 *  CENSUS REGS   *;
 ******************;
 
-* global output = "Output/GAUTENG/censusregs" ;
-* global output = "Code/GAUTENG/paper/figures" ;
-global output = "Code/GAUTENG/presentations/presentation_lunch";
-
-
 * PARAMETERS;
 global area = .3;
 
@@ -22,7 +17,6 @@ global LOCAL = 1;
 
 * MAKE DATASET?;
 global DATA_PREP = 0;
-
 
 if $LOCAL==1 {;
 	cd ..;
@@ -134,8 +128,44 @@ cd ../..;
 cd Output/GAUTENG/censusregs;
 
 global ifsample = "
-  (cluster < 1000 & frac1>.5 & mode_yr>2002 )
-  |(cluster >= 1009 & placebo_yr!=. & placebo_yr > 2002 )
+  (cluster < 1000 & frac1>.5 & mode_yr>2002 &
+    cluster != 1   &
+    cluster != 23  &
+    cluster != 72  &
+    cluster != 132 &
+    cluster != 170 &
+    cluster != 171 )
+  |(cluster >= 1009 & placebo_yr!=. & placebo_yr > 2002 &
+    cluster != 1013 &
+    cluster != 1019 &
+    cluster != 1046 &
+    cluster != 1071 &
+    cluster != 1074 &
+    cluster != 1075 &
+    cluster != 1078 &
+    cluster != 1079 &
+    cluster != 1084 &
+    cluster != 1085 &
+    cluster != 1092 &
+    cluster != 1095 &
+    cluster != 1117 &
+    cluster != 1119 &
+    cluster != 1125 &
+    cluster != 1126 &
+    cluster != 1127 &
+    cluster != 1164 &
+    cluster != 1172 &
+    cluster != 1185 &
+    cluster != 1190 &
+    cluster != 1202 &
+    cluster != 1203 &
+    cluster != 1218 &
+    cluster != 1219 &
+    cluster != 1220 &
+    cluster != 1224 &
+    cluster != 1225 &
+    cluster != 1230 &
+    cluster != 1239)
   ";
 
 * group definitions;
@@ -155,18 +185,9 @@ gen post   = (year==2011);
 gen treat  = (cluster<1000);
 gen ptreat = post*treat; 
 
-* employment;
-gen unemployed = .;
-replace unemployed = 1 if employment ==2;
-replace unemployed = 0 if employment ==1;
-
-lab var unemployed "Unemployed";
-
 * schooling;
 gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
 gen schooling_hschool = (education>=0 & education<=12) if !missing(education);
-lab var schooling_hschool "Over HS Educ." ;
-replace schooling_hschool=. if unemployed==.;
 
 * race;
 gen black = (race==1) if !missing(race);
@@ -187,55 +208,50 @@ replace inc_value = 153600 if income ==11;
 replace inc_value = 307200 if income ==12;
 gen inc_value_earners = inc_value ;
 replace inc_value_earners = . if inc_value==0;
-lab var inc_value_earners "HH Income";
+
+* employment;
+gen unemployed = .;
+replace unemployed = 1 if employment ==2;
+replace unemployed = 0 if employment ==1;
 
 
-g gr_1=gr==1;
-lab var gr_1 "Project Area";
+eststo clear;
+areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster); 
+eststo reg1;
+*areg inc_value 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg2;
+areg inc_value_earners 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg3;
+areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+eststo reg4;
+*areg black 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg5;
+*areg age 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr if $ifsample , a(cluster) cl(cluster);
+*eststo reg6;
 
-g gr_2=gr==2;
-lab var gr_2 "Spillover";
+esttab reg1 reg3 reg4 using census_DD_pers_sample,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress; 
 
-g gr_1_treat = gr_1*treat;
-lab var gr_1_treat "Project X Complete";
+eststo clear;
+areg schooling_hschool 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+eststo reg1;
+*areg inc_value 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+*eststo reg2;
+areg inc_value_earners 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster);
+eststo reg3;
+areg unemployed 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr , a(cluster) cl(cluster); 
+eststo reg4;
+*areg black 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr, a(cluster) cl(cluster);
+*eststo reg5;
+*areg age 1.ptreat#i.gr 1.post#i.gr 1.treat#i.gr i.gr, a(cluster) cl(cluster);
+*eststo reg6;
 
-g gr_2_treat = gr_2*treat;
-lab var gr_2_treat "Spillover X Complete";
-
-g gr_1_post = gr_1*post;
-lab var gr_1_post "Project X Post";
-
-g gr_2_post = gr_2*post;
-lab var gr_2_post "Spillover X Post";
-
-g gr_1_post_treat = gr_1*post*treat;
-lab var gr_1_post_treat "Project X Post X Complete";
-
-g gr_2_post_treat = gr_2*post*treat;
-lab var gr_2_post_treat "Spillover X Post X Complete";
-
-
-
-global vars "  gr_1_post_treat gr_2_post_treat  gr_1_post gr_2_post gr_2_treat gr_2 ";
-global outcomes "inc_value_earners unemployed";
-order $vars;
-
-local table_name "census_DD_pers_sample.tex";
-
-areg schooling_hschool $vars if $ifsample , a(cluster) cl(cluster);
-       outreg2 using "`table_name'", label  tex(frag) 
-replace addtext(Project FE, YES) keep(gr_*) 
-addnote("Standard errors are clustered at the project level.");
-
-foreach var of varlist $outcomes {;
-areg `var' $vars if $ifsample , a(cluster) cl(cluster);
-       outreg2 using "`table_name'", label  tex(frag) 
-append addtext(Project FE, YES) keep(gr_*) ;
-};
-
-exit STATA, clear;
-
-
+esttab reg1 reg3 reg4 using census_DD_pers,
+keep(*ptreat*) 
+replace nomti depvars b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex star(* 0.10 ** 0.05 *** 0.01)
+compress;
 
 
 

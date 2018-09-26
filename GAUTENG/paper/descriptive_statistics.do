@@ -124,12 +124,10 @@ prog descriptive_sample;
     save "Generated/GAUTENG/temp/sample_key_rdp.dta", replace ;
 
     *** GET PLACEBOS FROM PLACEBO PRICE REGRESSION;
-    global msiz  = 5;    /* minimum obs per cluster            */
+    global msiz  = 100;    /* minimum obs per cluster            */
     use "Generated/GAUTENG/gradplot_placebo.dta", clear;
     drop if seller_name == "STADSRAAD VAN PRETORIA";
-  * global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000  &  cluster_placebo != 1025 &  cluster_placebo != 1036 &  cluster_placebo != 1201 &   cluster_placebo != 1205 &   cluster_placebo != 1215 &    cluster_placebo != 1220 &   cluster_placebo != 1264   ";
-    global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000 ";
-
+    global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000  &  cluster_placebo != 1025 &  cluster_placebo != 1036 &  cluster_placebo != 1201 &   cluster_placebo != 1205 &   cluster_placebo != 1215 &    cluster_placebo != 1220 &   cluster_placebo != 1264   ";
     keep if $ifregs==1;
     ren cluster_placebo cluster;
     keep property_id  cluster;
@@ -178,7 +176,7 @@ prog descriptive_sample;
 
     *** GENERATE PROJECT LEVEL TEMP TABLE project_sample.dta;
     local qry = "
-      SELECT PC.cluster, PC.formal_pre, PC.formal_post, PC.informal_pre, PC.informal_post, PC.placebo_yr, 0 AS frac1, 0 AS frac2, C.cbd_dist  
+      SELECT PC.cluster, PC.formal_pre, PC.formal_post, PC.informal_pre, PC.informal_post, PC.placebo_yr, 0 AS frac1, 0 AS frac2, C.cbd_dist 
       FROM placebo_conhulls AS PC
       LEFT JOIN cbd_dist AS C ON PC.cluster = C.cluster
       UNION 
@@ -218,9 +216,7 @@ program write_descriptive_table;
     forvalues r=1/$cat_num {;
     file write newfile  "c";
     };
-    file write newfile "}" _n   " & Completed & Uncompleted & Other  \\" _n ;
-
-    print_blank;
+    file write newfile "}" _n "\toprule" _n   " & Completed & Uncompleted & Other  \\" _n ;
 
     *** HERE ARE THE MAIN VARIABLES ;
     print_2 "Purchase Price (Rand)" purch_price "mean" "%10.1fc"   ;
@@ -283,8 +279,8 @@ program write_census_hh_table;
     g rdp=hulltype=="rdp";
         global cat1="keep if area_int>.3 & rdp==1 " ;
         global cat2="keep if area_int>.3 & rdp==0 " ;
-        global cat3="keep if area_int<.3 & rdp==1 " ;
-        global cat4="keep if area_int<.3 & rdp==0 " ;           
+        global cat3="keep if area_int<.3 & distance<=400 & rdp==1 " ;
+        global cat4="keep if area_int<.3 & distance<=400 & rdp==0 " ;           
         global cat_num=4;
   
     file open newfile using "`1'", write replace;
@@ -306,35 +302,30 @@ program write_census_hh_table;
       time_gen electric_cooking;
     gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);  
       time_gen electric_lighting;
-    gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
-      time_gen owner;
+    *gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001);
+    *  time_gen owner;
     gen house = dwelling_typ==1;
       time_gen house;
-    gen rooms  = tot_rooms if tot_rooms<=10;
+    gen rooms  = tot_rooms if tot_rooms<=12;
       time_gen rooms;
-    gen hhsize = hh_size if hh_size<=10;
-      time_gen hhsize;
-    bys sal_code: gen small_areas = _n==1;
 
     *** HERE ARE THE MAIN VARIABLES ;
     print_1 "Flush Toilet" toilet_flush_pre "mean" "%10.2fc"   ;    
-    *  print_blank;
+      print_blank;
     print_1 "Piped Water" water_inside_pre    "mean" "%10.2fc"   ;
-    *  print_blank;
-    print_1 "Owner" owner_pre       "mean" "%10.2fc"   ;
+      print_blank;
+    *print_1 "Owner" owner_pre       "mean" "%10.2fc"   ;
     *  print_blank;
     print_1 "Elec. Cooking" electric_cooking_pre     "mean" "%10.2fc"   ;
-    *  print_blank;   
+      print_blank;   
     print_1 "Elec. Light" electric_lighting_pre     "mean" "%10.2fc"   ;
-    *  print_blank;   
+      print_blank;   
     print_1 "Single House" house_pre       "mean" "%10.2fc"   ;
+      print_blank;
+    *print_1 "Number of Rooms" rooms_pre      "mean" "%10.2fc"   ;
     *  print_blank;
-    print_1 "Number of Rooms" rooms_pre      "mean" "%10.2fc"   ;
-    *  print_blank;
-    print_1 "Household Size" hhsize_pre     "mean" "%10.2fc"   ;
     file write newfile "\midrule" _n;
-        print_1 "Census Blocks" small_areas "sum" "%10.0fc" ;
-        print_1 "Households" water_inside_pre "N" "%10.0fc" ;
+        print_1 Observations water_inside_pre "N" "%10.0fc" ;
     file write newfile "\bottomrule" _n "\end{tabu}" _n;
     file close newfile;
 end;
@@ -440,25 +431,25 @@ end;
 
 ***** IMPlEMENT PROGRAMS ***** ;
 
-*descriptive_sample;
+descriptive_sample;
 
-*write_string_match "${figures}string_match.tex";
-*write_string_match "${present}string_match.tex";
+* write_string_match "${figures}string_match.tex";
+write_string_match "${present}string_match.tex";
 
-write_census_hh_table "${figures}census_hh_table.tex";
-*write_census_hh_table "${present}census_hh_table.tex";
+* write_census_hh_table "${figures}census_hh_table.tex";
+write_census_hh_table "${present}census_hh_table.tex";
 
-*write_project_joint_table "${figures}project_joint_table.tex"; 
-*write_project_joint_table "${present}project_joint_table.tex";
+* write_project_joint_table "${figures}project_joint_table.tex"; 
+write_project_joint_table "${present}project_joint_table.tex";
 
-*write_descriptive_table "${figures}descriptive_table.tex";
-*write_descriptive_table "${present}descriptive_table.tex";
+* write_descriptive_table "${figures}descriptive_table.tex";
+write_descriptive_table "${present}descriptive_table.tex";
 
-*write_price_histogram "${figures}price_histogram.pdf";
-*write_price_histogram "${present}price_histogram.pdf";
+* write_price_histogram "${figures}price_histogram.pdf";
+write_price_histogram "${present}price_histogram.pdf";
 
-*write_biggest_sellers "${figures}biggest_sellers_table.tex";
-*write_biggest_sellers "${present}biggest_sellers_table.tex";
+* write_biggest_sellers "${figures}biggest_sellers_table.tex";
+write_biggest_sellers "${present}biggest_sellers_table.tex";
 
 
 

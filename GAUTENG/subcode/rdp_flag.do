@@ -95,9 +95,6 @@ local tresh = `r(mean)' + 6*`r(sd)';
 gen big_seller_rdp = (nn > `tresh' & seller_name != "" & gov!=1);
 drop n nn;
 
-pause on;
-pause;
-
 * indicate RDP (multiple definitions);
 gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
 gen rdp_never = (rdp==0);
@@ -139,14 +136,13 @@ drop rdp;
 ************************;
 * close and push to DB *;
 ************************;
-
-*odbc exec("DROP TABLE IF EXISTS rdp;"), dsn("gauteng");
-*odbc insert, table("rdp") create;
-*odbc exec("CREATE INDEX trans_ind_rdp ON rdp (trans_id);"), dsn("gauteng");
-*odbc exec("CREATE INDEX prop_ind_rdp ON rdp (property_id);"), dsn("gauteng");
-*odbc exec("CREATE INDEX rdp_all_ind_rdp ON rdp (rdp_all);"), dsn("gauteng");
-*odbc exec("CREATE INDEX rdp_gcroonly_ind_rdp ON rdp (rdp_gcroonly);"), dsn("gauteng");
-*odbc exec("CREATE INDEX rdp_notownship_ind_rdp ON rdp (rdp_notownship);"), dsn("gauteng");
-*odbc exec("CREATE INDEX rdp_phtownship_ind_rdp ON rdp (rdp_phtownship);"), dsn("gauteng");
-*exit, STATA clear;  
+odbc exec("DROP TABLE IF EXISTS rdp;"), dsn("gauteng");
+odbc insert, table("rdp") create;
+odbc exec("CREATE INDEX trans_ind_rdp ON rdp (trans_id);"), dsn("gauteng");
+odbc exec("CREATE INDEX prop_ind_rdp ON rdp (property_id);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_all_ind_rdp ON rdp (rdp_all);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_gcroonly_ind_rdp ON rdp (rdp_gcroonly);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_notownship_ind_rdp ON rdp (rdp_notownship);"), dsn("gauteng");
+odbc exec("CREATE INDEX rdp_phtownship_ind_rdp ON rdp (rdp_phtownship);"), dsn("gauteng");
+exit, STATA clear;  
 
