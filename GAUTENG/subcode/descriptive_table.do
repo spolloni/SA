@@ -10,15 +10,17 @@ global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 global LOCAL = 1;
 
+** prints two tables 1) pre_descriptives.tex  2) pre_descriptives_census.tex ;
+
+** set these equal to one to prep temporary datasets to make tables ;
 global census_prep = 0;
 global gcro_prep   = 0;
 global price_prep  = 0;
 global bblu_prep   = 0;
 
-global bblu_alt = 0;
 
-global census_int  = .5;
 
+global census_int  = .33;
 global size     = 50;
 
 if $LOCAL==1 {;
@@ -27,13 +29,13 @@ if $LOCAL==1 {;
 
 cap program drop ttesting;
 prog define ttesting;
-	preserve;
-		egen `1'_T=mean(`1'), by(cluster rdp);
-		duplicates drop cluster rdp, force;
+	egen `1'_T=mean(`1'), by(cluster rdp);
+	replace `1'_T = . if cn!=1;
+	sort cluster rdp;
 	qui ttest `1'_T, by(rdp);
-	restore;
 	g `1'_ttest = `=r(t)';
-	ren `1' `1'_id;
+	ren `1'_T `1'_id;
+	drop `1';
 	egen `1'=mean(`1'_id), by(rdp);
 	drop `1'_id;
 end;
@@ -41,6 +43,7 @@ end;
 
 cap program drop ttesting_nocluster;
 prog define ttesting_nocluster;
+	sort rdp;
 	qui ttest `1', by(rdp);
 	g `1'_ttest = `=r(t)';
 	ren `1' `1'_id;
@@ -114,12 +117,18 @@ if $census_prep == 1 {;
 		egen pop = sum(o), by(area_code);
 		g density = pop/area; 
 		replace density = . if a_n!=1;
+		sum density, detail;
+		replace density = . if density>`=r(p99)';
 		lab var density "Households per m2";
 
 		egen pop_n = sum(hh_size), by(area_code);
 		g density_n = pop_n/area;
 		replace density_n = . if a_n!=1;
+		sum density_n, detail;
+		replace density_n = . if density_n>`=r(p99)';
 		lab var density_n "People per m2";
+
+		bys cluster rdp: g cn=_n;
 
 		  foreach v in $census_vars {;
 		  ttesting `v';
@@ -188,6 +197,8 @@ if $price_prep == 1 {;
 
 		g rdp = distance_rdp<0;
 
+		bys cluster rdp: g cn=_n;
+
 		ttesting purch_price;
 
 		duplicates drop rdp, force;
@@ -197,7 +208,7 @@ if $price_prep == 1 {;
 };
 
 
-if $bblu_prep == 1 {;
+*if $bblu_prep == 1 {;
 	*** Pre building density in Uncompleted and Completed Areas *** ;
 	global bblu_vars = "inf for total_buildings";
 	 
@@ -210,10 +221,13 @@ if $bblu_prep == 1 {;
 
 	g rdp = distance_rdp<0;
 
+	bys cluster rdp: g cn=_n;
+
+	sort rdp;
+
 	foreach v in $bblu_vars {;
 	ttesting `v';
 	};
-
 
 	  duplicates drop rdp, force;
 	  keep rdp $bblu_vars *_ttest ;
@@ -222,57 +236,6 @@ if $bblu_prep == 1 {;
 
 
 
-if ${bblu_alt}==1   { ;
-	*** Pre building density in Uncompleted and Completed Areas *** ;
-	global bblu_vars = "inf for total_buildings";
-	 
-	use bbluplot_admin_pre.dta, clear;
-
-	  g for    = s_lu_code == "7.1";
-	  g inf    = s_lu_code == "7.2";
-	  g total_buildings = for + inf ;
-
-	  replace distance_placebo =. if con_mo_placebo<515 | con_mo_placebo==.;
-	  replace cluster_placebo  =. if con_mo_placebo<515 | con_mo_placebo==.;
-	  replace distance_rdp =. if con_mo_rdp<515 | con_mo_rdp==.;
-	  replace cluster_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
-
-	  replace distance_placebo =. if area < .5;
-	  replace cluster_placebo  =. if area < .5;
-	  drop if distance_rdp ==. & distance_placebo ==. ;
-	  drop if cluster_rdp ==. & cluster_placebo ==. ;
-
-	keep if cluster_int_rdp!=. | cluster_int_placebo!=.;
-
-
-	g cluster = cluster_int_rdp;
-	replace cluster = cluster_int_placebo if cluster==. & cluster_int_placebo!=.;
-
-	g rdp = cluster_int_rdp!=.;
-
-
-	  foreach v in $bblu_vars  {;
-	  ren `v' `v'_id;
-	  egen `v' = sum(`v'_id), by(cluster rdp);
-	  replace `v' = `v';
-	  drop `v'_id;
-	  };
-
-	  duplicates drop cluster, force;
-  
-	  foreach v in $bblu_vars  {;
-		qui ttest `v', by(rdp);
-		g `v'_ttest = `=r(t)';
-	  };
-
-
-	  duplicates drop rdp, force;
-	  keep rdp $bblu_vars *_ttest ;
-	save dtable_pre_build_alt.dta, replace;
-};
-
-
-	
 cap program drop tables;
 program define tables `1' `2' `3' `4' `5';
 	file open fi using "`1'.tex", write replace;
@@ -357,17 +320,12 @@ append using dtable_pre_gcro.dta;
 append using dtable_pre_price.dta;
 append using dtable_pre_build.dta;
 
-
-
 * go to working dir;
 cd ../..;
 cd $output ;
 
-
 expand 20;
 
-
-** separate tables: then second! ;
 
 
 	** 1 **;
@@ -412,7 +370,7 @@ preserve;
 	replace temp = "Population (per km)" 	in 2;
 	replace temp = "Informal Buildings (per km)" 		in 3;
 	replace temp = "Formal Buildings (per km)" 			in 4;
-	replace temp = "Price (Rand)" 			in 5;
+	replace temp = "Purchase Price (Rand)" 			in 5;
 	replace temp = "Project House Density (per km)" 		in 6;
 	replace temp = "Number of Projects" 	in 7;
 
@@ -422,8 +380,6 @@ preserve;
 		
 restore;
 
-
-/*
 
 	** 2 **;
 	******************************************;
