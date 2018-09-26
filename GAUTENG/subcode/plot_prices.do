@@ -74,9 +74,9 @@ global ifregs = "
 
 * what to run?;
 global dist_regs = 0;
-global time_regs = 1;
-global dd_reg_joined = 0;
-global ddd_regs = 0;
+global time_regs = 0;
+global dd_regs = 0;
+global ddd_regs = 1;
 
 * load data; 
 cd ../..;
@@ -189,7 +189,7 @@ end;
 *dummy construction;
 gen dreg_long_placebo = 0;
 gen dreg_long_rdp = 0;
-levelsof dists_joined;
+levelsof dists_rdp;
 foreach level in `r(levels)' {;
 
   gen dreg_`level'_pre_placebo  = (dists_placebo == `level' & prepost_reg_placebo==0);
@@ -283,7 +283,6 @@ end;
 gen dreg_far_rdp = 0;
 gen dreg_far_placebo = 0;
 levelsof mo2con_reg_rdp;
-
 foreach level in `r(levels)' {;
   
   gen dreg_`level'_treat_placebo  = (mo2con_reg_placebo == `level' & treat_placebo==1);
@@ -319,33 +318,139 @@ plotcoeffs_time placebo time_plot_placebo;
 *****************************************************************;
 *****************************************************************;
 
+*****************************************************************;
+*******************   DD REGRESSIONS  ***************************;
+*****************************************************************;
+if $dd_regs ==1 {;
 
-/*
+* program for plotting;
+cap program drop plotcoeffs_DD;
+program plotcoeffs_DD;
+  preserve;
+
+    parmest, fast;  
+
+    * grab continuous var from varname;
+    destring parm, gen(contin) i(dreg_ treat placebo rdp .) force;
+
+    * keep only coeffs to plot;
+    drop if contin == .;
+    drop if strpos(parm, "long") >0;
+    keep if strpos(parm, "treat") >0;
+
+    * dummy for post coeffs;
+    g rdp = regexm(parm,"rdp")==1;
+
+    *reaarrange continuous var;
+    drop if contin > 9000;
+    replace contin = -1*(contin - 1000) if contin>1000;
+    replace contin = $mbin*contin;
+    replace contin = cond(rdp==1, contin - 0.25, contin + 0.25);
+    sort contin;
+
+    * bounds for plot;
+    global lbound = 12*$twl;
+    global ubound = 12*($twu-1);
+
+    tw
+      (rcap max95 min95 contin if rdp ==0, lc(gs7) lw(thin) )
+      (rcap max95 min95 contin if rdp ==1, lc("206 162 97") lw(thin) )
+      (connected estimate contin if rdp ==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
+      (connected estimate contin if rdp ==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
+      xtitle("months to modal construction month",height(5))
+      ytitle("log-price coefficients",height(5))
+      xlabel(-$lbound(12)$ubound,labsize(small))
+      ylabel(-.4(.1).4,labsize(small))
+      xline(-6,lw(thin)lp(shortdash))
+      legend(order(3 "Uncompleted" 4 "Completed" ) 
+      ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(small) region(lwidth(none)))
+      note("`3'");
+
+      graphexportpdf `1', dropeps;
+
+  restore;
+end;
+
+*dummy construction;
+gen dreg_far_rdp = 0;
+gen dreg_far_placebo = 0;
+levelsof mo2con_reg_rdp;
+foreach level in `r(levels)' {;
+
+  gen dreg_`level'_rdp = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1));
+  gen dreg_`level'_rdp_treat = (mo2con_reg_rdp == `level' & treat_rdp==1);
+  replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' &  treat_rdp==2;
+
+  gen dreg_`level'_placebo = (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1));
+  gen dreg_`level'_placebo_treat = (mo2con_reg_placebo == `level' & treat_placebo==1);
+  replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' &  treat_placebo==2;      
+
+};
+
+foreach v in _rdp _placebo {;
+  replace dreg_far`v' = 1 if (dreg_9999`v'==1 | dreg_9999`v'_treat==1);
+  drop dreg_9999`v' dreg_9999`v'_treat;
+};
+
+* dummies global for regs;
+ds dreg* ;
+global dummies = "`r(varlist)'"; 
+omit dummies dreg_far_placebo dreg_far_rdp; 
+
+* REG MONKEY;
+*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+* plot coefficient;
+plotcoeffs_DD time_plot_DD;
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
 *****************************************************************;
 *************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
 *****************************************************************;
 if $ddd_regs ==1 {;
 
+*gen dreg_far_rdp = 0;
+*gen dreg_far_placebo = 0;
 gen dreg_far = 0;
 levelsof mo2con_reg_rdp;
 foreach level in `r(levels)' {;
 
-  gen  dreg_`level' = (mo2con_reg_joined == `level')*(treat_joined==0 | treat_joined==1);
-  gen  dreg_`level'_treat = (mo2con_reg_joined == `level')*(treat_joined==1);
-  gen  dreg_`level'_rdp = (mo2con_reg_joined == `level')*(placebo==0)*(treat_joined==0 | treat_joined==1);
-  gen  dreg_`level'_treat_rdp = (mo2con_reg_joined == `level')*(treat_joined==1)*(placebo==0);
+  gen  dreg_`level' = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1)) |
+                      (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1));
+  gen  dreg_`level'_treat = (mo2con_reg_rdp == `level' & treat_rdp==1) |
+                            (mo2con_reg_placebo == `level' & treat_placebo==1) ;
+  gen  dreg_`level'_rdp = (mo2con_reg_rdp == `level') & (treat_rdp==0 | treat_rdp==1);
+  gen  dreg_`level'_treat_rdp = (mo2con_reg_rdp == `level' & treat_rdp==1);
 
-  replace dreg_far = 1 if mo2con_reg_joined == `level' &  treat_joined==2;   
+  *replace dreg_far_rdp = 1 if (mo2con_reg_rdp == `level' & treat_rdp==2);
+  *replace dreg_far_placebo =1 if (mo2con_reg_placebo == `level' & treat_placebo==2);
 
+  replace dreg_far = 1 if dreg_`level' + dreg_`level'_treat
+            + dreg_`level'_rdp + dreg_`level'_treat_rdp == 0 ;
 };
+
+
+*replace dreg_far = 1 if 
+*  (dreg_9999 ==1 | dreg_9999_treat==1 | dreg_9999_rdp==1 | dreg_9999_treat_rdp==1);
+*drop dreg_9999 dreg_9999_treat dreg_9999_rdp dreg_9999_treat_rdp;
+
 
 * dummies global for regs;
 ds dreg_* ;
 global dummies = "`r(varlist)'"; 
-omit dummies dreg_far;
+*omit dummies dreg_0;
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+pause on;
+pause;
 
 * plot the coeffs;
 preserve;
@@ -387,74 +492,3 @@ graphexportpdf timeplot_admin_${treat}, dropeps;
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
-
-*****************************************************************;
-************* TIME REGRESSION SEPARATE PLACEBO-RDP  *************;
-*****************************************************************;
-if $time_reg_sep ==1 {;
-
-* associated regression dummies;
-foreach v in rdp placebo {;
-  levelsof mo2con_reg_`v';
-  foreach level in `r(levels)' {;
-    gen  dreg_`v'_`level' = (mo2con_reg_`v' == `level'); 
-    gen  dreg_`v'_`level'_treat = (mo2con_reg_`v' == `level')*treat_`v';       
-  };
-};
-
-* dummies global for regs;
-ds dreg_placebo_* dreg_rdp_*;
-global dummies = "`r(varlist)'"; 
-ommit dummies dreg_placebo_1001_treat ;
-
-reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo if $ifregs, cl(cluster_reg);
-
-* plot the coeffs;
-preserve;
-
-  parmest, fast;  
-
-  * grab continuous var from varname;
-  destring parm, gen(contin) i(dreg_ placebo rdp treat) force;
-
-  * keep only coeffs to plot;
-  drop if contin == .;
-  keep if strpos(parm,"treat") >0;
-
-  * dummy for placebo coeffs;
-  g placebo = regexm(parm,"placebo")==1;
-
-  *reaarrange continuous var;
-  drop if contin > 9000;
-  replace contin = -1*(contin - 1000) if contin>1000;
-  replace contin = $mbin*contin;
-  replace contin = cond(placebo==1, contin - 0.25, contin + 0.25);
-  sort contin;
-
-  * bounds for plot;
-  global lbound = 12*$twl;
-  global ubound = 12*($twu-1);
-
-  tw
-    (rcap max95 min95 contin if placebo==0, lc(gs0) lw(medthin) )
-    (rcap max95 min95 contin if placebo==1, lc(sienna) lw(medthin) )
-    (connected estimate contin if placebo==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
-    (connected estimate contin if placebo==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(medthin)),
-    xtitle("months to modal construction month",height(5))
-    ytitle("log-price coefficients",height(5))
-    xlabel(-$lbound(12)$ubound)
-    ylabel(-.4(.1).4,labsize(small))
-    xline(-3,lw(thin)lp(shortdash))
-    legend(order(3 "rdp" 4 "placebo") 
-    ring(0) position(5) bm(tiny) rowgap(small) 
-    colgap(small) size(medsmall) region(lwidth(none)))
-    note("`3'");
-
-restore;
-graphexportpdf timeplot_admin_${treat}, dropeps;
-
-};
-*****************************************************************;
-*****************************************************************;
-*****************************************************************;
-*/
