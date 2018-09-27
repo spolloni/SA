@@ -6,11 +6,13 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+
 global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 global LOCAL = 1;
 
 ** prints two tables 1) pre_descriptives.tex  2) pre_descriptives_census.tex ;
+
 
 ** set these equal to one to prep temporary datasets to make tables ;
 global census_prep = 0;
@@ -18,16 +20,14 @@ global gcro_prep   = 0;
 global price_prep  = 0;
 global bblu_prep   = 0;
 
-
-
-global census_int  = .33;
-global size     = 50;
+global census_int  = .33; /* intersection % between census areas and project areas*/
+global size     = 50; /* just for which bblu file to pull */
 
 if $LOCAL==1 {;
 	cd ..;
 };
 
-cap program drop ttesting;
+cap program drop ttesting; /* ttests are calculated between averages by cluster */
 prog define ttesting;
 	egen `1'_T=mean(`1'), by(cluster rdp);
 	replace `1'_T = . if cn!=1;
@@ -39,7 +39,6 @@ prog define ttesting;
 	egen `1'=mean(`1'_id), by(rdp);
 	drop `1'_id;
 end;
-
 
 cap program drop ttesting_nocluster;
 prog define ttesting_nocluster;
@@ -353,15 +352,10 @@ preserve;
 
 	matrix define PER=J(`num',1,0);
 
-	* put everything in kilometers ;
-
 	replace density_n = density_n*1000000;
-	*egen area1=max(area), by(rdp);
-	*replace inf = inf/area1; /* inf and for are in 50m2 bins */
-	*replace for = for/area1;
 
-	replace inf = inf*400;
-	replace for = for*400;
+	replace inf = inf*(1000000/($size*$size)); /* convert to km */
+	replace for = for*(1000000/($size*$size)); /* convert to km */
 
 
 
