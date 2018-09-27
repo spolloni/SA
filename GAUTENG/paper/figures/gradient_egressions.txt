@@ -1,0 +1,13 @@
+		(1)
+VARIABLES	LABELS	Log Price
+		
+post_1_treat	0-400m 3 yrs	-0.238**
+		(0.106)
+		
+Observations		28,701
+R-squared		0.229
+Project FE		NO
+Year-Month FE		YES
+Robust standard errors in parentheses		
+*** p<0.01, ** p<0.05, * p<0.1		
+Control for cubic in plot size.  Standard errors clustered at the project level.		

@@ -30,7 +30,7 @@ def gp2shp(db,qrys,geocol,out,espg):
     return
 
 
-def intersGEOM(db,dir,geom,hull,year):
+def intersGEOM(db,geom,hull,year):
 
     # connect to DB
     con = sql.connect(db)
@@ -38,10 +38,10 @@ def intersGEOM(db,dir,geom,hull,year):
     con.execute("SELECT load_extension('mod_spatialite');")
     cur = con.cursor()
 
-    cur.execute('DROP TABLE IF EXISTS {}_{}_int_{};'.format(hull,geom,year))
+    cur.execute('DROP TABLE IF EXISTS int_{}_{}_{};'.format(hull,geom,year))
 
     make_qry = '''
-               CREATE TABLE {}_{}_int_{} AS 
+               CREATE TABLE int_{}_{}_{} AS 
                SELECT A.{}_code, B.cluster, 
                st_area(st_intersection(A.GEOMETRY,B.GEOMETRY)) / st_area(A.GEOMETRY) AS area_int
                FROM {}_{} as A, {}_conhulls as B
@@ -51,7 +51,7 @@ def intersGEOM(db,dir,geom,hull,year):
                '''.format(hull,geom,year,geom,geom,year,hull,geom,year)
 
     index_qry = '''
-                CREATE INDEX {}_{}_int_{}_index ON {}_{}_int_{} ({}_code);
+                CREATE INDEX int_{}_{}_{}_index ON int_{}_{}_{} ({}_code);
                 '''.format(hull,geom,year,hull,geom,year,geom)
 
     cur.execute(make_qry)
@@ -206,7 +206,7 @@ def fetch_coordinates(db,hull):
 
 def fetch_data(db,dir,bufftype,hull,i):
 
-    distinct = ''
+    distinct = 'DISTINCT'
     if bufftype == 'reg': distinct = 'DISTINCT'
 
     if i=='BBLU_pre_buff':
@@ -286,16 +286,17 @@ def fetch_data(db,dir,bufftype,hull,i):
         if plygn == 'buff':  
  
             qry = ''' 
-                  SELECT {} st_x(st_centroid(e.GEOMETRY)) AS x, 
+                  SELECT st_x(st_centroid(e.GEOMETRY)) AS x, 
                          st_y(st_centroid(e.GEOMETRY)) AS y, e.{}_code,
-                         coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
-                         /st_area(e.GEOMETRY),0) AS area_int
+                         MAX(coalesce(st_area(st_intersection(e.GEOMETRY,h.GEOMETRY))
+                         /st_area(e.GEOMETRY),0)) AS area_int
                   FROM {}_{} AS e, {}_buffers_{} AS b
                   JOIN {}_conhulls AS h ON h.cluster = b.cluster  
                   WHERE e.ROWID IN (SELECT ROWID FROM SpatialIndex 
                           WHERE f_table_name = '{}_{}' AND search_frame=b.GEOMETRY)
                   AND st_within(st_centroid(e.GEOMETRY),b.GEOMETRY)
-                  '''.format(distinct,geom,geom,yr,hull,bufftype,hull,geom,yr)
+                  GROUP BY e.{}_code ;
+                  '''.format(geom,geom,yr,hull,bufftype,hull,geom,yr,geom)
 
         if plygn == 'hull':
 

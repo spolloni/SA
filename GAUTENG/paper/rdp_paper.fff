@@ -1,0 +1,89 @@
+\begin{figure}
+\caption{Top-Five Sellers}\label{figure:topfivesellers}
+\centering
+\input{figures/biggest_sellers_table}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Transaction Price Histogram}\label{figure:transactionhist}
+\centering
+\includegraphics[scale=1]{figures/price_histogram.pdf}\\
+Note: Transactions are censored at R100,000.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Convex Hull Example}\label{figure:conhull}
+\centering
+\includegraphics[scale=.5]{figures/convex_hull_v3_test.pdf}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Transaction Densities Relative to Modal Project Month}\label{figure:densitytime}
+\centering
+\includegraphics[scale=.5]{figures/summary_densitytime.pdf} \\
+The above panel includes transactions within a 1.2 kilometer buffer around a project cluster relative to the modal year of that cluster.  The below panel includes all transactions within the final sample of clusters.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Clusters and Administrative Project Boundaries}\label{figure:gcrooverlap}
+\centering
+\includegraphics[scale=.5]{figures/gcro_convexhull_overlap.pdf} \\
+This figure includes the northern half of housing projects.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Buffer Design Properties Example}\label{figure:bufferdesign}
+\centering
+\includegraphics[scale=.4]{figures/design.png}
+\begin{itemize}
+\item Project Properties : red circles
+\item Non-Project Properties : dark green circles
+\item Buffer Area (1.2 km from clusters) : light blue area
+\end{itemize}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Buffer Design Census Block Example}\label{figure:bufferdesigncensus}
+\centering
+\includegraphics[scale=.4]{figures/design_7.png}
+\begin{itemize}
+\item Census Blocks with $\geq$30\% project area overlap : yellow polygons
+\item Census Blocks with $<$30\% project area overlap : blue polygons
+\item Buffer Area (1.2 km from clusters) : dotted line
+\item Project Area : red polygon
+\end{itemize}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\caption{Growth in Structures between 2001 and 2011}\label{figure:buildingchanges}
+\centering
+\includegraphics[scale=.58]{figures/bbluplot.pdf}
+\includegraphics[scale=.58]{figures/bbluplot_placebo.pdf}\\
+\hspace{.7cm} Completed Projects \hspace{4.2cm} Uncompleted Projects
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/distplot.pdf}
+   \hfill
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/distplot_placebo.pdf}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/timeplot.pdf}
+   \hfill
+%\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/timeplot_placebo.pdf}
+
+\vspace{-3mm}
+\end{figure}
+\efloatseparator
+ 

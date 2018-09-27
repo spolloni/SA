@@ -1,7 +1,7 @@
 '''
 main.py
 
-    created by: sp, oct 9 2017
+    created by: wv, sept 4 2018
 
 '''
 
@@ -10,11 +10,13 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.spaclust import spatial_cluster, concavehull
-from subcode.placebofuns import make_gcro_placebo, import_budget
+from subcode.placebofuns import make_gcro, make_gcro_conhulls, import_budget, make_gcro_link
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
+from subcode.add_grid import bblu_xy, add_grid, add_grid_counts, grid_to_erven
+#from paper.descriptive_statistics import cbd_gen
+from subcode.distfuns_admin import dist, intersPOINT, areaGEOM
 
 import os, subprocess, shutil, multiprocessing, re, glob
 from functools import partial
@@ -49,6 +51,9 @@ workers = int(multiprocessing.cpu_count()-1)
 # SWITCHBOARD  # 
 ################
 
+dist_threshold  = 4000   # define neighborhood radius in meters
+hulls           = ['rdp','placebo'] 
+
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
 _1_c_IMPORT = 0  # import CENSUS
@@ -56,38 +61,23 @@ _1_d_IMPORT = 0  # import GCRO + landplots
 _1_e_IMPORT = 0  # import GHS
 
 _2_FLAGRDP_ = 0
+_3_GCRO_a_  = 0
+_3_GCRO_b_  = 0
 
-_3_CLUSTER_ = 0
-rdp  = 'all'     # Choose rdp definition. 
-algo = 1         # Algo for Cluster 1=DBSCAN, 2=HDBSCAM #1
-par1 = 700       # Parameter setting #1 for Clustering  #750,700                       
-par2 = 50        # Parametr setting #2 for Clustering  #77,50
-sig  = 3         # sigma factor for concave hulls
+_4_a_DISTS_ = 0  # buffers and hull creation
+_4_b_DISTS_ = 0  # ERVEN distance
+_4_c_DISTS_ = 0  # BBLU distance
+_4_d_DISTS_ = 0  # EA distance
+_4_e_DISTS_ = 0  # create x y table for BBLU
 
-_4_PLACEBO_ = 0 
-counts = {
-    'erven_rdp': '15', # upper-bound on rdp erven in project area 
-    'formal_pre': '99999', # upper-bound on pre formal structures in project area
-    'formal_post': '500',  # upper-bound on post formal structures in project area 
-    'informal_pre': '99999', # upper-bound on pre informal structures in project area
-    'informal_post': '99999'} # upper-bound on post informal structures in project area
-keywords = ['Planning','Proposed', # keywords to identify 
-            'Investigating','future','Implementation','Essential','Informal'] 
+_5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
+_6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
+_7_DD_REGS_     = 0  # DD regressions with census data
 
-_5_a_DISTS_ = 0  # buffers and hull creation
-_5_b_DISTS_ = 0  # non-RDP distance
-_5_c_DISTS_ = 0  # BBLU distance
-_5_d_DISTS_ = 0  # EA distance 
-bw = 1200        # bandwidth for buffers
-hulls = ['rdp','placebo'] # choose 
 
-_6_a_PLOTS_ = 0  # distance plots for RDP: house prices
-_6_b_PLOTS_ = 0  # distance plots for RDP: BBLU
+### NOT UPDATED YET ###
+_8_TABLES_      = 0  # DESCRIPTIVES (haven't updated yet)
 
-_7_a_PLOTS_ = 0  # distance plots for placebo: house prices
-_7_b_PLOTS_ = 0  # distance plots for placebo: BBLU
-
-_8_DD_REGS_ = 0  # DD regressions with census data
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -197,6 +187,7 @@ if _1_e_IMPORT ==1:
 
     print '\n'," - GHS data: done! "'\n'
 
+
 #############################################
 # STEP 2:  flag RDP properties              #
 #############################################
@@ -211,166 +202,96 @@ if _2_FLAGRDP_ ==1:
 
     print '\n'," -- RDP flagging: done! ",'\n'
 
-#############################################
-# STEP 3:  Cluster RDP properties           #
-#############################################
 
-if _3_CLUSTER_ ==1:
+#####################################
+# STEP 3:  GCRO Definition          #
+#####################################
 
-    print '\n'," Clustering RDP properties, forming hulls... ",'\n'
+if _3_GCRO_a_ == 1:
 
-    spatial_cluster(algo,par1,par2,db,rdp)
-    print '\n'," -- clustering RDP: done! "'\n'
-
-    concavehull(db,tempdir,sig,True)
-    print '\n'," -- Concave Hulls: done! "'\n'
-
-#############################################
-# STEP 4:  Placebo RDP from GCRO            #
-#############################################
-
-if _4_PLACEBO_ == 1:
-
-    print '\n'," Defining Placebo RDPs ... ",'\n'
+    print '\n'," Defining Placebo and RDPs from gcro ... ",'\n'
 
     import_budget(rawgcro)
-    make_gcro_placebo(db,counts,keywords)
 
-    print '\n'," -- Placebo RDPs: done! "'\n'
+    make_gcro(db)
+
+    for hull in hulls:
+        make_gcro_conhulls(db,hull)
+
+    print  '\n',  " generated GCRO tables NAMED placebo_conhulls and rdp_conhulls : DONE! ", '\n'
+
+
+if _3_GCRO_b_ == 1:
+
+    print '\n', " link new gcro to gcro_publichousing ", '\n'
+
+    make_gcro_link(db)
+
+    print '\n', " linking : DONE! ", '\n'
+
+
+
 
 #############################################
-# STEP 5:  Distance to RDP for non-RDP      #
+# STEP 4:  Distance to RDP for non-RDP      #
 #############################################
 
-if _5_a_DISTS_ ==1:
+if _4_a_DISTS_ ==1:
 
     print '\n'," Distance part A: Creating tables and polygons... ",'\n'
-
     # 5a.0 set-up
     shutil.rmtree(tempdir,ignore_errors=True)
     os.makedirs(tempdir)
     grids = glob.glob(rawgis+'grid_7*')
-    for grid in grids: shutil.copy(grid, tempdir)
-
+    for grid in grids: 
+        shutil.copy(grid, tempdir)
     for hull in hulls:
-
-        ## 5a.1 intersecting EAs
-        #intersGEOM(db,tempdir,'ea',hull,'2001')   
-        #intersGEOM(db,tempdir,'ea',hull,'2011')
-        #print '\n'," -- Intersecting EAs: done! ({}) "'\n'.format(hull)
-    
-        # 5a.2 buffers and self-intersections
-        selfintersect(db,tempdir,bw,hull)
-        print '\n'," -- Self-Intersections: done! ({}) "'\n'.format(hull)
-    
         # 5a.3 assemble coordinates for hull edges
         hulls_coordinates(db,tempdir,hull)
         print '\n'," -- Assemble hull coordinates: done! ({}) "'\n'.format(hull)
 
-if _5_b_DISTS_ ==1:
-
-    print '\n'," Distance part B: distances for non-RDP... ",'\n'
-
-    # 5b.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
-
+if _4_b_DISTS_ ==1:
+    print '\n'," Distance part B: distances for properties... ",'\n'
     for hull in hulls:
+        import_script = 'SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.property_id FROM erven AS p'
+        dist(db,hull,'erven',import_script,dist_threshold)
+        print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) ".format(hull), '\n'
+        intersPOINT(db,'erven',hull,'property_id')
+        print '\n'," -- Table with point intersections: done! ({}) ".format(hull), '\n'
 
-        # 5b.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-    
-        # 5b.2 non-rdp in/out of hulls
-        fetch_set = ['trans_buff','trans_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
-    
-        # 5b.3 calculate distances for non-rdp
-        inmat = matrx['trans_buff'][matrx['trans_buff'][:,3]==1][:,:2].astype(np.float) # filters for non-rdp
-        dist = dist_calc(inmat, coords[:,:2].astype(np.float)) # second input is targ_conhulls
-        print '\n'," -- Non-RDP distance calculation: done! ({}) "'\n'.format(hull)
-    
-        # 5b.4 retrieve IDs, populate table and push back to DB
-        push_distNRDP2db(db,matrx,dist,coords,hull)
-        print '\n'," -- NRDP distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
-
-    # 5b.5 kill parallel workers
-    pp.close()
-    pp.join()
-
-if _5_c_DISTS_ ==1:
-
+if _4_c_DISTS_ ==1:
     print '\n'," Distance part C: distances for BBLU... ",'\n'
+    for hull,bblu_type in product(hulls,['pre','post']):
+        import_script = 'SELECT st_x(p.GEOMETRY) AS x, st_y(p.GEOMETRY) AS y, p.OGC_FID FROM bblu_{} AS p'.format(bblu_type)
+        dist(db,hull,'bblu_'+bblu_type,import_script,dist_threshold)
+        print '\n'," -- BBLU distance, Populate table / push to DB: done! ({} {}) ".format(bblu_type, hull), '\n'
+        intersPOINT(db,'bblu_{}'.format(bblu_type),hull,'OGC_FID')            
+        print '\n'," -- Table with point intersections: done! ({}) ".format(hull), '\n'
 
-    # 5c.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
+if _4_d_DISTS_ ==1:
+    print '\n'," Distance part D: distances for EAs and SALs... ",'\n'        
+    for hull,geom,yr in product(hulls,['ea','sal'],['2001','2011']):
+        import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.{}_code
+                                FROM  {}_{}  AS  p'''.format(geom,geom,yr)
+        dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
+        print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+        intersGEOM(db,geom,hull,yr) 
+        print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
 
-    for hull in hulls:
+if _4_e_DISTS_ == 1:
+    print '\n'," Making BBLU xy table...",'\n'
+    bblu_xy(db)
+    print '\n'," Done BBLU XY ! ",'\n'
 
-        # 5c.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-    
-        # 5c.2 BBLU in/out of hulls
-        fetch_set = ['BBLU_pre_buff','BBLU_pre_hull','BBLU_post_buff','BBLU_post_hull']
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({}) "'\n'.format(hull)
-    
-        # 5c.3 calculate distances for BBLU points   
-        dist_input= [matrx['BBLU_'+x+'_buff'][:,:2].astype(np.float) for x in ['pre','post']]
-        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
-        dist = dict(zip(['BBLU_pre_buff','BBLU_post_buff'],pp.map(part_dist_calc,dist_input)))
-        print '\n'," -- BBLU distance calculation: done! ({}) "'\n'.format(hull)
-    
-        # 5c.4 retrieve IDs, populate table and push back to DB
-        push_distBBLU2db(db,matrx,dist,coords,hull)
-        print '\n'," -- BBLU distance, Populate table / push to DB: done! ({}) "'\n'.format(hull)
-
-    # 5c.5 kill parallel workers
-    pp.close()
-    pp.join()
-
-if _5_d_DISTS_ ==1:
-
-    print '\n'," Distance part D: distances for EAs and SALs... ",'\n'
-
-    # 5d.0 instantiate parallel workers
-    pp = multiprocessing.Pool(processes=workers)
-
-    for hull,geom in product(hulls,['ea','sal']):
-
-        # 5d.1 fetch hull coordinates
-        coords = fetch_coordinates(db,hull)
-    
-        # 5d.2 EA and SAL in/out of hulls
-        fetch_set = ['_'.join([geom,yr,plygn]) for yr,plygn in  product(['2001','2011'],['buff','hull'])]
-        part_fetch_data = partial(fetch_data,db,tempdir,'intersect',hull)
-        matrx = dict(zip(fetch_set,pp.map(part_fetch_data,fetch_set)))
-        print '\n'," -- Data fetch: done! ({},{}) "'\n'.format(hull,geom)
-    
-        # 5d.3 calculate distances for EA and SAL
-        dist_input=[matrx[x][:,:2].astype(np.float) for x in [geom+'_2001_buff',geom+'_2011_buff']]
-        part_dist_calc = partial(dist_calc,targ_mat=coords[:,:2].astype(np.float))  # second input is targ_conhulls
-        dist = dict(zip([geom+'_2001_buff',geom+'_2011_buff'],pp.map(part_dist_calc,dist_input)))
-        print '\n'," -- EA distance calculation: done! ({},{}) "'\n'.format(hull,geom)
-    
-        # 5d.4 retrieve IDs, populate table and push back to DB
-        for cen in [geom+'_2001',geom+'_2011']:
-            push_distCENSUS2db(db,matrx,dist,coords,cen,hull)
-        print '\n'," -- EA and SAL distance, Populate table / push to DB: done! ({},{}) "'\n'.format(hull,geom)
-
-    # 5d.5 kill parallel workers
-    pp.close()
-    pp.join()
 
 #############################################
-# STEP 6:  Make RDP Gradient/Density Plots  #
+# STEP 5:  Make RDP Gradient/Density Plots  #
 #############################################
 
-if _6_a_PLOTS_ == 1:
+if _5_PLOTS_erven_ == 1:
 
     print '\n'," Making Housing Prices plots...",'\n'
-
     dofile = "subcode/export2gradplot.do"
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
@@ -379,74 +300,71 @@ if _6_a_PLOTS_ == 1:
         os.makedirs(outdir+'gradplots')
 
     dofile = "subcode/plot_gradients.do"
-    cmd = ['stata-mp','do',dofile,rdp]
+    cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
-
     print '\n'," -- Price Gradient Plots: done! ",'\n'
 
-if _6_b_PLOTS_ == 1:
+    dofile = "subcode/plot_freq.do"
+    cmd = ['stata-mp','do',dofile]
+    subprocess.call(cmd)
+    print '\n'," -- Transaction Frequency Plots: done! ",'\n'
+
+
+#####################################
+# STEP 6:  Make bblu density plots  #
+#####################################
+
+if _6_PLOTS_bblu_ == 1:
 
     print '\n'," Making BBLU plots...",'\n'
 
     if not os.path.exists(outdir+'bbluplots'):
         os.makedirs(outdir+'bbluplots')
-
-    dofile = "subcode/plot_density.do"
+    dofile = "subcode/plot_density.do" # both makes dataset (suboption) and makes graphs
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    print '\n'," -- BBLU Plots: done! ",'\n'
+    print '\n'," -- BBLU Plots: done! ",'\n'        
 
-#################################################
-# STEP 7:  Make Placebo Gradient/Density Plots  #
-#################################################
-
-if _7_a_PLOTS_ == 1:
-
-    print '\n'," Making Housing Prices plots...",'\n'
-
-    dofile = "subcode/export2gradplot_placebo.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
-
-    if not os.path.exists(outdir+'gradplots_placebo'):
-        os.makedirs(outdir+'gradplots_placebo')
-
-    dofile = "subcode/plot_gradients_placebo.do"
-    cmd = ['stata-mp','do',dofile,rdp]
-    subprocess.call(cmd)
-
-    print '\n'," -- Placebo Price Gradient Plots: done! ",'\n'
-
-if _7_b_PLOTS_ == 1:
-
-    print '\n'," Making BBLU plots...",'\n'
-
-    if not os.path.exists(outdir+'bbluplots_placebo'):
-        os.makedirs(outdir+'bbluplots_placebo')
-
-    dofile = "subcode/plot_density_placebo.do"
-    cmd = ['stata-mp','do',dofile]
-    subprocess.call(cmd)
-
-    print '\n'," -- Placebo BBLU Plots: done! ",'\n'
 
 ##########################################
-# STEP 8:  Make census Diff-n-diff regs  #
+# STEP 7:  Make census Diff-n-diff regs  #
 ##########################################
 
-if _8_DD_REGS_ == 1:
+if _7_DD_REGS_ == 1:
 
     print '\n'," Doing DD census regs...",'\n'
+
+    for year, geom in product(['2001','2011'],['ea','sal']):
+        areaGEOM(db,geom+'_'+year,geom+'_code')
+
 
     if not os.path.exists(outdir+'census_regs'):
         os.makedirs(outdir+'census_regs')
 
-    dofile = "subcode/census_regs_hh.do"
+    dofile = "subcode/census_regs_hh.do" # both makes dataset (suboption) and makes regressions
+    cmd = ['stata-mp','do',dofile]
+    #subprocess.call(cmd)
+
+    print '\n'," -- DD census regs: done! ",'\n'
+
+
+
+
+
+
+if _8_TABLES_ == 1: # haven't done yet
+
+    print '\n'," Generate tables ... ", '\n'
+    cbd_gen()
+
+    dofile = "figures/descriptive_statistics.do"
     cmd = ['stata-mp','do',dofile]
     subprocess.call(cmd)
 
-    print '\n'," -- DD census regs: done! ",'\n'
+    print '\n'," -- Tables: done! ", '\n'    
+
+
 
 
 
