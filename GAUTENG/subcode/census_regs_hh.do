@@ -156,6 +156,19 @@ local qry = "
 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;	
+
+destring area_int_placebo area_int_rdp, replace force;  
+
+/* throw out clusters that were too early in the process */
+replace distance_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+replace area_int_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+replace sal_code_placebo ="" if con_mo_placebo<515 | con_mo_placebo==.;
+replace cluster_placebo  =.  if con_mo_placebo<515 | con_mo_placebo==.;
+
+replace distance_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+replace area_int_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+replace sal_code_rdp ="" if con_mo_rdp<515 | con_mo_rdp==.;
+replace cluster_rdp  =.  if con_mo_rdp<515 | con_mo_rdp==.;
   
 save DDcensus_hh_admin, replace;
 
@@ -170,17 +183,13 @@ save DDcensus_hh_admin, replace;
 if $data_anal==1 {;
 
 use DDcensus_hh_admin, clear;
-destring area_int_placebo area_int_rdp, replace force;  
+
 
 * go to working dir;
 cd ../..;
 cd $output ;
 
- /* throw out clusters that were too early in the process */
-  replace distance_placebo =.   if con_mo_placebo<510;
-  replace area_int_placebo =.   if con_mo_placebo<510;
-  replace distance_rdp =.       if con_mo_rdp<510;
-  replace area_int_rdp =.       if con_mo_rdp<510;
+
 
 *drop if distance_rdp==. & distance_placebo==.;
 
@@ -198,7 +207,7 @@ g project_placebo = (area_int_placebo > 0 & area_int_placebo<.) ;
 g spillover_rdp = project_rdp!=1 & distance_rdp<=2000 ;
 g spillover_placebo = project_placebo!=1 & distance_placebo<=2000 ;
 
-g post = (year==2011) ;
+g post = (year==2011);
 
 g project_rdp_post = project_rdp*post;
 g project_placebo_post = project_placebo*post;
