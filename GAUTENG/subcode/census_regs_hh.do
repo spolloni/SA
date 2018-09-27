@@ -57,7 +57,7 @@ local qry = "
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2001hh' AS source, 2001 AS year
+      'census2001hh' AS source, 2001 AS year, A.SAL AS area_code
 
     FROM census_hh_2001 AS A  
 
@@ -107,7 +107,7 @@ local qry = "
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2011hh' AS source, 2011 AS year
+      'census2011hh' AS source, 2011 AS year, A.SAL_CODE AS area_code
 
     FROM census_hh_2011 AS A  
 
@@ -250,13 +250,13 @@ g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 g o = 1;
-egen pop = sum(o), by(area year);
-bys area: g a_n=_n;
-g density = pop/area;
+egen pop = sum(o), by(area_code year);
+bys area_code: g a_n=_n;
+g density = (pop/area)*1000000;
 lab var density "Households per m2";
 
-egen pop_n = sum(hh_size), by(area year);
-g density_n = pop_n/area;
+egen pop_n = sum(hh_size), by(area_code year);
+g density_n = (pop_n/area)*1000000;
 lab var density_n "People per m2";
 
 
