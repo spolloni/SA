@@ -47,10 +47,10 @@ global dist_break_reg = 500; /* determines spillover vs control outside of proje
 global dist_max_reg = 1500;
 global dist_min_reg = -500;
 
-* MAKE DATASET?;
-global bblu_query_data  = 0 ; /* query data */
-global bblu_clean_data  = 0 ; /* clean data for analysis */
-global bblu_do_analysis = 1 ; /* do analysis */
+* DOFILE SECTIONS;
+global bblu_query_data  = 0; /* query data */
+global bblu_clean_data  = 0; /* clean data for analysis */
+global bblu_do_analysis = 0; /* do analysis */
 
 global graph_plotmeans_prepost = 0; /* plots means: 1) pre/post on same graph */
 global graph_plotmeans_rdpplac = 0; /* plots means: 2) placebo and rdp same graph (pre only) */
@@ -58,7 +58,7 @@ global graph_plotdiff       = 0;   /* plots changes over time for placebo and rd
 global graph_plotdiff_het   = 0;
 global graph_plottriplediff = 0;
 
-global reg_triplediff       = 1; /* creates regression analogue for triple difference */
+global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -93,7 +93,6 @@ cd Generated/Gauteng;
 ************************************************;
 ********* LOAD DATA  ***************************;
 ************************************************;
-
 if $bblu_query_data == 1 {;
 
   foreach time in pre post {;
@@ -165,8 +164,8 @@ if $bblu_query_data == 1 {;
   odbc load, exec("`qry'") clear;
       save bbluplot_admin_`time'.dta, replace;
 };
-};
 
+};
 ************************************************;
 ************************************************;
 ************************************************;
@@ -174,7 +173,6 @@ if $bblu_query_data == 1 {;
 ************************************************;
 ********* CLEAN DATA  **************************;
 ************************************************;
-
 if $bblu_clean_data==1 {;
 
   use bbluplot_admin_pre.dta, clear;
@@ -228,7 +226,9 @@ if $bblu_clean_data==1 {;
 
   };
 
-  keep  $outcomes  post id cluster_placebo cluster_rdp distance_rdp distance_placebo RDP_density;
+  keep  $outcomes  
+    post id cluster_placebo cluster_rdp 
+    distance_rdp distance_placebo RDP_density;
   duplicates drop id post, force;
 
   egen id1 = group(id);
@@ -252,7 +252,6 @@ if $bblu_clean_data==1 {;
   save bbluplot_reg_admin_$size, replace;
 
 };
-
 ************************************************;
 ************************************************;
 ************************************************;
@@ -260,7 +259,6 @@ if $bblu_clean_data==1 {;
 ************************************************;
 ********* ANALYZE DATA  ************************;
 ************************************************;
-
 if $bblu_do_analysis==1 {;
 
 use bbluplot_reg_admin_$size, clear;
@@ -304,7 +302,6 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 ************************************************;
 * 1.1 ** MAKE MEAN GRAPHS HERE PRE/POST ********;
 ************************************************;
-
 if $graph_plotmeans_prepost == 1 {;
 
   cap program drop plotmeans;
@@ -397,7 +394,6 @@ if $graph_plotmeans_prepost == 1 {;
     4;
 
 };
-
 ************************************************;
 ************************************************;
 ************************************************;
@@ -405,7 +401,6 @@ if $graph_plotmeans_prepost == 1 {;
 ************************************************;
 * 1.2 * MAKE MEAN GRAPHS HERE PRE rdp/placebo **;
 ************************************************;
-
 if $graph_plotmeans_rdpplac == 1 {;
 
   cap program drop plotmeans_pre;
@@ -462,8 +457,8 @@ if $graph_plotmeans_rdpplac == 1 {;
 
   end;
 
-global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
-global yl = "ylabel(2(1)7)";
+  global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+  global yl = "ylabel(2(1)7)";
 
   plotmeans_pre 
     bblu_total_buildings_pre_means total_buildings rdp placebo
@@ -496,7 +491,6 @@ global yl = "ylabel(2(1)7)";
     2;
 
 };
-
 ************************************************;
 ************************************************;
 ************************************************;
@@ -504,7 +498,6 @@ global yl = "ylabel(2(1)7)";
 ************************************************;
 * 2.1 * MAKE CHANGE GRAPHS (REGRESSIONS) HERE **;
 ************************************************;
-
 if $graph_plotdiff == 1 {;
 
 cap program drop plotreg;
@@ -571,7 +564,6 @@ foreach var in $outcomes {;
 };
 
 };
-
 ************************************************;
 ************************************************;
 ************************************************;
@@ -579,7 +571,6 @@ foreach var in $outcomes {;
 ************************************************;
 * 2.2 * MAKE HETEROGENEOUS CHANGE GRAPHS HERE **;
 ************************************************;
-
 if $graph_plotdiff_het == 1 {;
 
 sum RDP_density, detail;
@@ -600,15 +591,13 @@ foreach var in $outcomes {;
 };
 
 };
-
 ************************************************;
 ************************************************;
 ************************************************;
 
 ************************************************;
-* 3 * MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
+* 3.1 MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
 ************************************************;
-
 if $graph_plottriplediff == 1 {;
 
 cap program drop plotregsingle;
@@ -665,63 +654,59 @@ foreach var in $outcomes {;
 };
 
 };
+************************************************;
+************************************************;
+************************************************;
 
-
-
-
-
+************************************************;
+* 3.1 *** MAKE TRIPLE DIFFERENCE TABLES HERE ***;
+************************************************;
 if $reg_triplediff == 1 {;
 
 local table_name "regDDD";
 
+drop if distance_rdp > $dist_max_reg & distance_rdp<.; /* get rid of far away places */
+drop if distance_placebo > $dist_max_reg & distance_placebo<.;
 
-  drop if distance_rdp > $dist_max_reg & distance_rdp<.; /* get rid of far away places */
-  drop if distance_placebo > $dist_max_reg & distance_placebo<.;
+drop if distance_rdp < $dist_min_reg ; /* get rid of way too close places */
+drop if distance_placebo < $dist_min_reg ;
 
-  drop if distance_rdp < $dist_min_reg ; /* get rid of way too close places */
-  drop if distance_placebo < $dist_min_reg ;
+label_outcomes;
 
-    label_outcomes;
+foreach v in rdp placebo {;
+  g dists_`v'_g = 1 if dists_`v' >abs($dist_min_reg) & dists_`v' < abs($dist_min_reg) + $dist_break_reg  ;
+  replace  dists_`v'_g = 2 if dists_`v' <=abs($dist_min_reg)  ;
+  replace  dists_`v'_g = 3 if dists_`v' >= abs($dist_min_reg)+ $dist_break_reg & dists_`v' < abs($dist_min_reg) + $dist_max_reg ;
+};
 
-    foreach v in rdp placebo {;
-    g dists_`v'_g = 1 if dists_`v' >abs($dist_min_reg) & dists_`v' < abs($dist_min_reg) + $dist_break_reg  ;
-    replace  dists_`v'_g = 2 if dists_`v' <=abs($dist_min_reg)  ;
-    replace  dists_`v'_g = 3 if dists_`v' >= abs($dist_min_reg)+ $dist_break_reg & dists_`v' < abs($dist_min_reg) + $dist_max_reg ;
-    };
+levelsof dists_rdp_g;
+global dists_all_g "";
+foreach level in `r(levels)' {;
+  gen dists_rdp_g_`level' = dists_rdp_g== `level';
+  gen dists_all_g_`level' = (dists_rdp_g == `level' | dists_placebo_g == `level');
+  global dists_all_g "dists_all_g_`level' dists_rdp_g_`level' ${dists_all_g}";
+};
+omit dists_all_g dists_rdp_g_3;
 
-    levelsof dists_rdp_g;
-    global dists_all_g "";
-    foreach level in `r(levels)' {;
-      gen dists_rdp_g_`level' = dists_rdp_g== `level';
-      gen dists_all_g_`level' = (dists_rdp_g == `level' | dists_placebo_g == `level');
-      global dists_all_g "dists_all_g_`level' dists_rdp_g_`level' ${dists_all_g}";
-    };
-    omit dists_all_g dists_rdp_g_3;
+global vars_g = "dists_rdp_g_1 dists_rdp_g_2";
+lab var dists_rdp_g_1 "Spillover (`=abs($dist_min_reg)'m)";
+lab var dists_rdp_g_2 "Inside (`=abs($dist_min_reg)'m)";
 
-    global vars_g = "dists_rdp_g_1 dists_rdp_g_2";
-    lab var dists_rdp_g_1 "Spillover (`=abs($dist_min_reg)'m)";
-    lab var dists_rdp_g_2 "Inside (`=abs($dist_min_reg)'m)";
+local var: word 1 of $outcomes;
+areg `var' $dists_all_g , cl(cluster_reg) a(id);
+test dists_rdp_g_1 = dists_rdp_g_2;
+outreg2 using "`table_name'", label tex(frag) replace 
+addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g);
 
-    local var: word 1 of $outcomes ;
-      areg `var' $dists_all_g , cl(cluster_reg) a(id);
-      test dists_rdp_g_1 = dists_rdp_g_2;
-      outreg2 using "`table_name'", label tex(frag) replace 
-      addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
-
-    local outcomes_N: word count $outcomes ;
-    forvalues r=2/`outcomes_N' {;
-    local var: word `r' of $outcomes ;
-      areg `var' $dists_all_g , cl(cluster_reg) a(id);
-      test dists_rdp_g_1 = dists_rdp_g_2;
-      outreg2 using "`table_name'", label tex(frag) append
-      addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+local outcomes_N: word count $outcomes;
+forvalues r=2/`outcomes_N' {;
+local var: word `r' of $outcomes;
+areg `var' $dists_all_g , cl(cluster_reg) a(id);
+test dists_rdp_g_1 = dists_rdp_g_2;
+outreg2 using "`table_name'", label tex(frag) append
+addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g);
   
 };
-
-
-};
-
-
 ************************************************;
 ************************************************;
 ************************************************;
