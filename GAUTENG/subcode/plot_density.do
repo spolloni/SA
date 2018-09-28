@@ -191,9 +191,7 @@ if $bblu_clean_data==1 {;
   replace distance_rdp =. if con_mo_rdp<515 | con_mo_rdp==.;
   replace cluster_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
 
-  /* throw out placebo clusters that are too small */
-  replace distance_placebo =. if area < .5;
-  replace cluster_placebo  =. if area < .5;
+  /* drop unmatched observations */
   drop if distance_rdp ==. & distance_placebo ==. ;
   drop if cluster_rdp ==. & cluster_placebo ==. ;
 
