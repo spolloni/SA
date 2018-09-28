@@ -5,11 +5,29 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+***************************************;
+*  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
+***************************************;
+cap program drop omit;
+program define omit;
+
+  local original ${`1'};
+  local temp1 `0';
+  local temp2 `1';
+  local except: list temp1 - temp2;
+  local modified;
+  foreach e of local except{;
+   local modified = " `modified' o.`e'"; 
+  };
+  local new: list original - except;
+  local new " `modified' `new'";
+  global `1' `new';
+
+end;
+
 ******************;
 *  CENSUS REGS   *;
 ******************;
-
-* PARAMETERS;
 
 * SET OUTPUT GLOBAL;
 global output = "Output/GAUTENG/censusregs" ;
@@ -19,9 +37,14 @@ global output = "Output/GAUTENG/censusregs" ;
 * RUN LOCALLY?;
 global LOCAL = 1;
 
-* MAKE DATASET?;
-global data_prep = 1;
-global data_anal = 0;
+* DOFILE SECTIONS;
+global data_load = 0;
+global data_prep = 0;
+global data_regs = 0;
+
+* PARAMETERS;
+global tresh_area = 0.3;  /* Area ratio for "inside" vs spillover */
+global tresh_dist = 1500; /* Area ratio inside vs spillover */
 
 if $LOCAL==1 {;
 	cd ..;
@@ -34,7 +57,7 @@ cd Generated/Gauteng;
 *****************************************************************;
 ************************ LOAD DATA ******************************;
 *****************************************************************;
-if $data_prep==1 {;
+if $data_load==1 {;
 
 local qry = " 
 
@@ -156,6 +179,21 @@ local qry = "
 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;	
+
+destring area_int_placebo area_int_rdp, replace force;  
+
+/* throw out clusters that were too early in the process */
+replace distance_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+replace area_int_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+replace sal_code_placebo ="" if con_mo_placebo<515 | con_mo_placebo==.;
+replace cluster_placebo  =.  if con_mo_placebo<515 | con_mo_placebo==.;
+
+replace distance_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+replace area_int_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+replace sal_code_rdp ="" if con_mo_rdp<515 | con_mo_rdp==.;
+replace cluster_rdp  =.  if con_mo_rdp<515 | con_mo_rdp==.;
+
+drop if distance_rdp==. & distance_placebo==.;
   
 save DDcensus_hh_admin, replace;
 
@@ -165,50 +203,15 @@ save DDcensus_hh_admin, replace;
 *****************************************************************;
 
 *****************************************************************;
-************************ ANALYZE DATA ***************************;
+************************ PREPARE DATA ***************************;
 *****************************************************************;
-if $data_anal==1 {;
+if $data_prep==1 {;
 
 use DDcensus_hh_admin, clear;
-destring area_int_placebo area_int_rdp, replace force;  
 
 * go to working dir;
 cd ../..;
-cd $output ;
-
- /* throw out clusters that were too early in the process */
-  replace distance_placebo =.   if con_mo_placebo<510;
-  replace area_int_placebo =.   if con_mo_placebo<510;
-  replace distance_rdp =.       if con_mo_rdp<510;
-  replace area_int_rdp =.       if con_mo_rdp<510;
-
-*drop if distance_rdp==. & distance_placebo==.;
-
-* group definitions;
-*gen gr = .;
-*replace gr=1 if (area_int_rdp >= .3 & area_int_rdp<.)
-*            | (area_int_placebo >= .3 & area_int_placebo<.) ;
-*replace gr=2 if (area_int_rdp < .3 & area_int_rdp>0)  
-*            | (area_int_placebo < .3 & area_int_placebo>0) ;
-
-
-g project_rdp = (area_int_rdp > 0 & area_int_rdp<.);
-g project_placebo = (area_int_placebo > 0 & area_int_placebo<.) ;
-
-g spillover_rdp = project_rdp!=1 & distance_rdp<=2000 ;
-g spillover_placebo = project_placebo!=1 & distance_placebo<=2000 ;
-
-g post = (year==2011) ;
-
-g project_rdp_post = project_rdp*post;
-g project_placebo_post = project_placebo*post;
-
-g spillover_rdp_post = spillover_rdp*post;
-g spillover_placebo_post = spillover_placebo*post;
-
-
-global vars " project_rdp_post project_placebo_post spillover_rdp_post spillover_placebo_post  post project_rdp project_placebo spillover_rdp spillover_placebo  ";
-order $vars;
+cd $output;
 
 * flush toilet?;
 gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
@@ -217,102 +220,131 @@ lab var toilet_flush "Flush Toilet";
 * piped water?;
 gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
 lab var water_inside "Piped Water Inside";
-
-gen water_yard  = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
+gen water_yard = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
+lab var water_yard "Piped Water Inside or Yard";
 
 * water source?;
 gen water_utility = (water_source==1) if !missing(water_source);
+lab var water_utility "Water from utility";
 
 * electricity?;
 gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
+lab var electricity "Access to electricity";
 gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
 lab var electric_cooking "Electric Cooking";
-
 gen electric_heating  = enrgy_heating==1 if !missing(enrgy_heating);
+lab var electric_heating "Electric Heating";
 gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);
 lab var electric_lighting "Electric Lighting";
 
 * tenure?;
-gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001) if !missing(tenure);
+gen owner = ((tenure==2 | tenure==4) & year==2011)|((tenure==1 | tenure==2) & year==2001) if !missing(tenure);
 lab var owner "Owns House";
 
 * house?;
 gen house = dwelling_typ==1 if !missing(dwelling_typ);
 lab var house "Single House";
 
+* total rooms;
 replace tot_rooms=. if tot_rooms>9;
 lab var tot_rooms "No. Rooms";
 
+* household size rooms;
 replace hh_size=. if hh_size>10;
 lab var hh_size "Household Size";
 
-g cluster_reg = cluster_rdp;
-replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
-
+* household density;
 g o = 1;
-egen pop = sum(o), by(area_code year);
 bys area_code: g a_n=_n;
-g density = (pop/area)*1000000;
-lab var density "Households per m2";
+egen pop = sum(o), by(area_code year);
+g hh_density = (pop/area)*1000000;
+lab var hh_density "Households per m2";
+drop o pop;
 
-egen pop_n = sum(hh_size), by(area_code year);
-g density_n = (pop_n/area)*1000000;
-lab var density_n "People per m2";
+* pop density;
+egen pop = sum(hh_size), by(area_code year);
+g pop_density = (pop/area)*1000000;
+lab var pop_density "People per m2";
+drop pop;
 
+* cluster for SEs;
+replace area_int_rdp =0 if area_int_rdp ==.;
+replace area_int_placebo =0 if area_int_placebo ==.;
+gen placebo = (distance_placebo < distance_rdp);
+gen placebo2 = (area_int_placebo> area_int_rdp);
+replace placebo = 1 if placebo2==1;
+drop placebo2;
+gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
+gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 
-global outcomes "water_inside electric_cooking electric_lighting house owner tot_rooms hh_size";
-
-local table_name "census_DD_hh_sample_admin_dist.tex";
-
-areg toilet_flush $vars  , a(cluster_reg) cl(cluster_reg);
-       outreg2 using "`table_name'", label  tex(frag) 
-replace addtext(Project FE, YES) keep($vars) 
-addnote("Standard errors are clustered at the project level.");
-
-foreach var of varlist $outcomes {;
-areg `var' $vars , a(cluster_reg) cl(cluster_reg);
-       outreg2 using "`table_name'", label  tex(frag) 
-append addtext(Project FE, YES) keep($vars) ;
 };
 
-areg density $vars if a_n==1 , a(cluster_reg) cl(cluster_reg);
-outreg2 using "`table_name'",  label  tex(frag) append addtext(Project FE, YES) keep($vars) ;
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 
-areg density_n $vars if a_n==1 , a(cluster_reg) cl(cluster_reg);
-outreg2 using "`table_name'",  label  tex(frag) append addtext(Project FE, YES) keep($vars) ;
+*****************************************************************;
+********************* RUN REGRESSIONS ***************************;
+*****************************************************************;
+if $data_regs==1 {;
 
-/*
-preserve
+g project_rdp = (area_int_rdp > $tresh_area);
+g project_placebo = (area_int_placebo > $tresh_area);
+g project = (project_rdp==1 | project_placebo==1);
+g project_post = project ==1 & year==2011;
+g project_post_rdp = project_rdp ==1 & year==2011;
 
-  local table_name_true "census_DD_hh_sample_admin_dist_true.tex"
+g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
+g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
+g spillover = (spillover_rdp==1 | spillover_placebo==1);
+g spillover_post = spillover == 1 & year==2011;
+g spillover_post_rdp = spillover_rdp==1 & year==2011;
 
-  g project = project_rdp==1 | project_placebo==1
-  g project_post = project*post
-  g spillover = spillover_rdp==1 | spillover_placebo==1
-  g spillover_post = spillover*post
+g others = project !=1 & spillover !=1;
 
-  *keep if project==1 | spillover==1
+global regressors "
+  project
+  project_rdp
+  project_post
+  project_post_rdp
+  spillover
+  spillover_rdp
+  spillover_post
+  spillover_post_rdp
+  ";
 
-  global vars_true " spillover project spillover_rdp project_rdp post spillover_post project_post spillover_rdp_post project_rdp_post "
+global outcomes "
+  toilet_flush 
+  water_inside 
+  water_yard 
+  water_utility 
+  electricity 
+  electric_cooking 
+  electric_heating 
+  electric_lighting 
+  owner 
+  house 
+  ";
 
-  order $vars_true
+eststo clear;
 
-  areg toilet_flush $vars_true  , a(cluster_reg) cl(cluster_reg)
-       outreg2 using "`table_name_true'", label  tex(frag) replace addtext(Project FE, YES) keep($vars_true) addnote("Standard errors are clustered at the project level.")
+foreach var of varlist $outcomes {;
+  areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  eststo `var';
+};
 
+areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
+eststo pop_density;
 
-  foreach var of varlist $outcomes {
-  areg `var' $vars_true , a(cluster_reg) cl(cluster_reg)
-  outreg2 using "`table_name_true'", label  tex(frag) append addtext(Project FE, YES) keep($vars_true) 
-  }
+areg hh_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
+eststo hh_density;
 
-  areg density $vars_true if a_n==1 , a(cluster_reg) cl(cluster_reg)
-  outreg2 using "`table_name_true'",  label  tex(frag) append addtext(Project FE, YES) keep($vars_true) 
-
-  areg density_n $vars_true if a_n==1 , a(cluster_reg) cl(cluster_reg)
-  outreg2 using "`table_name_true'",  label  tex(frag) append addtext(Project FE, YES) keep($vars_true) 
-
-restore */
+esttab $outcomes hh_density pop_density using census_hh_DDregs_admin,
+  replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
+  keep(project_post_rdp spillover_post_rdp ) 
+  order(project_post_rdp spillover_post_rdp ) 
+  star(* 0.10 ** 0.05 *** 0.01) 
+  compress;
 
 };
 *****************************************************************;
