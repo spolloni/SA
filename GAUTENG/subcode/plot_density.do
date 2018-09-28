@@ -43,8 +43,9 @@ global size     = 50;
 global dist_max = 2200;
 global dist_min = -600;
 
-global dist_break = 600; /* determines spillover vs control outside of project for regDDD */
-
+global dist_break_reg = 500; /* determines spillover vs control outside of project for regDDD */
+global dist_max_reg = 1500;
+global dist_min_reg = -500;
 
 * MAKE DATASET?;
 global bblu_query_data  = 0 ; /* query data */
@@ -57,7 +58,7 @@ global graph_plotdiff       = 0;   /* plots changes over time for placebo and rd
 global graph_plotdiff_het   = 0;
 global graph_plottriplediff = 0;
 
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -673,40 +674,48 @@ if $reg_triplediff == 1 {;
 
 local table_name "regDDD";
 
-label_outcomes;
 
-foreach v in rdp placebo {;
-g dists_`v'_g = 1 if dists_`v' >abs($dist_min) & dists_`v' < abs($dist_min) + $dist_break  ;
-replace  dists_`v'_g = 2 if dists_`v' <=abs($dist_min)  ;
-replace  dists_`v'_g = 3 if dists_`v' >= abs($dist_min)+ $dist_break & dists_`v' <.  ;
-};
+  drop if distance_rdp > $dist_max_reg & distance_rdp<.; /* get rid of far away places */
+  drop if distance_placebo > $dist_max_reg & distance_placebo<.;
 
-levelsof dists_rdp_g;
-global dists_all_g "";
-foreach level in `r(levels)' {;
-  gen dists_rdp_g_`level' = dists_rdp_g== `level';
-  gen dists_all_g_`level' = (dists_rdp_g == `level' | dists_placebo_g == `level');
-  global dists_all_g "dists_all_g_`level' dists_rdp_g_`level' ${dists_all_g}";
-};
-omit dists_all_g dists_rdp_g_3;
+  drop if distance_rdp < $dist_min_reg ; /* get rid of way too close places */
+  drop if distance_placebo < $dist_min_reg ;
 
-global vars_g = "dists_rdp_g_1 dists_rdp_g_2";
-lab var dists_rdp_g_1 "Spillover (`=abs($dist_min)'m)";
-lab var dists_rdp_g_2 "Inside (`=abs($dist_min)'m)";
+    label_outcomes;
 
-local var: word 1 of $outcomes ;
-  areg `var' $dists_all_g , cl(cluster_reg) a(id);
-  test dists_rdp_g_1 = dists_rdp_g_2;
-  outreg2 using "`table_name'", label tex(frag) replace 
-  addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+    foreach v in rdp placebo {;
+    g dists_`v'_g = 1 if dists_`v' >abs($dist_min_reg) & dists_`v' < abs($dist_min_reg) + $dist_break_reg  ;
+    replace  dists_`v'_g = 2 if dists_`v' <=abs($dist_min_reg)  ;
+    replace  dists_`v'_g = 3 if dists_`v' >= abs($dist_min_reg)+ $dist_break_reg & dists_`v' < abs($dist_min_reg) + $dist_max_reg ;
+    };
 
-local outcomes_N: word count $outcomes ;
-forvalues r=2/`outcomes_N' {;
-local var: word `r' of $outcomes ;
-  areg `var' $dists_all_g , cl(cluster_reg) a(id);
-  test dists_rdp_g_1 = dists_rdp_g_2;
-  outreg2 using "`table_name'", label tex(frag) append
-  addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+    levelsof dists_rdp_g;
+    global dists_all_g "";
+    foreach level in `r(levels)' {;
+      gen dists_rdp_g_`level' = dists_rdp_g== `level';
+      gen dists_all_g_`level' = (dists_rdp_g == `level' | dists_placebo_g == `level');
+      global dists_all_g "dists_all_g_`level' dists_rdp_g_`level' ${dists_all_g}";
+    };
+    omit dists_all_g dists_rdp_g_3;
+
+    global vars_g = "dists_rdp_g_1 dists_rdp_g_2";
+    lab var dists_rdp_g_1 "Spillover (`=abs($dist_min_reg)'m)";
+    lab var dists_rdp_g_2 "Inside (`=abs($dist_min_reg)'m)";
+
+    local var: word 1 of $outcomes ;
+      areg `var' $dists_all_g , cl(cluster_reg) a(id);
+      test dists_rdp_g_1 = dists_rdp_g_2;
+      outreg2 using "`table_name'", label tex(frag) replace 
+      addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+
+    local outcomes_N: word count $outcomes ;
+    forvalues r=2/`outcomes_N' {;
+    local var: word `r' of $outcomes ;
+      areg `var' $dists_all_g , cl(cluster_reg) a(id);
+      test dists_rdp_g_1 = dists_rdp_g_2;
+      outreg2 using "`table_name'", label tex(frag) append
+      addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+  
 };
 
 
