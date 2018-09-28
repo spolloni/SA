@@ -43,18 +43,26 @@ global size     = 50;
 global dist_max = 2200;
 global dist_min = -600;
 
+global dist_break_reg = 500; /* determines spillover vs control outside of project for regDDD */
+global dist_max_reg = 1500;
+global dist_min_reg = -500;
+
 * MAKE DATASET?;
 global bblu_query_data  = 0 ; /* query data */
 global bblu_clean_data  = 0 ; /* clean data for analysis */
-global bblu_do_analysis = 0 ; /* do analysis */
+global bblu_do_analysis = 1 ; /* do analysis */
 
 global graph_plotmeans_prepost = 0; /* plots means: 1) pre/post on same graph */
 global graph_plotmeans_rdpplac = 0; /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotdiff       = 0;   /* plots changes over time for placebo and rdp */
 global graph_plotdiff_het   = 0;
-global graph_plottriplediff = 0;   /* can't figure out how to do this yet... */
+global graph_plottriplediff = 0;
 
-global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
+
+global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
+
+cap program drop outcome_gen;
 prog outcome_gen;
 
   g for    = s_lu_code == "7.1";
@@ -66,6 +74,14 @@ prog outcome_gen;
 
 end;
 
+cap program drop label_outcomes;
+prog label_outcomes;
+  lab var for "Formal";
+  lab var inf "Informal";
+  lab var total_buildings "Total";
+  lab var inf_backyard "Backyard";
+  lab var inf_non_backyard "Non-Backyard";
+end;
 
 if $LOCAL==1 {;
 	cd ..;
@@ -649,6 +665,62 @@ foreach var in $outcomes {;
 };
 
 };
+
+
+
+
+
+if $reg_triplediff == 1 {;
+
+local table_name "regDDD";
+
+
+  drop if distance_rdp > $dist_max_reg & distance_rdp<.; /* get rid of far away places */
+  drop if distance_placebo > $dist_max_reg & distance_placebo<.;
+
+  drop if distance_rdp < $dist_min_reg ; /* get rid of way too close places */
+  drop if distance_placebo < $dist_min_reg ;
+
+    label_outcomes;
+
+    foreach v in rdp placebo {;
+    g dists_`v'_g = 1 if dists_`v' >abs($dist_min_reg) & dists_`v' < abs($dist_min_reg) + $dist_break_reg  ;
+    replace  dists_`v'_g = 2 if dists_`v' <=abs($dist_min_reg)  ;
+    replace  dists_`v'_g = 3 if dists_`v' >= abs($dist_min_reg)+ $dist_break_reg & dists_`v' < abs($dist_min_reg) + $dist_max_reg ;
+    };
+
+    levelsof dists_rdp_g;
+    global dists_all_g "";
+    foreach level in `r(levels)' {;
+      gen dists_rdp_g_`level' = dists_rdp_g== `level';
+      gen dists_all_g_`level' = (dists_rdp_g == `level' | dists_placebo_g == `level');
+      global dists_all_g "dists_all_g_`level' dists_rdp_g_`level' ${dists_all_g}";
+    };
+    omit dists_all_g dists_rdp_g_3;
+
+    global vars_g = "dists_rdp_g_1 dists_rdp_g_2";
+    lab var dists_rdp_g_1 "Spillover (`=abs($dist_min_reg)'m)";
+    lab var dists_rdp_g_2 "Inside (`=abs($dist_min_reg)'m)";
+
+    local var: word 1 of $outcomes ;
+      areg `var' $dists_all_g , cl(cluster_reg) a(id);
+      test dists_rdp_g_1 = dists_rdp_g_2;
+      outreg2 using "`table_name'", label tex(frag) replace 
+      addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+
+    local outcomes_N: word count $outcomes ;
+    forvalues r=2/`outcomes_N' {;
+    local var: word `r' of $outcomes ;
+      areg `var' $dists_all_g , cl(cluster_reg) a(id);
+      test dists_rdp_g_1 = dists_rdp_g_2;
+      outreg2 using "`table_name'", label tex(frag) append
+      addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g) ;
+  
+};
+
+
+};
+
 
 ************************************************;
 ************************************************;

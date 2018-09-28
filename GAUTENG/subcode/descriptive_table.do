@@ -20,8 +20,8 @@ global gcro_prep   = 0;
 global price_prep  = 0;
 global bblu_prep   = 0;
 
-global census_int  = .33; /* intersection % between census areas and project areas*/
-global size     = 50; /* just for which bblu file to pull */
+global census_int  = .9 ; /* intersection % between census areas and project areas*/
+global size     = 50    ; /* just for which bblu file to pull */
 
 if $LOCAL==1 {;
 	cd ..;
@@ -69,9 +69,9 @@ if $census_prep == 1 {;
 		destring area_int_placebo area_int_rdp, replace force;  
 
 		/* make sure the rdp and placebo are intersecting but NOT overlapping */ ;
-		g rdp = 1 if (area_int_rdp > $census_int & area_int_rdp<.);
-		drop if rdp==1 & (area_int_placebo > $census_int & area_int_placebo<.) ;
-		replace rdp= 0 if (area_int_placebo > $census_int & area_int_placebo<.) ;
+		g rdp = 1 if (area_int_rdp >= $census_int & area_int_rdp<.);
+		drop if rdp==1 & (area_int_placebo >= $census_int & area_int_placebo<.) ;
+		replace rdp= 0 if (area_int_placebo >= $census_int & area_int_placebo<.) ;
 		drop if rdp==.  ;
 
 		* flush toilet?;
@@ -108,23 +108,22 @@ if $census_prep == 1 {;
 		g cluster = cluster_rdp;
 		replace cluster = cluster_placebo if cluster==. & cluster_placebo!=.;
 
-		** TRIM EXTREME AREAS *;
-		replace area = . if area>800000;
+		*replace area = . if area>800000; /* this tries to trim outliers but doesnt matter */
 
 		bys area_code: g a_n=_n;
 		g o = 1;
 		egen pop = sum(o), by(area_code);
 		g density = pop/area; 
 		replace density = . if a_n!=1;
-		sum density, detail;
-		replace density = . if density>`=r(p99)';
+		*sum density, detail; /* this tries to trim outliers but doesnt matter  */
+		*replace density = . if density>`=r(p99)';
 		lab var density "Households per m2";
 
 		egen pop_n = sum(hh_size), by(area_code);
 		g density_n = pop_n/area;
 		replace density_n = . if a_n!=1;
-		sum density_n, detail;
-		replace density_n = . if density_n>`=r(p99)';
+		*sum density_n, detail; /* this tries to trim outliers but doesnt matter */
+		*replace density_n = . if density_n>`=r(p99)';
 		lab var density_n "People per m2";
 
 		bys cluster rdp: g cn=_n;
@@ -157,6 +156,8 @@ if $gcro_prep == 1 {;
 
 		  keep if cluster_placebo!=. | cluster_rdp!=.;
 		  g rdp = cluster_rdp!=.;
+
+		  drop if area>50;
 
 		  foreach v in $gcro_vars {;
 		  ttesting_nocluster `v';
@@ -207,12 +208,13 @@ if $price_prep == 1 {;
 };
 
 
-*if $bblu_prep == 1 {;
+if $bblu_prep == 1 {;
 	*** Pre building density in Uncompleted and Completed Areas *** ;
 	global bblu_vars = "inf for total_buildings";
 	 
 	use bbluplot_reg_admin_$size, clear;
 
+	keep if post == 0 ;
 	keep if distance_rdp<0 | distance_placebo<0  ;
 
 	g cluster = cluster_rdp;
@@ -335,7 +337,7 @@ expand 20;
 
 preserve;
 
-	global varlist=" area  density_n inf for purch_price RDP_density N ";
+	global varlist=" area  inf for purch_price density_n RDP_density N ";
 	order $varlist;
 	local num : word count $varlist;
 	matrix define FOR=J(`num',1,2);
@@ -360,13 +362,14 @@ preserve;
 
 
 	g temp="";
-	replace temp = "Area (km)" 							in 1;
-	replace temp = "Population (per km)" 				in 2;
-	replace temp = "Informal Buildings (per km)" 		in 3;
-	replace temp = "Formal Buildings (per km)" 			in 4;
-	replace temp = "Purchase Price (Rand)" 				in 5;
-	replace temp = "Project House Density (per km)" 	in 6;
+	replace temp = "Area (km2)" 						in 1;
+	replace temp = "Informal Buildings (per km2)" 		in 2;
+	replace temp = "Formal Buildings (per km2)" 		in 3;
+	replace temp = "Purchase Price (Rand)" 				in 4;
+	replace temp = "Population (per km2)" 				in 5;
+	replace temp = "Project House Density (per km2)" 	in 6;
 	replace temp = "Number of Projects" 				in 7;
+
 
 	table_prepping;
 
