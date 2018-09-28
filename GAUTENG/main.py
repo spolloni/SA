@@ -10,7 +10,7 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.placebofuns import make_gcro, make_gcro_conhulls, import_budget, make_gcro_link
+from subcode.placebofuns import make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
@@ -78,6 +78,7 @@ _7_DD_REGS_     = 0  # DD regressions with census data
 ### NOT UPDATED YET ###
 _8_TABLES_      = 0  # DESCRIPTIVES (haven't updated yet)
 
+_9_MAP_         = 1 
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -365,6 +366,12 @@ if _8_TABLES_ == 1: # haven't done yet
     print '\n'," -- Tables: done! ", '\n'    
 
 
+if _9_MAP_ == 1:
 
+    print '\n'," Map Final Shapes ... ", '\n'
+
+    projects_shp(db)
+
+    print '\n'," Makes final map ... ", '\n'
 
 
