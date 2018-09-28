@@ -258,13 +258,13 @@ g o = 1;
 bys area_code: g a_n=_n;
 egen pop = sum(o), by(area_code year);
 g hh_density = (pop/area)*1000000;
-lab var hh_density "Households per m2";
+lab var hh_density "Households per km2";
 drop o pop;
 
 * pop density;
 egen pop = sum(hh_size), by(area_code year);
 g pop_density = (pop/area)*1000000;
-lab var pop_density "People per m2";
+lab var pop_density "People per km2";
 drop pop;
 
 * cluster for SEs;
