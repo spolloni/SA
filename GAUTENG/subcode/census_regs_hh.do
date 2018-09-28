@@ -39,8 +39,8 @@ global LOCAL = 1;
 
 * DOFILE SECTIONS;
 global data_load = 0;
-global data_prep = 0;
-global data_regs = 0;
+global data_prep = 1;
+global data_regs = 1;
 
 * PARAMETERS;
 global tresh_area = 0.3;  /* Area ratio for "inside" vs spillover */
@@ -300,34 +300,49 @@ g spillover_post = spillover == 1 & year==2011;
 g spillover_post_rdp = spillover_rdp==1 & year==2011;
 
 g others = project !=1 & spillover !=1;
+g others_post = others==1 & year==2011;
 
 global regressors "
-  project
-  project_rdp
-  project_post
   project_post_rdp
-  spillover
-  spillover_rdp
-  spillover_post
+  project_post
+  project_rdp
+  project
   spillover_post_rdp
+  spillover_post
+  spillover_rdp
+  spillover
+  others_post
   ";
 
-global outcomes "
+global outcomes1 "
   toilet_flush 
   water_inside 
-  water_yard 
   water_utility 
-  electricity 
-  electric_cooking 
-  electric_heating 
-  electric_lighting 
   owner 
   house 
   ";
 
+global outcomes2 "
+  electric_cooking 
+  electric_heating 
+  electric_lighting 
+  ";
+
 eststo clear;
 
-foreach var of varlist $outcomes {;
+foreach var of varlist $outcomes1 {;
+  areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  eststo `var';
+};
+
+esttab $outcomes1 using census_hh_DDregs_admin_1,
+  replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
+  star(* 0.10 ** 0.05 *** 0.01) 
+  compress;
+
+eststo clear;
+
+foreach var of varlist $outcomes2 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
   eststo `var';
 };
@@ -338,10 +353,8 @@ eststo pop_density;
 areg hh_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
 eststo hh_density;
 
-esttab $outcomes hh_density pop_density using census_hh_DDregs_admin,
+esttab $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
   replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  keep(project_post_rdp spillover_post_rdp ) 
-  order(project_post_rdp spillover_post_rdp ) 
   star(* 0.10 ** 0.05 *** 0.01) 
   compress;
 
