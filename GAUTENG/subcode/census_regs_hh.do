@@ -332,7 +332,7 @@ eststo clear;
 
 foreach var of varlist $outcomes1 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
-  sum `var', detail;
+  sum `var' if e(sample)==1, detail;
   estadd scalar Mean = `=r(mean)';
   eststo `var';
 };
@@ -347,18 +347,18 @@ eststo clear;
 
 foreach var of varlist $outcomes2 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
-  sum `var', detail;
+  sum `var' if e(sample)==1, detail;
   estadd scalar Mean = `=r(mean)';
   eststo `var';
 };
 
 areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
-  sum pop_density, detail;
+  sum pop_density if e(sample)==1, detail;
   estadd scalar Mean = `=r(mean)';
 eststo pop_density;
 
 areg hh_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
-  sum hh_density, detail;
+  sum hh_density if e(sample)==1, detail;
   estadd scalar Mean = `=r(mean)';
 eststo hh_density;
 
