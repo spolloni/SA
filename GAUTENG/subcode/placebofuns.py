@@ -13,6 +13,57 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+def projects_shp(db):
+
+    name = 'projects'
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="{}";
+               '''.format(name)
+
+    drop_qry = '''
+               SELECT DisableSpatialIndex('{}','GEOMETRY');
+               SELECT DiscardGeometryColumn('{}','GEOMETRY');
+               DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+               DROP TABLE IF EXISTS {};
+               '''.format(name,name,name,name)
+
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+    cur.execute('DROP TABLE IF EXISTS {};'.format(name))   
+
+    make_qry = '''
+                   CREATE TABLE {} AS 
+                   SELECT CastToMultiPolygon(A.GEOMETRY) AS GEOMETRY,
+                   A.cluster, A.parent, A.area, A.placebo_yr,
+                   A.formal_pre, A.informal_pre, A.formal_post, A.informal_post,
+                   A.RDP_density, A.RDP_mode_yr, B.rdp
+                    FROM gcro AS A 
+                    JOIN (SELECT cluster_rdp AS cluster, 1 AS rdp FROM cluster_rdp 
+                            UNION 
+                          SELECT cluster_placebo AS cluster, 0 AS rdp FROM cluster_placebo) 
+                              AS B ON A.cluster = B.cluster
+                    ;
+                   '''.format(name)
+    cur.execute(make_qry)
+    
+    cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(name))
+    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+
+    return
+
+
+
+
 
 def make_gcro_link(db):
     
@@ -197,7 +248,7 @@ def make_gcro(db):
     # clean-up
     cur.execute('DROP TABLE IF EXISTS gcro_temp_pre;')    
     cur.execute('DROP TABLE IF EXISTS gcro_temp_post;')  
-    cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
+    #cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
     cur.execute('DROP TABLE IF EXISTS gcro_temp_year;')
     cur.execute('''SELECT DiscardGeometryColumn('{}_union','GEOMETRY');'''.format(union_name))
     cur.execute('DROP TABLE IF EXISTS {}_union;'.format(union_name))
