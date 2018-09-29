@@ -248,7 +248,7 @@ def make_gcro(db):
     # clean-up
     cur.execute('DROP TABLE IF EXISTS gcro_temp_pre;')    
     cur.execute('DROP TABLE IF EXISTS gcro_temp_post;')  
-    cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
+    #cur.execute('DROP TABLE IF EXISTS gcro_temp_rdp_count;')
     cur.execute('DROP TABLE IF EXISTS gcro_temp_year;')
     cur.execute('''SELECT DiscardGeometryColumn('{}_union','GEOMETRY');'''.format(union_name))
     cur.execute('DROP TABLE IF EXISTS {}_union;'.format(union_name))

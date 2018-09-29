@@ -15,13 +15,13 @@ global LOCAL = 1;
 
 
 ** set these equal to one to prep temporary datasets to make tables ;
-global census_prep = 0;
-global gcro_prep   = 0;
-global price_prep  = 0;
-global bblu_prep   = 0;
+global census_prep = 0  ; 
+global gcro_prep   = 1  ;
+global price_prep  = 0  ;
+global bblu_prep   = 0  ;
 
 global census_int  = .9 ; /* intersection % between census areas and project areas*/
-global size     = 50    ; /* just for which bblu file to pull */
+global size        = 50 ; /* just for which bblu file to pull */
 
 if $LOCAL==1 {;
 	cd ..;
@@ -156,15 +156,15 @@ if $gcro_prep == 1 {;
 
 		  keep if cluster_placebo!=. | cluster_rdp!=.;
 		  g rdp = cluster_rdp!=.;
+		  
+		  bys rdp: g N=_N;
+		  g N_ttest = .;
 
 		  drop if area>50;
 
 		  foreach v in $gcro_vars {;
 		  ttesting_nocluster `v';
 		  };
-
-		  bys rdp: g N=_N;
-		  g N_ttest = .;
 
 		  duplicates drop rdp, force;
 		  keep rdp $gcro_vars N *_ttest;
@@ -280,7 +280,12 @@ program define tables `1' `2' `3' `4' `5';
 		file write fi  "`h' & ";
 		};
 		if `c'==`COLS' {;
-		file write fi  "`htest'  \\" _n		;
+		if `c'==3 {;
+		file write fi  "`htest'  \\" _n		;		
+		};
+		else {;
+		file write fi  "`h'  \\" _n		;
+		};
 		}		;
 		};
 	};
@@ -315,6 +320,22 @@ prog define table_prepping;
 end;
 
 
+cap program drop table_prepping_no_t;
+prog define table_prepping_no_t;
+
+	estpost sum $varlist if rdp==0;
+		matrix c1=e(mean);
+	estpost sum $varlist if rdp==1;
+		matrix c2=e(mean);
+		
+		matrix A1 = (c1',c2');
+
+	g colnames = "";
+	replace colnames = "Uncompleted" in 1;
+	replace colnames = "Completed" in 2;
+end;
+
+
 
 use dtable_pre_census.dta, clear;
 append using dtable_pre_gcro.dta;
@@ -337,17 +358,15 @@ expand 20;
 
 preserve;
 
-	global varlist=" area  inf for purch_price density_n RDP_density N ";
+	*global varlist=" N area RDP_density inf for density_n purch_price ";
+	
+	global varlist=" N area RDP_density inf for purch_price ";
+
 	order $varlist;
 	local num : word count $varlist;
-	matrix define FOR=J(`num',1,2);
+	matrix define FOR=J(`num',1,0);
 
-	matrix FOR[2,1] = 0;
-	matrix FOR[3,1] = 0;
-	matrix FOR[4,1] = 0;
-	matrix FOR[5,1] = 0;
-	matrix FOR[6,1] = 0;
-	matrix FOR[7,1] = 0;
+	matrix FOR[2,1] = 2;
 
 	replace RDP_density_ttest = .;
 	replace RDP_density = . if rdp==0;
@@ -359,16 +378,17 @@ preserve;
 	replace inf = inf*(1000000/($size*$size)); /* convert to km */
 	replace for = for*(1000000/($size*$size)); /* convert to km */
 
-
-
 	g temp="";
-	replace temp = "Area (km2)" 						in 1;
-	replace temp = "Informal Buildings (per km2)" 		in 2;
-	replace temp = "Formal Buildings (per km2)" 		in 3;
-	replace temp = "Purchase Price (Rand)" 				in 4;
-	replace temp = "Population (per km2)" 				in 5;
-	replace temp = "Project House Density (per km2)" 	in 6;
-	replace temp = "Number of Projects" 				in 7;
+	replace temp = "Number of Projects" 				in 1;
+	replace temp = "Area (km2)" 						in 2;
+	replace temp = "Completed Houses (per km2)" 	    in 3;
+
+	replace temp = "Informal Buildings (per km2)" 		in 4;
+	replace temp = "Formal Buildings (per km2)" 		in 5;
+	replace temp = "House Price (Rand)" 				in 6;
+
+*	replace temp = "Population (per km2)" 				in 6;
+
 
 
 	table_prepping;
@@ -376,6 +396,50 @@ preserve;
 		tables pre_descriptives A1 FOR temp colnames ;
 		
 restore;
+
+
+
+
+preserve;
+
+	*global varlist=" N area RDP_density inf for density_n purch_price ";
+	
+	global varlist=" N area RDP_density inf for purch_price ";
+
+	order $varlist;
+	local num : word count $varlist;
+	matrix define FOR=J(`num',1,0);
+
+	matrix FOR[2,1] = 2;
+
+	replace RDP_density_ttest = .;
+	replace RDP_density = . if rdp==0;
+
+	matrix define PER=J(`num',1,0);
+
+	replace density_n = density_n*1000000;
+
+	replace inf = inf*(1000000/($size*$size)); /* convert to km */
+	replace for = for*(1000000/($size*$size)); /* convert to km */
+
+	g temp="";
+	replace temp = "Number of Projects" 				in 1;
+	replace temp = "Area (km2)" 						in 2;
+	replace temp = "Completed Houses (per km2)" 	    in 3;
+
+	replace temp = "Informal Buildings (per km2)" 		in 4;
+	replace temp = "Formal Buildings (per km2)" 		in 5;
+	replace temp = "House Price (Rand)" 				in 6;
+
+*	replace temp = "Population (per km2)" 				in 6;
+
+	table_prepping_no_t;
+
+		tables pre_descriptives_no_t A1 FOR temp colnames ;
+		
+restore;
+
+
 
 
 	** 2 **;

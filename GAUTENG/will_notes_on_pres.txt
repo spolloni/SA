@@ -1,0 +1,10 @@
+
+9/29/18 :
+	
+	- title slides with outcome (or just take out plotting regression coefficients)
+	- a lot less preamble about data construction
+	- include buttons to diff-in-diff/means for bblu
+	- emphasize that there could be false-positives in the placebo (still constructed)
+	- think through how to interpret these areas
+	- add T-stat descriptive table just in case??
+	- area measure on descriptive table drops one major outlier

@@ -38,31 +38,62 @@ replace rdp = 1 if con_mo_rdp!=.;
 drop if rdp==.;
 
 
+
 *global varlist="implementation uncertain planning current complete proposed informal investigating";
 
 
-global varlist=" future proposed investigating planning uncertain implementation  complete";
+global varlist_start=" future proposed investigating planning uncertain implementation  complete";
 
+global varlist_single=" uncertain planning";
 
 g id =2;
-foreach v in $varlist {;
+foreach v in $varlist_start {;
 replace id = 1 if regexm(desc,"`v'")==1 ; 
 };
-sort id hectares;
-duplicates drop cluster_new, force;
-replace id = 0 if id==2;
-egen none = sum(id), by(rdp);
+sort id hectares; /* make sure we are keeping the descriptions with keywords! */
+duplicates drop cluster_new rdp, force;
 
-g total=none;
 
-foreach v in $varlist {;
+foreach v in $varlist_single {;
 	g `v'_id = regexm(desc,"`v'")==1 ; 
 	egen `v' = sum(`v'), by(rdp)     ;
-	drop `v'_id;
-	replace total = total + `v';
 };
 
-global varlist=" $varlist none total";
+g future_id = 	regexm(desc,"future")==1 | 
+				regexm(desc,"investigating")==1 | 
+				regexm(desc,"proposed")==1;
+	egen future= sum(future_id), by(rdp)     ;
+
+
+g implementation_id = 	regexm(desc,"implementation")==1 | 
+				regexm(desc,"complete")==1 ;
+
+	egen implementation= sum(implementation_id), by(rdp)     ;
+
+
+g none = 1;
+foreach var of varlist *_id {;
+replace none = 0 if `var'==1;
+};
+
+ren none none_id;
+egen none=sum(none_id), by(rdp);
+drop *_id;
+
+bys rdp: g total=_N;
+
+global varlist=" implementation planning future uncertain none total";
+
+
+
+g temp="";
+replace temp = "Implementation, Completed" in 1;
+replace temp = "Planning" in 2;
+replace temp = "Future, Investigating, Proposed" in 3;
+replace temp = "Uncertain" in 4;
+replace temp = "No Description" in 5;
+replace temp = "Total" in 6;
+
 
 
 
@@ -86,11 +117,11 @@ estpost sum $varlist if rdp==1;
 matrix define FOR=J(`num',1,0);
 matrix define PER=J(`num',1,0);
 
-g temp="";
-forvalues r=1/`num' {;
-local var `: word `r' of $varlist ' ;
-replace temp = "`var'" in `r';
-};
+
+*forvalues r=1/`num' {;
+*local var `: word `r' of $varlist ' ;
+*replace temp = "`var'" in `r';
+*};
 
 g colnames = "";
 replace colnames = "Uncompleted" in 1;
@@ -137,6 +168,9 @@ program define tables `1' `2' `3' `4' `5';
 		if `c'==`COLS' {;
 		file write fi  "`h'  \\" _n		;
 		}		;
+		};
+		if `r'==`=`ROWS'-1' {;
+			file write fi  "\hline ";
 		};
 	};
 *	file write fi "\hline" _n;

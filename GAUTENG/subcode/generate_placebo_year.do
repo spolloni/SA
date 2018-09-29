@@ -206,12 +206,16 @@ save "temp/tab_08_09.dta", replace;
 
 
 ** MERGE THEM ALL TOGETHER ;
+global count_budget=0;
 foreach year in 04_05 05_06 06_07 08_09 {;
 		use "temp/tab_`year'.dta", clear;
+		global count_budget = `=`$count_budet' + `=_N'' ;
 		matchit ID name using "temp/gcro.dta", idu(ID_gcro) txtu(name_gcro) generate(score) ;
 			replace score = round(score,.00001);
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
+			sum score, detail;
+			global score_`year' = `r(mean)';
 		** HERE IS WHERE WE SET THE THRESHOLD FOR THE STRING MATCHING SCORE ;
 			keep if max_score>.6;
 			drop max_score;
@@ -252,6 +256,7 @@ use "temp/gcro_merge.dta", clear;
 
 	sum year_post if RDP_mode_yr>=2000 & start_yr>=2000 & start_yr<=2004 & year_post>=0, detail ;
 
+
 	g placebo_year = start_yr + `=round(r(mean),1)';
 	** round to the nearest year because we are going at the year level ;
 
@@ -263,6 +268,11 @@ use "temp/gcro_merge.dta", clear;
 	odbc exec("DROP TABLE IF EXISTS gcro_temp_year;"), dsn("gauteng");
 	odbc insert, table("gcro_temp_year") create;
 
-	shell rm -r "temp";
+	disp $count_budget ;
+	disp ($score_04_05 + $score_05_06 + $score_06_07 + $score_08_09)/4;
+
+
+
+*	shell rm -r "temp";
 
 exit, STATA clear; 
