@@ -199,6 +199,10 @@ if $bblu_clean_data==1 {;
   replace distance_rdp = -1*distance_rdp if cluster_int_rdp!=.; 
   replace distance_placebo = -1*distance_placebo if cluster_int_placebo!=.;
 
+  /* single distance & cluster var -- no doublecounting */
+  gen placebo = (distance_placebo < distance_rdp);
+  gen cluster_joined = cond(placebo==1, cluster_placebo, cluster_rdp);
+
   /* create id's */
   g id  = string(round(X,$size),"%10.0g") + string(round(Y,$size),"%10.0g") ;
 
@@ -225,7 +229,7 @@ if $bblu_clean_data==1 {;
   };
 
   keep  $outcomes  
-    post id cluster_placebo cluster_rdp 
+    post id cluster_placebo cluster_rdp cluster_joined
     distance_rdp distance_placebo RDP_density;
   duplicates drop id post, force;
 
@@ -661,20 +665,11 @@ foreach var in $outcomes {;
 ************************************************;
 if $reg_triplediff == 1 {;
 
-local table_name "regDDD";
-
-drop if distance_rdp > $dist_max_reg & distance_rdp<.; /* get rid of far away places */
-drop if distance_placebo > $dist_max_reg & distance_placebo<.;
-
-drop if distance_rdp < $dist_min_reg ; /* get rid of way too close places */
-drop if distance_placebo < $dist_min_reg ;
-
-label_outcomes;
-
 foreach v in rdp placebo {;
-  g dists_`v'_g = 1 if dists_`v' >abs($dist_min_reg) & dists_`v' < abs($dist_min_reg) + $dist_break_reg  ;
-  replace  dists_`v'_g = 2 if dists_`v' <=abs($dist_min_reg)  ;
-  replace  dists_`v'_g = 3 if dists_`v' >= abs($dist_min_reg)+ $dist_break_reg & dists_`v' < abs($dist_min_reg) + $dist_max_reg ;
+  g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min;
+  replace dists_`v'_g = 2 if dists_`v' >= 0 - $dist_min & dists_`v' <= $dist_break_reg - $dist_min  ;
+  replace dists_`v'_g = 3 if dists_`v' > $dist_break_reg - $dist_min & dists_`v' <= $dist_max_reg - $dist_min;
+  replace dists_`v'_g = 4 if dists_`v' > $dist_max_reg - $dist_min;
 };
 
 levelsof dists_rdp_g;
@@ -686,24 +681,18 @@ foreach level in `r(levels)' {;
 };
 omit dists_all_g dists_rdp_g_3;
 
-global vars_g = "dists_rdp_g_1 dists_rdp_g_2";
-lab var dists_rdp_g_1 "Spillover (`=abs($dist_min_reg)'m)";
-lab var dists_rdp_g_2 "Inside (`=abs($dist_min_reg)'m)";
+foreach var of varlist $outcomes {;
+  areg `var' $dists_all_g , cl(cluster_reg) a(id);
+  eststo `var';
+};
 
-local var: word 1 of $outcomes;
-areg `var' $dists_all_g , cl(cluster_reg) a(id);
-test dists_rdp_g_1 = dists_rdp_g_2;
-outreg2 using "`table_name'", label tex(frag) replace 
-addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g);
+esttab $outcomes using bblu_regDDD,
+  replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
+  keep(dists_rdp_g_1 dists_rdp_g_2)
+  order(dists_rdp_g_1 dists_rdp_g_2)
+  star(* 0.10 ** 0.05 *** 0.01) 
+  compress;
 
-local outcomes_N: word count $outcomes;
-forvalues r=2/`outcomes_N' {;
-local var: word `r' of $outcomes;
-areg `var' $dists_all_g , cl(cluster_reg) a(id);
-test dists_rdp_g_1 = dists_rdp_g_2;
-outreg2 using "`table_name'", label tex(frag) append
-addtext(F-Test: Inside = Spillover, `=string(`=r(F)',"%10.3g")' ) keep($vars_g);
-  
 };
 ************************************************;
 ************************************************;
