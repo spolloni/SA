@@ -268,7 +268,7 @@ Understanding the spillover impacts of public housing requires (1) outcome measu
 
 %\subsection{Measuring Spillover Outcomes}
 
-We locate housing projects using administrative maps compiled by the Gauteng City Regional Authority.  These records include \input{figures/total_gcro}planned housing projects as well as notes on their completion status.\footnote{Since this data comes in the form of overlapping shapefiles, we use the intersection of the shapes excluding tiny shapes below 0.50 square kilometers.}  
+We locate housing projects using administrative maps compiled by the Gauteng City Regional Observatory.  These records include \input{figures/total_gcro}planned housing projects as well as notes on their completion status.\footnote{Since this data comes in the form of overlapping shapefiles, we use the intersection of the shapes excluding tiny shapes below 0.50 square kilometers.}  
 
 To measure formal housing market impacts, we use over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).\footnote{The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.}  These data include the price, exact location, plot size, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 1.2 kilometers of a housing project bringing the final sample to around 200,000 transactions.  We exclude the top 1\% of prices as well as prices below 2,500 Rand, which are likely composed of measurement error or the exchange of property title between family members.
 
@@ -288,7 +288,7 @@ For demographic and economic outcomes, we have access to the full census of popu
 %\subsubsection{Seller Identity}
 % prob yes and large : 2770 / 127600 = 2\%
 
-We define projects as successfully constructed when we observe at least some recipients receiving deeds to their new government houses.  Deed transfers are assumed to belong to a housing project if the seller name includes a government, municipality, or large developer.  We exclude deeds flagged as large buildings used for commercial purposes ($<$2\% of transactions) as well as purchase prices that are more than R50,000 above the yearly subsidy value ($<$4\% of remaining transactions).  Using this criteria, we are able to identify over \input{figures/total_cluster_rdp} constructed housing projects out of \input{figures/total_gcro}planned projects.
+We define projects as successfully constructed when we observe at least some recipients receiving deeds to their new government houses.  Deed transfers are assumed to belong to a housing project if the seller name includes a government, municipality, or large developer.  As recommended by the data provider, we exclude deeds flagged as large buildings used for commercial purposes ($<$2\% of transactions) as well as purchase prices that are more than R50,000 above the yearly subsidy value ($<$4\% of remaining transactions).  Using this criteria, we are able to identify over \input{figures/total_cluster_rdp} constructed housing projects out of \input{figures/total_gcro}planned projects.
 
 This approach may introduces measurement error insofar as we are mis-attributing deeds to housing projects.  We use a limited definition of verified seller names to minimize the chances that unconstructed projects are misclassified as constructed projects.  However, this approach increases the possibility that this definition mistakenly excludes constructed projects.
 
@@ -315,7 +315,7 @@ Descriptive evidence supports our project definition.  First, Figure~\ref{figure
 Note: Transactions are censored at R100,000.
 \end{figure}
 
-We assign a date for each project according to the modal year of deeds.  Figure~\ref{figure:densitytime} indicates the distribution of transaction dates for properties within a 1.2 km buffer around clusters (above panel) and within the selected project areas (below panel).  Project areas exhibit substantial bunching during a single month when projects were completed.  There are also more transactions after the modal year than before the modal year, consistent with either a gradual roll-out for some project areas or immediate resale of projects houses after construction, which would be counter to housing regulations.  
+We assign a completion date for each project according to the modal year of these deeds transactions.  Figure~\ref{figure:densitytime} indicates the distribution of transaction dates for properties within a 1.2 km buffer around clusters (above panel) and within the selected project areas (below panel).  Project areas exhibit substantial bunching during a single month when projects were completed.  There are also more transactions after the modal year than before the modal year, consistent with either a gradual roll-out for some project areas or immediate resale of projects houses after construction, which would be counter to housing regulations.  
 
 %We then include only clusters where over 50\% of transactions occur during the modal year, which excludes half of total clusters.  This approach helps to exclude incremental projects as well as possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
 
@@ -331,11 +331,17 @@ The above panel includes transactions within a 1.2 kilometer buffer around a pro
 
 \subsection{Planned but Unconstructed Housing Projects}
 
-
-
 %The administrative spatial data identifies many project areas that do not appear to have received housing projects, as measured by having fewer than 5 housing project transactions per square kilometer.  We use these areas to create a sample of planned but unconstructed housing projects to serve as counterfactuals areas in our analysis.
 
-To construct an estimated completion date for planned but unconstructed housing projects, we digitized National Treasury budget reports that detail the start date, expected completion date, and cost of each housing project.  We use a fuzzy-string matching algorithm with bigrams to successfully link project names from the budget reports for over 300 project names in our administrative spatial data (including both completed and uncompleted projects).  Appendix~\ref{table:stringmatch} compares unmatched and matched projects finding that matched projects have a higher density of formal and informal houses although they are smaller in total area.  We find that for completed projects, the mode transaction year observed in the deeds data falls an average of three years after the start date indicated in the budget reports.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Therefore, we assign a expected completion date for unconstructed projects that is three years after the announced start-date in the project.  
+Identifying \input{figures/total_cluster_rdp} constructed housing projects leaves \input{figures/unconstructed_no_date} planned but possibly unconstructed housing projects from the administrative records.  In order to determine which of these projects were planned to be completed between 2001 and 2011, we construct an estimated completion date using National Treasury budget reports.  We were able to digitize data for 132 projects from report spanning 2004 to 2009 and detailing the name, start date, expected completion date, and cost of each housing project.  
+
+We use a fuzzy-string matching algorithm with bigrams to successfully link project names from the budget reports for over 300 project names in our administrative spatial data (including both completed and uncompleted projects).  
+
+Appendix~\ref{table:stringmatch} compares unmatched and matched projects finding that matched projects have a higher density of formal and informal houses although they are smaller in total area.  
+
+We find that for completed projects, the mode transaction year observed in the deeds data falls an average of three years after the start date indicated in the budget reports.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Therefore, we assign a expected completion date for unconstructed projects that is three years after the announced start-date in the project.  
+
+
 
 
 \subsection{Assessing Project Measures}
