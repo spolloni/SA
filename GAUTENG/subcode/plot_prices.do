@@ -61,7 +61,7 @@ global bin   = 250;   /* distance bin width for dist regs   */
 global max   = 2000;  /* distance maximum for distance bins */
 global mbin  =  12;   /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
-global treat = 500;   /* distance to be considered treated  */
+global treat = 700;   /* distance to be considered treated  */
 global round = 0.15;  /* rounding for lat-lon FE */
 
 * data subset for regs (1);
@@ -72,11 +72,19 @@ global ifregs = "
        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
        ";
 
+global ifhists = "
+       s_N <30 &
+       rdp_never ==1 &
+       purch_price > 2000 & purch_price<1800000 &
+       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
+       ";
+
 * what to run?;
+global trans_hist = 0;
 global dist_regs = 0;
 global time_regs = 0;
 global dd_regs = 0;
-global ddd_regs = 1;
+global ddd_regs = 0;
 
 * load data; 
 cd ../..;
@@ -135,6 +143,51 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 *****************************************************************;
 
 *****************************************************************;
+****************** TRANSACTIONS HISTOGRAM  **********************;
+*****************************************************************;
+if $trans_hist ==1 {;
+preserve;
+
+keep if ($ifhists) | rdp_all ==1;
+bys cluster_rdp: egen sum_nrdp = sum(rdp_never);
+drop if sum_nrdp < 50;
+
+hist lprice if rdp_all==1 & lprice < 15 & lprice > 5, 
+  bin(200) name(a) xlabel(5(5)15)
+  xtitle("")  ytitle("") title("subsidized housing");
+
+hist lprice if rdp_never==1, 
+  bin(200)  name(b) xlabel(5(5)15)
+  xtitle("") yla(none) ytitle("") title("non-subsidized housing");
+
+graph combine a b, rows(1) ycommon 
+l1(" transaction density",size(medsmall)) 
+b1("log house price",size(medsmall))
+xsize(13) ysize(8.5) imargin(0 0 -2 -2);
+graphexportpdf summary_pricedist, dropeps;
+
+hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_all==1, 
+  bin(73) name(a) xlabel(-36(12)36)
+  xtitle("") xla("") ytitle("") title("subsidized housing");
+
+hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_never==1, 
+  bin(73)  name(b) xlabel(-36(12)36)
+  xtitle("") ytitle("") title("non-subsidized housing");
+
+graph combine a b, cols(1) xcommon 
+l1(" transaction density",size(medsmall)) 
+b1("months to project modal transaction month",size(medsmall))
+xsize(13) ysize(8.5) imargin(0 0 -2 -2);
+graphexportpdf summary_densitytime, dropeps;
+
+restore;
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
+
+*****************************************************************;
 *************** DISTANCE REGRESSIONS PLACEBO-RDP  ***************;
 *****************************************************************;
 if $dist_regs ==1 {;
@@ -167,16 +220,16 @@ program plotcoeffs_distance;
     global ubound = $max;
 
     tw
-      (rcap max95 min95 contin if post ==1, lc(gs7) lw(thin) )
-      (rcap max95 min95 contin if post ==0, lc("206 162 97") lw(thin) )
-      (connected estimate contin if post ==1, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
-      (connected estimate contin if post ==0, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
+      (rcap max95 min95 contin if post ==0, lc(gs7) lw(thin) )
+      (rcap max95 min95 contin if post ==1, lc("206 162 97") lw(thin) )
+      (connected estimate contin if post ==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
+      (connected estimate contin if post ==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
       xtitle("meters to project border",height(5))
       ytitle("log-price coefficients",height(5))
       xlabel($lbound(500)$ubound,labsize(small))
-      ylabel(-.4(.1).4,labsize(small))
+      ylabel(-.4(.1).2,labsize(small))
       yline(0,lw(thin)lp(shortdash))
-      legend(order(3 "post" 4 "pre") 
+      legend(order(3 "pre-completion" 4 "post-completion") 
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
       note("`3'");;
@@ -210,11 +263,11 @@ foreach v in _rdp _placebo {;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-omit dummies dreg_long_placebo dreg_long_rdp; 
+omit dummies dreg_2000_pre_placebo dreg_2000_pre_rdp; 
 
 * REG MONKEY;
-reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
-*reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(cluster_joined);
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
 
 * plot coefficient;
 plotcoeffs_distance rdp distance_plot_rdp;
@@ -267,7 +320,7 @@ program plotcoeffs_time;
       xtitle("months to modal construction month",height(5))
       ytitle("log-price coefficients",height(5))
       xlabel(-$lbound(12)$ubound,labsize(small))
-      ylabel(-.4(.1).4,labsize(small))
+      ylabel(-.4(.1).3,labsize(small))
       xline(-6,lw(thin)lp(shortdash))
       legend(order(3 "> ${treat}m" 4 "< ${treat}m" ) 
       ring(0) position(5) bm(tiny) rowgap(small) 
@@ -303,7 +356,7 @@ foreach v in _rdp _placebo {;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-omit dummies dreg_far_placebo dreg_far_rdp; 
+omit dummies dreg_1001_cntrl_placebo  dreg_1001_cntrl_rdp; 
 
 * REG MONKEY;
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
@@ -444,13 +497,10 @@ foreach level in `r(levels)' {;
 * dummies global for regs;
 ds dreg_* ;
 global dummies = "`r(varlist)'"; 
-*omit dummies dreg_0;
+*omit dummies dreg_1001_treat_rdp ;
 
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
 reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
-
-pause on;
-pause;
 
 * plot the coeffs;
 preserve;
