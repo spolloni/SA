@@ -20,6 +20,65 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+
+
+
+
+def project_counts():
+    con = sql.connect(db)
+    cur = con.cursor()
+    df = pd.read_sql('''
+            SELECT 
+            SUM(1) AS total
+            FROM cluster_rdp;
+            ''',con)        
+
+    print df.head(10)
+
+    f = open(figures+'total_cluster_rdp.tex','w')
+    f.write( '{:,.0f}'.format(round(df['total'],1)) )
+    f.close()
+
+    df = pd.read_sql('''
+            SELECT 
+            SUM(1) AS total
+            FROM cluster_placebo;
+            ''',con)        
+
+    print df.head(10)
+
+    f = open(figures+'total_cluster_placebo.tex','w')
+    f.write( '{:,.0f}'.format(round(df['total'],1)) )
+    f.close()
+
+    con.close()
+    return
+
+project_counts()
+
+
+
+def gcro_shape_count():
+    con = sql.connect(db)
+    cur = con.cursor()
+    df = pd.read_sql('''
+            SELECT 
+            SUM(1) AS total
+            FROM gcro WHERE (area>0.5 OR RDP_density>0);
+            ''',con)        
+
+    print df.head(10)
+
+    f = open(figures+'total_gcro.tex','w')
+    f.write( '{:,.0f}'.format(round(df['total'],1)) )
+    f.close()
+
+    con.close()
+    return
+
+gcro_shape_count()
+
+
 ### PUT FINAL CLUSTER IDs INTO SQL DATABASE
 
 def final_clusters():
@@ -30,7 +89,7 @@ def final_clusters():
     con.close()
     return    
 
-final_clusters()
+#final_clusters()
 
 
 
@@ -123,7 +182,7 @@ def count_census_small_areas():
             SELECT 
             SUM(1) AS total_obs,
             SUM(CASE WHEN B.distance>0 THEN 1 ELSE 0 END) AS total_buffer
-            FROM sal_2011 AS A LEFT JOIN distance_SAL_2011_rdp AS B ON A.sal_code=B.sal_code ;
+            FROM sal_2011 AS A LEFT JOIN distance_SAL_2011_rdp AS B ON A.sal_code=B.input_id ;
             ''',con)        
 
     print df.head(10)
@@ -212,5 +271,5 @@ def share_during_mode_year():
 
 # count_ghs()
 
-# count_census_small_areas()
+count_census_small_areas()
 
