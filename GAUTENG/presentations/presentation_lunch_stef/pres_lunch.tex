@@ -15,7 +15,7 @@
 %	PACKAGES AND THEMES
 %----------------------------------------------------------------------------------------
 
-\documentclass[aspectratio=149]{beamer}
+\documentclass[aspectratio=32]{beamer}
 \usefonttheme[onlymath]{serif}
 
 
@@ -78,9 +78,11 @@
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
 }
 
+
 \usepackage{graphicx} % Allows including images
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
 \usepackage{verbatim}
+\usepackage{colortbl}
 
 \usepackage{mathtools} 
 \usepackage{amssymb}
@@ -133,13 +135,13 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title{Spillovers of Subsidized Housing Programs: \\ Evidence from South Africa } % The short title appears at the bottom of every slide, the full title is only on the title page
+\title{Subsidized Housing \& Urban Development: \\ Evidence from South Africa } % The short title appears at the bottom of every slide, the full title is only on the title page
 
-\author{Ben Bradlow, Stefano Polloni, Will Violette} 
+\author{\\Ben Bradlow \\ Stefano Polloni\\ Will Violette} 
 
  % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 
-\date{May 2018} %\today} % Date, can be changed to a custom date
+\date{October 2018} %\today} % Date, can be changed to a custom date
 
 \begin{document}
 
@@ -165,9 +167,12 @@
 % In developing countries, 30\% of urban pop live in slums (UN, 2015)
 
 \begin{itemize}
-  \item<1-> In developing countries, 30\% of urban pop lives in informal housing (UN, 2015)
+  \item<1-> Housing is a pressing issue in the developing world due to rapid urbanization. 
+  \begin{itemize}
+  \item 30\% of urban pop living in informal housing (UN, 2015)
+  \end{itemize}
   \vspace{2mm}
-  \item<2-> Slums can be lasting poverty traps (Marx, 2013): 
+  \item<2-> Slums thought to be lasting poverty traps (Marx, 2013): 
     \begin{itemize}
       \vspace{1mm}
       \item Poor infrastructure, High crime, Health externalities
@@ -175,7 +180,7 @@
       \item Weak incentives to invest in housing/public goods
   \vspace{2mm}
     \end{itemize}
-  \item<3-> \textbf{Public Housing Provision} $\rightarrow$ primary government response
+  \item<3->  Government response $\rightarrow$ \textbf{Public Housing Provision} 
 \end{itemize}
 
 
@@ -198,9 +203,11 @@
   \item<2-> {\bf Indirect Recipient Impacts}
   \begin{itemize}
   \vspace{2mm}
-      \item Amenity value to neighboring residents: \\ Diamond \& McQuade [2016], Baum-Snow \& Marion [2008]
+      %\item {\it``combating crime, promoting social cohesion and spatial restructuring...''} {\footnotesize -- SA Dept. of Human Settlements}
+      %\vspace{2mm}
+      \item Informal housing possibilities within project areas.
       \vspace{2mm}
-      \item Informal housing possibilities / indirect access to provided services.
+      \item Amenity value to neighboring areas: \\ Diamond \& McQuade [2016], Baum-Snow \& Marion [2008]
     \end{itemize}
 \end{enumerate}
 
@@ -248,13 +255,13 @@
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Introduction}
+\frametitle{Indirect Recipients}
 \centering
 % In developing countries, 30\% of urban pop live in slums (UN, 2015)
 
 \begin{figure}
- \includegraphics[scale=.25]{shacks.jpg} 
- \caption{Public Housing with Backyard Shacks in Soweto}
+ \includegraphics[scale=.25]{figures/shacks.jpg} 
+ \caption{Government Housing with Backyard Shacks in Soweto}
 \end{figure}
 
 \end{frame}
@@ -267,29 +274,33 @@
 \centering
 
 \begin{itemize}
-  \item<1-> \textbf{Question}: \\ 
+  \only<1>{
+  \vspace{1cm}
+  \item \textbf{Question}: \\ 
   \vspace{.2cm}
-  {What are the spillovers from public housing in developing contexts?}
+  {What are the urban development impacts from subsidized housing in developing contexts?}
   \vspace{.2cm}
     \begin{itemize}
-      \item<2-> Examine effect on nearby home values in the private housing market. 
+      \item Evaluate household's access to services within projects and nearby.
       \vspace{1mm}
-      \item<3-> Assess extent of slum crowd-in response (backyard shacks and nearby slum density).
+      \item Examine composition of building growth (formal and informal structures) in subsidized vs non-subsidized areas. 
       \vspace{1mm}
-      \item<4-> Evaluate household's access to services within projects and nearby.
+      \item Assess spillover effects on nearby home values in the private housing market. 
+     
     \end{itemize}
-\vspace{.2cm}
-\item<5-> \textbf{Approach:} 
+  }
+\vspace{.1cm}
+\item<2-> \textbf{Approach:} 
 \vspace{1mm}
-\begin{itemize}
-      \item Leverage precise timing/geography of large housing projects.
+\begin{enumerate}
+      \item Leverage granular spatial data with precise geography of housing projects.
       \vspace{1mm}
-      \item Use planned but unconstructed projects for falsification and as controls.
-    \end{itemize}
+      \item Use planned but unconstructed projects as additional counter-factual.
+    \end{enumerate}
 \vspace{.2cm}
-\item<6-> \textbf{Data and Setting:} \\
+\item<2-> \textbf{Data and Setting:} \\
 \vspace{.1cm} 
-{\small 57 public housing projects in Gauteng province combined with GPS property transactions, building-based land information, and census data.}
+{\small $\sim$ 60 public housing projects in Gauteng province combined with GPS property transactions, building-based land information, and census data.}
 \end{itemize}
 
 \end{frame}
@@ -303,11 +314,13 @@
 \begin{enumerate}
 
 
-\item<1-> Housing projects depress home prices within 400 meters by 14\% for 3 years after construction.
+\item<1-> Significant improvement in households' access to water, sanitation, and electricity within project areas.
 \vspace{2mm}
-\item<2-> Slum growth twice as large inside and in vicinity of projects, compared with more distant locations.
+\item<2-> Public housing is direct substitute for informal housing: 
+
+Total structure growth no different than control areas, but significant composition effects.
 \vspace{2mm}
-\item<3-> Share of households with direct access to water and sanitation improves within project areas, but decreases in vicinity.
+\item<3-> No evidence of amenity spillovers to neighboring areas. 
 
 \end{enumerate}
 
@@ -331,11 +344,32 @@
     \vspace{2mm}
     \item Annual expenditure of 6bn Rands (US\$500M).
     \vspace{2mm}
-    \item Supply planned by municipal and provincial housing agencies, project construction outsourced to private developers.
+    \item Supply planned by national --$>$ provincial --$>$ municipal housing agencies, project construction outsourced to private developers.
     \vspace{2mm} 
     \item Constraints on costs per unit, services access, and rooms/lot sizes.
   \end{itemize}
 \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Where are the houses built?}
+
+\begin{itemize}
+  \item Vacant private or government-owned land-plots with varying levels of (mostly informal) residential structures. 
+\end{itemize}
+
+\begin{figure}
+ \includegraphics[scale=.125]{figures/rdp_houses.jpg} 
+\end{figure}
+
+\begin{itemize}
+  \item Projects are (should be) fully serviced: roads, water, sanitation, electricity.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
 
         %\item Over 4.3 million houses since 1994 (13\% of pop.)
 %      \item Houses 13\% of the population
@@ -353,17 +387,19 @@
     \item<1-> {\bf Official Policy:}
     \vspace{2mm} 
       \begin{itemize}
-        \item Must be eligible: South African Citizen, Married or with dependents, Monthly income $<$ R3,500
+        \item Must be eligible: South African Citizen, Married or with dependents, Monthly income $<$ R3,500.
         \vspace{1mm}
-        \item National/provincial waiting lists
+        \item National/provincial waiting lists.
         \vspace{1mm}
-        \item No resale within 7 years
+        \item No resale within 7 years.
       \end{itemize}
     \vspace{2mm}
     \item<2-> {\bf In Practice}:
       \begin{itemize}
         \vspace{2mm} 
-        \item Wait-lists and eligibility weakly enforced (corruption).
+        \item Wait-lists and eligibility weakly enforced, with many noted cases of corruption.
+        \vspace{1mm}
+        \item Developers often fail to meet quality requirements.
         \vspace{1mm}
         \item 20\% of houses occupied not occupied by initial owners after 5 years.
         \vspace{1mm}
@@ -376,25 +412,23 @@
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Where are these houses built?}
+\frametitle{Canceled/Delayed Projects}
+\begin{center}
 
-\begin{enumerate}
-  \item \textbf{Greenfield projects} on undeveloped land near slums.
-  \item \textbf{In-Situ upgrading} replacing existing slums.
-\end{enumerate}
-
-\begin{figure}
- \includegraphics[scale=.125]{rdp_houses.jpg} 
-\end{figure}
-
+  {\footnotesize
+{\it ``R95m down the tubes as housing project picked apart brick by brick''} \\ \hspace{20em}-- Timeslive, 2017 \\[.7em]
+{\it ``MEC Mashatile delays Munsieville Ext 5 multimillion housing project''} \\ \hspace{20em}-- DA-GPL, 2017 \\[.7em]
+{\it ``Objections put R242m housing project on hold''}\\ \hspace{20em}-- IOL News, 2016 \\[.3em]
+}
+\end{center}
+Why?
 \begin{itemize}
-  \item Projects are fully serviced (roads, water, sanitation, electricity)
+\item Disputes over beneficiaries; disagreement with security contractor.
+\item Lack of  approval/coordination from all agencies.
+\item Failed environmental impact assessment.
 \end{itemize}
-    %%% insert small maps of pre-post periods (with cherry picked examples) (with google maps? or bblu?) or find good sattelite from an evaluation?
-
 \end{frame}
-
-
+%------------------------------------------------
 %\begin{frame}
 %\frametitle{Conceptual Framework: Public Housing Impacts}
 %
@@ -439,7 +473,7 @@
 
 
 %------------------------------------------------
-\section{Data}
+\section{Data and Set-up}
 %------------------------------------------------
 
 
@@ -454,13 +488,13 @@
   \item<2-> Four main data sources:
   \vspace{2mm}
   \begin{enumerate}
-    \item \textbf{Property Transactions} 
+    \item \textbf{Administrative Data on project location and planning} 
+    \vspace{2mm}
+    \item \textbf{Deeds-Based Housing Transactions} 
     \vspace{2mm}
     \item \textbf{Building-Based Land Use}
     \vspace{2mm}
-    \item \textbf{Population Census} 
-    \vspace{2mm}
-    \item \textbf{Additional Administrative Data} 
+    \item \textbf{Household Census}    
   \end{enumerate}
 
 \end{itemize}
@@ -470,14 +504,30 @@
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Property Transactions}
+\frametitle{Administrative Data on Subsidized Housing.}
+
+  \begin{itemize}
+    \item Data on location of government housing initiatives as of 2008.
+    \begin{itemize} 
+      \item Includes planned but unconstructed projects.
+    \end{itemize}
+
+    \item Annual Budget Reports from National Treasury. 
+    
+  \end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Housing Transactions}
 
 \begin{itemize}
 
   \item Sourced from South African deeds registry. 
   \vspace{2mm}
-  \item Universe of formal housing transactions recorded during 2001-2011 in
-affordable areas. (460K transactions)
+  \item "Universe" of formal housing transactions recorded during 2001-2011 in
+{\bf affordable areas}. (550K transactions)
   \vspace{2mm}
   \item Exact geographic location of traded property, but limited information
 on characteristics other than price and lot size.
@@ -494,9 +544,9 @@ on characteristics other than price and lot size.
 
 \begin{itemize}
 
-  \item Exhaustive hand-coded building identification  from aerial imagery. 
+  \item GeoTerraImage\textsuperscript{\tiny\textcopyright}: Exhaustive hand-coded building identification  from aerial imagery.
   \vspace{2mm}
-  \item 2 cross-sections: 2001 and 2012. 
+  \item 2 cross-sections: 2001 and 2011. 
   \vspace{2mm}
   \item Building type differentiated by category: residential, commercial, industrial, etc.
   \vspace{2mm}
@@ -509,40 +559,28 @@ on characteristics other than price and lot size.
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Other Data Sources}
+\frametitle{Building Based Land-Use}
 
+\begin{figure}
+ \includegraphics[scale=.33]{figures/bblu_example.pdf} 
+\end{figure}
+\end{frame}
 
+%------------------------------------------------
 
- {\bf Census Data} 
-
-
-
+\begin{frame}
+\frametitle{Census Data}
+\begin{itemize}
+  \item Full coverage from 2001 and 2011 censuses at the household level.
+  \vspace{.1mm}
+  \item Smallest identifiable geography is {\it\bf small area}.
   \begin{itemize}
-    \item Full coverage from 2001 and 2011 censuses at the individual and household level.
-
-    \item Smallest identifiable geography is {\it census small area}.
-    \begin{itemize}
-    \item 11,000 small areas in 2001, 17,000 in 2011.
-    \item average of 170 household per small area.
-    \end{itemize}
+  \item Gauteng: 11,000 small areas in 2001, 17,000 in 2011.
+  \item 170 household per small area, on average.
   \end{itemize}
-
-  \vspace{2mm}
-
-  {\bf Administrative Data Sources} 
-
-
-
-  \begin{itemize}
-    \item Data on location of government housing initiatives as of 2008.
-    \begin{itemize} 
-      \item Includes planned but unconstructed projects.
-    \end{itemize}
-
-    \item Annual Budget Reports from National Treasury. 
-    
-  \end{itemize}
-
+  \vspace{.5mm}
+  \item Summary information on dwelling characteristics and access to services.
+\end{itemize}
 \end{frame}
 
 %------------------------------------------------
@@ -592,7 +630,7 @@ on characteristics other than price and lot size.
 \begin{tikzpicture}[overlay]
 
 \onslide<1->\node[overlay,anchor=west,align=left] at (0, 2.5) {    \begin{minipage}{1\textwidth} {\begin{enumerate}
-  \item \textbf{Filter on Seller Identity:} Match governments and housing authorities from seller-names in transactions. 
+  \item \textbf{Filter on Seller Identity:} Find Governments, Housing authorities and Large Sellers from seller-names in transactions. 
 \end{enumerate}}\end{minipage}};
 
 \onslide<2->\node[overlay,anchor=west,align=left] at (0, 1.4) {    \begin{minipage}{1\textwidth} { 
@@ -613,16 +651,6 @@ on characteristics other than price and lot size.
   \item \textbf{Spatial Clustering:} collect nearby houses into projects with density-based clustering algorithm. (DBSCAN)
 \end{enumerate}}\end{minipage}};
 
-\onslide<5->\node[overlay,anchor=west,align=left] at (0, -2.1) {    \begin{minipage}{1\textwidth} { 
-\begin{enumerate}
-  \setcounter{enumi}{4}
-  \item \textbf{Attribute project completion date:} Examine within-cluster distribution of transactions date. Assign modal transaction month as completion date. 
-\end{enumerate}}\end{minipage}};
-
-\onslide<6->\node[overlay,anchor=west,align=left] at (0, -3.2) {    \begin{minipage}{1\textwidth} { 
-\begin{itemize}
-  \item Overlaps well with completed projects from admin. data
-\end{itemize}}\end{minipage}};
 
 
 
@@ -630,7 +658,7 @@ on characteristics other than price and lot size.
 \begin{minipage}{1\textwidth} { 
 \begin{figure}
 \caption{Top 5 Seller Names}
-\input{biggest_sellers_table} 
+\input{input_tex/biggest_sellers_table} 
 \end{figure}
 }\end{minipage}
 } ;
@@ -641,7 +669,7 @@ on characteristics other than price and lot size.
 \begin{minipage}{1\textwidth} { 
 \begin{figure}
 %\caption{Purchase Price Densities}
- \includegraphics[scale=.53]{price_histogram.pdf} 
+ \includegraphics[scale=.23]{figures/summary_pricedist.pdf} 
 \end{figure}
 }\end{minipage} 
 } ;
@@ -659,15 +687,10 @@ on characteristics other than price and lot size.
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Census Areas Exposure Measures}
+\frametitle{Title}
 \begin{center}
 \begin{figure}
-\frame{\includegraphics[scale=0.25]<1>{datainfo/datainfo_1.jpg}}
-\frame{\includegraphics[scale=0.25]<2>{datainfo/datainfo_2.jpg}}
-\frame{\includegraphics[scale=0.25]<3>{datainfo/datainfo_3.jpg}}
-\frame{\includegraphics[scale=0.25]<4>{datainfo/datainfo_4.jpg}}
-\frame{\includegraphics[scale=0.25]<5>{datainfo/datainfo_6.jpg}}
-\frame{\includegraphics[scale=0.25]<6>{datainfo/datainfo_7.jpg}}
+\frame{\includegraphics[scale=0.32]{datainfo/explanmap.jpg}}
 \vspace{-3mm}
 \end{figure}
 \end{center}
@@ -704,74 +727,346 @@ on characteristics other than price and lot size.
 
 \end{frame}
 
-
 %------------------------------------------------
 
-\begin{frame}
-\frametitle{Housing Projects}
-\begin{table}
-\caption{Housing Projects and Building Growth}
-\input{project_joint_table}
-\end{table}
-\vspace{.2cm} 
-Density is building number per square kilometer.
-\end{frame}
+
+
+\section{Impact on Dwelling Characteristics}
 
 %------------------------------------------------
-
-\begin{frame}
-\frametitle{Housing Price Descriptives}
-\begin{table}
-\caption{Price Descriptives}
-\centering
-\resizebox{.95\textwidth}{!}{  
-\input{descriptive_table}
-}
-\end{table}
-% descriptive_statistics.do program: write_descriptive_table
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Census Descriptives}
-
-\centering
-\resizebox{\textwidth}{!}{  
-\input{census_hh_time_table}
-}
-% descriptive_statistics.do program: write_census_hh_table
-
-\end{frame}
-
-%------------------------------------------------
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Census Descriptives}
-
-\centering
-\resizebox{\textwidth}{!}{  
-\input{census_hh_table}
-}
-% descriptive_statistics.do program: write_census_hh_table
-
-\end{frame}
-
-%------------------------------------------------
-
 \begin{frame}
 \frametitle{Census Areas Exposure Measures}
+\only<1>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.145]{design/design_5.jpg}
+   \caption{\scriptsize Census "Small Areas" with centroid within 1500m of project border}
+ \end{figure}
+ \end{center}
+}
+\only<2>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.145]{design/design_6.jpg}
+   \caption{\scriptsize "project" exposure: small areas with $>$ 30\% area overlap}
+ \end{figure}
+ \end{center}
+}
+\only<3>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.145]{design/design_7.jpg}
+   \caption{\scriptsize "spillover" exposure: small areas with $<$ 30\% area overlap}
+ \end{figure}
+ \end{center}
+}
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Empirical Specification}
+\only<1>{
+\begin{equation*}
+y_{hpt} \, = \, \lambda_p + \alpha D_tC_p \, + \, \beta D_t \, + \, \gamma C_p \, + \, \varepsilon_{hpt}
+\end{equation*}
+}
+\only<2->{
+\begin{equation*}
+y_{hpt} \, = \, \lambda_p + \sum\limits_{e} I^e_{hpt}\Big( \alpha^e D_tC_p \, + \, \beta^eD_t \, + \, \gamma^eC_p \, + \, \theta^e \Big) \, + \, \varepsilon_{hpt}
+\end{equation*}
+}
+\only<1>{
+with:
+\begin{itemize}
+\item $y_{htp}$: Outcome for household $h$ living in vicinity of project $p$, observed in census year $t$.
+\item $D_{t}\,\,$=1 if year $t$ is census year 2011 (post period). 
+\item $C_{p}\,\,$=1 if project $p$ has been constructed.
+\item $\lambda_p$: project fixed-effect.
+\item $\varepsilon_{itp}$: error term.
+\end{itemize}
+}
+\only<2>{
+with:
+\begin{itemize}
+\item $y_{htp}$: Outcome for household $h$ living in vicinity of project $p$, observed in census year $t$.
+\item $I^e_{hpt}$=1 if household $h$ is in exposure area $e$ of project $p$.
+\item $D_{t}\,\,$=1 if year $t$ is census year 2011 (post period). 
+\item $C_{p}\,\,$=1 if project $p$ has been constructed.
+\item $\lambda_p$: project fixed-effect.
+\item $\varepsilon_{itp}$: error term.
+\end{itemize}
+}
+\only<3>{
+\begin{itemize}
+\item $\alpha^e$ is the DD effect of housing projects on outcome $y$ at exposure $e$, comparing constructed vs. non-constructed projects, before and after construction.
+\item Assumes no differential trends between treatment and control areas, absent of project construction.
+\item concerns:
+\begin{itemize}
+  \item correlation between what stopped project.
+  \item endogenous census geography.
+  \item "dosage".
+\end{itemize}
+\end{itemize}
+}
+\only<4>{
+{\bf Outcomes:}
+\begin{itemize}
+\item water and sewers: whether households have a flush toilets, access to an indoors water tap, water from utility company. 
+\item main energy sources for cooking, heating and lighting.
+\item whether household live in a formal house and whether they own it.
+\item population and household density.
+\end{itemize}
+}
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}
+\only<1>{
+\frametitle{Effect On Dwelling Characteristics I. (Nearby Projects)}
+\vspace{-1.5mm}
+\begin{table}
+{\footnotesize
+\input{input_tex/census_regs_hh_all1_1}
+}
+\end{table}
+}
+\only<2>{
+\frametitle{Effect On Dwelling Characteristics I. (Inside Projects)}
+\vspace{-1.5mm}
+\begin{table}
+{\footnotesize
+\input{input_tex/census_regs_hh_all2_1}
+}
+\end{table}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\only<1>{
+\frametitle{Effect On Dwelling Characteristics II. (Nearby Projects)}
+\vspace{-1.5mm}
+\begin{table}
+{\footnotesize
+\input{input_tex/census_regs_hh_all1_2}
+}
+\end{table}
+}
+\only<2>{
+\frametitle{Effect On Dwelling Characteristics II. (Inside Projects)}
+\vspace{-1.5mm}
+\begin{table}
+{\footnotesize
+\input{input_tex/census_regs_hh_all2_2}
+}
+\end{table}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\section{Impact on Building Density}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Gridded Building Density Measure}
+\only<1>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.27]{design/bbludesign1.png}
+   \caption{\scriptsize Empirical design for building density regressions}
+ \end{figure}
+ \end{center}
+}
+\only<2>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.27]{design/bbludesign2.png}
+   \caption{\scriptsize BBLU data showing formal (black) and informal (green) residential structures}
+ \end{figure}
+ \end{center}
+}
+\only<3>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.27]{design/bbludesign3.png}
+   \caption{\scriptsize 50m $\times$ 50m grid overlay.}
+ \end{figure}
+ \end{center}
+}
+\only<4>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.27]{design/bbludesign4.png}
+   \caption{\scriptsize Aggregated data at the cell level.}
+ \end{figure}
+ \end{center}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Raw Density Means }
+\only<1>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/bblu_for_rdp_admin}
+   \caption{formal structures, constructed projects.}
+ \end{figure}
+ \end{center}
+}
+\only<2>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/bblu_for_placebo_admin}
+   \caption{formal structures, non-constructed projects.}
+ \end{figure}
+ \end{center}
+}
+\only<3>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/bblu_inf_rdp_admin}
+   \caption{informal structures, constructed projects.}
+ \end{figure}
+ \end{center}
+}
+\only<4>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/bblu_inf_placebo_admin}
+   \caption{informal structures, non-constructed projects.}
+ \end{figure}
+ \end{center}
+}
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Empirical Specification}
+
+\begin{equation*}
+y_{ipt} \, = \, \lambda_i + \sum\limits_{d} I^d_{ipt}\Big( \alpha^d D_tC_p \, + \, \beta^dD_t\Big) \, + \, \varepsilon_{ipt}
+\end{equation*}
+\only<1>{
+\\with:
+\begin{itemize}
+\item $y_{itdp}$: building density for cell $i$ in vicinity of project $p$ observed in year $t$.
+\item $I^d_{ip}$\,=1 if cell $i$ is at distance $d$ of project $p$.
+\item $D_{t}\,\,$=1 if year $t$ is 2011 (post period). 
+\item $C_{p}\,\,$=1 if project $p$ has been constructed.
+\item $\lambda_i$: cell fixed-effect.
+\item $\varepsilon_{itp}$: error term
+\end{itemize}
+}
+\only<2>{
+{\\\bf Density Outcomes:}
+\begin{itemize}
+\item total buildings.
+\item formal buildings.
+\item informal buildings.
+\item backyard/non-backyard informal.
+\end{itemize}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Building Density: Estimation Results}
+\only<1>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/distplotDDD_bblu_total_buildings_admin}
+   \caption{total structures}
+ \end{figure}
+ \end{center}
+}
+\only<2>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/distplotDDD_bblu_for_admin}
+   \caption{formal structures}
+ \end{figure}
+ \end{center}
+}
+\only<3>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/distplotDDD_bblu_inf_admin}
+   \caption{informal structures}
+ \end{figure}
+ \end{center}
+}
+\only<4>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/distplotDDD_bblu_inf_backyard_admin}
+   \caption{informal backyard structures}
+ \end{figure}
+ \end{center}
+}
+\only<5>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/bblu/distplotDDD_bblu_inf_non_backyard_admin}
+   \caption{informal non-backyard structures}
+ \end{figure}
+ \end{center}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Triple Differences Tests}
+\vspace{-1.5mm}
+\begin{table}
+\input{input_tex/bblu_regDDD}
+\end{table}
+\end{frame}
+
+%------------------------------------------------
+
+\section{Spillovers on Housing Prices}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Empirical Set-up}
+\vspace{-1.5mm}
+\begin{itemize}
+\item Sample composed of non-subsidized formal housing transactions outside of project borders. 
+\vspace{.5em}
+\item Exact transaction date is observed.
+\vspace{.5em}
+\item Assign event date to {\bf constructed} projects.
+\begin{itemize}
+  \item modal transaction month for subsidized transactions.
+\end{itemize}
+\vspace{.5em}
+\item Assign "event date" to {\bf unconstructed} projects.
+\begin{itemize}
+  \item apply average delay between project announcement and delivery.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Transaction Densities}
 \begin{center}
 \begin{figure}
-\frame{\includegraphics[scale=0.15]<1>{design/design_1.jpg}}
-\frame{\includegraphics[scale=0.15]<2>{design/design_2.jpg}}
-\frame{\includegraphics[scale=0.15]<3>{design/design_3.jpg}}
-\frame{\includegraphics[scale=0.15]<4>{design/design_4.jpg}}
-\frame{\includegraphics[scale=0.15]<5>{design/design_5.jpg}}
-\frame{\includegraphics[scale=0.15]<6>{design/design_6.jpg}}
-\frame{\includegraphics[scale=0.15]<7>{design/design_7.jpg}}
+\includegraphics[scale=0.32]{figures/summary_densitytime.pdf}
 \vspace{-3mm}
 \end{figure}
 \end{center}
@@ -779,12 +1074,8 @@ Density is building number per square kilometer.
 
 %------------------------------------------------
 
-
-
-%------------------------------------------------
-
 \begin{frame}
-\frametitle{Empirical Methodology}
+\frametitle{Empirical Specifications}
 DID model:
 \begin{equation*}
 P_{itp} \, = \, \alpha D_{tp}T_{ip} \, + \,\theta_1 D_{tp} \, + \, \,\theta_2 T_{ip}+ \, X^{'}_{i}\beta \, +  \lambda_p \,  + \, \eta_{t} \, + \, \varepsilon_{itp} ,
@@ -793,7 +1084,7 @@ with:
 \begin{itemize}
 \item $P_{itp}$: log-price of property $i$ sold at time $t$, in vicinity of project $p$.
 \item $D_{tp}$ =1 if date $t$ is after modal construction month. 
-\item $T_{ip}\,\,$ =1 if property $i$ within 400m of project border.
+\item $T_{ip}\,\,$ =1 if property $i$ within 700m of project border.
 \item $X_{i}$: quadratic in lot size of property $i$.
 \item $\lambda_p$: project fixed-effect.
 \item $\eta_{t}$: time (year$\,\times\,$month) fixed-effect.
@@ -803,211 +1094,44 @@ with:
 \end{frame}
 
 %------------------------------------------------
-\begin{comment}
-\begin{frame}
-\frametitle{Empirical Methodology}
-Identification:
-\begin{equation*}
-E[\varepsilon_{itp}|X_{i},T_{ip},D_{tp},\lambda_p,\eta_{t}]=0
-\end{equation*}
-\begin{itemize}
-\item Identify off ``sharp'' amenity changes created by calming projects
-\item Use within group variation to limit OVB - assuming that control and treatment houses are exposed to same unobservable shocks.
-\end{itemize}
-Concerns:
-\begin{itemize}
-\item negative/postive spillovers - not clear that control transactions are not affected.
-\item sorting.
-\end{itemize}
-\end{frame}
-\end{comment}
-%------------------------------------------------
 
 \begin{frame}
-\frametitle{Distance Plot}
-\begin{center}
-\begin{figure}
-\includegraphics[scale=0.72]{distplot.pdf}
-\vspace{-3mm}
-\end{figure}
-\end{center}
-\end{frame}
-
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Placebo Distance Plot}
-\begin{center}
-\begin{figure}
-
-
-\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{distplot.pdf}
-   \hfill
-\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{distplot_placebo.pdf}
-
-\end{figure}
-\end{center}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Time Plot}
-\begin{center}
-\begin{figure}
-
-\includegraphics[scale=0.72]{timeplot.pdf}
-
-\end{figure}
-\end{center}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Placlebo Time Plot}
-\begin{center}
-\begin{figure}
-
-\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm}]{timeplot.pdf}
-   \hfill
-\includegraphics[width=0.5\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{timeplot_placebo.pdf}
-
-\vspace{-3mm}
-\end{figure}
-\end{center}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Transaction Densities}
-\begin{center}
-\begin{figure}
-\includegraphics[scale=0.32]{summary_densitytime.pdf}
-\vspace{-3mm}
-\end{figure}
-\end{center}
-\end{frame}
-
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Housing Projects}
-\vspace{-1.5mm}
-\begin{table}
-{\footnotesize
-\input{gradient_regressions}
+\frametitle{Housing Prices: Estimation Results}
+\only<1>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/gradplot/distance_plot_rdp}
+   \caption{proximity effects: constructed projects}
+ \end{figure}
+ \end{center}
 }
-\end{table}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Housing Projects}
-\vspace{-1.5mm}
-\begin{table}
-{\footnotesize
-\input{gradient_regressions_placebo}
+\only<2>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/gradplot/distance_plot_placebo}
+   \caption{proximity effects: non-constructed projects}
+ \end{figure}
+ \end{center}
 }
-\end{table}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Housing Projects}
-\vspace{-1.5mm}
-\begin{table}
-{\footnotesize
-\input{census_regs_hh_sample}
+\only<3>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/gradplot/time_plot_rdp}
+   \caption{timing effects: constructed projects}
+ \end{figure}
+ \end{center}
 }
-\end{table}
-\end{frame}
-
-%------------------------------------------------
-
-%\begin{frame}
-%\frametitle{Housing Projects}
-%\vspace{-1.5mm}
-%\begin{table}
-%{\footnotesize
-%\input{census_regs_hh_all}
-%}
-%\end{table}
-%\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Housing Projects}
-\vspace{-1.5mm}
-\begin{table}
-{\footnotesize
-\input{census_regs_pers_sample}
+\only<4>{
+ \begin{center}
+ \begin{figure}[ht]
+   \includegraphics[scale=0.65,trim={5cm 1cm 5cm 0cm}]{figures/gradplot/time_plot_placebo}
+   \caption{timing effects: non-constructed projects}
+ \end{figure}
+ \end{center}
 }
-\end{table}
 \end{frame}
 
 %------------------------------------------------
-
-%\begin{frame}
-%\frametitle{Housing Projects}
-%\vspace{-1.5mm}
-%\begin{table}
-%{\footnotesize
-%\input{census_regs_pers_all}
-%}
-%\end{table}
-%\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{BBLU plot}
-\begin{center}
-\begin{figure}
-\includegraphics[scale=0.72]{bbluplot.pdf}
-\vspace{-3mm}
-\end{figure}
-\end{center}
-\end{frame}
-
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{BBLU plot placebo}
-\begin{center}
-\begin{figure}
-
-\includegraphics[width=0.5\textwidth,trim={.75cm 0cm .21cm 0cm}]{bbluplot.pdf}
-   \hfill
-\includegraphics[width=0.5\textwidth,trim={.75cm 0cm .21cm 0cm},clip]{bbluplot_placebo.pdf}
-
-\end{figure}
-\end{center}
-\end{frame}
-
-
-%------------------------------------------------
-
-
-%------------------------------------------------
-
-%\begin{frame}
-%\frametitle{Transaction Densities}
-%\begin{center}
-%\begin{figure}
-%\includegraphics[scale=0.72]{rdpvsnonrdp.pdf}
-%\vspace{-3mm}
-%\end{figure}
-%\end{center}
-%\end{frame}
-
 
 
 \end{document} 
