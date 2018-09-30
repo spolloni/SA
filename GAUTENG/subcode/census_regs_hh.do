@@ -332,14 +332,16 @@ eststo clear;
 
 foreach var of varlist $outcomes1 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
-  sum `var' if e(sample)==1, detail;
-  estadd scalar Mean = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2001, detail;
+  estadd scalar Mean2001 = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2011, detail;
+  estadd scalar Mean2011 = `=r(mean)';
   eststo `var';
 };
 
 esttab $outcomes1 using census_hh_DDregs_admin_1,
   replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  star(* 0.10 ** 0.05 *** 0.01) stats(Mean)
+  star(* 0.10 ** 0.05 *** 0.01) stats(Mean2001 Mean2011)
   compress drop(_cons);
 
 
@@ -347,24 +349,30 @@ eststo clear;
 
 foreach var of varlist $outcomes2 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
-  sum `var' if e(sample)==1, detail;
-  estadd scalar Mean = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2001, detail;
+  estadd scalar Mean2001 = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2011, detail;
+  estadd scalar Mean2011 = `=r(mean)';
   eststo `var';
 };
 
 areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
-  sum pop_density if e(sample)==1, detail;
-  estadd scalar Mean = `=r(mean)';
+sum pop_density if e(sample)==1 & year ==2001, detail;
+estadd scalar Mean2001 = `=r(mean)';
+sum pop_density if e(sample)==1 & year ==2011, detail;
+estadd scalar Mean2011 = `=r(mean)';
 eststo pop_density;
 
 areg hh_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
-  sum hh_density if e(sample)==1, detail;
-  estadd scalar Mean = `=r(mean)';
+sum hh_density if e(sample)==1 & year ==2001, detail;
+estadd scalar Mean2001 = `=r(mean)';
+sum hh_density if e(sample)==1 & year ==2011, detail;
+estadd scalar Mean2011 = `=r(mean)';
 eststo hh_density;
 
 esttab $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
   replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  star(* 0.10 ** 0.05 *** 0.01)  stats(Mean)
+  star(* 0.10 ** 0.05 *** 0.01)  stats(Mean2001 Mean2011)
   compress;
 
 
