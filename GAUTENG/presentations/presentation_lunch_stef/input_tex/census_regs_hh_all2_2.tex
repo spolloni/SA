@@ -1,0 +1,32 @@
+{\footnotesize
+\definecolor{o}{RGB}{237,189,100}  
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{5}{c}}
+          &\multicolumn{1}{c}{elec cooking} &\multicolumn{1}{c}{elec heat}  &\multicolumn{1}{c}{elec light}         &\multicolumn{1}{c}{hh density}         &\multicolumn{1}{c}{pop density}    
+          \\[0.2em]
+\hline\\[-0.9em]
+& \multicolumn{5}{c}{...}\\
+[.5em]
+%------------------------------------------------------------------------------------------------
+\rowcolor{o} project\_DD &  0.294\sym{***} &  0.209\sym{***} &  0.116   & -127.3  & -328.5     \\
+\rowcolor{o}             &  (0.070)        &  (0.067)        &  (0.081) &(864.7)  &(1,631.7)\\
+[.5em]
+project\_post & 0.168\sym{***}& 0.142\sym{**} & 0.143\sym{**} &1,265.5\sym{*} &2,635.3\sym{*}  \\
+              &  (0.060)       &  (0.056)      &  (0.066)      &(714.9)        &(1,376.0)       \\
+[.5em]
+project\_completed & -0.038    &   -0.022      &    0.111      & -928.7\sym{*} &-1,384.9  \\
+                   & (0.099)   &  (0.088)      &  (0.110)      & (495.1)       &(1,254.1) \\
+[.5em]
+project     & -0.359\sym{***} & -0.329\sym{***}&-0.369\sym{***}&  835.1\sym{**}&1,649.6         \\
+            &  (0.071)        &  (0.068)       &  (0.081)      &(383.7)        &(1,005.9)       \\
+%------------------------------------------------------------------------------------------------
+          \\[-0.9em]
+\hline \\[-0.9em] 
+$\bar{y}$ 2001& 0.644      &    0.617       &    0.751       &2,167.9      &7,192.7         \\
+$\bar{y}$ 2011& 0.821      &    0.716       &    0.842       &2,869.2      &8,354.4         \\
+N          &  3,214,472    &  3,214,472     &  3,214,472     & 15,454        &    15,454         \\
+R$^{2}$    & 0.193         &    0.152       &    0.168       &    0.301      &    0.303         \\
+\hline
+\multicolumn{6}{l}{\tiny All specifications include project Fixed Effects. Standard errors clustered at the project level.}
+\end{tabular}
+}

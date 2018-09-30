@@ -1,0 +1,31 @@
+{\footnotesize
+\definecolor{o}{RGB}{237,189,100}  
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{5}{c}}
+          &\multicolumn{1}{c}{flush toilet}         &\multicolumn{1}{c}{water tap}         &\multicolumn{1}{c}{utility water}         &\multicolumn{1}{c}{owner}         &\multicolumn{1}{c}{house}         \\[0.2em]
+\hline\\[-0.9em]
+%------------------------------------------------------------------------------------------------
+\rowcolor{o} spillover\_DD  &  0.017    &   -0.011     &   -0.005    &   -0.019    &   -0.012   \\
+\rowcolor{o}                & (0.037)   &  (0.033)     &  (0.013)    &  (0.029)    &  (0.030)         \\
+[.5em]
+spillover\_post& 0.069\sym{**} &  0.177\sym{***}&  0.006    &   -0.030\sym{*}  &    0.077\sym{***}\\
+               &  (0.027)      &  (0.024)       &  (0.010)  &  (0.017)         &  (0.023)  \\       
+[.5em]
+spillover\_complete & -0.016   &    0.004       &    0.013  &    0.029         &    0.067      \\
+                    & (0.052)  &  (0.049)       &  (0.017)  &  (0.032)         &  (0.043)         \\
+[.5em]
+spillover &  -0.023    &   -0.041    &   -0.003    &   -0.008    &   -0.029         \\
+          &  (0.039)   &  (0.038)    &  (0.014)    &  (0.023)    &  (0.033)         \\
+%------------------------------------------------------------------------------------------------
+[.3em]
+& \multicolumn{5}{c}{...}\\
+[.5em]
+\hline \\[-0.9em]
+$\bar{y}$ 2001& 0.747      &    0.345        &    0.948      &    0.511         &    0.550         \\
+$\bar{y}$ 2011& 0.822      &    0.518        &    0.936      &    0.457         &    0.623         \\
+N          &  3,214,472    &  3,214,472      &  3,214,472    &  3,112,425       &  3,067,560       \\
+R$^{2}$    &    0.231      &    0.147        &    0.062      &    0.064         &    0.110         \\
+\hline
+\multicolumn{6}{l}{\tiny All specifications include project Fixed Effects. Standard errors clustered at the project level.}
+\end{tabular}
+}
