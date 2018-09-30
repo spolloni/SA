@@ -29,7 +29,8 @@ def project_counts():
     cur = con.cursor()
     df = pd.read_sql('''
             SELECT 
-            SUM(1) AS total
+            SUM(1) AS total,
+            SUM(CASE WHEN s_lu_code=="7.2" THEN 1 ELSE 0 END)
             FROM cluster_rdp;
             ''',con)        
 
@@ -63,7 +64,7 @@ def gcro_shape_count():
     cur = con.cursor()
     df = pd.read_sql('''
             SELECT 
-            SUM(1) AS total
+            SUM(1) AS total,
             FROM gcro WHERE (area>0.5 OR RDP_density>0);
             ''',con)        
 
