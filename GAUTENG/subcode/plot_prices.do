@@ -72,11 +72,19 @@ global ifregs = "
        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
        ";
 
+global ifhists = "
+       s_N <30 &
+       rdp_never ==1 &
+       purch_price > 2000 & purch_price<1800000 &
+       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
+       ";
+
 * what to run?;
+global trans_hist = 0;
 global dist_regs = 0;
 global time_regs = 0;
 global dd_regs = 0;
-global ddd_regs = 1;
+global ddd_regs = 0;
 
 * load data; 
 cd ../..;
@@ -133,6 +141,51 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
+
+*****************************************************************;
+****************** TRANSACTIONS HISTOGRAM  **********************;
+*****************************************************************;
+if $trans_hist ==1 {;
+preserve;
+
+keep if ($ifhists) | rdp_all ==1;
+bys cluster_rdp: egen sum_nrdp = sum(rdp_never);
+drop if sum_nrdp < 50;
+
+hist lprice if rdp_all==1 & lprice < 15 & lprice > 5, 
+  bin(200) name(a) xlabel(5(5)15)
+  xtitle("")  ytitle("") title("subsidized housing");
+
+hist lprice if rdp_never==1, 
+  bin(200)  name(b) xlabel(5(5)15)
+  xtitle("") yla(none) ytitle("") title("non-subsidized housing");
+
+graph combine a b, rows(1) ycommon 
+l1(" transaction density",size(medsmall)) 
+b1("log house price",size(medsmall))
+xsize(13) ysize(8.5) imargin(0 0 -2 -2);
+graphexportpdf summary_pricedist, dropeps;
+
+hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_all==1, 
+  bin(73) name(a) xlabel(-36(12)36)
+  xtitle("") xla("") ytitle("") title("subsidized housing");
+
+hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_never==1, 
+  bin(73)  name(b) xlabel(-36(12)36)
+  xtitle("") ytitle("") title("non-subsidized housing");
+
+graph combine a b, cols(1) xcommon 
+l1(" transaction density",size(medsmall)) 
+b1("months to project modal transaction month",size(medsmall))
+xsize(13) ysize(8.5) imargin(0 0 -2 -2);
+graphexportpdf summary_densitytime, dropeps;
+
+restore;
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
 
 *****************************************************************;
 *************** DISTANCE REGRESSIONS PLACEBO-RDP  ***************;
