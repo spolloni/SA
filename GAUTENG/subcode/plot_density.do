@@ -464,31 +464,31 @@ if $graph_plotmeans_rdpplac == 1 {;
 
   plotmeans_pre 
     bblu_total_buildings_pre_means total_buildings rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" $yl   
     4;
 
   plotmeans_pre 
     bblu_for_pre_means for rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)5)"
     4;
 
   plotmeans_pre 
     bblu_inf_pre_means inf rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)5)"
     4;
 
   plotmeans_pre 
     bblu_inf_backyard_pre_means inf_backyard rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)4)" 
     2;
 
   plotmeans_pre 
     bblu_inf_non_backyard_pre_means inf_non_backyard rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)4)"  
     2;
 
@@ -512,8 +512,8 @@ program plotreg;
       destring contin, replace force;
       replace contin=contin+${dist_min};
       drop if contin>2000;
-      local treat "Completed";
-      local control "Uncompleted";
+      local treat "Constructed";
+      local control "Unconstructed";
       local het "Large Projects";
 
       if length("`3'")>0 & length("`4'")==0  {;
@@ -616,7 +616,7 @@ program plotregsingle;
 
     sort contin;
 
-    global legend1 " 2 "Completed vs. Uncompleted difference" ";
+    global legend1 " 2 "Constructed vs. Unconstructed DiD" ";
     global graph1 "
     (rcap max95 min95 contin, lc("206 162 97") lw(vthin))
     (connected estimate contin, ms(T) msiz(medsmall) 
