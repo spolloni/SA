@@ -8,6 +8,7 @@ set maxvar 32767
 
 
 global output = "Code/GAUTENG/presentations/presentation_lunch";
+*global output  = "Code/GAUTENG/paper/figures/";
 
 global LOCAL = 1;
 
@@ -16,11 +17,12 @@ global LOCAL = 1;
 
 ** set these equal to one to prep temporary datasets to make tables ;
 global census_prep = 0  ; 
-global gcro_prep   = 1  ;
+global gcro_prep   = 0  ;
 global price_prep  = 0  ;
 global bblu_prep   = 0  ;
+global cbd_prep    = 0  ;
 
-global census_int  = .9 ; /* intersection % between census areas and project areas*/
+global census_int  = .3 ; /* intersection % between census areas and project areas*/
 global size        = 50 ; /* just for which bblu file to pull */
 
 if $LOCAL==1 {;
@@ -50,9 +52,39 @@ prog define ttesting_nocluster;
 	drop `1'_id;
 end;
 
+
+
 * load data; 
 cd ../..;
 cd Generated/GAUTENG;
+
+
+
+
+if $cbd_prep == 1 {;
+		*** Census Characteristics *** ;
+
+
+local qry = "
+      SELECT A.*, B.cluster_rdp, C.cluster_placebo, D.cbd_dist
+      FROM  gcro AS A
+      LEFT JOIN cluster_rdp AS B ON A.cluster = B.cluster_rdp
+      LEFT JOIN cluster_placebo AS C ON A.cluster = C.cluster_placebo
+      LEFT JOIN cbd_dist AS D ON A.cluster = D.cluster
+      ";
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
+    drop if cluster_rdp==. & cluster_placebo==.;
+    g rdp = cluster_rdp!=.;
+
+
+		 
+		  ttesting_nocluster cbd_dist;
+		  
+		  duplicates drop rdp, force;
+		  keep rdp cbd_dist *_ttest ;
+		  save dtable_pre_cbd.dta, replace;
+};
 
 
 
@@ -61,71 +93,82 @@ cd Generated/GAUTENG;
 if $census_prep == 1 {;
 		*** Census Characteristics *** ;
 
-		global census_vars = " toilet_flush water_inside owner hh_size house tot_rooms density_n ";
+		global census_vars = " toilet_flush water_inside owner hh_size house tot_rooms pop_density ";
 
-		use DDcensus_hh_admin, clear;
 
-		keep if year==2001;
-		destring area_int_placebo area_int_rdp, replace force;  
+use DDcensus_hh_admin, clear;
 
-		/* make sure the rdp and placebo are intersecting but NOT overlapping */ ;
-		g rdp = 1 if (area_int_rdp >= $census_int & area_int_rdp<.);
-		drop if rdp==1 & (area_int_placebo >= $census_int & area_int_placebo<.) ;
-		replace rdp= 0 if (area_int_placebo >= $census_int & area_int_placebo<.) ;
-		drop if rdp==.  ;
+* flush toilet?;
+gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
+lab var toilet_flush "Flush Toilet";
 
-		* flush toilet?;
-		gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
-		lab var toilet_flush "Flush Toilet";
+* piped water?;
+gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
+lab var water_inside "Piped Water Inside";
+gen water_yard = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
+lab var water_yard "Piped Water Inside or Yard";
 
-		* piped water?;
-		gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
-		lab var water_inside "Piped Water Inside";
-		gen water_yard   = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
-		* water source?;
-		gen water_utility = (water_source==1) if !missing(water_source);
+* water source?;
+gen water_utility = (water_source==1) if !missing(water_source);
+lab var water_utility "Water from utility";
 
-		* electricity?;
-		gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
-		gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
-		lab var electric_cooking "Electric Cooking";
-		gen electric_heating  = enrgy_heating==1 if !missing(enrgy_heating);
-		gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);
-		lab var electric_lighting "Electric Lighting";
+* electricity?;
+gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
+lab var electricity "Access to electricity";
+gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
+lab var electric_cooking "Electric Cooking";
+gen electric_heating  = enrgy_heating==1 if !missing(enrgy_heating);
+lab var electric_heating "Electric Heating";
+gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);
+lab var electric_lighting "Electric Lighting";
 
-		* tenure?;
-		gen owner = (tenure==2 | tenure==4 & year==2011)|(tenure==1 | tenure==2 & year==2001) if !missing(tenure);
-		lab var owner "Owns House";
+* tenure?;
+gen owner = ((tenure==2 | tenure==4) & year==2011)|((tenure==1 | tenure==2) & year==2001) if !missing(tenure);
+lab var owner "Owns House";
 
-		* house?;
-		gen house = dwelling_typ==1 if !missing(dwelling_typ);
-		lab var house "Single House";
-		replace tot_rooms=. if tot_rooms>9;
-		lab var tot_rooms "No. Rooms";
-		replace hh_size=. if hh_size>10;
-		lab var hh_size "Household Size";
+* house?;
+gen house = dwelling_typ==1 if !missing(dwelling_typ);
+lab var house "Single House";
 
-		g cluster = cluster_rdp;
-		replace cluster = cluster_placebo if cluster==. & cluster_placebo!=.;
+* total rooms;
+replace tot_rooms=. if tot_rooms>9;
+lab var tot_rooms "No. Rooms";
 
-		*replace area = . if area>800000; /* this tries to trim outliers but doesnt matter */
+* household size rooms;
+replace hh_size=. if hh_size>10;
+lab var hh_size "Household Size";
 
-		bys area_code: g a_n=_n;
-		g o = 1;
-		egen pop = sum(o), by(area_code);
-		g density = pop/area; 
-		replace density = . if a_n!=1;
-		*sum density, detail; /* this tries to trim outliers but doesnt matter  */
-		*replace density = . if density>`=r(p99)';
-		lab var density "Households per m2";
+* household density;
+g o = 1;
+bys area_code: g a_n=_n;
+egen pop = sum(o), by(area_code year);
+g hh_density = (pop/area)*1000000;
+lab var hh_density "Households per km2";
+drop o pop;
 
-		egen pop_n = sum(hh_size), by(area_code);
-		g density_n = pop_n/area;
-		replace density_n = . if a_n!=1;
-		*sum density_n, detail; /* this tries to trim outliers but doesnt matter */
-		*replace density_n = . if density_n>`=r(p99)';
-		lab var density_n "People per m2";
+* pop density;
+egen pop = sum(hh_size), by(area_code year);
+g pop_density = (pop/area)*1000000;
+lab var pop_density "People per km2";
+drop pop;
 
+* cluster for SEs;
+replace area_int_rdp =0 if area_int_rdp ==.;
+replace area_int_placebo =0 if area_int_placebo ==.;
+gen placebo = (distance_placebo < distance_rdp);
+gen placebo2 = (area_int_placebo> area_int_rdp);
+replace placebo = 1 if placebo2==1;
+drop placebo2;
+gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
+gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
+
+
+g project_rdp = (area_int_rdp > $tresh_area);
+g project_placebo = (area_int_placebo > $tresh_area);
+keep if project_rdp==1 | project_placebo==1;
+g rdp = project_rdp==1;
+
+		ren cluster_joined cluster;
 		bys cluster rdp: g cn=_n;
 
 		  foreach v in $census_vars {;
@@ -314,8 +357,8 @@ prog define table_prepping;
 		matrix A1 = (c1',c2',c3');
 
 	g colnames = "";
-	replace colnames = "Uncompleted" in 1;
-	replace colnames = "Completed" in 2;
+	replace colnames = "Unconstructed" in 1;
+	replace colnames = "Constructed" in 2;
 	replace colnames = "T-Stat" in 3; 
 end;
 
@@ -337,137 +380,147 @@ end;
 
 
 
-use dtable_pre_census.dta, clear;
-append using dtable_pre_gcro.dta;
-append using dtable_pre_price.dta;
-append using dtable_pre_build.dta;
-
-* go to working dir;
-cd ../..;
-cd $output ;
-
-expand 20;
 
 
 
-	** 1 **;
-	********************************************;
-	******** GENERATE DESCRIPTIVES TABLE *******;
-	********************************************;
 
+	use dtable_pre_census.dta, clear;
+	append using dtable_pre_gcro.dta;
+	append using dtable_pre_price.dta;
+	append using dtable_pre_build.dta;
+	append using dtable_pre_cbd.dta;
 
-preserve;
+	* go to working dir;
+	cd ../..;
+	cd $output ;
 
-	*global varlist=" N area RDP_density inf for density_n purch_price ";
-	
-	global varlist=" N area RDP_density inf for purch_price ";
-
-	order $varlist;
-	local num : word count $varlist;
-	matrix define FOR=J(`num',1,0);
-
-	matrix FOR[2,1] = 2;
-
-	replace RDP_density_ttest = .;
-	replace RDP_density = . if rdp==0;
-
-	matrix define PER=J(`num',1,0);
-
-	replace density_n = density_n*1000000;
-
-	replace inf = inf*(1000000/($size*$size)); /* convert to km */
-	replace for = for*(1000000/($size*$size)); /* convert to km */
-
-	g temp="";
-	replace temp = "Number of Projects" 				in 1;
-	replace temp = "Area (km2)" 						in 2;
-	replace temp = "Completed Houses (per km2)" 	    in 3;
-
-	replace temp = "Informal Buildings (per km2)" 		in 4;
-	replace temp = "Formal Buildings (per km2)" 		in 5;
-	replace temp = "House Price (Rand)" 				in 6;
-
-*	replace temp = "Population (per km2)" 				in 6;
+	expand 20;
 
 
 
-	table_prepping;
+		** 1 **;
+		********************************************;
+		******** GENERATE DESCRIPTIVES TABLE *******;
+		********************************************;
 
-		tables pre_descriptives A1 FOR temp colnames ;
+
+	preserve;
+
+		*global varlist=" N area RDP_density inf for pop_density purch_price ";
 		
-restore;
+		global varlist=" N area RDP_density inf for purch_price cbd_dist";
+
+		order $varlist;
+		local num : word count $varlist;
+		matrix define FOR=J(`num',1,0);
+
+		matrix FOR[2,1] = 2;
+
+		replace RDP_density_ttest = .;
+		replace RDP_density = . if rdp==0;
+
+		matrix define PER=J(`num',1,0);
+
+		replace pop_density = pop_density*1000000;
+
+		replace inf = inf*(1000000/($size*$size)); /* convert to km */
+		replace for = for*(1000000/($size*$size)); /* convert to km */
+
+		g temp="";
+		replace temp = "Number of Projects" 				in 1;
+		replace temp = "Area (km2)" 						in 2;
+		replace temp = "Project Houses (per km2)" 	    in 3;
+
+		replace temp = "Informal Buildings (per km2)" 		in 4;
+		replace temp = "Formal Buildings (per km2)" 		in 5;
+		replace temp = "House Price (Rand)" 				in 6;
+		replace temp = "Distance to CBD (km)" 				in 7;
+
+	*	replace temp = "Population (per km2)" 				in 6;
+
+
+
+		table_prepping;
+
+			tables pre_descriptives A1 FOR temp colnames ;
+			
+	restore;
 
 
 
 
-preserve;
+	preserve;
 
-	*global varlist=" N area RDP_density inf for density_n purch_price ";
-	
-	global varlist=" N area RDP_density inf for purch_price ";
-
-	order $varlist;
-	local num : word count $varlist;
-	matrix define FOR=J(`num',1,0);
-
-	matrix FOR[2,1] = 2;
-
-	replace RDP_density_ttest = .;
-	replace RDP_density = . if rdp==0;
-
-	matrix define PER=J(`num',1,0);
-
-	replace density_n = density_n*1000000;
-
-	replace inf = inf*(1000000/($size*$size)); /* convert to km */
-	replace for = for*(1000000/($size*$size)); /* convert to km */
-
-	g temp="";
-	replace temp = "Number of Projects" 				in 1;
-	replace temp = "Area (km2)" 						in 2;
-	replace temp = "Completed Houses (per km2)" 	    in 3;
-
-	replace temp = "Informal Buildings (per km2)" 		in 4;
-	replace temp = "Formal Buildings (per km2)" 		in 5;
-	replace temp = "House Price (Rand)" 				in 6;
-
-*	replace temp = "Population (per km2)" 				in 6;
-
-	table_prepping_no_t;
-
-		tables pre_descriptives_no_t A1 FOR temp colnames ;
+		*global varlist=" N area RDP_density inf for pop_density purch_price ";
 		
-restore;
+		global varlist=" N area RDP_density inf for purch_price ";
+
+		order $varlist;
+		local num : word count $varlist;
+		matrix define FOR=J(`num',1,0);
+
+		matrix FOR[2,1] = 2;
+
+		replace RDP_density_ttest = .;
+		replace RDP_density = . if rdp==0;
+
+		matrix define PER=J(`num',1,0);
+
+		replace pop_density = pop_density*1000000;
+
+		replace inf = inf*(1000000/($size*$size)); /* convert to km */
+		replace for = for*(1000000/($size*$size)); /* convert to km */
+
+		g temp="";
+		replace temp = "Number of Projects" 				in 1;
+		replace temp = "Area (km2)" 						in 2;
+		replace temp = "Project Houses (per km2)" 	    in 3;
+
+		replace temp = "Informal Buildings (per km2)" 		in 4;
+		replace temp = "Formal Buildings (per km2)" 		in 5;
+		replace temp = "House Price (Rand)" 				in 6;
+
+	*	replace temp = "Population (per km2)" 				in 6;
+
+		table_prepping_no_t;
+
+			tables pre_descriptives_no_t A1 FOR temp colnames ;
+			
+	restore;
 
 
 
 
-	** 2 **;
-	******************************************;
-	******** GENERATE THE CENSUS TABLE *******;
-	******************************************;
+		** 2 **;
+		******************************************;
+		******** GENERATE THE CENSUS TABLE *******;
+		******************************************;
 
-preserve;
+	preserve;
 
-	global varlist="  toilet_flush water_inside hh_size owner house tot_rooms ";
-	order $varlist;
-	local num : word count $varlist;
-	matrix define FOR=J(`num',1,3);
-	matrix define PER=J(`num',1,0);
+		global varlist="  toilet_flush water_inside hh_size owner house tot_rooms pop_density";
+		order $varlist;
+		local num : word count $varlist;
+		matrix define FOR=J(`num',1,3);
+		matrix define PER=J(`num',1,0);
 
-	*replace density_n = density_n*100;
+		matrix FOR[3,1]=2;
+		matrix FOR[6,1]=2;
+		matrix FOR[7,1]=0;
 
-	g temp="";
-	replace temp = "Flush Toilet" 			in 1;
-	replace temp = "Piped Water in Home" 	in 2;
-	replace temp = "Household Size" 		in 3;
-	replace temp = "Owns House" 			in 4;
-	replace temp = "Single House" 			in 5;
-	replace temp = "Number of Rooms" 		in 6;
-	*replace temp = "Pop. Density (per 100 m2)" 	in 7;
 
-	table_prepping;
+		*replace pop_density = pop_density*100;
 
-		tables pre_descriptives_census A1 FOR temp colnames ;
-restore;
-	
+		g temp="";
+		replace temp = "Flush Toilet" 				in 1;
+		replace temp = "Piped Water in Home" 		in 2;
+		replace temp = "Household Size" 			in 3;
+		replace temp = "Owns House" 				in 4;
+		replace temp = "Single House" 				in 5;
+		replace temp = "Number of Rooms" 			in 6;
+		replace temp = "Pop. Density (per km2)" 	in 7;
+
+		table_prepping;
+
+			tables pre_descriptives_census A1 FOR temp colnames ;
+	restore;

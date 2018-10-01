@@ -109,56 +109,83 @@ end;
 ********* ** DATA ** ********* ;
 ********* ********** ********* ;
 
-prog descriptive_sample;
-
-    *** GET RDPs FROM RDP PRICE REGRESSION;
-    global fr1   = "0.5";
-    global fr2   = "0.5";
-    global msiz  = 20;    /* minimum obs per cluster            */
-    use "Generated/GAUTENG/gradplot.dta", clear ;
-    drop if purch_price == 6900000 ;
-    global ifregs = "   frac1 > $fr1  & frac2 > $fr2  & rdp_never ==1 & purch_price > 2500 &  cluster_siz_nrdp > $msiz &  mode_yr>2002 &  distance >0 &  purch_yr > 2000  ";
-    keep if $ifregs==1 ;
-    keep property_id cluster;
-    g type = "rdp";
-    save "Generated/GAUTENG/temp/sample_key_rdp.dta", replace ;
-
-    *** GET PLACEBOS FROM PLACEBO PRICE REGRESSION;
-    global msiz  = 5;    /* minimum obs per cluster            */
-    use "Generated/GAUTENG/gradplot_placebo.dta", clear;
-    drop if seller_name == "STADSRAAD VAN PRETORIA";
-  * global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000  &  cluster_placebo != 1025 &  cluster_placebo != 1036 &  cluster_placebo != 1201 &   cluster_placebo != 1205 &   cluster_placebo != 1215 &    cluster_placebo != 1220 &   cluster_placebo != 1264   ";
-    global ifregs = "  purch_price > 2500 &  purch_price < 6000000 &  clust_placebo_siz > $msiz &   distance_placebo >0 & distance_placebo !=. &   placebo_yr>2002 &  placebo_yr!= . & purch_yr > 2000 ";
-
-    keep if $ifregs==1;
-    ren cluster_placebo cluster;
-    keep property_id  cluster;
-    g type = "placebo";
-    save "Generated/GAUTENG/temp/sample_key_placebo.dta", replace ;
-
-    *** GET PROPERTY IDs FOR ALL REGRESSION OBS;
-    use "Generated/GAUTENG/temp/sample_key_rdp.dta", clear;
-      append using "Generated/GAUTENG/temp/sample_key_placebo.dta";
-      duplicates drop property_id, force;
-      drop cluster;
-    save "Generated/GAUTENG/temp/rdp_placebo_property_id.dta", replace;
-
-    *** GET CLUSTER IDs FOR ALL REGRESSION CLUSTERS;
-    use "Generated/GAUTENG/temp/sample_key_rdp.dta", clear;
-      append using "Generated/GAUTENG/temp/sample_key_placebo.dta";
-      duplicates drop cluster, force;
-      drop property_id;
-    save "Generated/GAUTENG/temp/cluster_ids.dta", replace;
-
+prog descriptive_sample_temp;
     *** MERGE TO FULL AND SAVE price_sample.dta  ;
-    local qry = "  SELECT A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day, A.purch_price, A.trans_id, A.property_id, A.seller_name, C.rdp_all, C.rdp_never, D.erf_size
-                    FROM transactions AS A LEFT JOIN rdp AS C ON A.property_id = C.property_id  
-                    LEFT JOIN erven AS D ON A.property_id=D.property_id";
+local qry = "
+  SELECT 
+
+         A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day,
+         A.purch_price, A.trans_id, A.property_id, A.seller_name,
+
+         B.erf_size, B.latitude, B.longitude, 
+
+         C.rdp_all, C.rdp_gcroonly, C.rdp_notownship, C.rdp_phtownship, C.gov,
+         C.no_seller_rdp, C.big_seller_rdp, C.rdp_never, C.trans_id as trans_id_rdp,
+
+         D.distance AS distance_rdp, D.target_id AS cluster_rdp, D.count AS count_rdp,
+         E.cluster AS cluster_rdp_int,
+
+         F.distance AS distance_placebo, F.target_id AS cluster_placebo, F.count AS count_placebo,
+         G.cluster AS cluster_placebo_int, F.placebo_yr AS mode_yr_placebo, GC.RDP_density,
+
+         H.cluster_rdp AS cluster_rdp_true,
+         I.cluster_placebo AS cluster_placebo_true
+
+
+  FROM transactions AS A
+  JOIN erven AS B ON A.property_id = B.property_id
+  JOIN rdp   AS C ON B.property_id = C.property_id
+
+  LEFT JOIN (
+    SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+    FROM distance_erven_rdp 
+    WHERE distance<=4000
+    GROUP BY input_id 
+    HAVING COUNT(input_id)<=50
+      AND distance == MIN(distance)
+  ) AS D ON D.input_id = B.property_id
+
+  LEFT JOIN int_rdp_erven AS E  ON E.property_id = B.property_id
+
+  LEFT JOIN  gcro AS GC ON D.target_id = GC.cluster
+
+  LEFT JOIN (
+    SELECT dep.input_id, dep.distance, dep.target_id, 
+           COUNT(dep.input_id) AS count, gcro.placebo_yr
+    FROM distance_erven_placebo as dep
+    JOIN gcro on gcro.cluster = dep.target_id
+    WHERE dep.distance<=4000
+      AND gcro.placebo_yr IS NOT NULL
+      AND gcro.area > .5
+    GROUP BY dep.input_id 
+    HAVING COUNT(dep.input_id)<=50 
+      AND dep.distance == MIN(dep.distance)
+  ) AS F ON F.input_id = B.property_id
+
+  LEFT JOIN int_placebo_erven AS G  ON G.property_id = B.property_id
+
+  LEFT JOIN cluster_rdp AS H ON  H.cluster_rdp = D.target_id 
+  LEFT JOIN cluster_placebo AS I ON  I.cluster_placebo = F.target_id 
+
+  ";
+
     qui odbc query "gauteng";
     odbc load, exec("`qry'") clear;
 
-    merge m:1 property_id using "Generated/GAUTENG/temp/rdp_placebo_property_id.dta";
-    tab _merge;
+drop munic_name;
+egen sn = group(seller_name);
+replace sn = 0 if sn==.;
+drop seller_name;
+destring mun_code purch_yr purch_mo purch_day, replace force;
+drop trans_id;
+
+save "Generated/GAUTENG/temp/transactions_temp.dta", replace;
+end;
+
+
+prog define descriptive_sample;
+* THEN FILTER EVERYTHING! ;
+    use "Generated/GAUTENG/temp/transactions_temp.dta", clear;
 
     *** trim outliers ;
     drop if purch_price<2500 & _merge!=3;
@@ -175,7 +202,11 @@ prog descriptive_sample;
     replace plus_trans=. if p_n!=1;
     drop o trans_count _merge;
     save "Generated/GAUTENG/temp/price_sample.dta", replace;
+end;
 
+
+
+prog define another_temp;
     *** GENERATE PROJECT LEVEL TEMP TABLE project_sample.dta;
     local qry = "
       SELECT PC.cluster, PC.formal_pre, PC.formal_post, PC.informal_pre, PC.informal_post, PC.placebo_yr, 0 AS frac1, 0 AS frac2, C.cbd_dist  
@@ -186,6 +217,7 @@ prog descriptive_sample;
       FROM rdp_conhulls AS A JOIN rdp_clusters AS B ON A.cluster=B.cluster
       LEFT JOIN cbd_dist AS E ON A.cluster = E.cluster
       ";
+
     qui odbc query "gauteng";
     odbc load, exec("`qry'") clear;
     
@@ -239,7 +271,22 @@ end;
 **************************;
 
 program write_project_joint_table;
-    use "Generated/GAUTENG/temp/project_sample.dta", clear;
+    *use "Generated/GAUTENG/temp/project_sample.dta", clear;
+
+local qry = "
+      SELECT A.*, B.cluster_rdp, C.cluster_placebo, D.cbd_dist
+      FROM  gcro AS A
+      LEFT JOIN cluster_rdp AS B ON A.cluster = B.cluster_rdp
+      LEFT JOIN cluster_placebo AS C ON A.cluster = C.cluster_placebo
+      LEFT JOIN cbd_dist AS D ON A.cluster = D.cluster
+      ";
+
+    qui odbc query "gauteng";
+    odbc load, exec("`qry'") clear;
+
+    drop if cluster_rdp==. & cluster_placebo==.;
+    g rdp = cluster_rdp!=.;
+
         global cat1="keep if  rdp==1" ;
         global cat2="keep if  rdp==0" ;
         global cat_num=2;
@@ -348,31 +395,41 @@ end;
 program write_string_match;
   
     ** get cluster identifiers to clean the data ; 
-    local qry = "  SELECT A.*, B.hectares FROM gcro_publichousing_stats AS A JOIN gcro_publichousing AS B ON A.OGC_FID_gcro = B.OGC_FID  " ;
+    local qry = "  SELECT A.*, B.hectares 
+    FROM gcro_publichousing_stats AS A 
+    JOIN gcro_publichousing AS B ON A.OGC_FID_gcro = B.OGC_FID  " ;
+
+    local qry = "  SELECT A.*
+    FROM gcro AS A WHERE (area>0.5 AND RDP_density==0) OR (RDP_density>0)" ;
+
     qui odbc query "gauteng";
     odbc load, exec("`qry'") clear;
 
-        global cat1="keep if placebo_yr!=. " ;
-        global cat2="keep if placebo_yr==. " ;          
-        global cat_num=2;
+        g rdp = RDP_density>0 & RDP_density<.;
+        global cat1="keep if placebo_yr!=. & rdp==0" ;
+        global cat2="keep if placebo_yr==. & rdp==0 " ;   
+        global cat3="keep if placebo_yr!=. & rdp==1 " ;    
+        global cat4="keep if placebo_yr==. & rdp==1 " ;         
+        global cat_num=4;
 
     file open newfile using "`1'", write replace;
     print_table_start;  
-    file write newfile  " & Matched  & Unmatched  \\" _n ;
+    file write newfile  " & \multicolumn{2}{c}{Unconstructed} & \multicolumn{2}{c}{Constructed} \\" _n ;
+    file write newfile  " & Matched  & Unmatched  & Matched  & Unmatched  \\" _n ;
     file write newfile "\midrule" _n;
       print_1 "Formal Density: 2001" formal_pre  "mean" "%10.1fc"   ;
-      print_1 "Formal Density: 2011" formal_post "mean" "%10.1fc"   ;
-    print_blank;
+    *  print_1 "Formal Density: 2011" formal_post "mean" "%10.1fc"   ;
+    *print_blank;
       print_1 "Informal Density: 2001" informal_pre  "mean" "%10.1fc"   ;
-      print_1 "Informal Density: 2011" informal_post "mean" "%10.1fc"   ;
+    *  print_1 "Informal Density: 2011" informal_post "mean" "%10.1fc"   ;
     print_blank;
       print_1 "Project House Density" RDP_density  "mean" "%10.1fc"   ;
       print_1 "Project Mode Year" RDP_mode_yr "mean" "%10.0f"   ;
     print_blank;
-      print_1 "Hectares" hectares "mean" "%10.1fc"   ;
+      print_1 "Area (km2)" area "mean" "%10.1fc"   ;
     print_blank;
     file write newfile "\midrule" _n;
-        print_1 Observations OGC_FID_gcro "N" "%10.0fc" ;
+        print_1 Observations cluster "N" "%10.0fc" ;
     file write newfile "\bottomrule" _n "\end{tabu}" _n;
     file close newfile;
 
@@ -448,7 +505,7 @@ end;
 *write_census_hh_table "${figures}census_hh_table.tex";
 *write_census_hh_table "${present}census_hh_table.tex";
 
-*write_project_joint_table "${figures}project_joint_table.tex"; 
+write_project_joint_table "${figures}project_joint_table.tex"; 
 *write_project_joint_table "${present}project_joint_table.tex";
 
 *write_descriptive_table "${figures}descriptive_table.tex";

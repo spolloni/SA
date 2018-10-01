@@ -38,7 +38,7 @@ global output = "Output/GAUTENG/censusregs" ;
 global LOCAL = 1;
 
 * DOFILE SECTIONS;
-global data_load = 0;
+global data_load = 1;
 global data_prep = 1;
 global data_regs = 1;
 

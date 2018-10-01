@@ -7,6 +7,9 @@ set maxvar 32767
 #delimit;
 
 global output = "Code/GAUTENG/presentations/presentation_lunch";
+*global output = "Code/GAUTENG/paper/figures/";
+
+
 
 global LOCAL = 1;
 
@@ -82,7 +85,7 @@ drop *_id;
 
 bys rdp: g total=_N;
 
-global varlist=" implementation planning future uncertain none total";
+global varlist=" implementation planning future uncertain none";
 
 
 
@@ -92,8 +95,7 @@ replace temp = "Planning" in 2;
 replace temp = "Future, Investigating, Proposed" in 3;
 replace temp = "Uncertain" in 4;
 replace temp = "No Description" in 5;
-replace temp = "Total" in 6;
-
+*replace temp = "Total" in 6;
 
 
 
@@ -124,10 +126,10 @@ matrix define PER=J(`num',1,0);
 *};
 
 g colnames = "";
-replace colnames = "Uncompleted" in 1;
-replace colnames = "Completed" in 2;
+replace colnames = "Unconstructed" in 1;
+replace colnames = "Constructed" in 2;
 
-	
+
 cap program drop tables;
 program define tables `1' `2' `3' `4' `5';
 	file open fi using "`1'.tex", write replace;
@@ -169,9 +171,9 @@ program define tables `1' `2' `3' `4' `5';
 		file write fi  "`h'  \\" _n		;
 		}		;
 		};
-		if `r'==`=`ROWS'-1' {;
-			file write fi  "\hline ";
-		};
+		* if `r'==`=`ROWS'-1' {;
+		* 	file write fi  "\hline ";
+		* };
 	};
 *	file write fi "\hline" _n;
 	file write fi "\hline" _n;
