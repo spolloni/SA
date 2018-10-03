@@ -1,11 +1,6 @@
 \beamer@endinputifotherversion {3.36pt}
-<<<<<<< HEAD
-\beamer@sectionintoc {1}{Background}{17}{0}{1}
-\beamer@sectionintoc {2}{Data}{22}{0}{2}
-=======
 \beamer@sectionintoc {1}{Background}{13}{0}{1}
 \beamer@sectionintoc {2}{Data and Set-up}{19}{0}{2}
 \beamer@sectionintoc {3}{Impact on Dwelling Characteristics}{33}{0}{3}
 \beamer@sectionintoc {4}{Impact on Building Density}{45}{0}{4}
 \beamer@sectionintoc {5}{Spillovers on Housing Prices}{62}{0}{5}
->>>>>>> admin_boundaries

@@ -30,8 +30,8 @@ end;
 ******************;
 
 * SET OUTPUT;
-global output = "Output/GAUTENG/bbluplots";
-*global output = "Code/GAUTENG/paper/figures";
+*global output = "Output/GAUTENG/bbluplots";
+global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
@@ -49,16 +49,16 @@ global dist_min_reg = -500;
 
 * DOFILE SECTIONS;
 global bblu_query_data  = 0; /* query data */
-global bblu_clean_data  = 0; /* clean data for analysis */
-global bblu_do_analysis = 0; /* do analysis */
+global bblu_clean_data  = 1; /* clean data for analysis */
+global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_prepost = 0; /* plots means: 1) pre/post on same graph */
-global graph_plotmeans_rdpplac = 0; /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotdiff       = 0;   /* plots changes over time for placebo and rdp */
-global graph_plotdiff_het   = 0;
-global graph_plottriplediff = 0;
+global graph_plotmeans_prepost = 1;   /* plots means: 1) pre/post on same graph */
+global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotdiff          = 0;   /* plots changes over time for placebo and rdp */
+global graph_plotdiff_het      = 0;
+global graph_plottriplediff    = 0;
 
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -464,31 +464,31 @@ if $graph_plotmeans_rdpplac == 1 {;
 
   plotmeans_pre 
     bblu_total_buildings_pre_means total_buildings rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" $yl   
     4;
 
   plotmeans_pre 
     bblu_for_pre_means for rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)5)"
     4;
 
   plotmeans_pre 
     bblu_inf_pre_means inf rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)5)"
     4;
 
   plotmeans_pre 
     bblu_inf_backyard_pre_means inf_backyard rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)4)" 
     2;
 
   plotmeans_pre 
     bblu_inf_non_backyard_pre_means inf_non_backyard rdp placebo
-    "Completed" "Uncompleted"
+    "Constructed" "Unconstructed"
     "xlabel(-500(250)2000)" "ylabel(0(1)4)"  
     2;
 
@@ -512,8 +512,8 @@ program plotreg;
       destring contin, replace force;
       replace contin=contin+${dist_min};
       drop if contin>2000;
-      local treat "Completed";
-      local control "Uncompleted";
+      local treat "Constructed";
+      local control "Unconstructed";
       local het "Large Projects";
 
       if length("`3'")>0 & length("`4'")==0  {;
@@ -553,7 +553,7 @@ program plotreg;
       legend(order($legend) 
       ring(0) position(1) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
-      note("Mean Structures per `=${size}' m2: `=$mean_outcome'");
+      note("Mean Structures per `=${size}*${size}' m2: `=$mean_outcome'");
       graphexportpdf `1', dropeps;
    restore;
 end;
@@ -616,7 +616,7 @@ program plotregsingle;
 
     sort contin;
 
-    global legend1 " 2 "Completed vs. Uncompleted difference" ";
+    global legend1 " 2 "Constructed vs. Unconstructed difference" ";
     global graph1 "
     (rcap max95 min95 contin, lc("206 162 97") lw(vthin))
     (connected estimate contin, ms(T) msiz(medsmall) 
@@ -633,7 +633,7 @@ program plotregsingle;
     legend(order($legend1) 
     ring(0) position(1) bm(tiny) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
-    note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
+    note("Mean Structures per `=${size}*${size}' m2: `=$mean_outcome'")
     ;
     graphexportpdf `1', dropeps;
   restore;

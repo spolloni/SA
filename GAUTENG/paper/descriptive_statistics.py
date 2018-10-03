@@ -24,6 +24,7 @@ db = gendata+'gauteng.db'
 
 
 
+
 def project_counts():
     con = sql.connect(db)
     cur = con.cursor()

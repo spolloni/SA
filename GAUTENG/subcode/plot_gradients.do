@@ -11,8 +11,8 @@ set maxvar 32767
 
 * SET OUTPUT FOLDER ;
 *global output = "Output/GAUTENG/gradplots";
-*global output = "Code/GAUTENG/paper/figures";
-global output = "Code/GAUTENG/presentations/presentation_lunch";
+global output = "Code/GAUTENG/paper/figures";
+*global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
 global rdp   = "`1'";
@@ -35,9 +35,9 @@ cd Generated/GAUTENG;
 use gradplot_admin.dta, clear;
 
 
-global dd_graphs      = 0; /* standard graphs */
-global dd_graphs_het  = 0; /* separating RDP effect between high and low density projects */
-global dd_graphs_inside = 0; /* separating RDP and Placebo effects for being within project areas */
+global dd_graphs      = 1; /* standard graphs */
+global dd_graphs_het  = 1; /* separating RDP effect between high and low density projects */
+global dd_graphs_inside = 1; /* separating RDP and Placebo effects for being within project areas */
 
 * go to working dir;
 cd ../..;
@@ -212,7 +212,7 @@ program define  coeffgraph_het;
 
       graphexportpdf `1', dropeps;
 
-   *restore;
+   restore;
 end;
 
 global ifregs = "

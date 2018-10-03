@@ -8,7 +8,7 @@ set maxvar 32767
 
 
 global output = "Code/GAUTENG/presentations/presentation_lunch";
-*global output  = "Code/GAUTENG/paper/figures/";
+global output  = "Code/GAUTENG/paper/figures/";
 
 global LOCAL = 1;
 
@@ -16,7 +16,7 @@ global LOCAL = 1;
 
 
 ** set these equal to one to prep temporary datasets to make tables ;
-global census_prep = 0  ; 
+global census_prep = 1  ; 
 global gcro_prep   = 0  ;
 global price_prep  = 0  ;
 global bblu_prep   = 0  ;
@@ -141,6 +141,15 @@ lab var hh_size "Household Size";
 * household density;
 g o = 1;
 bys area_code: g a_n=_n;
+	
+	g a_n1=a_n==1;
+	egen aN = sum(a_n1);
+	sum aN, detail;
+	file open fi using "../../Code/GAUTENG/paper/figures/area_int.tex", write replace;
+	local h : di %10.0fc `=r(mean)';
+	file write fi "`h'";
+	file close fi;
+
 egen pop = sum(o), by(area_code year);
 g hh_density = (pop/area)*1000000;
 lab var hh_density "Households per km2";
@@ -167,6 +176,7 @@ g project_rdp = (area_int_rdp > $tresh_area);
 g project_placebo = (area_int_placebo > $tresh_area);
 keep if project_rdp==1 | project_placebo==1;
 g rdp = project_rdp==1;
+
 
 		ren cluster_joined cluster;
 		bys cluster rdp: g cn=_n;
