@@ -40,6 +40,7 @@ global LOCAL = 1;
 * PARAMETERS;
 global bin      = 100;   /* distance bin width for dist regs   */
 global size     = 50;
+global sizesq   = $size*$size;
 global dist_max = 2200;
 global dist_min = -600;
 
@@ -319,7 +320,7 @@ if $graph_plotmeans_prepost == 1 {;
     (connected `2'_`3' d`3' if post==1 & nn_`3'==1, ms(T) msiz(medsmall)  mlc(sienna) mfc(sienna) lc("206 162 97") lw(thin))
     ,
     xtitle("meters from project border",height(5))
-    ytitle("Structures per `=${size}' m2",height(5))
+    ytitle("Structures per `=${sizesq}' m2",height(5))
     xline(0,lw(thin)lp(shortdash))
     `6'
     `7'
@@ -446,7 +447,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     (connected `2'_`4' D, ms(T) msiz(medsmall)  mlc(sienna) mfc(sienna) lc("206 162 97") lw(thin))
     ,
     xtitle("meters from project border",height(5))
-    ytitle("Structures per `=${size}' m2",height(5))
+    ytitle("Structures per `=${sizesq}' m2",height(5))
     xline(0,lw(thin)lp(shortdash))
     `7'
     `8'
@@ -548,12 +549,12 @@ program plotreg;
       yline(0,lw(thin)lp(shortdash))
       xline(0,lw(thin)lp(shortdash))
       xtitle("meters from project border",height(5))
-      ytitle("Structures per `=${size}' m2",height(5))
+      ytitle("Structures per `=${sizesq}' m2",height(5))
       xlabel(-500(250)2000)
       legend(order($legend) 
       ring(0) position(1) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
-      note("Mean Structures per `=${size}' m2: `=$mean_outcome'");
+      note("Mean Structures per `=${sizesq}' m2: `=$mean_outcome'");
       graphexportpdf `1', dropeps;
    restore;
 end;
@@ -628,12 +629,12 @@ program plotregsingle;
     yline(0,lw(thin)lp(shortdash))
     xline(0,lw(thin)lp(shortdash))
     xtitle("meters from project border",height(5))
-    ytitle("Structures per `=${size}' m2",height(5))
+    ytitle("Structures per `=${sizesq}' m2",height(5))
     xlabel(-500(250)2000)
     legend(order($legend1) 
     ring(0) position(1) bm(tiny) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
-    note("Mean Structures per `=${size}' m2: `=$mean_outcome'")
+    note("Mean Structures per `=${sizesq}' m2: `=$mean_outcome'")
     ;
     graphexportpdf `1', dropeps;
   restore;
