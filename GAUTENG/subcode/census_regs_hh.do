@@ -30,8 +30,8 @@ end;
 ******************;
 
 * SET OUTPUT GLOBAL;
-global output = "Output/GAUTENG/censusregs" ;
-* global output = "Code/GAUTENG/paper/figures";
+*global output = "Output/GAUTENG/censusregs" ;
+ global output = "Code/GAUTENG/paper/figures";
 * global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
@@ -43,7 +43,8 @@ global data_prep = 1;
 global data_regs = 1;
 
 * PARAMETERS;
-global tresh_area = 0.3;  /* Area ratio for "inside" vs spillover */
+global drop_others= 1   ; /* everything relative to unconstructed */
+global tresh_area = 0.3 ; /* Area ratio for "inside" vs spillover */
 global tresh_dist = 1500; /* Area ratio inside vs spillover */
 
 if $LOCAL==1 {;
@@ -288,19 +289,31 @@ gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 if $data_regs==1 {;
 
 g project_rdp = (area_int_rdp > $tresh_area);
+lab var project_rdp "Project X Const.";
 g project_placebo = (area_int_placebo > $tresh_area);
+lab var project_placebo "Project X Unconst.";
 g project = (project_rdp==1 | project_placebo==1);
+lab var project "Project";
 g project_post = project ==1 & year==2011;
+lab var project_post "Project X Post";
 g project_post_rdp = project_rdp ==1 & year==2011;
+lab var project_post_rdp "Project X Post X Const.";
 
 g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
+lab var spillover_rdp "Spillover X Const.";
 g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
+lab var spillover_placebo "Spillover X Unconst.";
 g spillover = (spillover_rdp==1 | spillover_placebo==1);
+lab var spillover "Spillover";
 g spillover_post = spillover == 1 & year==2011;
+lab var spillover_post "Spillover X Post";
 g spillover_post_rdp = spillover_rdp==1 & year==2011;
+lab var spillover_post_rdp "Spillover X Post X Const.";
 
 g others = project !=1 & spillover !=1;
+lab var others "Outside";
 g others_post = others==1 & year==2011;
+lab var others_post "Outside Post";
 
 global regressors "
   project_post_rdp
@@ -313,6 +326,21 @@ global regressors "
   spillover
   others_post
   ";
+
+if $drop_others == 1{;
+drop if others==1;
+global regressors "
+  project_post_rdp
+  project_post
+  project_rdp
+  project
+  spillover_post_rdp
+  spillover_post
+  spillover_rdp
+  ";
+};
+
+
 
 global outcomes1 "
   toilet_flush 
@@ -328,35 +356,53 @@ global outcomes2 "
   electric_lighting 
   ";
 
+
+preserve ; 
+  g an1 = a_n==1;
+  egen AN=sum(an1);
+  sum AN, detail;
+  file open myfile using "total_blocks.tex", write replace;
+  local h : di %10.0fc `=r(mean)';
+  file write myfile "`h'";
+  file close myfile ;
+restore ;
+
 eststo clear;
 
 foreach var of varlist $outcomes1 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+
   sum `var' if e(sample)==1 & year ==2001, detail;
   estadd scalar Mean2001 = `=r(mean)';
   sum `var' if e(sample)==1 & year ==2011, detail;
   estadd scalar Mean2011 = `=r(mean)';
+
   eststo `var';
 };
 
 esttab $outcomes1 using census_hh_DDregs_admin_1,
-  replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  star(* 0.10 ** 0.05 *** 0.01) stats(Mean2001 Mean2011)
+  replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
+  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House")
+  star(* 0.10 ** 0.05 *** 0.01) stats(N Mean2001 Mean2011) label
+
   compress drop(_cons);
 
 
-eststo clear;
+*eststo clear;
 
 foreach var of varlist $outcomes2 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+
   sum `var' if e(sample)==1 & year ==2001, detail;
   estadd scalar Mean2001 = `=r(mean)';
   sum `var' if e(sample)==1 & year ==2011, detail;
   estadd scalar Mean2011 = `=r(mean)';
+
   eststo `var';
 };
 
 areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
+
 sum pop_density if e(sample)==1 & year ==2001, detail;
 estadd scalar Mean2001 = `=r(mean)';
 sum pop_density if e(sample)==1 & year ==2011, detail;
@@ -368,11 +414,15 @@ sum hh_density if e(sample)==1 & year ==2001, detail;
 estadd scalar Mean2001 = `=r(mean)';
 sum hh_density if e(sample)==1 & year ==2011, detail;
 estadd scalar Mean2011 = `=r(mean)';
+
 eststo hh_density;
 
-esttab $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
-  replace nomti b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  star(* 0.10 ** 0.05 *** 0.01)  stats(Mean2001 Mean2011)
+esttab $outcomes1 $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
+  replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex label
+
+  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House" "Elec. Cooking" "Elec. Heating" "Elec. Lighting" "HH Density" "Pop. Density")
+  star(* 0.10 ** 0.05 *** 0.01)  stats(N Mean2001 Mean2011)
+
   compress;
 
 

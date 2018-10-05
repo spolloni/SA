@@ -1,0 +1,36 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{5}{c}}
+\hline\hline
+                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+                &\multicolumn{1}{c}{Flush Toilet}&\multicolumn{1}{c}{Water Inside}&\multicolumn{1}{c}{Water Utility}&\multicolumn{1}{c}{Own House}&\multicolumn{1}{c}{Single House}\\
+\hline
+Project X Post X Const.&    0.121\sym{*}  &    0.136\sym{***}&    0.035         &   -0.085         &    0.142\sym{***}\\
+                &  (0.063)         &  (0.050)         &  (0.039)         &  (0.074)         &  (0.053)         \\
+[1em]
+Project X Post  &    0.080\sym{*}  &    0.099\sym{**} &   -0.030         &    0.041         &    0.075\sym{**} \\
+                &  (0.047)         &  (0.038)         &  (0.037)         &  (0.038)         &  (0.036)         \\
+[1em]
+Project X Const.&    0.088         &   -0.015         &    0.040\sym{*}  &    0.120         &    0.044         \\
+                &  (0.111)         &  (0.084)         &  (0.022)         &  (0.087)         &  (0.100)         \\
+[1em]
+Project         &   -0.316\sym{***}&   -0.212\sym{***}&   -0.021         &   -0.182\sym{***}&   -0.245\sym{***}\\
+                &  (0.074)         &  (0.050)         &  (0.022)         &  (0.054)         &  (0.063)         \\
+[1em]
+Spillover X Post X Const.&    0.037         &    0.031         &   -0.012         &   -0.008         &    0.015         \\
+                &  (0.035)         &  (0.033)         &  (0.012)         &  (0.028)         &  (0.029)         \\
+[1em]
+Spillover X Post&    0.049\sym{*}  &    0.136\sym{***}&    0.012         &   -0.039\sym{**} &    0.048\sym{**} \\
+                &  (0.025)         &  (0.025)         &  (0.009)         &  (0.015)         &  (0.022)         \\
+[1em]
+Spillover X Const.&   -0.026         &   -0.040         &    0.030\sym{*}  &    0.019         &   -0.000         \\
+                &  (0.057)         &  (0.053)         &  (0.016)         &  (0.043)         &  (0.045)         \\
+\hline
+N               &2020549.000         &2020549.000         &2020549.000         &1958335.000         &1936911.000         \\
+Mean2001        &    0.699         &    0.300         &    0.947         &    0.507         &    0.535         \\
+Mean2011        &    0.807         &    0.481         &    0.941         &    0.442         &    0.622         \\
+\hline\hline
+\multicolumn{6}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{6}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+}

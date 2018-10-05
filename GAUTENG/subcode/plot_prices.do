@@ -49,13 +49,13 @@ end;
 *******************;
 
 * SET OUTPUT FOLDER ;
-global output = "Output/GAUTENG/gradplots";
-*global output = "Code/GAUTENG/paper/figures";
+*global output = "Output/GAUTENG/gradplots";
+global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
 global rdp   = "`1'";
-global twl   = "4";   /* look at twl years before construction */
+global twl   = "3";   /* look at twl years before construction */
 global twu   = "4";   /* look at twu years after construction */
 global bin   = 250;   /* distance bin width for dist regs   */
 global max   = 2000;  /* distance maximum for distance bins */
@@ -81,10 +81,11 @@ global ifhists = "
 
 * what to run?;
 global trans_hist = 0;
-global dist_regs = 0;
-global time_regs = 0;
-global dd_regs = 0;
-global ddd_regs = 0;
+global dist_regs  = 0;
+global time_regs  = 0;
+global dd_regs    = 0;
+global ddd_regs   = 0;
+global simple_reg = 1;
 
 * load data; 
 cd ../..;
@@ -138,9 +139,44 @@ egen latlongroup = group(latbin lonbin);
 * cluster var for FE (arbitrary for obs contributing to 2 clusters?);
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
+
+
+**** PRINT STATISTIC : percent of transactions excluded with seller_name criteria  ;
+preserve;
+  keep if
+       rdp_never ==1 &
+       purch_price > 2000 & purch_price<800000 &
+       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+  g total=_N;
+  g s30 = s_N<30;
+  egen s30s = sum(s30);
+  g s30share=1-(s30s/total);
+  sum s30share, detail;
+  file open myfile using "s30.tex", write replace;
+  local h : di %10.0fc `=r(mean)*100';
+  file write myfile "`h'";
+  file close myfile ;
+restore ;
+
+
+**** PRINT STATISTIC : total price observations  ;
+preserve;
+  keep if s_N<30     & 
+       rdp_never ==1  &
+       purch_price > 2000 & purch_price<800000 &
+       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+  g total=_N;
+  sum total, detail;
+  file open myfile using "total_price_obs.tex", write replace;
+  local h : di %10.0fc `=r(mean)';
+  file write myfile "`h'";
+  file close myfile ;
+restore ;
+
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
+
 
 *****************************************************************;
 ****************** TRANSACTIONS HISTOGRAM  **********************;
@@ -154,31 +190,33 @@ drop if sum_nrdp < 50;
 
 hist lprice if rdp_all==1 & lprice < 15 & lprice > 5, 
   bin(200) name(a) xlabel(5(5)15)
-  xtitle("")  ytitle("") title("subsidized housing");
+  xtitle("")  ytitle("") title("project housing");
 
 hist lprice if rdp_never==1, 
   bin(200)  name(b) xlabel(5(5)15)
-  xtitle("") yla(none) ytitle("") title("non-subsidized housing");
+  xtitle("") yla(none) ytitle("") title("non-project housing");
 
 graph combine a b, rows(1) ycommon 
 l1(" transaction density",size(medsmall)) 
 b1("log house price",size(medsmall))
 xsize(13) ysize(8.5) imargin(0 0 -2 -2);
-graphexportpdf summary_pricedist, dropeps;
+graphexportpdf summary_pricedist, dropeps replace;
+graph drop _all;
 
 hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_all==1, 
   bin(73) name(a) xlabel(-36(12)36)
-  xtitle("") xla("") ytitle("") title("subsidized housing");
+  xtitle("") xla("") ytitle("") title("project housing");
 
 hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_never==1, 
   bin(73)  name(b) xlabel(-36(12)36)
-  xtitle("") ytitle("") title("non-subsidized housing");
+  xtitle("") ytitle("") title("non-project housing");
 
 graph combine a b, cols(1) xcommon 
 l1(" transaction density",size(medsmall)) 
 b1("months to project modal transaction month",size(medsmall))
 xsize(13) ysize(8.5) imargin(0 0 -2 -2);
-graphexportpdf summary_densitytime, dropeps;
+graphexportpdf summary_densitytime, dropeps replace;
+graph drop _all;
 
 restore;
 };
@@ -229,7 +267,7 @@ program plotcoeffs_distance;
       xlabel($lbound(500)$ubound,labsize(small))
       ylabel(-.4(.1).2,labsize(small))
       yline(0,lw(thin)lp(shortdash))
-      legend(order(3 "pre-completion" 4 "post-completion") 
+      legend(order(3 "pre-construction" 4 "post-construction") 
       ring(0) position(5) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
       note("`3'");;
@@ -334,40 +372,41 @@ program plotcoeffs_time;
   restore;
 end;
 
-*dummy construction;
-gen dreg_far_rdp = 0;
-gen dreg_far_placebo = 0;
-levelsof mo2con_reg_rdp;
-foreach level in `r(levels)' {;
-  
-  gen dreg_`level'_treat_placebo  = (mo2con_reg_placebo == `level' & treat_placebo==1);
-  gen dreg_`level'_cntrl_placebo = (mo2con_reg_placebo == `level' & treat_placebo==0);
-  replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' & treat_placebo==2;
+preserve; 
+    *dummy construction;
+    gen dreg_far_rdp = 0;
+    gen dreg_far_placebo = 0;
+    levelsof mo2con_reg_rdp;
+    foreach level in `r(levels)' {;
+      
+      gen dreg_`level'_treat_placebo  = (mo2con_reg_placebo == `level' & treat_placebo==1);
+      gen dreg_`level'_cntrl_placebo = (mo2con_reg_placebo == `level' & treat_placebo==0);
+      replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' & treat_placebo==2;
 
-  gen dreg_`level'_treat_rdp  = (mo2con_reg_rdp == `level' & treat_rdp==1);
-  gen dreg_`level'_cntrl_rdp = (mo2con_reg_rdp == `level' & treat_rdp==0);
-  replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' & treat_rdp==2;
+      gen dreg_`level'_treat_rdp  = (mo2con_reg_rdp == `level' & treat_rdp==1);
+      gen dreg_`level'_cntrl_rdp = (mo2con_reg_rdp == `level' & treat_rdp==0);
+      replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' & treat_rdp==2;
 
-};
+    };
 
-foreach v in _rdp _placebo {;
-  replace dreg_far`v' = 1 if (dreg_9999_treat`v'==1 | dreg_9999_cntrl`v'==1);
-  drop dreg_9999_treat`v' dreg_9999_cntrl`v';
-};
+    foreach v in _rdp _placebo {;
+      replace dreg_far`v' = 1 if (dreg_9999_treat`v'==1 | dreg_9999_cntrl`v'==1);
+      drop dreg_9999_treat`v' dreg_9999_cntrl`v';
+    };
 
-* dummies global for regs;
-ds dreg* ;
-global dummies = "`r(varlist)'"; 
-omit dummies dreg_1001_cntrl_placebo  dreg_1001_cntrl_rdp; 
+    * dummies global for regs;
+    ds dreg* ;
+    global dummies = "`r(varlist)'"; 
+    omit dummies dreg_1001_cntrl_placebo  dreg_1001_cntrl_rdp; 
 
-* REG MONKEY;
-*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
-reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+    * REG MONKEY;
+    *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+    reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
 
-* plot coefficient;
-plotcoeffs_time rdp time_plot_rdp;
-plotcoeffs_time placebo time_plot_placebo;
-
+    * plot coefficient;
+    plotcoeffs_time rdp time_plot_rdp;
+    plotcoeffs_time placebo time_plot_placebo;
+restore;
 };
 *****************************************************************;
 *****************************************************************;
@@ -390,7 +429,7 @@ program plotcoeffs_DD;
 
     * keep only coeffs to plot;
     drop if contin == .;
-    drop if strpos(parm, "long") >0;
+    drop if strpos(parm, "long" ) >0;
     keep if strpos(parm, "treat") >0;
 
     * dummy for post coeffs;
@@ -427,39 +466,40 @@ program plotcoeffs_DD;
   restore;
 end;
 
-*dummy construction;
-gen dreg_far_rdp = 0;
-gen dreg_far_placebo = 0;
-levelsof mo2con_reg_rdp;
-foreach level in `r(levels)' {;
+preserve;
+    *dummy construction;
+    gen dreg_far_rdp = 0;
+    gen dreg_far_placebo = 0;
+    levelsof mo2con_reg_rdp;
+    foreach level in `r(levels)' {;
 
-  gen dreg_`level'_rdp = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1));
-  gen dreg_`level'_rdp_treat = (mo2con_reg_rdp == `level' & treat_rdp==1);
-  replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' &  treat_rdp==2;
+      gen dreg_`level'_rdp = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1));
+      gen dreg_`level'_rdp_treat = (mo2con_reg_rdp == `level' & treat_rdp==1);
+      replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' &  treat_rdp==2;
 
-  gen dreg_`level'_placebo = (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1));
-  gen dreg_`level'_placebo_treat = (mo2con_reg_placebo == `level' & treat_placebo==1);
-  replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' &  treat_placebo==2;      
+      gen dreg_`level'_placebo = (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1));
+      gen dreg_`level'_placebo_treat = (mo2con_reg_placebo == `level' & treat_placebo==1);
+      replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' &  treat_placebo==2;      
 
-};
+    };
 
-foreach v in _rdp _placebo {;
-  replace dreg_far`v' = 1 if (dreg_9999`v'==1 | dreg_9999`v'_treat==1);
-  drop dreg_9999`v' dreg_9999`v'_treat;
-};
+    foreach v in _rdp _placebo {;
+      replace dreg_far`v' = 1 if (dreg_9999`v'==1 | dreg_9999`v'_treat==1);
+      drop dreg_9999`v' dreg_9999`v'_treat;
+    };
 
-* dummies global for regs;
-ds dreg* ;
-global dummies = "`r(varlist)'"; 
-omit dummies dreg_far_placebo dreg_far_rdp; 
+    * dummies global for regs;
+    ds dreg* ;
+    global dummies = "`r(varlist)'"; 
+    omit dummies dreg_far_placebo dreg_far_rdp; 
 
-* REG MONKEY;
-*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
-reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+    * REG MONKEY;
+    *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+    reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
 
-* plot coefficient;
-plotcoeffs_DD time_plot_DD;
-
+    * plot coefficient;
+    plotcoeffs_DD time_plot_DD;
+restore;
 };
 *****************************************************************;
 *****************************************************************;
@@ -544,3 +584,84 @@ graphexportpdf timeplot_admin_${treat}, dropeps;
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
+
+
+
+
+*****************************;
+******* SIMPLE REG TABLE ****;
+*****************************;
+
+if $simple_reg == 1 {;
+
+  gen dreg_rdp = (treat_rdp==0 | treat_rdp==1) ;
+    lab var dreg_rdp "Const." ;
+  gen dreg_treat = treat_rdp==1 | treat_placebo==1 ;
+    lab var dreg_treat "Near" ;
+  gen dreg_treat_rdp = (treat_rdp==1);  
+    lab var dreg_treat_rdp "Near X Const." ;
+
+  gen  dreg_post = (mo2con_reg_rdp>0 & mo2con_reg_rdp<=3 & (treat_rdp==0 | treat_rdp==1)) |
+                      (mo2con_reg_placebo>0 & mo2con_reg_placebo<=3 & (treat_placebo==0 | treat_placebo==1)) ;
+    lab var dreg_post "Post" ;
+
+  gen  dreg_post_treat = (mo2con_reg_rdp>0 & mo2con_reg_rdp<=3 & treat_rdp==1) |
+                            (mo2con_reg_placebo>0 & mo2con_reg_placebo<=3 & treat_placebo==1) ;
+    lab var dreg_post_treat "Post X Near" ;
+
+  gen  dreg_post_rdp = (mo2con_reg_rdp>0 & mo2con_reg_rdp<=3 ) & (treat_rdp==0 | treat_rdp==1) ;
+    lab var dreg_post_rdp "Post X Const." ;
+
+  gen  dreg_post_treat_rdp = (mo2con_reg_rdp>0 & mo2con_reg_rdp<=3  & treat_rdp==1) ;
+    lab var dreg_post_treat_rdp "Post X Near X Const." ;
+
+
+
+
+order  dreg_post_treat_rdp   dreg_post_rdp  dreg_treat_rdp dreg_post_treat  dreg_post  dreg_treat  dreg_rdp  ;
+
+* dummies global for regs;
+ds dreg_* ;
+global dummies = "`r(varlist)'"; 
+
+global dummies1 = " dreg_post_treat dreg_treat dreg_post " ;
+global ifregs1 = " (treat_rdp==0 | treat_rdp==1) " ;
+
+global dummies2 = " dreg_post_treat dreg_treat dreg_post " ;
+global ifregs2 = " (treat_placebo==0 | treat_placebo==1) " ;
+
+
+reg lprice $dummies1 i.purch_yr#i.purch_mo i.cluster_joined if $ifregs & $ifregs1, cl(cluster_joined);
+
+outreg2 using "ddd_price_regs.tex", tex(frag)
+    replace addtext("Year-Month FE","Yes","Project FE","Yes") addnote("Clustered at the project level.") label
+    ctitle("Const") keep($dummies1) ;
+
+reg lprice $dummies2 i.purch_yr#i.purch_mo i.cluster_joined if $ifregs & $ifregs2, cl(cluster_joined);
+
+outreg2 using "ddd_price_regs.tex", tex(frag)
+    append addtext("Year-Month FE","Yes","Project FE","Yes") label
+    ctitle("Unconst") keep($dummies2) ;
+
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+outreg2 using "ddd_price_regs.tex", tex(frag)
+    append addtext("Year-Month FE","Yes","Project FE","Yes") label
+    ctitle("All") keep($dummies) ;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

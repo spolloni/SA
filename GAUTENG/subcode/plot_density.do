@@ -30,8 +30,8 @@ end;
 ******************;
 
 * SET OUTPUT;
-global output = "Output/GAUTENG/bbluplots";
-*global output = "Code/GAUTENG/paper/figures";
+*global output = "Output/GAUTENG/bbluplots";
+global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
@@ -50,16 +50,16 @@ global dist_min_reg = -500;
 
 * DOFILE SECTIONS;
 global bblu_query_data  = 0; /* query data */
-global bblu_clean_data  = 0; /* clean data for analysis */
-global bblu_do_analysis = 0; /* do analysis */
+global bblu_clean_data  = 1; /* clean data for analysis */
+global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_prepost = 0; /* plots means: 1) pre/post on same graph */
-global graph_plotmeans_rdpplac = 0; /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotdiff       = 0;   /* plots changes over time for placebo and rdp */
-global graph_plotdiff_het   = 0;
-global graph_plottriplediff = 0;
+global graph_plotmeans_prepost = 1;   /* plots means: 1) pre/post on same graph */
+global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotdiff          = 0;   /* plots changes over time for placebo and rdp */
+global graph_plotdiff_het      = 0;
+global graph_plottriplediff    = 0;
 
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 

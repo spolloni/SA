@@ -38,12 +38,8 @@ def cbd_gen():
     con.execute('''
         CREATE TABLE cbd_dist AS
         SELECT MIN(ST_distance(A.GEOMETRY,ST_Centroid(B.GEOMETRY)))/1000 AS cbd_dist, A.town, B.cluster as cluster
-        FROM cbd_centroids AS A, placebo_conhulls AS B
+        FROM cbd_centroids AS A, gcro AS B
         GROUP BY B.cluster
-        UNION
-        SELECT MIN(ST_distance(C.GEOMETRY,ST_Centroid(D.GEOMETRY)))/1000 AS cbd_dist, C.town, D.cluster as cluster
-        FROM cbd_centroids AS C, rdp_conhulls AS D
-        GROUP BY D.cluster  ;
                 ''')
     con.close()
 
