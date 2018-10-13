@@ -38,7 +38,8 @@ global output = "Code/GAUTENG/paper/figures";
 global LOCAL = 1;
 
 * PARAMETERS;
-global bin      = 100;   /* distance bin width for dist regs   */
+global bin      = 200;   /* distance bin width for dist regs   */
+* set bin to 200 for nr regs ;
 global size     = 50;
 global sizesq   = $size*$size;
 global dist_max = 2200;
@@ -50,29 +51,50 @@ global dist_min_reg = -500;
 
 * DOFILE SECTIONS;
 global bblu_query_data  = 0; /* query data */
-global bblu_clean_data  = 1; /* clean data for analysis */
+global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_prepost = 1;   /* plots means: 1) pre/post on same graph */
+global graph_plotmeans_prepost = 0;   /* plots means: 1) pre/post on same graph */
 global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+
+
+global graph_means_het     = 0;
+global graph_meansdiff_het     = 1;
+
 global graph_plotdiff          = 0;   /* plots changes over time for placebo and rdp */
 global graph_plotdiff_het      = 0;
+global graph_plotdiff_full_het = 0;
 global graph_plottriplediff    = 0;
+global graph_plottriplediff_het= 0;
+  global same_control="no";   /*  if yes, keeps the same unconstructed reference for both close and far */
 
-global reg_triplediff       = 1; /* creates regression analogue for triple difference */
+
+global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
+
+*** SIZE HETEROGENEITY ; 
+cap program drop gen_het;
+prog gen_het;
+  sum RDP_density, detail;
+  g het = RDP_density>= `=r(p50)' & RDP_density<.;
+end;
+
+*** CBD_DIST HETEROGENEITY ; 
+cap program drop gen_het;
+prog gen_het;
+  sum cbd_dist, detail;
+  g het = cbd_dist>= `=r(p50)' & cbd_dist<.;
+end;
+
 cap program drop outcome_gen;
 prog outcome_gen;
-
   g for    = s_lu_code == "7.1";
   g inf    = s_lu_code == "7.2";
   g total_buildings = for + inf ;
-
   g inf_backyard  = t_lu_code == "7.2.3";
   g inf_non_backyard  = inf_b==0 & inf==1;
-
 end;
 
 cap program drop label_outcomes;
@@ -83,6 +105,7 @@ prog label_outcomes;
   lab var inf_backyard "Backyard";
   lab var inf_non_backyard "Non-Backyard";
 end;
+
 
 if $LOCAL==1 {;
 	cd ..;
@@ -103,7 +126,8 @@ if $bblu_query_data == 1 {;
   local qry = " 
 
     SELECT AA.*, GP.con_mo_placebo, GR.con_mo_rdp, IR.cluster AS cluster_int_rdp, 
-    IP.cluster AS cluster_int_placebo, GC.RDP_density, GC.area
+    IP.cluster AS cluster_int_placebo, GC.RDP_density, GC.area,
+    RC.cbd_dist AS cbd_dist_rdp, RP.cbd_dist AS cbd_dist_placebo
 
     FROM 
 
@@ -159,6 +183,10 @@ if $bblu_query_data == 1 {;
 
     LEFT JOIN int_rdp_bblu_`time' AS IR  ON IR.OGC_FID = AA.OGC_FID    
 
+    LEFT JOIN cbd_dist AS RC ON AA.cluster_rdp = RC.cluster
+
+    LEFT JOIN cbd_dist AS RP ON AA.cluster_placebo = RP.cluster
+
     ";
 
   odbc query "gauteng";
@@ -180,6 +208,11 @@ if $bblu_clean_data==1 {;
   g post = 0;
   append using bbluplot_admin_post.dta;
   replace post = 1 if post==.;
+
+  destring cbd_dist_rdp cbd_dist_placebo, replace force ; 
+  g cbd_dist=cbd_dist_rdp ;
+  replace cbd_dist=cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ;
+  drop cbd_dist_rdp cbd_dist_placebo ;
 
   g formal = (s_lu_code=="7.1");
 
@@ -231,7 +264,7 @@ if $bblu_clean_data==1 {;
 
   keep  $outcomes  
     post id cluster_placebo cluster_rdp cluster_joined
-    distance_rdp distance_placebo RDP_density;
+    distance_rdp distance_placebo RDP_density cbd_dist;
   duplicates drop id post, force;
 
   egen id1 = group(id);
@@ -246,7 +279,7 @@ if $bblu_clean_data==1 {;
   replace `var'=0 if `var'==.;
   };
 
-  foreach var of varlist cluster_placebo cluster_rdp distance_rdp distance_placebo RDP_density {;
+  foreach var of varlist cluster_placebo cluster_rdp distance_rdp distance_placebo RDP_density cbd_dist{;
   egen `var'_m=max(`var'), by(id);
   replace `var'=`var'_m if `var'==.;
   drop `var'_m;
@@ -454,7 +487,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     legend(order(1 "`5'" 2 "`6'") 
     ring(0) position(`9') bm(tiny) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
-    aspect(`10');;
+    aspect(`10');
     graphexportpdf `1', dropeps;
   restore;
 
@@ -498,10 +531,143 @@ if $graph_plotmeans_rdpplac == 1 {;
 ************************************************;
 ************************************************;
 
+
+if $graph_means_het == 1 {;
+
+gen_het; 
+
+  cap program drop plotmeans_het;
+  program plotmeans_het;
+  preserve;
+
+  keep if het==`8';
+
+    egen `2'_`3' = mean(`2'), by(post d`3');
+    bys post d`3': g nn_`3'=_n;
+
+    twoway 
+    (connected `2'_`3' d`3' if post==0 & nn_`3'==1, ms(o)  mlc(gs0) mfc(gs0) lc(gs7) lp(none) lw(thin))
+    (connected `2'_`3' d`3' if post==1 & nn_`3'==1, ms(T) msiz(medsmall)  mlc(sienna) mfc(sienna) lc("206 162 97") lw(thin))
+    ,
+    xtitle("meters from project border",height(5))
+    ytitle("Structures per `=${sizesq}' m2",height(5))
+    xline(0,lw(thin)lp(shortdash))
+    `6'
+    `7'
+    legend(order(1 "`4'" 2 "`5'") 
+    ring(0) position(4) bm(tiny) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none))) ;
+
+    graph export "`1'.pdf", as(pdf) replace  ;
+
+  restore; 
+  end;
+
+  global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+  foreach v in $outcomes {;
+  foreach t in rdp placebo {;
+  plotmeans_het 
+    bblu_`v'_`t'_close `v' `t' 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(2(1)12)"  
+    0 ;
+
+  plotmeans_het
+    bblu_`v'_`t'_far `v' `t' 
+    "2001" "2011" 
+    "xlabel(-500(250)2000)" "ylabel(2(1)12)"  
+    1 ; 
+  };
+  };
+
+};
+
+
+
+if $graph_meansdiff_het == 1 {;
+
+gen_het;
+
+cap program drop plotmeansdiff_het;
+program plotmeansdiff_het;
+
+  preserve;
+    keep if het==`9';
+    egen `2'_`3'_id = mean(`2'), by(d`3' post);    
+    keep `2'_`3'_id d`3' post;
+    duplicates drop d`3' post, force;
+    sort d`3' post ;
+    by d`3': g `2'_`3' = `2'_`3'_id[_n] - `2'_`3'_id[_n-1];
+    keep if post==1;
+    keep `2'_`3' d`3';
+    ren d`3' D;
+    save "${temp}pmeansd_`3'_temp.dta", replace;
+  restore;
+
+  preserve; 
+    keep if het==`9';
+      egen `2'_`4'_id = mean(`2'), by(d`4' post);    
+    keep `2'_`4'_id d`4' post;
+    duplicates drop d`4' post, force;
+    sort d`4' post ;
+    by d`4': g `2'_`4' = `2'_`4'_id[_n] - `2'_`4'_id[_n-1];
+    keep if post==1;
+    keep `2'_`4' d`4';
+    ren d`4' D;
+    save "${temp}pmeansd_`4'_temp.dta", replace;
+  restore;
+
+  preserve; 
+    use "${temp}pmeansd_`3'_temp.dta", clear;
+    merge 1:1 D using "${temp}pmeansd_`4'_temp.dta";
+    keep if _merge==3;
+    drop _merge;
+
+    twoway 
+    (connected `2'_`3' D, ms(o)  mlc(gs0) mfc(gs0) lc(gs7) lp(none) lw(thin))
+    (connected `2'_`4' D, ms(T) msiz(medsmall)  mlc(sienna) mfc(sienna) lc("206 162 97") lw(thin))
+    ,
+    xtitle("meters from project border",height(5))
+    ytitle("Change in Structures per `=${sizesq}' m2",height(5))
+    xline(0,lw(thin)lp(shortdash))
+    `7'
+    `8'
+    legend(order(1 "`5'" 2 "`6'") 
+    ring(0) position(4) bm(tiny) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(`10');
+    graph export "`1'.pdf", as(pdf) replace ;
+    erase "${temp}pmeansd_`3'_temp.dta";
+    erase "${temp}pmeansd_`4'_temp.dta";
+  restore;
+  end;
+
+
+  global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+  foreach v in $outcomes {;
+  plotmeansdiff_het 
+    bblu_`v'_diff_close `v' rdp placebo 
+    "cons" "uncons" 
+    "xlabel(-500(250)2000)" " "  
+    0 ;
+
+  plotmeansdiff_het
+    bblu_`v'_diff_far `v' rdp placebo
+    "cons" "uncons" 
+    "xlabel(-500(250)2000)" " "  
+    1 ; 
+  };
+
+};
+
+
+
+
+
+
 ************************************************;
 * 2.1 * MAKE CHANGE GRAPHS (REGRESSIONS) HERE **;
 ************************************************;
-if $graph_plotdiff == 1 {;
 
 cap program drop plotreg;
 program plotreg;
@@ -515,7 +681,7 @@ program plotreg;
       drop if contin>2000;
       local treat "Constructed";
       local control "Unconstructed";
-      local het "Large Projects";
+      local het "Heterogeneity Constructed";
 
       if length("`3'")>0 & length("`4'")==0  {;
         replace contin = cond(regexm(parm,"`2'")==1, contin - 7.5, contin + 7.5);
@@ -555,9 +721,12 @@ program plotreg;
       ring(0) position(1) bm(tiny) rowgap(small) 
       colgap(small) size(medsmall) region(lwidth(none)))
       note("Mean Structures per `=${sizesq}' m2: `=$mean_outcome'");
-      graphexportpdf `1', dropeps;
+      graph export "`1'.pdf", as(pdf) replace;
+      *graphexportpdf `1', dropeps;
    restore;
 end;
+
+if $graph_plotdiff == 1 {;
 
 foreach var in $outcomes {;
   sum `var', detail;
@@ -576,9 +745,7 @@ foreach var in $outcomes {;
 ************************************************;
 if $graph_plotdiff_het == 1 {;
 
-sum RDP_density, detail;
-
-g het = RDP_density>= `=r(p50)' & RDP_density<.;
+gen_het; 
 
 sum dists_rdp, detail;
 g dists_rdp_no_het = dists_rdp;
@@ -594,6 +761,99 @@ foreach var in $outcomes {;
 };
 
 };
+
+
+if $graph_plotdiff_full_het == 1 {;
+
+cap program drop plotreg_full_het;
+program plotreg_full_het;
+
+   preserve;
+   parmest, fast;
+
+      egen contin = sieve(parm), keep(n);
+      destring contin, replace force;
+      replace contin=contin+${dist_min};
+      drop if contin>2000;
+      local treat "Constructed";
+      local control "Unconstructed";
+      local treat_het "Heterogeneity Constructed";
+      local control_het "Heterogeneity Unconstructed";
+
+
+      if length("`3'")>0 & length("`4'")==0  {;
+        replace contin = cond(regexm(parm,"`2'")==1, contin - 7.5, contin + 7.5);
+      };
+
+      global graph "";
+      global legend "";
+
+      if length("`2'")>0 & length("`3'")>0 {;
+        global legend " 3 "`treat'" 4 "`control'" ";
+        global graph "
+        (rcap max95 min95 contin if regexm(parm,"`2'")==1, lc("206 162 97") lw(vthin))
+        (rcap max95 min95 contin if regexm(parm,"`3'")==1, lc(gs9) lw(vthin))
+        (connected estimate contin if regexm(parm,"`2'")==1, 
+        ms(T) msiz(medsmall) mlc("145 90 7") mfc("145 90 7") lc("145 90 7") lp(none) lw(thin) )
+        (connected estimate contin if regexm(parm,"`3'")==1, ms(o) 
+        msiz(small) mlc(black) mfc(black) lc(black) lp(none) lw(thin))";
+      };   
+
+      if length("`4'")>0 {;
+        global legend " ${legend}  6 "`treat_het'" ";
+        global graph " ${graph}  
+        (rcap max95 min95 contin if regexm(parm,"`4'")==1, lc(gs5) lw(thin))
+        (connected estimate contin if regexm(parm,"`4'")==1, ms(o) 
+        msiz(small) mlc(blue) mfc(blue) lc(blue) lp(none) lw(thin))";
+      };
+
+      if length("`5'")>0 {;
+        global legend " ${legend}  8 "`control_het'" ";
+        global graph " ${graph}  
+        (rcap max95 min95 contin if regexm(parm,"`5'")==1, lc(gs5) lw(thin))
+        (connected estimate contin if regexm(parm,"`5'")==1, ms(o) 
+        msiz(small) mlc(teal) mfc(teal) lc(teal) lp(none) lw(thin))";
+      };
+
+      tw 
+      $graph
+      ,
+      yline(0,lw(thin)lp(shortdash))
+      xline(0,lw(thin)lp(shortdash))
+      xtitle("meters from project border",height(5))
+      ytitle("Structures per `=${sizesq}' m2",height(5))
+      xlabel(-500(250)2000)
+      legend(order($legend) 
+      ring(0) position(1) bm(tiny) rowgap(small) 
+      colgap(small) size(medsmall) region(lwidth(none)))
+      note("Mean Structures per `=${sizesq}' m2: `=$mean_outcome'");
+      graph export "`1'.pdf", as(pdf) replace;
+      *graphexportpdf `1', dropeps;
+   restore;
+end;
+
+gen_het;
+
+foreach v in _rdp _placebo {;
+sum dists`v', detail;
+g dists`v'_no_het = dists`v';
+replace dists`v'_no_het = `=r(max)' if het == 1;
+g dists`v'_het = dists`v';
+replace dists`v'_het = `=r(max)' if het == 0;
+};
+
+foreach var in $outcomes {;
+  sum `var', detail;
+  global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
+  areg `var' b1100.dists_rdp_no_het b1100.dists_placebo_no_het b1100.dists_rdp_het b1100.dists_placebo_het, cl(cluster_reg) a(id);
+  plotreg_full_het distplot_bblu_`var'_het_full  dists_rdp_no_het dists_placebo_no_het dists_rdp_het dists_placebo_het ; 
+};
+
+};
+
+
+
+
 ************************************************;
 ************************************************;
 ************************************************;
@@ -647,7 +907,8 @@ foreach level in `r(levels)' {;
   gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
   global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_1100;
+
+* * omit dists_all dists_rdp_1100;
 
 foreach var in $outcomes {;
   sum `var', detail;
@@ -660,6 +921,118 @@ foreach var in $outcomes {;
 ************************************************;
 ************************************************;
 ************************************************;
+
+
+
+************************************************;
+* 3.1 MAKE TRIPLE DIFFERENCE HETEROGEHEITY ;
+************************************************;
+if $graph_plottriplediff_het == 1 {;
+
+cap program drop plotregddd_het;
+program plotregddd_het;
+  local ylabel "ylabel(-10(5)10)";
+  local l1_index "2";
+  local l2_index "4";
+  local rcap1 "(rcap max95 min95 contin if het==0, lc("206 162 97") lw(vthin))";
+  local rcap2 "(rcap max95 min95 contin if het==1, lc(teal) lw(vthin))";
+
+  if "`2'"=="no" {;
+  local ylabel "ylabel(-4(2)4)";
+  local l1_index "1";
+  local l2_index "2";
+  local rcap1 "";
+  local rcap2 "";
+  };
+
+  preserve;
+  parmest, fast;
+
+    egen contin = sieve(parm), keep(n);
+    destring contin, replace force;
+    replace contin=contin+${dist_min};
+    drop if contin>2000;
+    drop if strpos(parm, "all") >0;
+    g het = regexm(parm,"het")==1;
+    sort contin;
+
+    global legend1 " `l1_index' "`3'" ";
+    global graph1 "
+    `rcap1'
+    (connected estimate contin if het==0, ms(T) msiz(medsmall) 
+    mlc("145 90 7") mfc("145 90 7") lc("145 90 7") lp(none) lw(thin) )";
+
+    global legend2 " `l2_index' "`4'" ";
+    global graph2 "
+    `rcap2'
+    (connected estimate contin if het==1, ms(T) msiz(medsmall) 
+    mlc(teal) mfc(teal) lc(teal) lp(none) lw(thin) )";
+    
+    tw 
+    $graph1 
+    $graph2
+    ,
+    yline(0,lw(thin)lp(shortdash))
+    xline(0,lw(thin)lp(shortdash))
+    xtitle("meters from project border",height(5))
+    ytitle("Structures per `=${sizesq}' m2",height(5))
+    xlabel(-500(250)2000)
+    `ylabel'
+    legend(order($legend1 $legend2) 
+    ring(0) position(1) bm(tiny) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    note("Mean Structures per `=${sizesq}' m2: `=$mean_outcome'")
+    ;
+      graph export "`1'.pdf", as(pdf) replace;
+      *graphexportpdf `1', dropeps;
+  restore;
+end;
+
+gen_het;
+
+global d_all "";
+global d_all_het "";
+
+if "$same_control"=="no" {;
+global dists_all " & het==0 " ; 
+global dists_all_het " & het==1 " ;
+};
+
+levelsof dists_rdp;
+global dists_all "";
+foreach level in `r(levels)' {;
+  gen dists_rdp_`level' = dists_rdp== `level' & het==0;
+  gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level') $d_all ;
+  global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
+};
+
+levelsof dists_rdp;
+*global dists_all "";
+foreach level in `r(levels)' {;
+  gen dists_rdp_het_`level' = dists_rdp== `level' & het==1;
+  gen dists_all_het_`level' = (dists_rdp == `level' | dists_placebo == `level') $d_all_het;
+  global dists_all "dists_all_het_`level' dists_rdp_het_`level' ${dists_all}";
+};
+
+* omit dists_all dists_rdp_1$bin dists_rdp_het_1$bin;
+
+omit dists_all dists_rdp_1$bin;
+
+foreach var in $outcomes {;
+  sum `var', detail;
+  global mean_outcome=`=substr(string(r(mean),"%10.2fc"),1,4)';
+  areg `var' $dists_all , cl(cluster_reg) a(id);
+  plotregddd_het distDDD_`var'_het_$same_control yes close far; 
+  plotregddd_het distDDD_`var'_het_nr_$same_control no close far; 
+};
+
+};
+
+************************************************;
+************************************************;
+************************************************;
+
+
 
 ************************************************;
 * 3.1 *** MAKE TRIPLE DIFFERENCE TABLES HERE ***;

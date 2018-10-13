@@ -25,6 +25,12 @@ program define omit;
 
 end;
 
+cap program drop gen_het;
+prog gen_het;
+  sum cbd_dist, detail;
+  g het = cbd_dist>= `=r(p50)' & cbd_dist<.;
+end;
+
 ******************;
 *  CENSUS REGS   *;
 ******************;
@@ -48,11 +54,11 @@ global tresh_area = 0.3 ; /* Area ratio for "inside" vs spillover */
 global tresh_dist = 1500; /* Area ratio inside vs spillover */
 
 if $LOCAL==1 {;
-	cd ..;
+	cd .. ;
 };
 
 * load data;
-cd ../..;
+cd ../.. ;
 cd Generated/Gauteng;
 
 *****************************************************************;
@@ -64,7 +70,9 @@ local qry = "
 
   SELECT 
 
-  AA.*, GP.con_mo_placebo, GR.con_mo_rdp
+  AA.*, GP.con_mo_placebo, GR.con_mo_rdp, 
+
+  CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
 
   FROM (
 
@@ -176,6 +184,10 @@ local qry = "
     FROM cluster_rdp
   ) AS GR ON AA.cluster_rdp = GR.cluster_rdp
 
+  LEFT JOIN cbd_dist AS CP ON CP.cluster = AA.cluster_placebo
+
+  LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
+
   ";
 
 odbc query "gauteng";
@@ -195,7 +207,12 @@ replace sal_code_rdp ="" if con_mo_rdp<515 | con_mo_rdp==.;
 replace cluster_rdp  =.  if con_mo_rdp<515 | con_mo_rdp==.;
 
 drop if distance_rdp==. & distance_placebo==.;
-  
+
+destring cbd_dist_rdp cbd_dist_placebo, replace force;
+g cbd_dist = cbd_dist_rdp ;
+replace cbd_dist = cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ;
+drop cbd_dist_rdp cbd_dist_placebo ; 
+
 save DDcensus_hh_admin, replace;
 
 };
@@ -219,7 +236,7 @@ gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
 lab var toilet_flush "Flush Toilet";
 
 * piped water?;
-gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
+gen water_inside = (water_piped==1 & year==2011) | (water_piped==5 & year==2001) if !missing(water_piped);
 lab var water_inside "Piped Water Inside";
 gen water_yard = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
 lab var water_yard "Piped Water Inside or Yard";
@@ -276,6 +293,7 @@ gen placebo2 = (area_int_placebo> area_int_rdp);
 replace placebo = 1 if placebo2==1;
 drop placebo2;
 gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
+
 gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 
 };
@@ -288,46 +306,24 @@ gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 *****************************************************************;
 if $data_regs==1 {;
 
+gen_het;
+
 g project_rdp = (area_int_rdp > $tresh_area);
-lab var project_rdp "Project X Const.";
 g project_placebo = (area_int_placebo > $tresh_area);
-lab var project_placebo "Project X Unconst.";
 g project = (project_rdp==1 | project_placebo==1);
-lab var project "Project";
 g project_post = project ==1 & year==2011;
-lab var project_post "Project X Post";
 g project_post_rdp = project_rdp ==1 & year==2011;
-lab var project_post_rdp "Project X Post X Const.";
-
 g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
-lab var spillover_rdp "Spillover X Const.";
 g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
-lab var spillover_placebo "Spillover X Unconst.";
 g spillover = (spillover_rdp==1 | spillover_placebo==1);
-lab var spillover "Spillover";
 g spillover_post = spillover == 1 & year==2011;
-lab var spillover_post "Spillover X Post";
 g spillover_post_rdp = spillover_rdp==1 & year==2011;
-lab var spillover_post_rdp "Spillover X Post X Const.";
-
 g others = project !=1 & spillover !=1;
-lab var others "Outside";
 g others_post = others==1 & year==2011;
-lab var others_post "Outside Post";
 
-global regressors "
-  project_post_rdp
-  project_post
-  project_rdp
-  project
-  spillover_post_rdp
-  spillover_post
-  spillover_rdp
-  spillover
-  others_post
-  ";
 
-if $drop_others == 1{;
+
+
 drop if others==1;
 global regressors "
   project_post_rdp
@@ -338,7 +334,34 @@ global regressors "
   spillover_post
   spillover_rdp
   ";
+
+foreach v in $regressors {;
+g `v'_het = `v'*het;
+replace `v' = 0 if het==1;
 };
+foreach v in spillover {;
+g `v'_het = `v'*het;
+replace `v' = 0 if het==1;
+};
+
+global regressors "
+  project_post_rdp
+  project_post
+  project_rdp
+  project
+  spillover_post_rdp
+  spillover_post
+  spillover_rdp
+
+  project_post_rdp_het
+  project_post_het
+  project_rdp_het
+  project_het
+  spillover_post_rdp_het
+  spillover_post_het
+  spillover_rdp_het
+  spillover_het
+  ";
 
 
 
@@ -350,13 +373,6 @@ global outcomes1 "
   house 
   ";
 
-
-global outcomes2 "
-  electric_cooking 
-  electric_heating 
-  electric_lighting 
-  ";
-
 global outcomes2 "
   electric_cooking 
   hh_size
@@ -364,15 +380,43 @@ global outcomes2 "
   ";
 
 
-preserve ; 
-  g an1 = a_n==1;
-  egen AN=sum(an1);
-  sum AN, detail;
-  file open myfile using "total_blocks.tex", write replace;
-  local h : di %10.0fc `=r(mean)';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+lab var project_rdp "Close Proj X Const.";
+lab var project_placebo "Close Proj X Unconst.";
+lab var project "Close Proj";
+lab var project_post "Close Proj X Post";
+lab var project_post_rdp "Close Proj X Post X Const.";
+lab var spillover_rdp "Close Spill X Const.";
+lab var spillover_placebo "Close Spill X Unconst.";
+lab var spillover "Close Spill";
+lab var spillover_post "Close Spill X Post";
+lab var spillover_post_rdp "Close Spill X Post X Const.";
+lab var others "Outside";
+lab var others_post "Outside Post";
+
+
+lab var project_het "Far Proj";
+lab var project_rdp_het "Far Proj X Const.";
+lab var project_post_het "Far Proj X Post";
+lab var project_post_rdp_het "Far Proj X Post X Const.";
+
+lab var spillover_het "Far Spill";
+lab var spillover_rdp_het "Far Spill X Const.";
+lab var spillover_post_het "Far Spill X Post";
+lab var spillover_post_rdp_het "Far Spill X Post X Const.";
+
+
+
+
+* preserve ; 
+*   g an1 = a_n==1;
+*   egen AN=sum(an1);
+*   sum AN, detail;
+*   file open myfile using "total_blocks.tex", write replace;
+*   local h : di %10.0fc `=r(mean)';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
+
 
 eststo clear;
 
@@ -386,16 +430,6 @@ foreach var of varlist $outcomes1 {;
 
   eststo `var';
 };
-
-esttab $outcomes1 using census_hh_DDregs_admin_1,
-  replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House")
-  star(* 0.10 ** 0.05 *** 0.01) stats(N Mean2001 Mean2011) label
-
-  compress drop(_cons);
-
-
-*eststo clear;
 
 foreach var of varlist $outcomes2 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
@@ -421,13 +455,12 @@ sum hh_density if e(sample)==1 & year ==2001, detail;
 estadd scalar Mean2001 = `=r(mean)';
 sum hh_density if e(sample)==1 & year ==2011, detail;
 estadd scalar Mean2011 = `=r(mean)';
-
 eststo hh_density;
 
-esttab $outcomes1 $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
+esttab $outcomes1 $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2_het,
   replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex label
 
-  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House" "Elec. Cooking" "Elec. Heating" "Elec. Lighting" "HH Density" "Pop. Density")
+  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House" "Elec. Cooking" "HH Size" "Rooms" "HH Density" "Pop. Density")
   star(* 0.10 ** 0.05 *** 0.01)  stats(N Mean2001 Mean2011)
 
   compress;

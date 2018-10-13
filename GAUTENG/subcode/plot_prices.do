@@ -44,6 +44,23 @@ program define takefromglobal;
 
 end;
 
+cap program drop gen_het;
+program define gen_het;
+    g price_het_id = lprice if purch_yr<=2004 & purch_yr>=2003;
+    egen price_het = mean(price_het_id), by(cluster_joined);
+    sum price_het, detail;
+    g het = price_het>=`=r(p50)' & price_het<.;
+end;
+
+cap program drop gen_het;
+program define gen_het;
+    sum cbd_dist, detail;
+    g het = cbd_dist>=`=r(p50)' & cbd_dist<.;
+end;
+
+
+
+
 *******************;
 *  PLOT GRADIENTS *;
 *******************;
@@ -80,12 +97,18 @@ global ifhists = "
        ";
 
 * what to run?;
-global trans_hist = 0;
-global dist_regs  = 0;
-global time_regs  = 0;
-global dd_regs    = 0;
-global ddd_regs   = 0;
-global simple_reg = 1;
+global trans_hist   = 0;
+global dist_regs    = 0;
+global time_regs    = 0;
+global dd_regs      = 0;
+global dd_regs_het  = 0;
+
+global ddd_regs     = 0;
+global ddd_regs_het = 0;
+global simple_reg   = 0;
+
+global hetlab0 = "close";
+global hetlab1 = "far";
 
 * load data; 
 cd ../..;
@@ -142,36 +165,36 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 
 **** PRINT STATISTIC : percent of transactions excluded with seller_name criteria  ;
-preserve;
-  keep if
-       rdp_never ==1 &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
-  g total=_N;
-  g s30 = s_N<30;
-  egen s30s = sum(s30);
-  g s30share=1-(s30s/total);
-  sum s30share, detail;
-  file open myfile using "s30.tex", write replace;
-  local h : di %10.0fc `=r(mean)*100';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+* preserve;
+*   keep if
+*        rdp_never ==1 &
+*        purch_price > 2000 & purch_price<800000 &
+*        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+*   g total=_N;
+*   g s30 = s_N<30;
+*   egen s30s = sum(s30);
+*   g s30share=1-(s30s/total);
+*   sum s30share, detail;
+*   file open myfile using "s30.tex", write replace;
+*   local h : di %10.0fc `=r(mean)*100';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
 
 
 **** PRINT STATISTIC : total price observations  ;
-preserve;
-  keep if s_N<30     & 
-       rdp_never ==1  &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
-  g total=_N;
-  sum total, detail;
-  file open myfile using "total_price_obs.tex", write replace;
-  local h : di %10.0fc `=r(mean)';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+* preserve;
+*   keep if s_N<30     & 
+*        rdp_never ==1  &
+*        purch_price > 2000 & purch_price<800000 &
+*        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+*   g total=_N;
+*   sum total, detail;
+*   file open myfile using "total_price_obs.tex", write replace;
+*   local h : di %10.0fc `=r(mean)';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
 
 *****************************************************************;
 *****************************************************************;
@@ -501,6 +524,119 @@ preserve;
     plotcoeffs_DD time_plot_DD;
 restore;
 };
+
+
+
+*****************************************************************;
+*******************   DD REGRESSIONS  ***************************;
+*****************************************************************;
+if $dd_regs_het ==1 {;
+
+* program for plotting;
+cap program drop plotcoeffs_DD_het;
+program plotcoeffs_DD_het;
+  preserve;
+
+    parmest, fast;  
+
+    * grab continuous var from varname;
+    destring parm, gen(contin) i(dreg_ treat placebo rdp het .) force;
+
+    * keep only coeffs to plot;
+    drop if contin == .;
+    drop if strpos(parm, "long" ) >0;
+    keep if strpos(parm, "treat") >0;
+
+    * dummy for post coeffs;
+    g rdp = regexm(parm,"rdp")==1;
+    g het = regexm(parm,"het")==1;
+
+    *reaarrange continuous var;
+    drop if contin > 9000;
+    replace contin = -1*(contin - 1000) if contin>1000;
+    replace contin = $mbin*contin;
+    replace contin = cond(rdp==1, contin - 0.25, contin + 0.25);
+    sort contin;
+
+    * bounds for plot;
+    global lbound = 12*$twl;
+    global ubound = 12*($twu-1);
+
+    tw
+      (rcap max95 min95 contin if rdp ==0 & het==0, lc(gs7) lw(thin) )
+      (rcap max95 min95 contin if rdp ==1 & het==0, lc("206 162 97") lw(thin) )
+      (connected estimate contin if rdp ==0 & het==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
+      (connected estimate contin if rdp ==1 & het==0, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium))
+
+      (rcap max95 min95 contin if rdp ==0 & het==1, lc(gs7) lw(thin) )
+      (rcap max95 min95 contin if rdp ==1 & het==1, lc("206 162 97") lw(thin) )
+      (connected estimate contin if rdp ==0 & het==1, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(blue) lp(none) lw(medium)) 
+      (connected estimate contin if rdp ==1 & het==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(red) lp(none) lw(medium)),
+      xtitle("months to modal construction month",height(5))
+      ytitle("log-price coefficients",height(5))
+      xlabel(-$lbound(12)$ubound,labsize(small))
+      ylabel(-.4(.1).4,labsize(small))
+      xline(-6,lw(thin)lp(shortdash))
+      legend(order(3 "Uncon $hetlab0" 4 "Con $hetlab0" 7 "Uncon $hetlab1" 8 "Con $hetlab1"  ) 
+      ring(0) position(5) bm(tiny) rowgap(small) 
+      colgap(small) size(small) region(lwidth(none)))
+      note("`3'");
+
+      *graphexportpdf `1', dropeps;
+      graph export "`1'.pdf", as(pdf) replace;
+  restore;
+end;
+
+preserve;
+
+    gen_het;
+    gen dreg_far_rdp = 0;
+    gen dreg_far_placebo = 0;
+    gen dreg_far_het_rdp = 0;
+    gen dreg_far_het_placebo = 0;
+
+    levelsof mo2con_reg_rdp;
+    foreach level in `r(levels)' {;
+      gen dreg_`level'_rdp = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1) & het==0);
+      gen dreg_`level'_rdp_treat = (mo2con_reg_rdp == `level' & treat_rdp==1 & het==0);
+      replace dreg_far_rdp = 1 if mo2con_reg_rdp == `level' &  treat_rdp==2 & het==0;
+
+      gen dreg_`level'_placebo = (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1) & het==0);
+      gen dreg_`level'_placebo_treat = (mo2con_reg_placebo == `level' & treat_placebo==1 & het==0);
+      replace dreg_far_placebo = 1 if mo2con_reg_placebo == `level' &  treat_placebo==2 & het==0;      
+    };
+
+    levelsof mo2con_reg_rdp;
+    foreach level in `r(levels)' {;
+      gen dreg_`level'_het_rdp = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1) & het==1);
+      gen dreg_`level'_het_rdp_treat = (mo2con_reg_rdp == `level' & treat_rdp==1 & het==1);
+      replace dreg_far_het_rdp = 1 if mo2con_reg_rdp == `level' &  treat_rdp==2 & het==1;
+
+      gen dreg_`level'_het_placebo = (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1) & het==1);
+      gen dreg_`level'_het_placebo_treat = (mo2con_reg_placebo == `level' & treat_placebo==1) & het==1;
+      replace dreg_far_het_placebo = 1 if mo2con_reg_placebo == `level' &  treat_placebo==2 & het==1;      
+    };
+
+    foreach v in _rdp _placebo {;
+      replace dreg_far`v' = 1 if (dreg_9999`v'==1 | dreg_9999`v'_treat==1);
+      replace dreg_far_het`v' = 1 if (dreg_9999_het`v'==1 | dreg_9999_het`v'_treat==1);
+      *drop dreg_9999`v' dreg_9999`v'_treat;
+    };
+      drop dreg_9999*;
+
+    * dummies global for regs;
+    ds dreg* ;
+    global dummies = "`r(varlist)'"; 
+    omit dummies dreg_far_placebo dreg_far_rdp dreg_far_het_placebo dreg_far_het_rdp; 
+
+    * REG MONKEY;
+    reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+    * plot coefficient;
+    plotcoeffs_DD_het time_plot_DD_het;
+restore;
+
+};
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
@@ -579,6 +715,98 @@ preserve;
 
 restore;
 graphexportpdf timeplot_admin_${treat}, dropeps;
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
+
+
+
+
+*****************************************************************;
+*************   DDD REGRESSION JOINED PLACEBO-RDP HET   *************;
+*****************************************************************;
+if $ddd_regs_het ==1 {;
+
+gen_het;
+
+gen dreg_far = 0;
+gen dreg_far_het = 0;
+levelsof mo2con_reg_rdp;
+foreach level in `r(levels)' {;
+  gen  dreg_`level' = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1) & het==0) |
+                      (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1) & het==0);
+  gen  dreg_`level'_treat = (mo2con_reg_rdp == `level' & treat_rdp==1 & het==0) |
+                            (mo2con_reg_placebo == `level' & treat_placebo==1 & het==0) ;
+  gen  dreg_`level'_rdp = mo2con_reg_rdp == `level' & het==0 & (treat_rdp==0 | treat_rdp==1);
+  gen  dreg_`level'_treat_rdp = (mo2con_reg_rdp == `level' & treat_rdp==1 & het==0);
+
+  replace dreg_far = 1 if dreg_`level' + dreg_`level'_treat
+            + dreg_`level'_rdp + dreg_`level'_treat_rdp == 0 + het==0;
+};
+
+levelsof mo2con_reg_rdp;
+foreach level in `r(levels)' {;
+  gen  dreg_`level'_het = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1) & het==1) |
+                      (mo2con_reg_placebo == `level' & (treat_placebo==0 | treat_placebo==1) & het==1);
+  gen  dreg_`level'_het_treat = (mo2con_reg_rdp == `level' & treat_rdp==1 & het==1) |
+                            (mo2con_reg_placebo == `level' & treat_placebo==1 & het==1) ;
+  gen  dreg_`level'_het_rdp = mo2con_reg_rdp == `level' & het==1 & (treat_rdp==0 | treat_rdp==1);
+  gen  dreg_`level'_het_treat_rdp = (mo2con_reg_rdp == `level' & treat_rdp==1 & het==1);
+  
+  replace dreg_far_het = 1 if dreg_`level' + dreg_`level'_treat
+            + dreg_`level'_rdp + dreg_`level'_treat_rdp == 0 + het==1 ;
+};
+
+* dummies global for regs;
+ds dreg_* ;
+global dummies = "`r(varlist)'"; 
+*omit dummies dreg_1001_treat_rdp ;
+
+*reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
+reg lprice $dummies i.purch_yr#i.purch_mo i.cluster_joined if $ifregs, cl(cluster_joined);
+
+* plot the coeffs;
+preserve;
+
+  parmest, fast;  
+
+  * grab continuous var from varname;
+  destring parm, gen(contin) i(dreg_ joined placebo rdp treat het .) force;
+  g het=regexm(parm,"het")==1;
+
+  * keep only coeffs to plot;
+  drop if contin == .;
+  keep if strpos(parm,"treat") >0 & strpos(parm,"rdp") >0;
+
+  *reaarrange continuous var;
+  drop if contin > 9000;
+  replace contin = -1*(contin - 1000) if contin>1000;
+  replace contin = $mbin*contin;
+  sort contin;
+
+  * bounds for plot;
+  global lbound = 12*$twl;
+  global ubound = 12*($twu-1);
+
+  tw
+    (rcap max95 min95 contin if het==0, lc("206 162 97") lw(thin) )
+    (connected estimate contin if het==0, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium))
+    (rcap max95 min95 contin if het==1, lc("206 162 97") lw(thin) )
+    (connected estimate contin if het==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(blue) lp(none) lw(medium)),
+    xtitle("months to modal construction month",height(5))
+    ytitle("log-price coefficients",height(5))
+    xlabel(-$lbound(12)$ubound)
+    ylabel(-.4(.1).4,labsize(small))
+    xline(-3,lw(thin)lp(shortdash))
+      legend(order(2 "$hetlab0" 4 "$hetlab1")) 
+    note("`3'");
+
+restore;
+*graphexportpdf timeplot_admin_${treat}_het, dropeps;
+graph export "timeplot_admin_${treat}_het.pdf", as(pdf) replace;
 
 };
 *****************************************************************;

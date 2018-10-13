@@ -25,6 +25,12 @@ program define omit;
 
 end;
 
+cap program drop gen_het;
+prog gen_het;
+  sum cbd_dist, detail;
+  g het = cbd_dist>= `=r(p50)' & cbd_dist<.;
+end;
+
 ******************;
 *  CENSUS REGS   *;
 ******************;
@@ -48,11 +54,11 @@ global tresh_area = 0.3 ; /* Area ratio for "inside" vs spillover */
 global tresh_dist = 1500; /* Area ratio inside vs spillover */
 
 if $LOCAL==1 {;
-	cd ..;
+	cd .. ;
 };
 
 * load data;
-cd ../..;
+cd ../.. ;
 cd Generated/Gauteng;
 
 *****************************************************************;
@@ -64,26 +70,29 @@ local qry = "
 
   SELECT 
 
-  AA.*, GP.con_mo_placebo, GR.con_mo_rdp
+  AA.*, (RANDOM()/(2*9223372036854775808)+.5) as random, 
+
+  GP.con_mo_placebo, GR.con_mo_rdp, 
+
+  CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
 
   FROM (
 
     SELECT 
 
-      A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
-      A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
-      A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
-      A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
-      A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size,
+          A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, A.P02_Yr AS birth_yr,
+           A.P05_Mar AS marit_stat, A.P06_Race AS race, A.P07_lng AS language, P09a_Prv AS birth_prov,
+           A.P22_Incm AS income, P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
+           A.P19b_Ind AS industry, A.P19c_Occ as occupation, 
 
       cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
       cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2001hh' AS source, 2001 AS year, A.SAL AS area_code
+      'census2001pers' AS source, 2001 AS year, A.SAL AS area_code
 
-    FROM census_hh_2001 AS A  
+    FROM census_pers_2001 AS A  
 
     LEFT JOIN (
       SELECT input_id, distance, target_id, COUNT(input_id) AS count 
@@ -120,20 +129,19 @@ local qry = "
 
     SELECT 
 
-      A.H01_QUARTERS AS quarters_typ, A.H02_MAINDWELLING AS dwelling_typ,
-      A.H03_TOTROOMS AS tot_rooms, A.H04_TENURE AS tenure, A.H07_WATERPIPED AS water_piped,
-      A.H08_WATERSOURCE AS water_source, A.H10_TOILET AS toilet_typ, 
-      A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
-      A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size,
+           A.F03_SEX AS sex, A.F02_AGE AS age, A.P02_RELATION AS relation, A.P01_YEAR AS birth_yr,
+           A.P03_MARITAL_ST AS marit_stat, A.P05_POP_GROUP AS race, A.P06A_LANGUAGE AS language,
+           A.P07_PROV_POB AS birth_prov, A.P16_INCOME AS income, A.P20_EDULEVEL AS education,
+           A.DERP_EMPLOY_STATUS_OFFICIAL AS employment, A.DERP_INDUSTRY AS industry, A.DERP_OCCUPATION AS occupation,
 
       cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
       cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2011hh' AS source, 2011 AS year, A.SAL_CODE AS area_code
+      'census2011pers' AS source, 2011 AS year, A.SAL_CODE AS area_code
 
-    FROM census_hh_2011 AS A  
+    FROM census_pers_2011 AS A  
 
     LEFT JOIN (
       SELECT input_id, distance, target_id, COUNT(input_id) AS count 
@@ -176,6 +184,12 @@ local qry = "
     FROM cluster_rdp
   ) AS GR ON AA.cluster_rdp = GR.cluster_rdp
 
+  LEFT JOIN cbd_dist AS CP ON CP.cluster = AA.cluster_placebo
+
+  LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
+
+    WHERE random < .25
+
   ";
 
 odbc query "gauteng";
@@ -195,8 +209,13 @@ replace sal_code_rdp ="" if con_mo_rdp<515 | con_mo_rdp==.;
 replace cluster_rdp  =.  if con_mo_rdp<515 | con_mo_rdp==.;
 
 drop if distance_rdp==. & distance_placebo==.;
-  
-save DDcensus_hh_admin, replace;
+
+destring cbd_dist_rdp cbd_dist_placebo, replace force;
+g cbd_dist = cbd_dist_rdp ;
+replace cbd_dist = cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ;
+drop cbd_dist_rdp cbd_dist_placebo ; 
+
+save DDcensus_pers_het, replace;
 
 };
 *****************************************************************;
@@ -208,65 +227,47 @@ save DDcensus_hh_admin, replace;
 *****************************************************************;
 if $data_prep==1 {;
 
-use DDcensus_hh_admin, clear;
+use DDcensus_pers_het, clear;
 
 * go to working dir;
 cd ../..;
 cd $output;
 
-* flush toilet?;
-gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
-lab var toilet_flush "Flush Toilet";
 
-* piped water?;
-gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
-lab var water_inside "Piped Water Inside";
-gen water_yard = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
-lab var water_yard "Piped Water Inside or Yard";
+* employment;
+gen unemployed = .;
+replace unemployed = 1 if employment ==2;
+replace unemployed = 0 if employment ==1;
 
-* water source?;
-gen water_utility = (water_source==1) if !missing(water_source);
-lab var water_utility "Water from utility";
+lab var unemployed "Unemployed";
 
-* electricity?;
-gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
-lab var electricity "Access to electricity";
-gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
-lab var electric_cooking "Electric Cooking";
-gen electric_heating  = enrgy_heating==1 if !missing(enrgy_heating);
-lab var electric_heating "Electric Heating";
-gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);
-lab var electric_lighting "Electric Lighting";
+* schooling;
+gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
+gen schooling_hschool = (education>=0 & education<=12) if !missing(education);
+lab var schooling_hschool "Over HS Educ." ;
+replace schooling_hschool=. if unemployed==.;
 
-* tenure?;
-gen owner = ((tenure==2 | tenure==4) & year==2011)|((tenure==1 | tenure==2) & year==2001) if !missing(tenure);
-lab var owner "Owns House";
+* race;
+gen black = (race==1) if !missing(race);
 
-* house?;
-gen house = dwelling_typ==1 if !missing(dwelling_typ);
-lab var house "Single House";
+* income;
+gen inc_value = . ;
+replace inc_value = 0      if income ==1;
+replace inc_value = 200    if income ==2;
+replace inc_value = 600    if income ==3;
+replace inc_value = 1200   if income ==4;
+replace inc_value = 2400   if income ==5;
+replace inc_value = 4800   if income ==6;
+replace inc_value = 9600   if income ==7;
+replace inc_value = 19200  if income ==8;
+replace inc_value = 38400  if income ==9;
+replace inc_value = 76800  if income ==10;
+replace inc_value = 153600 if income ==11;
+replace inc_value = 307200 if income ==12;
+gen inc_value_earners = inc_value ;
+replace inc_value_earners = . if inc_value==0;
+lab var inc_value_earners "HH Income";
 
-* total rooms;
-replace tot_rooms=. if tot_rooms>9;
-lab var tot_rooms "No. Rooms";
-
-* household size rooms;
-replace hh_size=. if hh_size>10;
-lab var hh_size "Household Size";
-
-* household density;
-g o = 1;
-bys area_code: g a_n=_n;
-egen pop = sum(o), by(area_code year);
-g hh_density = (pop/area)*1000000;
-lab var hh_density "Households per km2";
-drop o pop;
-
-* pop density;
-egen pop = sum(hh_size), by(area_code year);
-g pop_density = (pop/area)*1000000;
-lab var pop_density "People per km2";
-drop pop;
 
 * cluster for SEs;
 replace area_int_rdp =0 if area_int_rdp ==.;
@@ -276,6 +277,7 @@ gen placebo2 = (area_int_placebo> area_int_rdp);
 replace placebo = 1 if placebo2==1;
 drop placebo2;
 gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
+
 gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 
 };
@@ -288,47 +290,23 @@ gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 *****************************************************************;
 if $data_regs==1 {;
 
+gen_het;
+
 g project_rdp = (area_int_rdp > $tresh_area);
-lab var project_rdp "Project X Const.";
 g project_placebo = (area_int_placebo > $tresh_area);
-lab var project_placebo "Project X Unconst.";
 g project = (project_rdp==1 | project_placebo==1);
-lab var project "Project";
 g project_post = project ==1 & year==2011;
-lab var project_post "Project X Post";
 g project_post_rdp = project_rdp ==1 & year==2011;
-lab var project_post_rdp "Project X Post X Const.";
-
 g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
-lab var spillover_rdp "Spillover X Const.";
 g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
-lab var spillover_placebo "Spillover X Unconst.";
 g spillover = (spillover_rdp==1 | spillover_placebo==1);
-lab var spillover "Spillover";
 g spillover_post = spillover == 1 & year==2011;
-lab var spillover_post "Spillover X Post";
 g spillover_post_rdp = spillover_rdp==1 & year==2011;
-lab var spillover_post_rdp "Spillover X Post X Const.";
-
 g others = project !=1 & spillover !=1;
-lab var others "Outside";
 g others_post = others==1 & year==2011;
-lab var others_post "Outside Post";
 
-global regressors "
-  project_post_rdp
-  project_post
-  project_rdp
-  project
-  spillover_post_rdp
-  spillover_post
-  spillover_rdp
-  spillover
-  others_post
-  ";
-
-if $drop_others == 1{;
 drop if others==1;
+
 global regressors "
   project_post_rdp
   project_post
@@ -338,45 +316,70 @@ global regressors "
   spillover_post
   spillover_rdp
   ";
+
+foreach v in $regressors {;
+g `v'_het = `v'*het;
+replace `v' = 0 if het==1;
+};
+foreach v in spillover {;
+g `v'_het = `v'*het;
+replace `v' = 0 if het==1;
 };
 
+global regressors "
+  project_post_rdp
+  project_post
+  project_rdp
+  project
+  spillover_post_rdp
+  spillover_post
+  spillover_rdp
 
+  project_post_rdp_het
+  project_post_het
+  project_rdp_het
+  project_het
+  spillover_post_rdp_het
+  spillover_post_het
+  spillover_rdp_het
+  spillover_het
+  ";
 
 global outcomes1 "
-  toilet_flush 
-  water_inside 
-  water_utility 
-  owner 
-  house 
+unemployed schooling_noeduc schooling_hschool inc_value inc_value_earners black
   ";
 
+lab var project_rdp "Close Proj X Const.";
+lab var project_placebo "Close Proj X Unconst.";
+lab var project "Close Proj";
+lab var project_post "Close Proj X Post";
+lab var project_post_rdp "Close Proj X Post X Const.";
 
-global outcomes2 "
-  electric_cooking 
-  electric_heating 
-  electric_lighting 
-  ";
+lab var spillover_rdp "Close Spill X Const.";
+lab var spillover_placebo "Close Spill X Unconst.";
+lab var spillover "Close Spill";
+lab var spillover_post "Close Spill X Post";
+lab var spillover_post_rdp "Close Spill X Post X Const.";
+lab var others "Outside";
+lab var others_post "Outside Post";
 
-global outcomes2 "
-  electric_cooking 
-  hh_size
-  tot_rooms
-  ";
+lab var project_het "Far Proj";
+lab var project_rdp_het "Far Proj X Const.";
+lab var project_post_het "Far Proj X Post";
+lab var project_post_rdp_het "Far Proj X Post X Const.";
 
+lab var spillover_het "Far Spill";
+lab var spillover_rdp_het "Far Spill X Const.";
+lab var spillover_post_het "Far Spill X Post";
+lab var spillover_post_rdp_het "Far Spill X Post X Const.";
 
-preserve ; 
-  g an1 = a_n==1;
-  egen AN=sum(an1);
-  sum AN, detail;
-  file open myfile using "total_blocks.tex", write replace;
-  local h : di %10.0fc `=r(mean)';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
 
 eststo clear;
 
+
+local mtitles " ";
 foreach var of varlist $outcomes1 {;
+  local mtitles " `mtitles' "`var'" ";
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
 
   sum `var' if e(sample)==1 & year ==2001, detail;
@@ -387,49 +390,10 @@ foreach var of varlist $outcomes1 {;
   eststo `var';
 };
 
-esttab $outcomes1 using census_hh_DDregs_admin_1,
-  replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex 
-  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House")
-  star(* 0.10 ** 0.05 *** 0.01) stats(N Mean2001 Mean2011) label
-
-  compress drop(_cons);
-
-
-*eststo clear;
-
-foreach var of varlist $outcomes2 {;
-  areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
-
-  sum `var' if e(sample)==1 & year ==2001, detail;
-  estadd scalar Mean2001 = `=r(mean)';
-  sum `var' if e(sample)==1 & year ==2011, detail;
-  estadd scalar Mean2011 = `=r(mean)';
-
-  eststo `var';
-};
-
-areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
-
-sum pop_density if e(sample)==1 & year ==2001, detail;
-estadd scalar Mean2001 = `=r(mean)';
-sum pop_density if e(sample)==1 & year ==2011, detail;
-estadd scalar Mean2011 = `=r(mean)';
-eststo pop_density;
-
-areg hh_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
-sum hh_density if e(sample)==1 & year ==2001, detail;
-estadd scalar Mean2001 = `=r(mean)';
-sum hh_density if e(sample)==1 & year ==2011, detail;
-estadd scalar Mean2011 = `=r(mean)';
-
-eststo hh_density;
-
-esttab $outcomes1 $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
+esttab $outcomes1  using census_pers_DDregs_het,
   replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex label
-
-  mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House" "Elec. Cooking" "Elec. Heating" "Elec. Lighting" "HH Density" "Pop. Density")
+  mtitles(`mtitles')
   star(* 0.10 ** 0.05 *** 0.01)  stats(N Mean2001 Mean2011)
-
   compress;
 
 
