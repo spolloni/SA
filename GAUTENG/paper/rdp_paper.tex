@@ -1,11 +1,14 @@
 \documentclass[12pt]{article}
 
 % TEMPLATE DEFAULT PACKAGES
-\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,array,hyperref,adjustbox}
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,array,adjustbox}
 
 % ADDED PACKAGES FOR THIS MANUSCRIPT
 \usepackage{mathptmx,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,subfigure,threeparttable,mathtools,bm,bbm}
 % endfloat,
+
+\usepackage[draft]{hyperref}
+\setlength{\parskip}{2.5pt}
 
 % SECTION TITLE SETTINGS
 \titlelabel{\thetitle.\enskip}
@@ -29,10 +32,10 @@
 \begin{document}
 
 \begin{titlepage}
-\title{Public Housing Spillovers in a Developing Country\thanks{We are grateful to Matthew Turner, Andrew Foster, Jesse Shapiro, Daniel Bjorkegren, Brian Knight, and John Friedman for their feedback, advice and support.  We also thank Adelaide Steedley and the Centre for Affordable Housing and Finance in Africa as well as Geo-Terra Image for generous research guidance and for providing excellent data without which this project would not have been possible.  Any opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views of the the Federal Trade Commission or its Commissioners.}}
+\title{{Public Housing Spillovers in a Developing Country}\thanks{We are grateful to Andrew Foster, Daniel Bjorkegren, Matthew Turner, Jesse Shapiro, Brian Knight, and John Friedman for their valuable feedback and advice.  We also thank Adelaide Steedley and the Centre for Affordable Housing and Finance in Africa as well as GeoTerraImage for generous research guidance and for providing excellent data without which this project would not have been possible.  Any opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views of the the Federal Trade Commission or its Commissioners.}}
 \author{\\[3em] Benjamin Bradlow\thanks{Dept. of Sociology, Brown University, Box 1916, Providence, RI 02912  E-mail: benjamin\textunderscore bradlow@brown.edu}\\
  Stefano Polloni\thanks{Dept. of Economics, Brown University, Box B, Providence, RI 02912  E-mail: stefano\textunderscore polloni@brown.edu}\\ 
-  William Violette\thanks{Federal Trade Commission, DC 01234  E-mail: william\textunderscore violette@ftc.gov} \\
+  William Violette\thanks{Federal Trade Commission, DC. E-mail: william.j.violette@gmail.com} \\
  \\ 
   }
 \vspace{30mm}
@@ -40,7 +43,7 @@
 \maketitle
 \begin{abstract}
 
-	Does subsidized housing improve neighborhood quality? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no change in housing quantity, quality, or price. 
+	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no change in housing quantity, quality, or price. 
 
  %\\
 %\vspace{0in}\\
@@ -54,11 +57,13 @@
 \end{titlepage}
 \pagebreak \newpage
 
-\doublespacing
+%\doublespacing
+\spacing{1.5}
+
 
 \section{Introduction} \label{sec:introduction}
 
-In developing countries, 30\% of urban populations live in slums where households often suffer from unsanitary conditions,  high crime rates, low access to infrastructure, and insecure property rights \citep{mdg}.  Combined, these negative congestion externalities are thought to pose long-lasting obstacles to upward mobility and local economic development \citep{10.1257/jep.27.4.187}. We study a common policy response where governments replace slums with serviced formal structures and move slum dwellers into public housing projects. Subsidized housing aims to provide not only direct health and economic benefits to recipients, but also greater incentives for neighbors to invest in their homes and communities, reducing negative externalities and steering residents away from poverty traps. At the same time, public housing can attract slums by improving access to bulk services like water and sanitation, as well as providing developable land within and nearby housing projects. These implicit housing opportunies are especially salient in South Africa, where {\it backyarding} is a common and widely documented form of land use.\footnote{see recent work by \cite{Brueckner2018backyarding}} In this way, public housing programs may ultimately exacerbate the same negative externalities that they were designed to remediate. While much of the existing literature has focused on estimating direct recipient impacts \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}, the broader consequences of subsidized housing for urban development remain poorly understood.
+In developing countries, 30\% of urban populations live in crowded slums where households often suffer from unsanitary conditions and high crime rates \citep{mdg}. Combined with low infrastructure access and insecure property rights, these negative congestion externalities are thought to pose long-lasting obstacles to upward mobility and local economic development \citep{10.1257/jep.27.4.187}. We study a common policy response where governments replace slums with serviced formal structures and move slum dwellers into public housing projects. These programs aim to provide not only direct health and economic benefits to recipients, but also greater incentives for neighbors to invest in their homes and communities, reducing negative externalities and steering residents away from poverty traps. At the same time, subsidized housing can attract slums by improving nearby access to bulk services like water and sanitation, as well as providing under-utilized developpable land within project areas. These indirect housing opportunies are especially salient in South Africa, where {\it backyarding} is a common and widely documented form of land use.\footnote{see recent work by \cite{Brueckner2018backyarding}} In this way, public housing programs may ultimately exacerbate the same negative externalities they were designed to remediate. While much of the existing literature has focused on estimating direct recipient impacts \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}, the broader consequences of subsidized housing for urban development remain poorly understood.
 
 % While these policies aim to reduce slum growth
 %While these policies are often motivated by immediate health and economic benefits for recipients, economic theory emphasizes how public housing can provide incentives for neighbors to invest more in their own homes and communities, reducing negative externalities and steering communities away from poverty traps.{}
@@ -67,120 +72,182 @@ In developing countries, 30\% of urban populations live in slums where household
 
 %In this paper, we analyze the impacts of public housing on the development of surrounding neighborhoods.
 
-In this paper, we estimate economic spillovers from a large-scale housing program in South Africa, focusing on the quality, density and price of nearby housing. With over 3 million allocated dwellings, the program is one of the largest in the developing world, and continues to respond to large backlogs in demand. \citep{dhsreports}. The program aims not only to serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also to generate community-wide benefits, ``leveraging growth in the economy, [ . . . ] combating crime, promoting social cohesion, [ . . . ] [and] utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}. 
+In this paper, we estimate economic spillovers from a large-scale housing program in South Africa, focusing on the quality, density and price of nearby housing. With over 3 million allocated dwellings, the program is one of the largest in the developing world, and continues to respond to large backlogs in demand \citep{dhsreports}. The program aims not only to serve as ``a key strategy for poverty alleviation'' to direct beneficiaries, but also to generate community-wide benefits, ``leveraging growth in the economy, [ . . . ] combating crime, promoting social cohesion, [ . . . ] [and] utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}. 
 
-We combine administrative records for \input{figures/total_cluster_rdp}completed housing projects with data on property transactions, formal and informal housing density, and dwelling characteristics to measure the local impacts of these projects.   We find evidence of greater access to services, improved home quality, and a greater share of formal housing stock within project areas but no effects on surrounding areas.  Examining nearby housing transactions, we find no statistically significant effects of public housing on prices in the formal market.  To interpret these findings, we provide a simple conceptual framework balancing the amenity effects of improved housing quality against the price and quantity effects of a housing supply shock.  This framework helps shed light on the absence of spillover effects detected in our analysis.
+We combine administrative records for \input{figures/total_cluster_rdp}completed housing projects in the province of Gauteng, with data on property transactions, formal and informal housing densities, and dwelling characteristics to measure the local impact of these projects.   We find evidence of greater access to services, improved home quality, and a greater share of formal housing stock within project areas but no effects on surrounding areas.  Examining nearby housing transactions, we find no statistically significant effects of public housing on prices in the formal market.  To interpret these findings, we provide a simple conceptual framework balancing the amenity effects of improved housing quality against the price and quantity effects of a housing supply shock.  This framework helps shed light on the absence of spillover effects detected in our analysis.
 
 % the welfare effects..
 % attribute the local decline in housing prices in the formal market to greater externalities imposed 
 % To understand the welfare implications of this policy, we also develop a model similar to... 
 %We then use heterogeneity in the extent to which projects eradicate existing slums as a natural experiment to quantify negative externalities from slum areas.  Our estimates imply that increasing slum density by [XX]\% leads to a [XX]\% decline in local housing prices.  We find some evidence that this effect scales non-linearly with the size of the housing projects, which has theoretical implications for the extent to which slum areas represent poverty traps.
 
-Our empirical estimates rely on a difference-in-differences design leveraging both the timing of housing project construction as well as the precise geographic proximity of surrounding areas. Like prior studies in the US, the substantial uncertainty in project timing due to difficulties coordinating many stakeholders and sources of funding limits the extent to which local housing markets are able to anticipate these projects \citep{diamond2016wants, serihistory}.  To address the potential endogenous placement of housing projects, we use \input{figures/total_cluster_rdp}planned but unconstructed projects as counterfactuals and detect no impacts of these projects on local housing markets.
+Our empirical estimates rely on a difference-in-differences design leveraging both the timing of housing project construction as well as the precise geography of treated areas. Like prior studies in the US, the substantial uncertainty in project timing due to difficulties coordinating many stakeholders and sources of funding limits the extent to which local housing markets are able to anticipate the projects \citep{diamond2016wants, serihistory}.  To address the potential endogenous placement of housing projects, we use \input{figures/total_cluster_placebo}planned but unconstructed projects as counterfactuals and detect no impacts of these projects on local housing markets.
 
+\begin{comment}
 Our zero spillover estimates stand in contrast to a large literature in development that has found positive impacts of public housing on direct recipients.  Relying on small-scale experimental designs, previous studies have linked public housing to improvements in employment outcomes \citep{franklin2016enabled}, self-reported wellbeing \citep{galiani2017shelter, devoto2012happiness}, and child health outcomes \citep{cattaneo2009housing}.  Data limitations both in finding a large enough sample of housing projects and in identifying outcomes at a precise spatial scale have prevented previous studies from identifying spillover effects.  Taken alongside these previous studies, our findings suggest that policymakers may be able to continue emphasizing direct benefits to recipients in designing future housing policy since spillover affects appear to be minimal.
+\end{comment}
 
-We proceed by first providing background on the South African housing program in Section~\ref{section:background}.  In Section~\ref{section:model}, we develop a conceptual framework of housing supply and housing externalities to help to interpret the results. Section~\ref{section:data} describes the data used to measure outcomes and details our approach to identifying housing projects while Section~\ref{section:descriptives} provides descriptive evidence.  We present spillover results for residential home prices in Section~\ref{section:resultsprices} and demographic outcomes in Section~\ref{section:resultscensus}.  Section~\ref{section:discussion} includes a discussion of our findings before providing some concluding thoughts.
-
-
-\section{Background} \label{section:background}
-
-\subsection{Where are houses built?}
-
-Between 2000 and 2010, subsidized housing efforts in South Africa have primarily focused on constructing and allocating single-story, two-room (30 to 40 square meter) dwellings to households in groups of 50 to 500 per project.  Housing projects are primarily located on undeveloped state-owned land although in some cases, municipalities will work with private developers to purchase inexpensive, undeveloped private land for these projects.  Finding undeveloped land often requires policymakers to locate these projects far from city centers and economic opportunities \citep{dhsreports}.  Often undeveloped land contains preexisting informal settlements, which the government tries to replace with new formal houses and ensure that preexisting residents benefit from the new project houses \citep{serihistory}.
-
-Facing substantial housing demand, the Department of Human Settlements has continued to issue grants to provincial governments to keep the rate of yearly housing allocations roughly constant \citep{dhsreports}.  While the location and types of projects are determined by provincial and municipal governments, construction is subcontracted to private developers who also act as project managers assisting in the allocation of houses to beneficiaries \citep{seriq}.
-
-Since housing projects require coordination between many stakeholders, these projects often face unanticipated delays and cancellations due to labor and land procurement issues, difficulties gaining support from local government agencies, environmental impact assessments, and inadequate bulk infrastructure provision \citep{dhsreports}.  In one example, political disagreements with local stakeholders led to the abandonment of a large project near Johannesburg \citep{protest}.  In other cases, housing projects can be delayed for upwards of 10 years \citep{dagpl}. 
+We proceed by first providing background on the South African housing program in Section~\ref{section:background}.  In Section~\ref{section:model}, we develop a conceptual framework of housing supply and housing externalities to help interpret the results. Section~\ref{section:data} describes the data used to measure outcomes and details our approach to identifying housing projects while Section~\ref{section:descriptives} provides descriptive evidence.  We present spillover results for residential home prices in Section~\ref{section:resultsprices} and demographic outcomes in Section~\ref{section:resultscensus}.  Section~\ref{section:discussion} includes a discussion of our findings before providing some concluding thoughts.
 
 
-\subsection{Background: Who are the beneficiaries?}
+\section{Subsidized Housing in South Africa} \label{section:background}
 
-The National Department of Human Settlements issues guidelines for eligibility and maintains an official waiting list for eligible households for greenfield developments.  Eligibility requires citizenship, no previous property ownership, being married or having financial dependents, and having a monthly household income below R3,500 \citep{seriq}.\footnote{The Gauteng Province has implemented their own waiting list since 2008 in order to exert greater control over the allocation process.}  The share of households reporting at least one member on the waiting list has remained stable at over 13\% from 2009 to 2013.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013}  Before construction, each project is assigned beneficiaries in a first-come, first-served basis according to the waiting list in their province or municipality.  For in-situ upgrading projects, previous inhabitants of informal settlements receive renovated houses while any remaining houses are allocated according to the housing waiting list.
+The projects studied in this paper were implemented as part of a large national housing subsidy scheme enacted in 1994. Though periodically revised and renamed,\footnote{Public housing in South Africa has been delivered under the {\it Reconstruction and Development Program} (RDP) starting in 1994 and subsequently by its successor, {\it Breaking New Grounds}, as of 2004.} the program has consistently sought to redress the economic and geographic legacy of apartheid by providing formal housing to low-income households. Subsidized housing efforts at the national level have focused on constructing and allocating 40m$^2$, single-story, two-room dwellings in groups of 50 to 500 per project. According to government figures, upwards of 3 million housing units have been delivered between 1994 and 2015.
 
-In practice, these guidelines are only loosely followed.  Recent reports point to cases of corruption in the allocation of houses while in some instances, housing projects are organized with the assistance of local community groups who ultimately select the beneficiaries \citep{seriq}; \citep{casestudytinazonke}.  Research suggests that beneficiaries are often selected over the course of project construction and sometimes even after construction has finished \citep{seriq}.
+\subsection{Planning and Delivery}
 
-Beneficiaries are expected to pay a small one-time payment in order to receive title for their houses.  Guidelines also prevent beneficiaries from reselling their houses within their first 7 years of ownership.  Despite these guidelines, only 82\% of project houses are reported being still occupied by their original beneficiaries within five years of construction.\footnote{This figure is calculated from the General Household Surveys from 2009 to 2013.}  Anecdotal evidence suggests that project managers are aware of active secondary markets but have difficulty policing these transactions \citep{resale}.
+Housing projects are primarily located on undeveloped state-owned land although in some cases, municipalities work with private developers to purchase inexpensive, vacant private land for these projects.  Finding suitable land plots often requires policymakers to locate these projects far from city centers and economic opportunities \citep{dhsreports}.  Undeveloped land plots may contain preexisting informal settlements, which the government tries to replace with new formal houses and ensure that preexisting residents benefit from the new project houses \citep{serihistory}.
+
+Facing substantial housing demand, the Department of Human Settlements has continued to issue grants to provincial governments to maintain yearly housing allocations \citep{dhsreports}.  While the location and types of projects are determined by provincial and municipal governments, construction is subcontracted to private developers who also act as project managers assisting in the allocation of houses to beneficiaries \citep{seriq}.
+
+Since housing projects require coordination between many stakeholders, these projects often face unanticipated delays and cancellations due to labor and land procurement issues, difficulties gaining support from local government agencies, environmental impact assessments, and inadequate bulk infrastructure provision \citep{dhsreports}.  In one example, political disagreements with local stakeholders led to the abandonment of a large project near Johannesburg \citep{protest}.  In other cases, housing projects have been delayed for upwards of 10 years \citep{dagpl}. 
 
 
+\subsection{Recipients}
+
+The National Department of Human Settlements issues guidelines for eligibility and maintains an official waiting list for eligible households.  Eligibility requires citizenship, no previous property ownership, being married or having financial dependents, and having a monthly household income below R3,500 \citep{seriq}.\footnote{The Gauteng Province has implemented their own waiting list since 2008 in order to exert greater control over the allocation process.}  The share of households reporting at least one member on the waiting list has remained stable at over 13\% from 2009 to 2013.\footnote{\label{GHSnote}This figure is calculated from the General Household Surveys from 2009 to 2013}  Before construction, each project is assigned beneficiaries in a first-come, first-served basis according to the waiting list in their province or municipality.  For in-situ upgrading projects, previous inhabitants of informal settlements receive renovated houses while any remaining houses are allocated according to the housing waiting list.
+
+In practice, these guidelines are only loosely followed.  Recent reports point to cases of corruption in the allocation of houses while in some instances, housing projects are organized with the assistance of local community groups who ultimately select the beneficiaries \citep{seriq}; \citep{casestudytinazonke}.  Research suggests that beneficiaries are often selected over the course of project construction and sometimes even after construction has finished \citep{seriq}. Beneficiaries are expected to pay a small one-time payment in order to receive title for their houses.  Guidelines also prevent beneficiaries from reselling their houses within their first 7 years of ownership.  Despite these guidelines, only 82\% of project houses are reported being still occupied by their original beneficiaries within five years of construction.\textsuperscript{\ref{GHSnote}} Anecdotal evidence suggests that project managers are aware of active secondary markets but have difficulty policing these transactions \citep{resale}.
+
+\subsection{Backyard Shacks}
+
+By design, subsidized housing in South Africa offers recipients generous amounts of yard space, which often serve alternative land uses. The construction of informal backyard shacks is a common occurrence within project boundaries. Recipients typically enter agreements with tenants (at times relatives) to lease the shacks for cash or in-kind payments. According to the 2011 census, backyard tenants represent 7.5\% of South African households.\footnote{This figure jumps to 12.5\% for the province of Gauteng, where our study is conducted.} Though the structures are not as durable as their government-provisioned counterparts, living conditions are typically superior than those of conventional informal settlements. Tenants gain indirect access to their landlord's services such as water taps, electricity connections, and toilets, and benefit from reduced eviction threats and greater personal safety \citep{beall2003social}. \cite{Brueckner2018backyarding} note that {\it backyarding} is suggestive of inefficiencies in the program delivery, and allows to correct potential misallocations of resources. Importantly for our analysis, backyard shacks reveal that more household benefit from subsidized housing than the number of direct recipients. According to the general household surveys (2009-2013), more than 33\% of government-provisioned homes have backyard shacks within two years of the delivery date. 
 
 \section{Conceptual Framework}\label{section:model}
 
+Stay tuned.
+
+\begin{comment}
 We consider housing projects as generating positive shocks to housing quantity as well as quality.  Following a standard model of housing supply and demand, increases in formal housing quantity should (1) lower prices of formal housing nearby and (2) incentivize households to move into project areas, both leading to increases in population.  At the same time, gains in housing quality not only benefit direct recipients, but also may have an amenity effect, increasing the desirability of living in neighboring areas \citep{diamond2016wants}.  This amenity effect is likely to (1) increase house prices nearby and (2) drive increases in local population as well.  Taken together, quantity and quality effects have ambiguous predictions for formal housing prices nearby but both predict increases in population both within and around housing project areas.
 
 This simple framework ignores additional features specific to housing markets in developing countries.  In the housing production function, there may be complementarities or substitution between project housing and informal housing.  By zoning and servicing large swaths of land, housing projects may lower the cost of building new informal housing settlements both within and around these projects.  At the same time, clearly defined property rights allocated by these housing projects may increase the cost of squatting, decreasing nearby informal settlements.
 
 The level of informal settlement growth generated by these housing projects may have additional welfare consequences due to general externalities from slum growth \citep{10.1257/jep.27.4.187}.  Health effects, congested infrastructure, and higher crime combine to form negative amenities, potentially depressing nearby housing prices or lowering population densities in these areas.  Although these specific mechanisms are difficult to precisely identify in this setting, these considerations motivate analyzing the differential impacts of housing projects for informal versus formal housing.
+\end{comment}
+
+\section{Data Sources}\label{section:data}
+
+Our analysis focuses on the South African province of Gauteng, both the smallest geographically and most populated province in the country. Gauteng's boundaries roughly correspond to the greater metropolitan area of Johannesburg and Pretoria. Understanding the local development impacts of public housing requires (1) outcomes measured at high spatial resolutions, and (2) a precise measure of the location, timing, and size of housing projects.  To this end, we rely on four main data sources: administrative maps describing Gauteng's housing policies, deeds data on housing transactions, household-level census data, and building-based land use information. Each is described in turn below.
+
+\subsection{Deeds Data and Location of Housing Projects}
+
+ We locate housing projects using a combination of administrative policy maps and deeds data. We obtain the former from the Gauteng City Regional Observatory, a research unit joint with the Gauteng Provincial Government and two Johanesburg universities.\footnote{\href{url}{www.gcro.ac.za/}} The maps describe \input{figures/total_gcro}planned housing projects as of 2008, including (on some occasions) notes on their completion status.\footnote{Since this data comes in the form of overlapping shapefiles, we use the union of intersecting shapes, excluding small shapes below 0.5 km$^2$.} The latter is sourced from the South African National Deeds Office, covering the 2001 to 2011 universe of transactions in {\it affordable areas}, defined as census enumeration areas with 2010 mean house prices below R500,000. These data were kindly provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets. Transaction information includes sale price, GPS location, plot size, buyer name, and seller name.
 
 
-\section{Data}\label{section:data}
+\begin{table}[h!]
+\vspace{4mm}
+\caption{Top-Five Sellers in Housing Transactions Sample}\label{table:topfivesellers}
+\centering
+\input{figures/biggest_sellers_table}
+\vspace{-4mm}
+\end{table}
 
-Understanding the spillover impacts of public housing requires (1) outcome measures at high spatial and geographic resolutions as well as (2) a precise measure of the location, timing, and size of housing projects.  We locate housing projects using administrative maps compiled by the Gauteng City Regional Observatory.  These records include \input{figures/total_gcro}planned housing projects as well as notes on their completion status.\footnote{Since this data comes in the form of overlapping shapefiles, we use the intersection of the shapes excluding tiny shapes below 0.50 square kilometers.}  
+ \subsubsection*{Constructed Housing Projects}
 
-To measure formal housing market impacts, we analyze over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).  The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.  These data include the price, exact location, plot size, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 4 kilometers of a housing project.  Finally, we exclude the top 1\% of prices as well as prices below 2,500 Rand, which are likely composed of measurement error or exchanging of titles between family members.
+ Using the administrative policy maps, we define projects as successfully constructed when we observe recipients receiving deeds to their government-sponsored house within the projects boundaries. To identify state-sponsored housing transactions, we follow a filtering procedure established by our data provider. Properties are first assumed to belong to a housing project if the seller name includes a government, municipality, or large developer when first transacted. In 	\mbox{Table \ref{table:topfivesellers}}, we show that these institutional sellers represent an important share of our sample. We then exclude deeds flagged as large buildings used for commercial purposes (less than 2\% of transactions), as well as purchase prices more than R50,000 above the yearly nominal subsidy values (less than 4\% of remaining transactions). As shown in the right panel of Figure \ref{figure:transactionhist}, transaction prices for properties deemed to belong to public housing programs exhibit significant mass-points in their distribution, consistent with many properties being recorded with these subsidy values. Finally, we exclude transactions occurring in Gauteng's historic townships, because the bulk of residential construction within these areas precedes the start of South Africa's housing program.\footnote{Urban townships are apartheid-era residential areas created for black migrant workers. Township boundaries were also provided by the Gauteng City-Region Observatory.} Altogether, this filtering procedure identifies over 127,000 properties as government-sponsored housing. Overlaying theses properties' GPS coordinates with the housing policy maps, we are able to identify \input{figures/total_cluster_rdp}constructed housing projects. Delivery dates for the projects are then inferred from the distribution of transactions over time. Specifically, considering transactions within each projects separately, we set the modal transaction month as the delivery month for each project. Within projects, most government-sponsored properties are transacted in the same month. %This is apparent from the upper panel of figure \ref{figure:densitytime}, where monthly transaction densities for subsidized properties are plotted 36 months prior and following the modal delivery month.
 
-Since it is unlikely that government deeds records capture informal housing markets, we also include a building census of all structures in the Gauteng Province in 2001 and 2011.  Using a combination of high-resolution satellite imagery and local field teams, these data record the precise location of each structure, identifying structures within over 30 categories including formal and informal residential dwellings.  Out of \input{figures/total_bblu}structures, this building census includes \input{figures/total_bblu_formal}formal structures and \input{figures/total_bblu_informal}informal structures.  These data serve as both outcome measures of informal housing development as well as additional measures of public housing construction.
+\begin{figure}[t]
+\caption{Transaction Price Histogram}\label{figure:transactionhist}
+\centering
+\includegraphics[scale=.37]{figures/summary_pricedist.pdf}
+\vspace{-4mm}
+%\\
+%\footnotesize{Note: Transactions are censored at R100,000.}
+\end{figure}
 
-For demographic and economic outcomes, we have access to the full census of population and housing for 2001 and 2011, which provides information on housing characteristics, population density, as well as income and employment measures.   To spatially link these households in both samples to their corresponding housing projects, we conduct the analysis at the census block level, which is the smallest geography available with \input{figures/total_small_areas}total blocks in Gauteng Province and \input{figures/total_small_areas_in_buffer}with centroid within 4 kilometers of a housing project.
+\subsubsection*{Planned but Unconstructed Housing Projects}
+
+Identifying \input{figures/total_cluster_rdp}constructed housing projects leaves \input{figures/unconstructed_no_date}planned but possibly unconstructed housing projects in the administrative map.  We propose using these projects as counterfactuals, capturing the level of urban development that would have occurred in the absence of construction. Because our deeds data cover the 2001-2011 period and the policy maps pertain to 1994-2008, a concern is that some of the remaining 99 projects were planned and delivered prior to 2001. In order to determine which of the unconstructed projects were planned between 2001 and 2011, we make use of National Treasury budget reports.  We are able to digitize data for 132 projects from budget reports spanning 2004 to 2009, which detail the name, start date, expected completion date, and cost of each housing project.  We then use a string-matching algorithm to link project names from the budget reports to the administrative maps. This procedure results in a final sample of \input{figures/total_cluster_placebo}unconstructed projects. We provide further details about the digitization and string-matching algorithm in appendix Appendix~\ref{table:stringmatch}. Figure \ref{figure:map} shows the geographic setting of our analysis, where our final sample of constructed and unconstructed project boundaries are mapped out. Importantly, Figure \ref{figure:map} also shows that affordable areas, the coverage areas for our deeds data, contain every project boundary. While constructed and unconstructed projects are often adjacent to each other, possibly indicating cases where authorities were unable to complete final phases of planned projects, there are also many examples of isolated projects of both types.  Projects are generally located at relatively great distances from central business districts (CBDs), validating that vacant or inexpensive land plots are especially targeted by housing authorities.  Despite their distance from the CBDs, housing projects are often next to arterial highways easing commuting costs for recipients.
+
+\begin{figure}[t!]
+\centering
+\caption{Housing Project Map}\label{figure:map}
+\includegraphics[scale=.56]{figures/explanmap.jpg}
+\end{figure}
+
+
+%We then use a fuzzy-string matching algorithm with bigrams to link project names from the budget reports to the administrative maps.  We keep all matches with over 60\% similarity, with 44 projects matching exactly.  Appendix~\ref{table:stringmatch} compares unmatched and matched projects finding that matched projects have much higher densities of informal housing and project housing density, but similar densities of formal housing and project dates.  One reason may be that the budget reports only include larger, more expansive projects. We find that the project start date (from the budget reports) is three years before the project completion date (from the deeds data) on average.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Using this lag, we assign an expected completion date for unconstructed projects that is three years after the announced start-date in the budget reports.  Since the budget data does not include month of planning, we assign a random month for unconstructed projects, which ensures that this date is uncorrelated with seasonality but also introduces measurement error in the timing of unconstructed projects.  This error is only likely to affect the housing transaction estimates, which are the only estimates performed at the monthly level.  
+
+%We use a limited definition of verified seller names to minimize the chances that unconstructed projects are misclassified as constructed projects.  However, this approach increases the possibility that this definition mistakenly excludes constructed projects.
+
+We note that our approach is not without limitations, and may introduce measurement error insofar as we are mis-attributing deeds to housing projects (false-positives), or wrongly assuming a project is unconstructed (false-negatives). To provide some validation for our classification, we tabulate in Table~\ref{table:projectdescriptions} project descriptions from the administrative policy maps according to whether projects are classified as constructed or unconstructed. We find that constructed projects are more likely to be classified as ``completed" or ``under implementation", while unconstructed projects are more likely to fall into ``proposed'' or ``planning'' categories.\footnote{We cannot verify that every project description, when available, is indicative of the most recent project status.}
+
+\begin{table}[t!]
+\centering
+\caption{Project Descriptions}\label{table:projectdescriptions}
+\begin{tabular}{l*{1}{cc}}
+ &Constructed &Unconstructed  \\
+\hline 
+``proposed"   &          5  &    20  \\
+``planning"   &          8  &    12  \\
+``under implementation"& 12 &     4  \\
+``complete"   &          6  &     1  \\
+$\,${\it No Description} &       37  &    28  \\ 
+\hline $\,$Total &         68  &     65  \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Non-subsidized housing transactions}
+
+To examine spillovers on nearby non-subsidized housing, we retain the remainder of properties that satisfy none of the criteria in the filtering procedure. We focus on properties located within 4 kilometers of constructed and unconstructed housing projects, forming a sample of over 140,000 transactions.  We exclude the top 1\% of prices as well as prices below 2,500 Rand, which are likely composed of mis-measured prices, or titles exchanged between family members. The price distribution of this sample is displayed in the right panel of Figure \ref{figure:transactionhist}, which stands in contrast to the distribution of subsidized transactions in the left panel. %In Figure \ref{figure:densitytime}, we plot monthly transaction densities around the modal transaction month for every constructed project, separating project transactions (upper panel) from non-project transactions (lower panel).
+
+%\begin{figure}[t!]
+%\centering
+%\includegraphics[scale=.4]{figures/summary_densitytime.pdf} 
+%\caption{Transaction Densities Relative to Modal Project Month}\label{figure:densitytime}
+%\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Descriptive evidence supports our project definition in several ways.  First, Figure~\ref{figure:topfivesellers} shows that the top five most frequently occurring seller names clearly correspond to government housing programs in the region.  Second, transaction prices for project houses are strongly clustered around subsidy values.  Figure~\ref{figure:transactionhist} provides a histogram of deed prices under R100,000 for transactions that meet our project definition as well as those that do not.  Government agencies often record either zero price or the value of the subsidy in the deeds, producing substantial bunching at these values compared to non-project transactions.  At the same time, there exists a small density of projects smoothly distributed across the lower range of prices for project housing, which may be evidence of some misclassification of our project housing measure.
+
+
+%We assign a completion date for each project according to the modal year of these deeds transactions.  Figure~\ref{figure:densitytime} indicates the distribution of transaction dates for properties within a 4 km buffer around housing projects (above panel) and within the selected project areas (below panel).  Project areas exhibit substantial bunching during a single month when projects were completed.  There are also more transactions after the modal year than before the modal year, consistent with either a gradual roll-out for some project areas or immediate resale of projects houses after construction, which would be counter to housing regulations.  
+%We then include only clusters where over 50\% of transactions occur during the modal year, which excludes half of total clusters.  This approach helps to exclude incremental projects as well as possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
+
+%Evidence of similar bunching around the modal year for transactions coded as non-project transactions (above panel) would suggest that we may be miscoding project transactions as non-project transactions; instead, we find a smooth pattern relative to the modal year for these non-project transactions.  The slight increase in density around and just following the modal year may also be consistent with housing projects having an immediate impact on local housing markets, which we will explore further below.
+
+%To measure formal housing market impacts, we analyze over 500,000 housing transactions from the South African National Deeds Office covering the universe of transactions for suburbs in the bottom 20\% of the housing market between 2003 and 2011 in the Gauteng Province (including the Johannesburg metro area).  The bottom 20\% suburbs were selected relative to prices in 2003 and followed every year from 2003 to 2011.  These data were provided by the Affordable Land and Housing Data Centre (ALHDC), which tracks affordable housing markets.\footnote{the ALHDC is an initiative launched by the Centre for Affordable Housing Finance in Africa, an independent think tank. }  These data include the price, exact location, plot size, buyer name, and seller name for each transaction.  To isolate spillover effects, we focus on transactions occurring within 4 kilometers of a housing project.  Finally, we exclude the top 1\% of prices as well as prices below 2,500 Rand, which are likely composed of measurement error or exchanging of titles between family members.
+
+\subsection{Census Data}
+
+To measure impacts on dwelling characteristics, we use the 2001 and 2011 national censuses of population and housing. Specifically, we analyze household-level responses describing the quality of their living quarters. Our outcomes are mainly binary indicators, and pertain to the household's access to services (flush toilets, water tap, electricity access), housing durability, and tenure arrangements. We identify households at the {\it small-area} level, the smallest available census geography. The province of Gauteng is divided between approximately 11,000 small areas in 2001, and 17,000 small areas in 2011.\footnote{Despite many boundaries being very similar, census geographies are not constant in both time periods. Most of the 2001-2011 growth in census small areas is due to geographies being split into more part in the 2011 census.} On average, each census area contains 170 household. Though we observe responses from every surveyed household in both census waves, the data does not allow to link households across time periods. 
+
+\subsection{Building Based Land Use}
+
+Our final data source consists of hand-coded building surveys derived from high-resolution aerial and satellite imagery. We obtain these data from GeoTerraImage (Pty) ltd., a local remote-sensing specialist. The data differentiates structures within over 30 categories, including formal and informal residential dwellings. Informal housing structures are easily identified from their temporary nature, often made of materials such as recycled wood and corrugated metal. In contrast, formal housing structures are permanent, generally made out of brick, and may have a pitched or a flat roof with tiles, zinc panels, or other materials. Importantly for our analysis, the data encodes backyard shacks as informal structures, but allows to distinguish between backyard and other types of informal buildings. We track changes in residential development by using all two available survey waves in Gauteng: 2001 and 2012. As a validation exercise, we compute aggregated building counts at the census small-area level, and check the resulting figures against the number of households reporting to live in formal/informal housing in the census. The two data sources paint a consistent picture of housing in Gauteng, with highly correlated ($\geq$ 0.85) formal and informal building quantities in both available comparison years.\footnote{We correlated the 2001 and 2012 building surveys with the 2001 and 2011 household censuses, respectively.} For estimation purposes, we transform this data into 50m$\times$50m grid cells building counts, thereby creating five measures of housing density and the built environment: total residential structures, formal residential structures, informal residential structures, backyard informal and non-backyard informal structures.\footnote{The first measure is the sum of the second and third, while the third measure is the sum of the fourth and fifth.} In appendix \ref{figure:housecensusexample}, we provide an example of the raw data and a visual depiction of our gridding procedure. 
+
+
 %as well as the yearly General Household Survey for 2005 through 2014.  
 
 % The General Household Survey includes additional details on participation in housing programs over time for a random sample of around 35,000 households in the Gauteng Province. 
 % Both surveys include information about dwelling type, employment, income, and demographics for each household.  The General Household Survey includes additional details on participation in housing programs over time for a random sample of around 35,000 households in the Gauteng Province.
 
-\subsection{Constructed Housing Projects}
+%\subsection{Constructed Housing Projects}
 
 %We construct our primary measure of housing projects by matching a set of known characteristics for housing projects for properties transacted in the deeds data.  This procedure results in spatially distinct clusters that form the definition of housing projects for the empirical analysis (\cite{serihistory}).  Due to data limitations, we are not able to differentiate between greenfield and in-situ upgrading projects in the analysis.
 
 %\subsubsection{Seller Identity}
 % prob yes and large : 2770 / 127600 = 2\%
 
-We define projects as successfully constructed when we observe at least some recipients receiving deeds to their new government houses.  Deed transfers are assumed to belong to a housing project if the seller name includes a government, municipality, or large developer.  As recommended by the data provider, we exclude deeds flagged as large buildings used for commercial purposes ($<$2\% of transactions) as well as purchase prices that are more than R50,000 above the yearly subsidy value ($<$4\% of remaining transactions).  Using this criteria, we are able to identify over \input{figures/total_cluster_rdp}constructed housing projects out of \input{figures/total_gcro}planned projects.
-
-This approach may introduces measurement error insofar as we are mis-attributing deeds to housing projects.  We use a limited definition of verified seller names to minimize the chances that unconstructed projects are misclassified as constructed projects.  However, this approach increases the possibility that this definition mistakenly excludes constructed projects.
-\begin{figure}
-\caption{Top-Five Sellers}\label{figure:topfivesellers}
-\centering
-\input{figures/biggest_sellers_table}
-\end{figure}
-Descriptive evidence supports our project definition in several ways.  First, Figure~\ref{figure:topfivesellers} shows that the top five most frequently occurring seller names clearly correspond to government housing programs in the region.  Second, transaction prices for project houses are strongly clustered around subsidy values.  Figure~\ref{figure:transactionhist} provides a histogram of deed prices under R100,000 for transactions that meet our project definition as well as those that do not.  Government agencies often record either zero price or the value of the subsidy in the deeds, producing substantial bunching at these values compared to non-project transactions.  At the same time, there exists a small density of projects smoothly distributed across the lower range of prices for project housing, which may be evidence of some misclassification of our project housing measure.
-\begin{figure}
-\caption{Transaction Price Histogram}\label{figure:transactionhist}
-\centering
-\includegraphics[scale=.4]{figures/summary_pricedist.pdf}
-%\\
-%\footnotesize{Note: Transactions are censored at R100,000.}
-\end{figure}
-We assign a completion date for each project according to the modal year of these deeds transactions.  Figure~\ref{figure:densitytime} indicates the distribution of transaction dates for properties within a 4 km buffer around housing projects (above panel) and within the selected project areas (below panel).  Project areas exhibit substantial bunching during a single month when projects were completed.  There are also more transactions after the modal year than before the modal year, consistent with either a gradual roll-out for some project areas or immediate resale of projects houses after construction, which would be counter to housing regulations.  
-%We then include only clusters where over 50\% of transactions occur during the modal year, which excludes half of total clusters.  This approach helps to exclude incremental projects as well as possible land titling programs, allowing us to leverage the sharp timing of large project construction in our identification.  
-
-Evidence of similar bunching around the modal year for transactions coded as non-project transactions (above panel) would suggest that we may be miscoding project transactions as non-project transactions; instead, we find a smooth pattern relative to the modal year for these non-project transactions.  The slight increase in density around and just following the modal year may also be consistent with housing projects having an immediate impact on local housing markets, which we will explore further below.
-
-\begin{figure}
-\caption{Transaction Densities Relative to Modal Project Month}\label{figure:densitytime}
-\centering
-\includegraphics[scale=.5]{figures/summary_densitytime.pdf} \\
-The upper panel includes all transactions within the final sample of clusters.  The lower panel includes transactions within a 4 kilometer buffer around a project cluster relative to the modal year of that cluster.
-\end{figure}
-
-
-\subsection{Planned but Unconstructed Housing Projects}
+%\subsection{Planned but Unconstructed Housing Projects}
 
 %The administrative spatial data identifies many project areas that do not appear to have received housing projects, as measured by having fewer than 5 housing project transactions per square kilometer.  We use these areas to create a sample of planned but unconstructed housing projects to serve as counterfactuals areas in our analysis.
 
-Identifying \input{figures/total_cluster_rdp}constructed housing projects leaves \input{figures/unconstructed_no_date}planned but possibly unconstructed housing projects in the administrative map.  We propose using these projects as counterfactuals, capturing the level of the development that would have occurred in the absence of full construction.  
+%Identifying \input{figures/total_cluster_rdp}constructed housing projects leaves \input{figures/unconstructed_no_date}planned but possibly unconstructed housing projects in the administrative map.  We propose using these projects as counterfactuals, capturing the level of the development that would have occurred in the absence of full construction.  
 
-In order to determine which of the unconstructed projects were planned to be completed between 2001 and 2011, we construct an estimated completion date using National Treasury budget reports.  We were able to digitize data for 132 projects from budget reports spanning 2004 to 2009, which detail the name, start date, expected completion date, and cost of each housing project.  We then use a fuzzy-string matching algorithm with bigrams to link project names from the budget reports to the administrative maps.  We keep all matches with over 60\% similarity with 44 projects matching exactly.  Appendix~\ref{table:stringmatch} compares unmatched and matched projects finding that matched projects have much higher densities of informal housing and project housing density, but similar densities of formal housing and project dates.  One reason may be that the budget reports only include larger, more expensive projects.
+%In order to determine which of the unconstructed projects were planned to be completed between 2001 and 2011, we construct an estimated completion date using National Treasury budget reports.  We were able to digitize data for 132 projects from budget reports spanning 2004 to 2009, which detail the name, start date, expected completion date, and cost of each housing project.  We then use a fuzzy-string matching algorithm with bigrams to link project names from the budget reports to the administrative maps.  We keep all matches with over 60\% similarity with 44 projects matching exactly.  Appendix~\ref{table:stringmatch} compares unmatched and matched projects finding that matched projects have much higher densities of informal housing and project housing density, but similar densities of formal housing and project dates.  One reason may be that the budget reports only include larger, more expensive projects.
 
-We find that the project start date (from the budget reports) is three years before the project completion date (from the deeds data) on average.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Using this lag, we assign an expected completion date for unconstructed projects that is three years after the announced start-date in the budget reports.  Since the budget data does not include month of planning, we assign a random month for unconstructed projects, which ensures that this date is uncorrelated with seasonality but also introduces measurement error in the timing of unconstructed projects.  This error is only likely to affect the housing transaction estimates, which are the only estimates performed at the monthly level.  This procedure results in a final sample of \input{figures/total_cluster_placebo}unconstructed projects.
+%We find that the project start date (from the budget reports) is three years before the project completion date (from the deeds data) on average.  In other words, beneficiaries receive title to their new houses about three years after the housing program is announced in the budget.  Using this lag, we assign an expected completion date for unconstructed projects that is three years after the announced start-date in the budget reports.  Since the budget data does not include month of planning, we assign a random month for unconstructed projects, which ensures that this date is uncorrelated with seasonality but also introduces measurement error in the timing of unconstructed projects.  This error is only likely to affect the housing transaction estimates, which are the only estimates performed at the monthly level.  This procedure results in a final sample of \input{figures/total_cluster_placebo}unconstructed projects.
 
-Table~\ref{table:projectdescriptions} tabulates project descriptions from the administrative data according to our definitions of completed and uncompleted.  We find that constructed projects are much more likely to be classified as ``completed,'' ``planning,'' or in ``implementation'' while unconstructed projects are more likely to fall into ``Uncertain'' or ``Investigating'' categories.  These correlations provide an external validation of our classification of constructed and unconstructed projects with deeds records.
-\begin{table}
-\centering
-\caption{Project Descriptions}\label{table:projectdescriptions}
-\input{figures/keyword_analysis}\\
-\vspace{.2cm}
-\footnotesize{Descriptions from administrative project map.}
-\end{table}
+%Table~\ref{table:projectdescriptions} tabulates project descriptions from the administrative data according to our definitions of completed and uncompleted.  We find that constructed projects are much more likely to be classified as ``completed,'' ``planning,'' or in ``implementation'' while unconstructed projects are more likely to fall into ``Uncertain'' or ``Investigating'' categories.  These correlations provide an external validation of our classification of constructed and unconstructed projects with deeds records.
+
+\section{Empirical Methodology}\label{section:methodology}
 
 
 \section{Descriptive Evidence}\label{section:descriptives}
@@ -196,13 +263,7 @@ Table~\ref{table:projectdescriptions} tabulates project descriptions from the ad
 
 To contextualize our analysis, we provide descriptive evidence of the location, size, and surrounding areas of housing projects.  Figure~\ref{figure:map} maps our sample of unconstructed and constructed housing projects.  We find that projects fall exclusively within affordable housing areas (defined as enumerator areas in the bottom quintile of house prices in 2003).  While constructed and unconstructed projects are often adjacent to each other possibly indicating cases where authorities were unable to complete final phases of planned projects, there are also many examples of stand-alone projects of both types.  Projects are generally located at relatively great distances from central business districts (CBDs), which suggests that vacant or inexpensive land plots are especially targeted by housing authorities.  Despite their distance from the CBDs, housing projects are often next to arterial highways easing commuting costs for recipients.
 
-\begin{figure}
-\caption{Housing Project Map}\label{figure:map}
-\centering
-\includegraphics[scale=.5]{figures/explanmap.jpg}
-\end{figure}
-
-\begin{table}
+\begin{table}[h!]
 \centering
 \caption{Housing Projects at Baseline}\label{table:projectdescriptives}
 %\input{figures/project_joint_table}
