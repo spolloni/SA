@@ -49,8 +49,8 @@ end;
 *******************;
 
 * SET OUTPUT FOLDER ;
-*global output = "Output/GAUTENG/gradplots";
-global output = "Code/GAUTENG/paper/figures";
+global output = "Output/GAUTENG/gradplots";
+*global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
@@ -85,7 +85,7 @@ global dist_regs  = 0;
 global time_regs  = 0;
 global dd_regs    = 0;
 global ddd_regs   = 0;
-global simple_reg = 1;
+global simple_reg = 0;
 
 * load data; 
 cd ../..;
@@ -188,18 +188,18 @@ keep if ($ifhists) | rdp_all ==1;
 bys cluster_rdp: egen sum_nrdp = sum(rdp_never);
 drop if sum_nrdp < 50;
 
-hist lprice if rdp_all==1 & lprice < 15 & lprice > 5, 
-  bin(200) name(a) xlabel(5(5)15)
-  xtitle("")  ytitle("") title("project housing");
+hist lprice if rdp_all==1 & purch_price < 600000 & lprice > 5, 
+  bin(200) col(gs0) name(a) xlabel(5(5)15,tp(c)) yla(,tp(c)) plotr(ls(none))
+  xtitle("")  ytitle("") title("Subsidized Housing");
 
 hist lprice if rdp_never==1, 
-  bin(200)  name(b) xlabel(5(5)15)
-  xtitle("") yla(none) ytitle("") title("non-project housing");
+  bin(200) col(gs0)  name(b) xlabel(5(5)15,tp(c)) plotr(ls(none))
+  xtitle("") yla(none,tp(c)) ytitle("") title("Non-Subsidized Housing");
 
 graph combine a b, rows(1) ycommon 
-l1(" transaction density",size(medsmall)) 
-b1("log house price",size(medsmall))
-xsize(13) ysize(8.5) imargin(0 0 -2 -2);
+l1(" Transaction Density",size(medsmall)) 
+b1("Log House Price",size(medsmall))
+xsize(13) ysize(8.5) imargin(0 0 -2 -2) ;
 graphexportpdf summary_pricedist, dropeps replace;
 graph drop _all;
 

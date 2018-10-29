@@ -30,8 +30,8 @@ end;
 ******************;
 
 * SET OUTPUT GLOBAL;
-*global output = "Output/GAUTENG/censusregs" ;
- global output = "Code/GAUTENG/paper/figures";
+ global output = "Output/GAUTENG/censusregs" ;
+* global output = "Code/GAUTENG/paper/figures";
 * global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
@@ -40,7 +40,8 @@ global LOCAL = 1;
 * DOFILE SECTIONS;
 global data_load = 0;
 global data_prep = 1;
-global data_regs = 1;
+global data_stat = 1;
+global data_regs = 0;
 
 * PARAMETERS;
 global drop_others= 1   ; /* everything relative to unconstructed */
@@ -284,13 +285,120 @@ gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 *****************************************************************;
 
 *****************************************************************;
+********************* SUMMARY STATISTICS ************************;
+*****************************************************************;
+if $data_stat==1 {;
+
+preserve;
+
+mat SUM = J(8, 3,.);
+keep if year ==2001;
+g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
+g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
+*replace project_placebo = 0 if (project_placebo==1 & project_rdp==1) & area_int_placebo < area_int_rdp;
+*replace project_rdp = 0 if (project_placebo==1 & project_rdp==1) & area_int_placebo > area_int_rdp;
+
+* toilet_flush means;
+sum toilet_flush if project_rdp ==1;
+matrix SUM[1,1] = round(r(mean),.01);
+sum toilet_flush if project_placebo ==1;
+matrix SUM[1,2] = round(r(mean),.01);
+sum toilet_flush; 
+matrix SUM[1,3] = round(r(mean),.01);
+
+* water_inside means;
+sum water_inside if project_rdp ==1;
+matrix SUM[2,1] = round(r(mean),.01);
+sum water_inside if project_placebo ==1;
+matrix SUM[2,2] = round(r(mean),.01);
+sum water_inside;
+matrix SUM[2,3] = round(r(mean),.01);
+
+* electric_cooking means;
+sum electric_cooking if project_rdp ==1;
+matrix SUM[3,1] = round(r(mean),.01);
+sum electric_cooking if project_placebo ==1;
+matrix SUM[3,2] = round(r(mean),.01);
+sum electric_cooking;
+matrix SUM[3,3] = round(r(mean),.01);
+
+* electric_heating means;
+sum electric_heating if project_rdp ==1;
+matrix SUM[4,1] = round(r(mean),.01);
+sum electric_heating if project_placebo ==1;
+matrix SUM[4,2] = round(r(mean),.01);
+sum electric_heating;
+matrix SUM[4,3] = round(r(mean),.01);
+
+* electric_lighting means;
+sum electric_lighting if project_rdp ==1;
+matrix SUM[5,1] = round(r(mean),.01);
+sum electric_lighting if project_placebo ==1;
+matrix SUM[5,2] = round(r(mean),.01);
+sum electric_lighting; 
+matrix SUM[5,3] = round(r(mean),.01);
+
+* tot_rooms means;
+sum tot_rooms if project_rdp ==1;
+matrix SUM[6,1] = round(r(mean),.01);
+sum tot_rooms if project_placebo ==1;
+matrix SUM[6,2] = round(r(mean),.01);
+sum tot_rooms;
+matrix SUM[6,3] = round(r(mean),.01);
+
+* hh_size means;
+sum hh_size if project_rdp ==1;
+matrix SUM[7,1] = round(r(mean),.01);
+sum hh_size if project_placebo ==1;
+matrix SUM[7,2] = round(r(mean),.01);
+sum hh_size;
+matrix SUM[7,3] = round(r(mean),.01);
+
+* Counts;
+count if project_rdp ==1;
+global cons: di %15.0fc r(N);
+count if project_placebo ==1;
+global uncons: di %15.0fc r(N);
+count;
+global all: di %15.0fc r(N);
+
+clear;
+svmat SUM; 
+tostring * , replace force format(%9.2f);
+gen names = "";
+order names, first;
+replace names = "Flushed Toilet" in 1;
+replace names = "Piped Water in Home" in 2;
+replace names = "Electricity for Cooking" in 3;
+replace names = "Electricity for Heating" in 4;
+replace names = "Electricity for Lighting" in 5;
+replace names = "Number of Rooms" in 6;
+replace names = "Household Size" in 7;
+
+replace names = "N" in 8;
+replace SUM1 = "$cons" in 8;
+replace SUM2 = "$uncons" in 8;
+replace SUM3 = "$all" in 8;
+
+replace SUM3 = SUM3 + " \\";
+
+export delimited using "census_at_baseline.tex", novar delimiter("&") replace;
+
+restore;
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
+
+*****************************************************************;
 ********************* RUN REGRESSIONS ***************************;
 *****************************************************************;
 if $data_regs==1 {;
 
-g project_rdp = (area_int_rdp > $tresh_area);
+g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
 lab var project_rdp "Project X Const.";
-g project_placebo = (area_int_placebo > $tresh_area);
+g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
 lab var project_placebo "Project X Unconst.";
 g project = (project_rdp==1 | project_placebo==1);
 lab var project "Project";
