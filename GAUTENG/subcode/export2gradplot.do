@@ -57,7 +57,6 @@ local qry = "
     JOIN gcro on gcro.cluster = dep.target_id
     WHERE dep.distance<=4000
       AND gcro.placebo_yr IS NOT NULL
-      AND gcro.area > .5
     GROUP BY dep.input_id 
     HAVING COUNT(dep.input_id)<=50 
       AND dep.distance == MIN(dep.distance)

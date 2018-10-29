@@ -61,6 +61,8 @@ replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
 *replace mo2con_reg = 1 if mo2con_reg ==0;
 };
 
+* transaction count per seller;
+bys seller_name: g s_N=_N;
 
 *extra time-controls;
 gen day_date_sq = day_date^2;
@@ -70,8 +72,6 @@ drop if purch_price == 6900000;
 
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
-
-bys seller_name: g s_N=_N;
 
 gen treat_rdp  = (distance_rdp>=0 & distance_rdp <= $treat);
 gen treat_placebo = (distance_placebo>=0 & distance_placebo <= $treat);
@@ -114,6 +114,8 @@ program define  coeffgraph;
       sort contin;
       g placebo = regexm(parm,"placebo")==1;
 
+      replace contin = cond(placebo==1, contin - 0.25, contin + 0.25);
+
       tw
       (rcap max95 min95 contin if placebo==0, lc(gs0) lw(thin) )
       (rcap max95 min95 contin if placebo==1, lc(sienna) lw(thin) )
@@ -139,7 +141,8 @@ end;
 *        rdp_never ==1 &;
 
 global ifregs = "
-       rdp_never == 1  &  s_N <= 10  & 
+       s_N <30 &
+       rdp_never ==1 &
        purch_price > 2500 & purch_price<500000 &
        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
        ";
