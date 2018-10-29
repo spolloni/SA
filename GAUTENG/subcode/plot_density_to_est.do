@@ -298,7 +298,7 @@ if $bblu_clean_data==1 {;
 ************************************************;
 ********* ANALYZE DATA  ************************;
 ************************************************;
-if $bblu_do_analysis==1 {;
+*if $bblu_do_analysis==1 {;
 
 use bbluplot_reg_admin_$size, clear;
 
@@ -347,6 +347,17 @@ preserve;
 restore;
 
 
+*preserve;
+  sort drdp;
+  keep if post==1 & drdp!=.;
+  egen infm = mean(inf), by(drdp);
+  egen form = mean(for), by(drdp);
+  keep drdp infm form;
+  duplicates drop drdp, force;
+  outsheet using "${output}/for_con_post.csv", comma replace;
+
+/*
+restore;
 
 
 };

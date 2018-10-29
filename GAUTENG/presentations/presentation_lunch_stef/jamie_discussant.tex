@@ -1,0 +1,209 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass[aspectratio=32]{beamer}
+\usefonttheme[onlymath]{serif}
+
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+\usecolortheme{spruce}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{verbatim}
+\usepackage{colortbl}
+
+\usepackage{mathtools} 
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsmath}
+\usepackage{bm}
+
+\usepackage{ragged2e}
+\usepackage{etoolbox}
+\usepackage{lipsum}
+
+\usepackage{siunitx,booktabs}
+\usepackage{pifont}
+\usepackage{array}
+\usepackage{tabu,booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes}
+
+\setbeamertemplate{enumerate items}[circle]
+\usepackage{tikz}
+
+\newcommand\mynum[1]{
+  \usebeamercolor{enumerate item}
+  \tikzset{beameritem/.style={circle,inner sep=0,minimum size=2ex,text=enumerate item.bg,fill=enumerate item.fg,font=\footnotesize}}%
+  \tikz[baseline=(n.base)]\node(n)[beameritem]{#1};
+}
+
+\newcommand\mynumm[1]{
+  \usebeamercolor{enumerate item}
+  \tikzset{beameritem/.style={rectangle,inner sep=0,minimum size=2ex,text=enumerate item.bg,fill=enumerate item.fg,font=\footnotesize}}%
+  \tikz[baseline=(n.base)]\node(n)[beameritem]{#1};
+}
+
+\def\Put(#1,#2)#3{\leavevmode\makebox(0,0){\put(#1,#2){#3}}}
+
+\setbeamertemplate{footline}[frame number]
+
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{Does Air Pollution Lower Productivity? \\ Evidence from Manufacturing in India} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Jamie Hansen-Lewis, Brown University \\ Discussant: Will Violette, Federal Trade Commission} 
+
+ % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+
+
+\date{October 2018} %\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\beamertemplatenavigationsymbolsempty
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+%\vspace{3cm}
+
+The views expressed are those of the author and do not necessarily reflect those of the Federal Trade Commission.
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+%\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+%\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Main Takeaway}
+\centering
+
+\begin{itemize}
+  \item Previous studies find large air pollution impacts in specific industries, in specific areas, even in specific firms
+  \item But air pollution spreads far and wide, so environmental policy needs to be broad (city-level, province-level, country-level)
+  \item This research fills this gap: studies all industries over a long-time range
+  \item Conclusion: reducing pollution to international standards has little overall benefit to producer surplus 
+  \begin{itemize}
+    \item 0.26\% compared to 5.6\% for fixing electric shortages
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Questions and New Directions}
+
+\begin{itemize}
+
+\item \textbf{Other impacts}: Do firms enter/exit/move in response to air pollution? Which types?
+  \begin{itemize}
+    \item Does pollution impact the variance of productivity shocks and capital investment decisions of firms?
+    \item Is there evidence of adaptation over time?
+    \item Is there data on labor migration reallocation across space?
+  \end{itemize}
+
+\vspace{2mm}
+
+\item \textbf{Policy}: Can your research recommend more targeted policies?
+  \begin{itemize}
+    \item Are sensitive industries geographically concentrated?
+    \item How far does air pollution travel?
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\end{document} 
