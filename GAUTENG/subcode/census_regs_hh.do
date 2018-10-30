@@ -367,7 +367,7 @@ svmat SUM;
 tostring * , replace force format(%9.2f);
 gen names = "";
 order names, first;
-replace names = "Flushed Toilet" in 1;
+replace names = "Flush Toilet" in 1;
 replace names = "Piped Water in Home" in 2;
 replace names = "Electricity for Cooking" in 3;
 replace names = "Electricity for Heating" in 4;
