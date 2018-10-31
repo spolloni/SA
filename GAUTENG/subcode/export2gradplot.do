@@ -29,7 +29,7 @@ local qry = "
          E.cluster AS cluster_rdp_int,
 
          F.distance AS distance_placebo, F.target_id AS cluster_placebo, F.count AS count_placebo,
-         G.cluster AS cluster_placebo_int, F.placebo_yr AS mode_yr_placebo, GC.RDP_density
+         G.cluster AS cluster_placebo_int, F.placebo_yr AS mode_yr_placebo, GC.RDP_density, CB.cbd_dist
 
   FROM transactions AS A
   JOIN erven AS B ON A.property_id = B.property_id
@@ -48,6 +48,8 @@ local qry = "
 
   LEFT JOIN  gcro AS GC ON D.target_id = GC.cluster
 
+  LEFT JOIN  cbd_dist AS CB ON CB.cluster = GC.cluster
+
   LEFT JOIN (
     SELECT dep.input_id, dep.distance, dep.target_id, 
            COUNT(dep.input_id) AS count, gcro.placebo_yr
@@ -55,7 +57,6 @@ local qry = "
     JOIN gcro on gcro.cluster = dep.target_id
     WHERE dep.distance<=4000
       AND gcro.placebo_yr IS NOT NULL
-      AND gcro.area > .5
     GROUP BY dep.input_id 
     HAVING COUNT(dep.input_id)<=50 
       AND dep.distance == MIN(dep.distance)
