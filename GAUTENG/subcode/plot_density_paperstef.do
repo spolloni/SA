@@ -54,8 +54,8 @@ global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan = 0;
-global graph_plottriplediff    = 1;
+global graph_plotmeans_rawchan = 1;
+global graph_plottriplediff    = 0;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
@@ -442,7 +442,7 @@ if $graph_plotmeans_rawchan == 1 {;
     (bar `2'_`3' D`3',  col(gs0) lw(thick)  ) 
     ,
     xtitle("Distance from project border (meters)",height(5))
-    ytitle("2011-2001 density change (structures per km{superscript:2})",height(5) si(medsmall))
+    ytitle("2012-2001 density change (structures per km{superscript:2})",height(5) si(medsmall))
     xline(0,lw(medthin)lp(shortdash))
     xlabel(`7' , tp(c) labs(small)  )
     ylabel(`8' , tp(c) labs(small)  )
