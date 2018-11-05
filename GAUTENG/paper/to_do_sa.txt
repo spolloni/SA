@@ -1,0 +1,39 @@
+
+10/30/18
+
+Big things:
+
+intro update  
+
+- gonna rewrite later after reading a lot of intros from good papers, and once our results are in and our story is clear
+Cool. 
+	we should mention the harrari paper and other tanzania (?) paper I forget. We’re not gonna have a litt section here so we should def talk about those papers in there. They do a similar analysis to ours, but focus on slum upgrading. Also hararri and maisy wong find no spillovers and mention that explicitely somewhere in their paper.
+
+- Noticed its reframed as “housing outcomes,” but we got person-outcomes too, and I don’t mind framing as urban dev broadly, what you think?
+	I like the broad urban dev framing, but I think we do focus on housing no? So far we dont show person census results and household data is mostly about housing quality / density.
+
+- Bias discussion: Any thoughts on what to talk about there?
+	Some bull crap about people moving to appease matt, but mostly I want to talk about anticipation and how people may behave differently in unconstructed knowing that something might pop-up eventually.
+
+- Person-level regressions (i can put them in) (education, age, employment, etc.) 
+	I dont love these results from what I’ve seen  and I think they are a bait for a sorting discussion that won’t end well on our end.
+
+- Wanna do the CBD heterogeneity in this draft or no?
+	Yes if we can pull it off would be nice, def more excited about that than person regs, although Im starting to feel like im behind and should send something asap.
+
+Little things:
+
+- urls in references are spilling over. Yeah it bothers me as hell havent looked into it yet.
+- Fix map:
+- Put in the big project we took out I kinda want to leave it out, if you look at the rdp properties inside there is not a lot of density and that thing is huge and ugly. Also ignored it for the area means in descriptive stats. Lol ok
+- “Completed” to “constructed”; “uncompleted” to “unconstructed” ugh yes forgot about that. 
+- Census descriptives (and other parts)
+“Flush toilets” not “flushed toilets” (although its definitely funny) LOL oupsie.
+
+
+10/31/18:
+	
+- wrote bias discussion draft; what you think?
+
+
+
