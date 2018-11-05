@@ -283,7 +283,27 @@ y_{ipt} \, = \, \lambda_p + \sum\limits_{d} I^d_{ipt}\Big( \alpha^d D_{pt}C_{p} 
 \noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$ was constructed, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{pt}$, constructed $C_{p}$, and interaction $D_{pt}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. This specification also includes project fixed-effects $\lambda_p$, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
 
 % As will be clear from sections \ref{lol} and \ref{lol}, 
-We interpret the coefficients of interest $\alpha^d$ as the causal impact of subsidized housing on outcome $y$, at distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects. A causal interpretation requires the assumption that absent the completion of a housing project, constructed and unconstructed areas would experience the same changes in outcomes.  
+We interpret the coefficients of interest $\alpha^d$ as the causal impact of subsidized housing on outcome $y$, at distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects.  Interpreting this coefficient as the causal effect of project construction requires the assumption that absent the completion of a housing project, constructed and unconstructed areas would experience the same changes in outcomes.  
+
+One concern would be that the project construction may be driven by changes in local political or economic conditions that may also drive changes in local housing development.  For example, growing neighborhoods may generate greater political resistance to housing projects, delaying project construction despite improvements in local housing.  Alternatively, worsening infrastructure quality in declining neighborhoods may both increase the costs of finishing projects while decreasing local housing conditions.  To the extent that these trends are reflected in average levels of local development, we can evaluate potential sources of endogeneity by comparing baseline characteristics across project areas as in Section~\ref{section:descriptives}.  However, we are unable to test for these factors if changes in local economic and political conditions happen at the same time as project construction.
+
+Another potential concern is that forward-looking households in unconstructed areas may anticipate the eventual construction (or conversion) of these areas and therefore alter their housing investment decisions.  Knowing that these areas may be soon redeveloped, households may choose to construct temporary, informal structures instead of investing in long-term, formal houses.   
+
+Specific versus less specific... ?
+
+
+Given these potential limitations to comparing unconstructed and constructed areas, we also consider a complementary approach that compares nearby areas to areas just further away from project boundaries.  Under the assumption that areas just nearby projects would have evolved in the same way as areas just further away in the absence of the housing project.  
+
+
+
+
+
+
+Anticipation (unconstructed knowing something will pop-up)
+
+Sorting
+
+
 
 \section{Descriptive Statistics}\label{section:descriptives}
 
