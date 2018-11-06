@@ -4,6 +4,8 @@ set scheme s1mono
 set matsize 11000
 set maxvar 32767
 #delimit;
+grstyle init;
+grstyle set imesh, horizontal;
 
 ***************************************;
 *  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
@@ -41,8 +43,8 @@ global LOCAL = 1;
 global bin      = 50;   /* distance bin width for dist regs   */
 global size     = 50;
 global sizesq   = $size*$size;
-global dist_max = 2200;
-global dist_min = -600;
+global dist_max = 1200;
+global dist_min = -400;
 
 global dist_break_reg = 500; /* determines spillover vs control outside of project for regDDD */
 global dist_max_reg = 1500;
@@ -54,8 +56,8 @@ global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan = 1;
-global graph_plottriplediff    = 0;
+global graph_plotmeans_rawchan = 0;
+global graph_plottriplediff    = 1;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
@@ -275,18 +277,18 @@ drop if distance_rdp < $dist_min ; /* get rid of way too close places */
 drop if distance_placebo < $dist_min ;
 
 sum distance_rdp;
-global max = round(ceil(`r(max)'),100);
+global max = round(ceil(`r(max)'),$bin);
 
 egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
 g drdp=dists_rdp;
-replace drdp=. if drdp>=$max-$bin; 
+replace drdp=. if drdp>$max-$bin; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
 replace dists_rdp=`=r(max)' if dists_rdp==. | post==0;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
-replace dplacebo=. if dplacebo>=$max-$bin;
+replace dplacebo=. if dplacebo>$max-$bin;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
 replace dists_placebo=`=r(max)' if dists_placebo==. | post==0;
@@ -341,18 +343,20 @@ if $graph_plotmeans_rdpplac == 1 {;
     keep if _merge==3;
     drop _merge;
 
+    replace D = D + $bin/2;
+
     twoway 
     (connected `2'_`4' D, ms(d) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
     (connected `2'_`3' D, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
     ,
     xtitle("Distance from project border (meters)",height(5))
-    ytitle("Average 2001 density (structures per km{superscript:2})",height(5)si(medsmall))
+    ytitle("Average 2001 density (structures per km{superscript:2})",height(3)si(medsmall))
     xline(0,lw(medthin)lp(shortdash))
     xlabel(`7' , tp(c) labs(small)  )
     ylabel(`8' , tp(c) labs(small)  )
     plotr(lw(medthick ))
     legend(order(2 "`5'" 1 "`6'"  ) symx(6)
-    ring(0) position(`9') bm(tiny) rowgap(small) 
+    ring(0) position(`9') bm(medium) rowgap(small) col(1)
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(`10');;
     graphexportpdf `1', dropeps;
@@ -366,31 +370,31 @@ if $graph_plotmeans_rdpplac == 1 {;
   * plotmeans_pre 
   *   bblu_total_buildings_pre_means total_buildings rdp placebo
   *   "Constructed" "Unconstructed"
-  *   "-500(250)2000" $yl   
+  *   "-400(200)1000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'  
   *   4;
 
   plotmeans_pre 
     bblu_for_pre_means for rdp placebo
     "Constructed" "Unconstructed"
-    "-500(250)2000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
     2;
 
   plotmeans_pre 
     bblu_inf_pre_means inf rdp placebo
     "Constructed" "Unconstructed"
-    "-500(250)2000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
     2;
 
   * plotmeans_pre 
   *   bblu_inf_backyard_pre_means inf_backyard rdp placebo
   *   "Constructed" "Unconstructed"
-  *   "-500(250)2000" "0(1)4" 
+  *   "-400(200)1000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
   *   2;
 
   * plotmeans_pre 
   *   bblu_inf_non_backyard_pre_means inf_non_backyard rdp placebo
   *   "Constructed" "Unconstructed"
-  *   "-500(250)2000" "0(1)4"  
+  *   "-400(200)1000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
   *   2;
 
 };
@@ -434,12 +438,13 @@ if $graph_plotmeans_rawchan == 1 {;
      keep if _merge==3;
      drop _merge;
 
-    gen D`4' = D+10;
-    gen D`3' = D-10;
+    replace D = D + $bin/2;
+    gen D`4' = D+7;
+    gen D`3' = D-7;
 
     twoway 
-    (bar `2'_`4' D`4',  col(maroon) lw(thick) )
-    (bar `2'_`3' D`3',  col(gs0) lw(thick)  ) 
+    (dropline `2'_`4' D`4',  col(maroon) lw(medthick) msiz(small) m(O))
+    (dropline `2'_`3' D`3',  col(gs0) lw(medthick) msiz(small) m(O))
     ,
     xtitle("Distance from project border (meters)",height(5))
     ytitle("2012-2001 density change (structures per km{superscript:2})",height(5) si(medsmall))
@@ -447,8 +452,8 @@ if $graph_plotmeans_rawchan == 1 {;
     xlabel(`7' , tp(c) labs(small)  )
     ylabel(`8' , tp(c) labs(small)  )
     plotr(lw(medthick ))
-    legend(order(2 "`5'" 1 "`6'"  ) symx(6)
-    ring(0) position(`9') bm(tiny) rowgap(small) 
+    legend(order(2 "`5'" 1 "`6'"  ) symx(6) col(1)
+    ring(0) position(`9') bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(`10');;
     graphexportpdf `1', dropeps;
@@ -462,31 +467,31 @@ if $graph_plotmeans_rawchan == 1 {;
   * plotchanges 
   *   bblu_total_buildings_rawchanges total_buildings rdp placebo
   *   "Constructed" "Unconstructed"
-  *   "-500(250)2000" $yl   
+  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'  
   *   4;
 
   plotchanges 
     bblu_for_rawchanges for rdp placebo
     "Constructed" "Unconstructed"
-    "-500(250)2000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
+    "-400(200)1000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   plotchanges 
     bblu_inf_rawchanges inf rdp placebo
     "Constructed" "Unconstructed"
-    "-500(250)2000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
+    "-400(200)1000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   * plotchanges 
   *   bblu_inf_backyard_rawchanges inf_backyard rdp placebo
   *   "Constructed" "Unconstructed"
-  *   "-500(250)2000" "0(1)4" 
+  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
   *   2;
 
   * plotchanges 
   *   bblu_inf_non_backyard_rawchanges inf_non_backyard rdp placebo
   *   "Constructed" "Unconstructed"
-  *   "-500(250)2000" "0(1)4"  
+  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
   *   2;
 
 };
@@ -503,19 +508,21 @@ cap program drop plotregsingle;
 program plotregsingle;
 
   preserve;
-  parmest, fast;
+  parmest, fast le(90);
 
     egen contin = sieve(parm), keep(n);
     destring contin, replace force;
     replace contin=contin+${dist_min};
-    drop if contin>2000;
+    drop if contin>= $dist_max - $bin;
     drop if strpos(parm, "all") >0;
+
+    replace contin = contin + $bin/2;
 
     sort contin;
 
-    global legend1 " 2 "Constructed vs. Unconstructed DD coefficients" ";
+    global legend1 `" 2 "DDD Coefficients" 1 "90% Confidence Intervals" "';
     global graph1 "
-    (rspike max95 min95 contin, lc(gs7) lw(vthin))
+    (rspike max90 min90 contin, lc(gs7) lw(vthin))
     (connected estimate contin, ms(d) msiz(small)
     mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin) )";
     
@@ -525,14 +532,14 @@ program plotregsingle;
     yline(0,lw(thin)lp(shortdash))
     xline(0,lw(thin)lp(shortdash))
     xtitle("Distance from project border (meters)",height(5))
-    ytitle("Structures per km{superscript:2}",height(5))
-    xlabel(-500(250)2000, tp(c) labs(small)  )
+    ytitle("Structures per km{superscript:2}",height(2))
+    xlabel(-400(200)1000, tp(c) labs(small)  )
     ylabel(-1500(500)1500, tp(c) labs(small)  )
     plotr(lw(medthick ))
-    legend(order($legend1) symx(6)
-    ring(0) position(2) bm(tiny) rowgap(small) 
-    colgap(small) size(medsmall) region(lwidth(none)))
-    note("Mean Structures per km{superscript:2}: `=$mean_outcome'  " ,ring(0) position(4))
+    legend(order($legend1) symx(6) col(1)
+    ring(0) position(2) bm(medium) rowgap(small)  
+    colgap(small) size(*.95) region(lwidth(none)))
+    note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
     aspect(.6);
     graphexportpdf `1', dropeps;
   restore;
@@ -545,12 +552,12 @@ foreach level in `r(levels)' {;
   gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
   global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_1600;
+omit dists_all dists_rdp_1500;
 
 foreach var in $outcomes {;
   replace `var' = 400*`var';
   sum `var', detail;
-  global mean_outcome= round(r(mean),.01);
+  global mean_outcome= string(round(r(mean),.01),"%9.2f");
   areg `var' $dists_all , cl(cluster_reg) a(id);
   plotregsingle distplotDDD_bblu_`var'_admin; 
   replace `var' = `var'/400;
