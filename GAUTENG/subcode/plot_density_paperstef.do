@@ -55,9 +55,9 @@ global bblu_query_data  = 0; /* query data */
 global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 0;
-global graph_plottriplediff    = 1;
+global graph_plottriplediff    = 0;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
@@ -358,7 +358,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     legend(order(2 "`5'" 1 "`6'"  ) symx(6)
     ring(0) position(`9') bm(medium) rowgap(small) col(1)
     colgap(small) size(medsmall) region(lwidth(none)))
-    aspect(`10');;
+    aspect(.7);;
     graphexportpdf `1', dropeps;
   restore;
 
@@ -376,13 +376,13 @@ if $graph_plotmeans_rdpplac == 1 {;
   plotmeans_pre 
     bblu_for_pre_means for rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
     2;
 
   plotmeans_pre 
     bblu_inf_pre_means inf rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
     2;
 
   * plotmeans_pre 
@@ -455,7 +455,7 @@ if $graph_plotmeans_rawchan == 1 {;
     legend(order(2 "`5'" 1 "`6'"  ) symx(6) col(1)
     ring(0) position(`9') bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
-    aspect(`10');;
+    aspect(.7);;
     graphexportpdf `1', dropeps;
   restore;
 
@@ -524,7 +524,7 @@ program plotregsingle;
     global graph1 "
     (rspike max90 min90 contin, lc(gs7) lw(vthin))
     (connected estimate contin, ms(d) msiz(small)
-    mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin) )";
+    mlc(gs0) mfc(gs0) lc(gs0) m(o) lp(none) lw(medthin) )";
     
     tw 
     $graph1 
@@ -537,10 +537,10 @@ program plotregsingle;
     ylabel(-1500(500)1500, tp(c) labs(small)  )
     plotr(lw(medthick ))
     legend(order($legend1) symx(6) col(1)
-    ring(0) position(2) bm(medium) rowgap(small)  
+    ring(0) position(2) bm(medium) rowgap(small) 
     colgap(small) size(*.95) region(lwidth(none)))
     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
-    aspect(.6);
+    aspect(.77);
     graphexportpdf `1', dropeps;
   restore;
 end;
