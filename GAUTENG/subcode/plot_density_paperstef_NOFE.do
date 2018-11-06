@@ -178,21 +178,28 @@ end;
 levelsof dists_rdp;
 global dists_all "";
 foreach level in `r(levels)' {;
-  gen dists_rdp_`level' = dists_rdp== `level';
   gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
   gen dists_post_`level' = (dists_rdp == `level' | dists_placebo == `level') & post==1;
+  gen dists_rdp_`level' = dists_rdp== `level';
   gen dists_rdp_post_`level' = dists_rdp == `level'  & post==1;
   global dists_all "dists_all_`level' dists_rdp_`level' dists_post_`level' dists_rdp_post_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_post_1500;
+omit dists_all dists_rdp_post_1500 dists_post_1500 dists_rdp_1500 dists_all_1500 ;
 
 drop if  dists_rdp==. &  dists_placebo ==.;
+
+gen rdp = dists_rdp <= 1500;
+gen rdppost = rdp*post;
+
+global dists_all "rdp rdppost post ${dists_all}";
 
 foreach var in $outcomes {;
   replace `var' = 400*`var';
   sum `var', detail;
   global mean_outcome= string(round(r(mean),.01),"%9.2f");
-  areg `var' $dists_all , cl(cluster_reg) a(cluster_reg);
+  reg `var' $dists_all  ; ///cl(cluster_reg) a(cluster_reg)
+  pause on;
+  pause;
   plotregsingle distplotDDD_bblu_`var'_admin; 
   replace `var' = `var'/400;
 };
