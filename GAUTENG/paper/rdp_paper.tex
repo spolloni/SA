@@ -527,7 +527,9 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
         \label{fig:rawbblumeans}
     \end{figure*} 
 
-The high geographic resolution of our housing density measure allows us to take a more non-parametric approach to estimating the impacts of housing projects on local building density.  This geographic resolution is instrumental in detecting possible spillover effects just outside of housing project boundaries.  Figure~\ref{figure:housecensusexample} in Appendix~\ref{appendix:bblupictures} demonstrates this resolution by depicting all structures within and around an example housing project.  To construct a measure of housing density, we take the average number of houses within a 50 meter by 50 meter grid cell.  Figure~\ref{figure:housedensityexample} in Appendix~\ref{appendix:bblupictures} provides an example of this density measure over a housing project.  Using these measures, we estimate the following equation:
+
+
+The high geographic resolution of our housing density measure allows for a non-parametric approach to estimating the impacts of housing projects on local building density.  This geographic resolution is instrumental in detecting possible spillover effects just outside of housing project boundaries.  Figure~\ref{figure:housecensusexample} in Appendix~\ref{appendix:bblupictures} demonstrates this resolution by depicting all structures within and around an example housing project.  To construct a measure of housing density, we take the average number of houses within a 50m$\times$50m grid cell.  Figure~\ref{figure:housedensityexample} in Appendix~\ref{appendix:bblupictures} provides an example of this density measure over a housing project.  Using these measures, we estimate the following equation:
 \begin{equation}
 \label{equation:bblu}
 y_{ipt} \, = \, \lambda_i + \sum\limits_{d} I^d_{ipt}\Big( \alpha^d D_tC_p \, + \, \beta^dD_t\Big) \, + \, \varepsilon_{ipt}
