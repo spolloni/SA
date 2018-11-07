@@ -111,14 +111,14 @@ g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-*replace dists_rdp=`=r(max)' if dists_rdp==. | post==0;
+replace dists_rdp=`=r(max)' + $bin if dists_rdp==. ;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-*replace dists_placebo=`=r(max)' if dists_placebo==. | post==0;
+replace dists_placebo=`=r(max)' + $bin if dists_placebo==.;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;
@@ -143,7 +143,7 @@ program plotregsingle;
     egen contin = sieve(parm), keep(n);
     destring contin, replace force;
     replace contin=contin+${dist_min};
-    drop if contin>= $dist_max - $bin;
+    drop if contin > $dist_max - $bin;
     keep if strpos(parm, "rdp") >0 &  strpos(parm, "post") >0;
 
     replace contin = contin + $bin/2;
@@ -163,14 +163,14 @@ program plotregsingle;
     xline(0,lw(thin)lp(shortdash))
     xtitle("Distance from project border (meters)",height(5))
     ytitle("Structures per km{superscript:2}",height(2))
-    xlabel(-400(200)1000, tp(c) labs(small)  )
-    ylabel(-1500(500)1500, tp(c) labs(small)  )
+    xlabel(-400(200)1200, tp(c) labs(small)  )
+    ylabel(-1200(400)1200, tp(c) labs(small)  )
     plotr(lw(medthick ))
     legend(order($legend1) symx(6) col(1)
     ring(0) position(2) bm(medium) rowgap(small)  
     colgap(small) size(*.95) region(lwidth(none)))
     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
-    aspect(.6);
+    aspect(.77);
     graphexportpdf `1', dropeps;
   restore;
 end;
@@ -178,17 +178,17 @@ end;
 levelsof dists_rdp;
 global dists_all "";
 foreach level in `r(levels)' {;
-  gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
+  gen dists_all_`level' = (dists_rdp == `level'  | dists_placebo == `level');
   gen dists_post_`level' = (dists_rdp == `level' | dists_placebo == `level') & post==1;
   gen dists_rdp_`level' = dists_rdp== `level';
   gen dists_rdp_post_`level' = dists_rdp == `level'  & post==1;
   global dists_all "dists_all_`level' dists_rdp_`level' dists_post_`level' dists_rdp_post_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_post_1500 dists_post_1500 dists_rdp_1500 dists_all_1500 ;
+omit dists_all dists_rdp_post_1550 dists_post_1550 dists_rdp_1550 dists_all_1550 ;
 
 drop if  dists_rdp==. &  dists_placebo ==.;
 
-gen rdp = dists_rdp <= 1500;
+gen rdp = dists_rdp <= $dist_max - $bin +`=abs($dist_min)' & dists_rdp!=.;
 gen rdppost = rdp*post;
 
 global dists_all "rdp rdppost post ${dists_all}";
@@ -197,9 +197,7 @@ foreach var in $outcomes {;
   replace `var' = 400*`var';
   sum `var', detail;
   global mean_outcome= string(round(r(mean),.01),"%9.2f");
-  reg `var' $dists_all  ; ///cl(cluster_reg) a(cluster_reg)
-  pause on;
-  pause;
+  reg `var' $dists_all, cl(cluster_reg)  ; /// a(cluster_reg)
   plotregsingle distplotDDD_bblu_`var'_admin; 
   replace `var' = `var'/400;
 };
