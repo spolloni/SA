@@ -55,9 +55,9 @@ global bblu_query_data  = 0; /* query data */
 global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 0;
-global graph_plottriplediff    = 0;
+global graph_plottriplediff    = 1;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
@@ -284,14 +284,14 @@ g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)' if dists_rdp==. | post==0;
+replace dists_rdp=`=r(max)'+ $bin if dists_rdp==. | post==0;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)' if dists_placebo==. | post==0;
+replace dists_placebo=`=r(max)'+ $bin if dists_placebo==. | post==0;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;
@@ -473,13 +473,13 @@ if $graph_plotmeans_rawchan == 1 {;
   plotchanges 
     bblu_for_rawchanges for rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
+    "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   plotchanges 
     bblu_inf_rawchanges inf rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
+    "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   * plotchanges 
@@ -513,7 +513,7 @@ program plotregsingle;
     egen contin = sieve(parm), keep(n);
     destring contin, replace force;
     replace contin=contin+${dist_min};
-    drop if contin>= $dist_max - $bin;
+    drop if contin > $dist_max - $bin;
     drop if strpos(parm, "all") >0;
 
     replace contin = contin + $bin/2;
@@ -533,7 +533,7 @@ program plotregsingle;
     xline(0,lw(thin)lp(shortdash))
     xtitle("Distance from project border (meters)",height(5))
     ytitle("Structures per km{superscript:2}",height(2))
-    xlabel(-400(200)1000, tp(c) labs(small)  )
+    xlabel(-400(200)1200, tp(c) labs(small)  )
     ylabel(-1500(500)1500, tp(c) labs(small)  )
     plotr(lw(medthick ))
     legend(order($legend1) symx(6) col(1)
@@ -552,7 +552,7 @@ foreach level in `r(levels)' {;
   gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
   global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_1500;
+omit dists_all dists_rdp_1550;
 
 foreach var in $outcomes {;
   replace `var' = 400*`var';
