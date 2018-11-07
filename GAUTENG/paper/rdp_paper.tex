@@ -281,16 +281,16 @@ Our final data source consists of hand-coded building surveys derived from high-
 To estimate the urban development impacts of subsidized housing both within project boundaries as well as nearby, we implement a difference-in-differences strategy assessing changes in outcomes for constructed projects, using unconstructed projects as counterfactuals. Given the varying temporal and spatial granularities of our measured outcomes, we estimate different forms of the following specification:
 
 \begin{equation}
-y_{ipt} \, = \, \lambda_p + \sum\limits_{d} I^d_{ipt}\Big( \alpha^d D_{pt}C_{p} \, + \, \beta^dD_{pt} \, + \, \gamma^dC_{p} \, + \, \theta^{pt} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
+y_{ipt} \, = \, \lambda_p + \sum\limits_{d} I^d_{ipt}\Big( \alpha^d D_{pt}C_{p} \, + \, \beta^dD_{pt} \, + \, \gamma^dC_{p} \, + \, \theta^{d} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
 \end{equation}
 
 % $D_{pt}$ and $C_{p}$ are post and treatment dummies, where 
 \noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$'s assigned construction date, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{pt}$, constructed $C_{p}$, and interaction $D_{pt}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. This specification also includes project fixed-effects $\lambda_p$, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach therefore allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
 
 % As will be clear from sections \ref{lol} and \ref{lol}, 
-We interpret the coefficients of interest $\alpha^d$ as the causal impact of subsidized housing on outcome $y$, at distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects.  Interpreting this coefficient as the causal effect of project construction requires the assumption that absent the completion of a housing project, constructed and unconstructed areas would experience the same changes in outcomes.  
+We interpret the coefficients of interest $\alpha^d$ as the causal impact of subsidized housing on outcome $y$, at distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects.  A causal interpretation requires the assumption that absent the completion of a housing project, constructed and unconstructed areas would experience the same changes in outcomes.  
 
-One concern would be that project construction may be impacted by changes in local political or economic conditions that may also drive local housing development.  For example, growing neighborhoods may generate greater political resistance to housing projects, delaying project construction despite improvements in local housing.  Alternatively, worsening infrastructure quality may both increase the costs of finishing projects while also worsening local housing conditions.  To the extent that these trends are reflected in average levels of local charateristics, we can evaluate potential sources of endogeneity by comparing baseline characteristics across constructed and unconstructed areas as in Section~\ref{section:descriptives}.  However, we are unable to test for these factors if changes in local economic and political conditions happen at the same time as project construction.
+One concern would be that project construction may be impacted by changes in local political or economic conditions that may also drive local housing development.  For example, growing neighborhoods may generate greater political resistance to housing projects, delaying project construction despite improvements in local housing.  Alternatively, worsening infrastructure quality may both increase the costs of finishing projects while also worsening local housing conditions.  To the extent that these trends are reflected in average levels of local characteristics, we can evaluate potential sources of endogeneity by comparing baseline characteristics across constructed and unconstructed areas as in Section~\ref{section:descriptives}.  However, we are unable to test for these factors if changes in local economic and political conditions happen at the same time as project construction.
 
 Another potential concern is that forward-looking households in unconstructed areas may anticipate investments in these areas and alter their housing investment decisions accordingly.  For example, squatter households may be more likely to construct temporary, informal structures or locate elsewhere rather than invest in long-term dwellings in these areas.  In this case, comparisons between constructed and uncontructed areas would overestimate the role of project construction in boosting formal housing development.  Similarly, nearby housing markets may anticipate projects by either appreciating or depreciating in advance (depending on the amenity value of the projects).  We are able to empirically examine these anticipatory effects to some extent by observing dynamics in housing prices around the construction date.  For most measures, we compare changes in outcomes over 10 years so that our baseline time-period is likely occur before households are able to anticipate project construction.  This long-term comparison helps to ensure that anticipatory effects play a minimal role in biasing results.
 
@@ -328,7 +328,7 @@ Distance to CBD$^\ddagger$ (km) &  30.38  &     32.92   \\
 % This figure includes the northern half of housing projects.
 % \end{figure}
 
-To contextualize our main analysis, we first provide descriptive evidence on the location, size, and surrounding housing stock of our 133 sampled housing projects. Table~\ref{table:projectdescriptives} reveals that constructed projects provide generous quantities of housing, delivering on average more than 850 new units per project. Constructed projects are also substantially larger in area than unconstructed projects. As mentionned in section \ref{section:data}, these discrepancies may be due to many unconstructed projects representing smaller planned extensions to previously implemented projects. \iffalse It may also reflect that larger land plots are first targeted by housing authorities to maximize delivery.\fi Though unconstructed projects are located in slighty more remote locations, both types of projects impose long commutes on residents, as measured by the average distance to central business districts. These distances are consistent with housing authorities targeting inexpensive, vacant land for these projects. Finally, prices for non-subsidized housing in the vicinity of project boundaries are slightly lower for unconstructed projects, perhaps driven in part by their more distant locations.
+To contextualize our main analysis, we first provide descriptive evidence on the location, size, and surrounding housing stock of our 133 sampled housing projects. Table~\ref{table:projectdescriptives} reveals that constructed projects provide generous quantities of housing, delivering on average more than 850 new units per project. Constructed projects are also substantially larger in area than unconstructed projects. As mentioned in section \ref{section:data}, these discrepancies may be due to many unconstructed projects representing smaller planned extensions to previously implemented projects. \iffalse It may also reflect that larger land plots are first targeted by housing authorities to maximize delivery.\fi Though unconstructed projects are located in slightly more remote locations, both types of projects impose long commutes on residents, as measured by the average distance to central business districts. These distances are consistent with housing authorities targeting inexpensive, vacant land for these projects. Finally, prices for non-subsidized housing in the vicinity of project boundaries are slightly lower for unconstructed projects, perhaps driven in part by their more distant locations.
 
 Next, we turn to household census data to assess how both types of projects differ in terms of dwelling characteristics prior to project construction. We identify census small areas as pertaining to a housing project when over 30\% of their land areas overlaps with a project boundary.\footnote{Our census geography selection method is depicted in more detail in figure \ref{figure:bufferdesigncensus}.} This procedure results in 1,207 small areas containing a total of 258,502 households. Table \ref{table:projectdescriptivescensus} compares various indicators for these households on the basis of whether they live within the boundaries of a constructed (first column) or planned but unconstructed project (second column). As a reference, the third column provides averages for every variable using the entire sample of Gauteng households. 
 
@@ -346,25 +346,6 @@ Next, we turn to household census data to assess how both types of projects diff
 \end{table}
 
 A clear takeaway from table \ref{table:projectdescriptivescensus} is that dwelling quality at baseline for both constructed and unconstructed project areas is far worse than the average Gauteng dwel\-ling. Given the quality of land plots that were targeted by this policy, we expect project areas to lag behind other areas, and reflect more precarious housing conditions. We find that access to sanitation, water and electricity are between 25 and 50\% lower in both types of project areas relative to the province as a whole. Comparing constructed to unconstructed projects, we find no systematic differences in dwelling quality. While constructed areas are more likely to have flush toilets, electricity for lighting, and a larger number of rooms, households in unconstructed areas report having better access to piped water and electricity for eating and cooking. Despite some similarities between averages in constructed and unconstructed areas, a simple t-test rejects the null hypothesis that means are equal for every tabulated variable.
-
-We also examine how average land-use patterns vary across unconstructed and constructed project areas using the building-based density measures described in section \ref{section:data:bblu}.  To better understand how land-use depends on proximity to housing projects, we calculate the distance from the centroid of each 50m$\times$50m grid-cell to the nearest project boundary, assigning negative distances to grid-cells within project boundaries.  We then compute the average density for 50m distance bins, reported in terms of structures per kilometer.  Figures \ref{fig:prefor} and \ref{fig:preinf} respectively plot average densities of formal and informal houses in the pre-period according to distance to the nearest project boundary.
-
-Focusing on formal housing density in Figure \ref{fig:prefor}, we find low densities of formal housing within both unconstructed and constructed project areas. This finding is consistent with governments locating projects on relatively vacant land.\footnote{Greater negative distances exclude smaller projects in computing average density, which may account for some of the variation in building density within projects.  Appendix~\ref{projectcounts} describes this compositional change in more detail.}  Moving from inside to outside project boundaries, formal housing density jumps discontinuously at these boundaries and quickly stabilizes at a higher level across positive distances.  Figure \ref{fig:preinf} reports an inverse pattern for informal housing, finding high levels of informal housing within project areas that discontinuously decline just outside of the boundaries.  
-
-We find relatively flat trends in housing density moving further outside of boundaries across all possible categories (constructed and unconstructed projects as well as formal and informal housing densities).  This cross-sectional evidence already suggests that living next to project areas at baseline (with high relative densities of informal dwellings) may not have strong effects on local development; if vacant land acts as a negative amenity, we would have expected to see much lower housing densities just nearby project boundaries.  From an empirical perspective, similar levels of baseline densities near and far from boundaries provide suggestive evidence that these housing markets were following similar trajectories before the designation of projects.  This finding supports our identification strategy of attributing differential changes with respect to project proximity to the spillover effects of housing projects.  Similar logic applies for comparing constructed and unconstructed projects: their almost identical density patterns at baseline support the assumption that later deviations in housing markets between constructed and unconstructed areas are solely due to project completion.
-
-Figures \ref{fig:forchange} and \ref{fig:infchange} extend this exercise by plotting average changes in building densities between 2001 and 2012.  Tall black bars at negative distances in Figure \ref{fig:forchange} show increases in the density of formal housing of around 1,000 structures per $\text{km}^{2}$ within constructed project areas.  Compared to a baseline mean density of close to 400 structures per $\text{km}^{2}$ in Figure \ref{fig:prefor}, this shift represents a nearly 250\% increase within project areas.  Captured by the red bars in Figure \ref{fig:forchange}, unconstructed areas also experience increases in formal housing density, but at much smaller rates than in constructed areas.  Importantly, increases at negative distances for unconstructed areas resemble increases outside of project areas in magnitude, which is consistent with a broad, secular expansion in housing.  At positive distances, changes in constructed and unconstructed formal densities are almost overlapping.  This result previews our empirical analysis by showing little evidence of any spillover effects on neighboring formal housing markets.
-
-Figure \ref{fig:infchange} compares changes in informal building density relative to distance to project boundary.  We observe large increases in informal density within project boundaries (at negative distances) for both constructed and unconstructed project areas.  At some distances, unconstructed areas appear to overtake constructed areas in informal housing growth.  Moving outside of project boundaries, constructed areas experience larger increases in informal density than unconstructed areas although these increases do not appear to be concentrated just nearby project boundaries.  This absence of differential trends with distance previews a similar absence of spillover effects for informal housing densities explored further in the empirical analysis.  Relative to baseline levels in Figure \ref{fig:preinf}, informal housing increases are large, increasing by at least 50\% across all distances and nearly doubling in some cases.
-
-%The findings in this section suggest both that (1) governments select low-cost land to implement projects and (2) the decision to finish project construction does not appear to be strongly correlated with pre-existing levels of development in the project areas.  
-%At least in terms of building composition, density, and value, unconstructed projects seem to provide a better comparison group for constructed projects than simply examining nearby areas. 
-
-%Average densities within project areas appear display substantial variation with distance especially for unconstructed projects, 
-
-%We also observe some variation in average densities within project areas  especially for unconstructed 
-
-
 
 \begin{figure*}[t!]
         \centering
@@ -403,7 +384,29 @@ Figure \ref{fig:infchange} compares changes in informal building density relativ
             \label{fig:infchange}
         \end{subfigure}
         \label{fig:rawbblumeans}
+        \vspace{-6mm}
     \end{figure*} 
+
+We also examine how average land-use patterns vary across unconstructed and constructed project areas using the building-based density measures described in section \ref{section:data:bblu}.  To better understand how land-use depends on proximity to housing projects, we calculate the distance from the centroid of each 50m$\times$50m grid-cell to the nearest project boundary, assigning negative distances to grid-cells within project boundaries.  We then compute the average density for 50m distance bins, reported in terms of structures per kilometer.  Figures \ref{fig:prefor} and \ref{fig:preinf} respectively plot average densities of formal and informal houses in the pre-period according to distance to the nearest project boundary.
+
+Focusing on formal housing density in Figure \ref{fig:prefor}, we find low densities of formal housing within both unconstructed and constructed project areas. This finding is consistent with governments locating projects on relatively vacant land.\footnote{Greater negative distances exclude smaller projects in computing average density, which may account for some of the variation in building density within projects.  Appendix~\ref{projectcounts} describes this compositional change in more detail.}  Moving from inside to outside project boundaries, formal housing density jumps sharply at these boundaries and quickly stabilizes at a higher level across positive distances.  Figure \ref{fig:preinf} reports an inverse pattern for informal housing, finding high levels of informal housing within project areas that discontinuously decline just outside of the boundaries.  
+
+We find relatively flat trends in housing density moving further outside of boundaries across all possible categories (constructed and unconstructed projects as well as formal and informal housing densities).  This cross-sectional evidence already suggests that living next to project areas at baseline (with high relative densities of informal dwellings) may not have strong effects on local development; if vacant land acts as a negative amenity, we would have expected to see much lower housing densities just nearby project boundaries.  From an empirical perspective, similar levels of baseline densities near and far from boundaries provide suggestive evidence that these housing markets were following similar trajectories before the designation of projects.  This finding supports our identification strategy of attributing differential changes with respect to project proximity to the spillover effects of housing projects.  Similar logic applies for comparing constructed and unconstructed projects: their almost identical density patterns at baseline support the assumption that later deviations in housing markets between constructed and unconstructed areas are solely due to project completion.
+
+Figures \ref{fig:forchange} and \ref{fig:infchange} extend this exercise by plotting average changes in building densities between 2001 and 2012.  Tall black bars at negative distances in Figure \ref{fig:forchange} show increases in the density of formal housing of around 1,000 structures per $\text{km}^{2}$ within constructed project areas.  Compared to a baseline mean density of close to 400 structures per $\text{km}^{2}$ in Figure \ref{fig:prefor}, this shift represents a nearly 250\% increase within project areas.  Captured by the red bars in Figure \ref{fig:forchange}, unconstructed areas also experience increases in formal housing density, but at much smaller rates than in constructed areas.  Importantly, increases at negative distances for unconstructed areas resemble increases outside of project areas in magnitude, which is consistent with a broad, secular expansion in housing.  At positive distances, changes in constructed and unconstructed formal densities are almost overlapping.  This result previews our empirical analysis by showing little evidence of any spillover effects on neighboring formal housing markets.
+
+Figure \ref{fig:infchange} compares changes in informal building density relative to distance to project boundary.  We observe large increases in informal density within project boundaries (at negative distances) for both constructed and unconstructed project areas.  At some distances, unconstructed areas appear to overtake constructed areas in informal housing growth.  Moving outside of project boundaries, constructed areas experience larger increases in informal density than unconstructed areas although these increases do not appear to be concentrated just nearby project boundaries.  This absence of differential trends with distance previews a similar absence of spillover effects for informal housing densities explored further in the empirical analysis.  Relative to baseline levels in Figure \ref{fig:preinf}, informal housing increases are large, increasing by at least 50\% across all distances and nearly doubling in some cases.
+
+%The findings in this section suggest both that (1) governments select low-cost land to implement projects and (2) the decision to finish project construction does not appear to be strongly correlated with pre-existing levels of development in the project areas.  
+%At least in terms of building composition, density, and value, unconstructed projects seem to provide a better comparison group for constructed projects than simply examining nearby areas. 
+
+%Average densities within project areas appear display substantial variation with distance especially for unconstructed projects, 
+
+%We also observe some variation in average densities within project areas  especially for unconstructed 
+
+
+
+
  
 
 
@@ -425,7 +428,7 @@ y_{hpt} \, = \, \lambda_p + \sum\limits_{e} I^e_{hpt}\Big( \alpha^e D_tC_p \, + 
 \end{equation*}
 $y_{hpt}$ measures the outcome for household $h$ living in the vicinity of project $p$, observed in census year $t$.  $I^e_{hpt}$=1 if household $h$ is in the exposure area $e$ of project $p$.  Exposure area $e$ includes (1) {\it project areas} defined as census blocks that overlap over 30\% of their area with a housing project and (2) {\it spillover areas} defined as census blocks with less than 30\% area of overlap but whose centroids still fall within 1.5 km of a project boundary.  Appendix Figure~\ref{figure:bufferdesigncensus} maps an example of the project and spillover definitions.  The summation includes a standard difference-in-differences specification for each exposure area where $D_{t}\,\,$=1 if year $t$ is census year 2011 (post period) and $C_{p}\,\,$=1 if project $p$ has been constructed.  $\lambda_p$ includes a project fixed-effect to control for fixed differences between project areas that may be correlated with local demographic changes.  
 
-The coefficients of interest are $\alpha^e$, which measure the differential changes in outcomes for constructed relative to unconstructed projects (either for the project or spillover areas).  Interpreting this ceofficient as the causal effect of housing projects requires assuming that the areas within and nearby constructed projects would have evolved in the same way as corresponding areas for unconstructed projects in the absence of the program.  Descriptive evidence from Section~\ref{section:descriptives} finds some mean differences at baseline between constructed and unconstructed projects, which would likely bias any cross-sectional comparisons between projects. 
+The coefficients of interest are $\alpha^e$, which measure the differential changes in outcomes for constructed relative to unconstructed projects (either for the project or spillover areas).  A causal interpretation requires assuming that the areas within and nearby constructed projects would have evolved in the same way as corresponding areas for unconstructed projects in the absence of the program.  Descriptive evidence from Section~\ref{section:descriptives} finds some mean differences at baseline between constructed and unconstructed projects, which would likely bias any cross-sectional comparisons between projects. 
 
 % One potential concern is that whether a project is ultimately constructed depends on changes in the local housing market as well as local economic and political conditions, which may separately drive changes in census outcomes.  For example, residents of quickly growing neighborhoods may be more likely to petition local governments to stall or stop housing projects.  Similarly, it may be easier to finish housing projects in areas where informal housing grows slowly.  Both of these factors may lead this approach to overestimate the impacts of public housing.  At the same time, the extent to which constructed projects are misclassified as unconstructed would lead this approach to underestimate the true effects of this program.
 
@@ -483,7 +486,7 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering
             \caption[]{Total Buildings}  
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={0cm .8cm 0cm .6cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
             \label{fig:DDDtotal}
         \end{subfigure}
         \hfill
@@ -491,15 +494,15 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering 
             \caption[]{Formal Buildings}
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={0cm .8cm 0cm .6cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
             \label{fig:DDDformal}
         \end{subfigure}
-        \vskip 1mm \vskip 0pt
+        \vskip -1mm \vskip 0pt
         \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \caption[]{Informal Buildings}
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={0cm .8cm 0cm .6cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
             \label{fig:DDDinformal}
         \end{subfigure}
         \hfill
@@ -507,15 +510,15 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering
             \caption[]{Backyard Informal Buildings}  
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={0cm .8cm 0cm .6cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
             \label{fig:DDDbackyard}
         \end{subfigure}
-        \vskip 1mm \vskip 0pt
+        \vskip -1mm \vskip 0pt
         \begin{subfigure}[b]{.49\textwidth}  
             \centering
             \caption[]{Non-Backyard Informal Buildings} 
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={0cm .8cm 0cm .6cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
             \label{fig:DDDnonbackyard}
         \end{subfigure}
         \hfill \hspace{.02\textwidth}
