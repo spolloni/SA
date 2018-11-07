@@ -170,7 +170,7 @@ program plotregsingle;
     ring(0) position(2) bm(medium) rowgap(small)  
     colgap(small) size(*.95) region(lwidth(none)))
     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
-    aspect(.77);
+    aspect(.72);
     graphexportpdf `1', dropeps;
   restore;
 end;
