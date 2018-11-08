@@ -24,7 +24,7 @@
 
 % COLUMN TYPES
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
-\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
 % MARGINS AND SPACING
@@ -528,7 +528,21 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
         {\small Difference-in-differences coefficients for five density outcomes: (a) total housing, (b) formal housing, (c) informal housing, (d) backyard informal housing and (e) non-backyard informal housing.  } 
 		\end{minipage}
         \label{fig:rawbblumeans}
-    \end{figure*} 
+    \end{figure*}
+
+
+\begin{table}[]
+\small
+\centering
+\caption{Triple Difference Estimates }\label{table:DDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCCC}
+\toprule
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Backyard Housing & \small Non-Bkyrd Housing \\ \midrule 
+\input{figures/bblu_regDDD}
+\bottomrule
+\end{tabular}
+\end{table}
 
 The high geographic resolution of our housing density measure allows us to take a more non-parametric approach to estimating the impacts of housing projects on local building density.  This geographic resolution is instrumental in detecting possible spillover effects just outside of housing project boundaries.  Figure~\ref{figure:housecensusexample} in Appendix~\ref{appendix:bblupictures} demonstrates this resolution by depicting all structures within and around an example housing project.  To construct a measure of housing density, we take the average number of houses within a 50 meter by 50 meter grid cell.  Figure~\ref{figure:housedensityexample} in Appendix~\ref{appendix:bblupictures} provides an example of this density measure over a housing project.  Using these measures, we estimate the following equation:
 \begin{equation}
@@ -673,6 +687,15 @@ Density is measured in structures per $\text{km}^{2}$.
 \caption*{\footnotesize {\bf Note:} We consider every census small areas whose centroid fall within 1500m of a project boundary. We denote small areas with over 30\% area overlap with project boundaries as "project" small areas, and use household responses within these geographies to capture dwelling characteristics inside project boundaries. All remaining small areas are denoted as "spillover" geographies, and are used to capture dwelling characteristics nearby.}
 \end{figure}
 
+
+\pagebreak
+\subsection{Project Counts}
+
+\begin{figure}[h!]
+\caption{Buffer Design for Census Small Areas}\label{figure:bufferdesigncensus}
+\centering
+\includegraphics[scale=1.2,trim={.75cm .4cm .75cm 1cm,clip=true}]{figures/projectcounts.pdf}
+\end{figure}
 
 
 
