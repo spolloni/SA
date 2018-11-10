@@ -106,11 +106,15 @@ local qry = "
     LEFT JOIN (
       SELECT sal_code, area_int AS area_int_rdp 
       FROM int_rdp_sal_2001
+      GROUP BY sal_code
+      HAVING area_int_rdp = MAX(area_int_rdp)
     ) AS IR ON IR.sal_code = A.SAL
 
     LEFT JOIN (
       SELECT sal_code, area_int AS area_int_placebo 
       FROM int_placebo_sal_2001
+      GROUP BY sal_code
+      HAVING area_int_placebo = MAX(area_int_placebo)
     ) AS IP ON IP.sal_code = A.SAL
 
     LEFT JOIN area_sal_2001 AS QQ ON QQ.sal_code = A.SAL
@@ -156,11 +160,15 @@ local qry = "
     LEFT JOIN (
       SELECT sal_code, area_int AS area_int_rdp
       FROM int_rdp_sal_2011
+      GROUP BY sal_code
+      HAVING area_int_rdp = MAX(area_int_rdp)
     ) AS IR ON IR.sal_code = A.SAL_CODE
 
     LEFT JOIN (
       SELECT sal_code, area_int AS area_int_placebo 
       FROM int_placebo_sal_2011
+      GROUP BY sal_code
+      HAVING area_int_placebo = MAX(area_int_placebo)
     ) AS IP ON IP.sal_code = A.SAL_CODE
 
     LEFT JOIN area_sal_2011 AS QQ ON QQ.sal_code = A.SAL_CODE
