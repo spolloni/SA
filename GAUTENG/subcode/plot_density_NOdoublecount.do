@@ -588,8 +588,6 @@ replace dists_rdp_het = `=r(max)' if het == 0;
        areg `var' b1100.dists_rdp_no_het b1100.dists_placebo b1100.dists_rdp_het, cl(cluster_reg) a(id);
     restore;
    plotreg distplot_bblu_`var'_het_admin  dists_rdp_no_het dists_placebo dists_rdp_het ; 
-   pause on;
-   pause;
  };
 
 };
