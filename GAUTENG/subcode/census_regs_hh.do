@@ -436,7 +436,6 @@ drop if others==1;
 omit regressors spillover others_post;
 };
 
-
 global outcomes1 "
   toilet_flush 
   water_inside 
@@ -534,16 +533,6 @@ estout $outcomes using census_hh_DDregs.tex, replace
     )
   )
   starlevels( * 0.10 ** 0.05 *** 0.01) ;
-
-
-
-
-
-* esttab $outcomes1 $outcomes2 hh_density pop_density using census_hh_DDregs_admin_2,
-*   replace  b(%12.3fc) se(%12.3fc) r2(%12.3fc) r2 tex label
-*   mtitles("Flush Toilet" "Water Inside" "Water Utility" "Own House" "Single House" "Elec. Cooking" "Elec. Heating" "Elec. Lighting" "HH Density" "Pop. Density")
-*   star(* 0.10 ** 0.05 *** 0.01)  stats(N Mean2001 Mean2011)
-*   compress;
 
 
 };

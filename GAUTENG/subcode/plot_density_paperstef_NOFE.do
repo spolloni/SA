@@ -27,13 +27,25 @@ program define omit;
 
 end;
 
+cap program drop remove;
+program define remove;
+
+  local original ${`1'};
+  local temp1 `0';
+  local temp2 `1';
+  local except: list temp1 - temp2;
+  local new: list original - except;
+  global `1' `new';
+
+end;
+
 ******************;
 *  PLOT DENSITY  *;
 ******************;
 
 * SET OUTPUT;
-*global output = "Output/GAUTENG/bbluplots";
-global output = "Code/GAUTENG/paper/figures";
+global output = "Output/GAUTENG/bbluplots";
+*global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
@@ -192,7 +204,7 @@ foreach level in `r(levels)' {;
   gen dists_rdp_post_`level' = dists_rdp == `level'  & post==1;
   global dists_all "dists_all_`level' dists_rdp_`level' dists_post_`level' dists_rdp_post_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_post_1550 dists_post_1550 dists_rdp_1550 dists_all_1550 ;
+omit dists_all dists_rdp_post_1550 dists_post_1550 dists_rdp_1550 dists_all_1550;
 
 drop if  dists_rdp==. &  dists_placebo ==.;
 

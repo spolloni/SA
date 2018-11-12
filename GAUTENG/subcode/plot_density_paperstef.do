@@ -57,8 +57,8 @@ global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 0;
-global graph_plotmeans_cntproj = 1;
-global graph_plottriplediff    = 0;
+global graph_plotmeans_cntproj = 0;
+global graph_plottriplediff    = 1;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
