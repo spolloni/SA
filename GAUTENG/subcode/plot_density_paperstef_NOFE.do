@@ -98,11 +98,18 @@ use bbluplot_reg_admin_$size, clear;
 cd ../..;
 cd $output ;
 
-drop if distance_rdp > $dist_max & distance_rdp<.; /* get rid of far away places */
-drop if distance_placebo > $dist_max & distance_placebo<.;
+replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
+replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
 
-drop if distance_rdp < $dist_min ; /* get rid of way too close places */
-drop if distance_placebo < $dist_min ;
+replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
+replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+
+drop if distance_rdp == . & distance_placebo == .;
+drop if cluster_rdp == . & cluster_placebo == .;
 
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
