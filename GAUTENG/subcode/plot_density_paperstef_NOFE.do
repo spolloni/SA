@@ -27,6 +27,18 @@ program define omit;
 
 end;
 
+cap program drop remove;
+program define remove;
+
+  local original ${`1'};
+  local temp1 `0';
+  local temp2 `1';
+  local except: list temp1 - temp2;
+  local new: list original - except;
+  global `1' `new';
+
+end;
+
 ******************;
 *  PLOT DENSITY  *;
 ******************;
@@ -46,15 +58,16 @@ global sizesq   = $size*$size;
 global dist_max = 1200;
 global dist_min = -400;
 
-global dist_break_reg = 500; /* determines spillover vs control outside of project for regDDD */
-global dist_max_reg = 1500;
-global dist_min_reg = -500;
+global dist_break_reg1 = 400; 
+* global dist_break_reg2 = 800; 
+global dist_max_reg = 1200;
+global dist_min_reg = -400;
 
 * DOFILE SECTIONS;
 global bblu_do_analysis = 1; /* do analysis */
-global graph_plottriplediff    = 1;
 
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global graph_plottriplediff = 0;
+global reg_triplediff = 1;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -97,11 +110,18 @@ use bbluplot_reg_admin_$size, clear;
 cd ../..;
 cd $output ;
 
-drop if distance_rdp > $dist_max & distance_rdp<.; /* get rid of far away places */
-drop if distance_placebo > $dist_max & distance_placebo<.;
+replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
+replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
 
-drop if distance_rdp < $dist_min ; /* get rid of way too close places */
-drop if distance_placebo < $dist_min ;
+replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
+replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+
+drop if distance_rdp == . & distance_placebo == .;
+drop if cluster_rdp == . & cluster_placebo == .;
 
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
@@ -184,7 +204,7 @@ foreach level in `r(levels)' {;
   gen dists_rdp_post_`level' = dists_rdp == `level'  & post==1;
   global dists_all "dists_all_`level' dists_rdp_`level' dists_post_`level' dists_rdp_post_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_post_1550 dists_post_1550 dists_rdp_1550 dists_all_1550 ;
+omit dists_all dists_rdp_post_1550 dists_post_1550 dists_rdp_1550 dists_all_1550;
 
 drop if  dists_rdp==. &  dists_placebo ==.;
 
@@ -201,6 +221,82 @@ foreach var in $outcomes {;
   plotregsingle distplotDDD_bblu_`var'_admin; 
   replace `var' = `var'/400;
 };
+
+};
+************************************************;
+************************************************;
+************************************************;
+
+************************************************;
+* 3.2 *** MAKE TRIPLE DIFFERENCE TABLES HERE ***;
+************************************************;
+if $reg_triplediff == 1 {;
+
+foreach v in rdp placebo {;
+  g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min;
+  replace dists_`v'_g = 2 if dists_`v' >= 0 - $dist_min & dists_`v' < $dist_break_reg1 - $dist_min  ;
+  replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg1 - $dist_min  & dists_`v' < $dist_max_reg - $dist_min;
+  replace dists_`v'_g = 4 if dists_`v' >= $dist_max_reg - $dist_min;
+  * replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg1 - $dist_min  & dists_`v' < $dist_break_reg2 - $dist_min  ;
+  * replace dists_`v'_g = 4 if dists_`v' >= $dist_break_reg2 - $dist_min & dists_`v' < $dist_max_reg - $dist_min;
+  * replace dists_`v'_g = 5 if dists_`v' >= $dist_max_reg - $dist_min;
+};
+
+levelsof dists_rdp_g;
+global dists_all_g "";
+foreach level in `r(levels)' {;
+
+  gen dists_all_g_`level'  = (dists_rdp_g == `level' | dists_placebo_g == `level');
+  gen dists_post_g_`level' = (dists_rdp_g == `level' | dists_placebo_g == `level') & post==1;
+  gen dists_rdp_g_`level'  = dists_rdp_g== `level';
+  gen dists_rdp_post_g_`level'  = dists_rdp_g== `level' & post==1;
+  
+  global dists_all_g 
+    "dists_all_g_`level' dists_post_g_`level' 
+     dists_rdp_g_`level' dists_rdp_post_g_`level' ${dists_all_g}"; 
+};
+
+omit dists_all_g dists_all_g_3 dists_post_g_3 dists_rdp_g_3 dists_rdp_post_g_3;
+* omit dists_all_g dists_all_g_4 dists_post_g_4 dists_rdp_g_4 dists_rdp_post_g_4;
+
+drop if  dists_rdp==. &  dists_placebo ==.;
+
+gen rdp = dists_rdp <= $dist_max - $bin +`=abs($dist_min)' & dists_rdp!=.;
+gen rdppost = rdp*post;
+
+global dists_all_g "rdp rdppost post ${dists_all_g}";
+
+foreach var of varlist $outcomes {;
+  replace `var' = 400*`var';
+  reg `var' $dists_all_g , cl(cluster_reg);
+  sum `var', detail;
+  estadd scalar meandepvar = round(r(mean),.01);
+  preserve;
+    keep if e(sample)==1;
+    quietly tab cluster_rdp;
+    global projectcount = r(r);
+    quietly tab cluster_placebo;
+    global projectcount = $projectcount + r(r);
+  restore;
+  estadd scalar projcount = $projectcount;
+  eststo `var';
+};
+
+estout $outcomes using bblu_regDDD.tex, replace
+  style(tex) 
+  keep("-400m to 0m" "0m to 400m")
+  order("-400m to 0m" "0m to 400m") 
+  rename(
+    dists_rdp_post_g_1 "-400m to 0m" 
+    dists_rdp_post_g_2 "0m to 400m"
+  )
+  mlabels(,none) 
+  collabels(none)
+  cells( b(fmt(2) star ) se(par fmt(2)) )
+  varlabels(,el("-400m to 0m" [0.5em] "0m to 400m" " \midrule"))
+  stats(meandepvar projcount r2 N , 
+    labels("Mean dep. var." "\# Projects" "R$^2$" "N" ) fmt(%9.2fc %12.0fc %12.3fc %12.0fc ) )
+  starlevels( * 0.10 ** 0.05 *** 0.01) ;
 
 };
 ************************************************;

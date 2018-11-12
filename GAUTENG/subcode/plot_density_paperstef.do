@@ -57,6 +57,7 @@ global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 0;
+global graph_plotmeans_cntproj = 0;
 global graph_plottriplediff    = 1;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
@@ -270,11 +271,18 @@ use bbluplot_reg_admin_$size, clear;
 cd ../..;
 cd $output ;
 
-drop if distance_rdp > $dist_max & distance_rdp<.; /* get rid of far away places */
-drop if distance_placebo > $dist_max & distance_placebo<.;
+replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
+replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
 
-drop if distance_rdp < $dist_min ; /* get rid of way too close places */
-drop if distance_placebo < $dist_min ;
+replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
+replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+
+drop if distance_rdp == . & distance_placebo == .;
+drop if cluster_rdp == . & cluster_placebo == .;  
 
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
@@ -493,6 +501,61 @@ if $graph_plotmeans_rawchan == 1 {;
   *   "Constructed" "Unconstructed"
   *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
   *   2;
+
+};
+************************************************;
+************************************************;
+************************************************;
+
+************************************************;
+* 1.4 * Count Projects by Distance            **;
+************************************************;
+if $graph_plotmeans_cntproj == 1 {;
+
+  preserve;
+    keep drdp cluster_rdp;
+    duplicates drop;
+    drop if cluster_rdp==. | drdp==.;
+    bys drdp: gen Nrdp = _N;
+    ren drdp D;
+    keep D Nrdp;
+    duplicates drop;
+    save "${temp}pmeans_rdp_temp.dta", replace;
+  restore;
+
+  preserve;
+    keep dplacebo cluster_placebo;
+    duplicates drop;
+    drop if cluster_placebo==. | dplacebo==.;
+    bys dplacebo: gen Nplacebo = _N;
+    ren dplacebo D;
+    keep D Nplacebo;
+    duplicates drop;
+    save "${temp}pmeans_placebo_temp.dta", replace;
+  restore;
+
+  preserve; 
+    use "${temp}pmeans_rdp_temp.dta", clear;
+    merge 1:1 D using "${temp}pmeans_placebo_temp.dta";
+    keep if _merge==3;
+    drop _merge;
+
+    replace D = D + $bin/2;
+    
+    tw
+    (sc Nrdp D, m(o) mc(black)) 
+    (sc Nplacebo D, m(o) mc(maroon)),
+    xtitle("Distance from project border (meters)",height(5))
+    ytitle("Observed Projects",height(5) si(medsmall))
+    xline(0,lw(medthin)lp(shortdash))
+    ylabel(0(20)80, tp(c) labs(small))
+    xlabel(-400(200)1200, tp(c) labs(small))
+    legend(order(1 "Constructed" 2 "Unconstructed"  ) symx(6) col(1)
+    ring(0) position(5) bm(medium) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(.5);
+    graphexportpdf projectcounts, dropeps;
+  restore;
 
 };
 ************************************************;
