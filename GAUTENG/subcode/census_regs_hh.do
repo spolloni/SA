@@ -5,6 +5,10 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
+* current definition : project area has 57 clusters spillover has 58 ;
+* new definition : ;
+
+
 ***************************************;
 *  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
 ***************************************;
@@ -41,12 +45,18 @@ global LOCAL = 1;
 global data_load = 0;
 global data_prep = 1;
 global data_stat = 0;
-global data_regs = 1;
+global data_regs = 0;
+global data_regs_DDD = 1;
 
 * PARAMETERS;
 global drop_others= 1   ; /* everything relative to unconstructed */
 global tresh_area = 0.3 ; /* Area ratio for "inside" vs spillover */
 global tresh_dist = 1500; /* Area ratio inside vs spillover */
+
+global tresh_area_DDD = 0.75     ;
+global tresh_dist_DDD = 400      ;
+global tresh_dist_max_DDD = 1200 ;
+
 
 if $LOCAL==1 {;
 	cd ..;
@@ -419,6 +429,7 @@ g spillover_post_rdp = spillover_rdp==1 & year==2011;
 g others = project !=1 & spillover !=1;
 g others_post = others==1 & year==2011;
 
+
 global regressors "
   project_post_rdp
   project_post
@@ -511,6 +522,143 @@ estout $outcomes using census_hh_DDregs.tex, replace
     "spillover${X}post${X}constr" [0.5em] 
     "spillover${X}post" [0.5em] 
     "spillover${X}constr" " \midrule"
+  ))
+  stats(Mean2001 Mean2011 hhproj hhspill projcount r2 N , 
+    labels(
+      "Mean Outcome 2001" 
+      "Mean Outcome 2011" 
+      `"\# "Project" Households"'
+      `"\# "Spillover" Households"'
+      "\# Projects"
+      "R$^2$" 
+      "N" 
+    ) 
+    fmt(
+      %9.2fc
+      %9.2fc 
+      %12.0fc 
+      %12.0fc 
+      %12.0fc  
+      %12.3fc 
+      %12.0fc 
+    )
+  )
+  starlevels( * 0.10 ** 0.05 *** 0.01) ;
+
+
+};
+
+
+if $data_regs_DDD==1 {;
+
+keep if distance_rdp <= $tresh_dist_max_DDD  |  distance_placebo <= $tresh_dist_max_DDD ;
+
+g project_rdp = (area_int_rdp > $tresh_area_DDD & distance_rdp<= $tresh_dist_DDD);
+g project_placebo = (area_int_placebo > $tresh_area_DDD & distance_placebo<= $tresh_dist_DDD);
+g project = (project_rdp==1 | project_placebo==1);
+g project_post = project ==1 & year==2011;
+g project_post_rdp = project_rdp ==1 & year==2011;
+
+g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist_DDD;
+g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist_DDD;
+g spillover = (spillover_rdp==1 | spillover_placebo==1);
+g spillover_post = spillover == 1 & year==2011;
+g spillover_post_rdp = spillover_rdp==1 & year==2011; 
+
+*g others      = project !=1 & spillover !=1;
+g  post = year==2011;
+g  rdp  = distance_rdp<= $tresh_dist_max_DDD;
+g  post_rdp = post*rdp;
+
+
+global regressors "
+  project_post_rdp
+  project_post
+  project_rdp
+  project
+  spillover_post_rdp
+  spillover_post
+  spillover_rdp
+  spillover
+  post_rdp
+  post
+  ";
+
+order $regressors;
+
+global outcomes1 "
+  toilet_flush 
+  water_inside 
+  electric_cooking 
+  electric_heating 
+  electric_lighting 
+  tot_rooms
+  hh_size
+  ";
+
+eststo clear;
+
+*areg toilet_flush $regressors , a(cluster_joined) cl(cluster_joined);
+*areg water_inside $regressors , a(cluster_joined) cl(cluster_joined);
+
+
+foreach var of varlist $outcomes1 {;
+  areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  sum `var' if e(sample)==1 & year ==2001, detail;
+  estadd scalar Mean2001 = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2011, detail;
+  estadd scalar Mean2011 = `=r(mean)';
+  count if e(sample)==1 & spillover==1;
+  estadd scalar hhspill = `=r(N)';
+  count if e(sample)==1 & project==1;
+  estadd scalar hhproj = `=r(N)';
+  preserve;
+    keep if e(sample)==1;
+    quietly tab cluster_rdp;
+    global projectcount = r(r);
+    quietly tab cluster_placebo;
+    global projectcount = $projectcount + r(r);
+  restore;
+  estadd scalar projcount = $projectcount;
+  eststo `var';
+};
+
+areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
+sum pop_density if e(sample)==1 & year ==2001, detail;
+estadd scalar Mean2001 = `=r(mean)';
+sum pop_density if e(sample)==1 & year ==2011, detail;
+estadd scalar Mean2011 = `=r(mean)';
+eststo pop_density;
+
+global X "{\tim}";
+
+estout $outcomes using census_hh_DDDregs.tex, replace
+  style(tex) 
+  drop(_cons)
+  rename(
+    project_post_rdp "project${X}post${X}constr"
+    project_post "project${X}post"
+    project_rdp "project${X}constr"
+    spillover_post_rdp "spillover${X}post${X}constr"
+    spillover_post "spillover${X}post"
+    spillover_rdp "spillover${X}constr"
+    post_rdp "post${X}constr"
+  )
+  noomitted
+  mlabels(,none) 
+  collabels(none)
+  cells( b(fmt(3) star ) se(par fmt(3)) )
+  varlabels(,el(
+    "project${X}post${X}constr" [0.5em] 
+    "project${X}post" [0.5em] 
+    "project${X}constr" [0.5em] 
+    project [0.5em] 
+    "spillover${X}post${X}constr" [0.5em] 
+    "spillover${X}post" [0.5em] 
+    "spillover${X}constr" [0.5em]  
+    "post${X}constr" [0.5em] 
+    spillover [0.5em] 
+    post  [0.5em] " \midrule"
   ))
   stats(Mean2001 Mean2011 hhproj hhspill projcount r2 N , 
     labels(
