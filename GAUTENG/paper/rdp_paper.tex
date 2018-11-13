@@ -503,12 +503,12 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
 
 \begin{figure*}[t!]
         \centering
-        \caption{Housing Density Estimation}\label{fig:DDDbblu}
+        \vspace{2mm}
         \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \caption[]{Total Houses}  
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
             \label{fig:DDDtotal}
         \end{subfigure}
         \hfill
@@ -516,7 +516,7 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering 
             \caption[]{Formal Houses}
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
             \label{fig:DDDformal}
         \end{subfigure}
         \vskip -1mm \vskip 0pt
@@ -524,7 +524,7 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering
             \caption[]{Informal Houses}
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
             \label{fig:DDDinformal}
         \end{subfigure}
         \hfill
@@ -532,7 +532,7 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering
             \caption[]{Backyard Informal Houses}  
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
             \label{fig:DDDbackyard}
         \end{subfigure}
         \vskip -1mm \vskip 0pt
@@ -540,7 +540,7 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
             \centering
             \caption[]{Non-Backyard Informal Houses} 
             \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
+            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
             \label{fig:DDDnonbackyard}
         \end{subfigure}
         \hfill \hspace{.02\textwidth}
@@ -562,7 +562,22 @@ We also normalize the coefficient for the furthest distance bin outside of the b
 
 We estimate impacts on five housing density measures: 1) total houses, 2) formal houses, 3) informal houses, which are divided into 4) backyard houses and 5) informal non-backyard houses.  Figure~\ref{fig:DDDbblu} plots the $\alpha^{d}$ coefficients across all outcomes for distance bins within projects (negative distances) and outside projects (positive distances).  Figure~\ref{fig:DDDtotal} finds weak increases in housing within projects and just outside of projects (within 200 meters) before settling to zero at all greater distances.  Predicting increases of around 200 houses per kilometer near the project boundary, these coefficients are both statistically and economically insignificant given an average density of nearly 2,400 structures per kilometer.  
 
+\begin{table}[h!]
+\small
+\centering
+\caption{Triple Difference Estimates }\label{table:DDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCCC}
+\toprule
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Backyard Housing & \small Non-Bkyrd Housing \\ \midrule 
+\input{figures/bblu_regDDD}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. * p$<$0.10,** p$<$0.05,*** p$<$0.01 }
+\end{tabular}
+\end{table}
+
 After measuring substantial numbers of houses per project in the descriptive evidence (Table~\ref{table:projectdescriptives}), it is surprising to find little evidence of housing spikes in these areas; however, the small effects on aggregate housing density mask larger shifts in the composition of housing.  Figure~\ref{fig:DDDformal} estimates over 30\% increases in formal housing density within project areas, which quickly dissipates just beyond their boundaries.  Coefficients within 200 meters inside the boundary are statistically different from those furthest away at the 10\% level.  Gains in formal housing density are almost entirely offset by losses in informal housing density as demonstrated by Figure~\ref{fig:DDDinformal}.  Informal housing density also seems to increase slightly just outside of project areas before stabilizing at zero growth further away.  Disaggregating informal housing further between backyard houses (Figure~\ref{fig:DDDbackyard}) and non-backyard houses (Figure~\ref{fig:DDDnonbackyard}) indicates that massive declines in non-backyard housing (of around 100\% of the average) are only partially offset by an almost doubling of the densities of backyard housing within projects.  Backyard housing growth extends slightly outside of the project boundary, accounting for the small increases in total housing observed in these regions (Figure~\ref{fig:DDDtotal}).
+
 
 
 
@@ -701,11 +716,6 @@ Density is measured in structures per $\text{km}^{2}$.
 \end{figure}
 
 
-
-
-
-\end{document}
-
 \pagebreak
 \subsection{Project Counts}
 
@@ -715,6 +725,7 @@ Density is measured in structures per $\text{km}^{2}$.
 \includegraphics[scale=1.2,trim={.75cm .4cm .75cm 1cm,clip=true}]{figures/projectcounts.pdf}
 \end{figure}
 
+\end{document}
 
 
 
