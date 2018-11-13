@@ -283,11 +283,11 @@ Our final data source consists of hand-coded building surveys derived from high-
 To estimate the urban development impacts of subsidized housing both within project boundaries as well as nearby, we implement a difference-in-differences strategy assessing changes in outcomes for constructed projects, using unconstructed projects as counterfactuals. Given the varying temporal and spatial granularities of our measured outcomes, we estimate different forms of the following specification:
 
 \begin{equation}
-y_{ipt} \, = \, \lambda_{ip} + \sum\limits_{d} I^d_{ip}\Big( \alpha^d D_{t}C_{p} \, + \, \beta^dD_{t} \, + \, \gamma^dC_{p} \, + \, \theta^{d} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
+y_{ipt} \, = \, \lambda_{ip} + \sum\limits_{d} I^d_{ip}\Big( \alpha^d D_{pt}C_{p} \, + \, \beta^dD_{pt} \, + \, \gamma^dC_{p} \, + \, \theta^{d} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
 \end{equation}
 
 % $D_{pt}$ and $C_{p}$ are post and treatment dummies, where 
-\noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$'s assigned construction date, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{t}$, constructed $C_{p}$, and interaction $D_{t}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. Specifications may also include fixed-effects $\lambda_{ip}$ at the project or unit level, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach therefore allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
+\noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$'s assigned construction date, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{pt}$, constructed $C_{p}$, and interaction $D_{pt}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. Specifications may also include fixed-effects $\lambda_{ip}$ at the project or unit level, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach therefore allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
 
 % As will be clear from sections \ref{lol} and \ref{lol}, 
 We interpret the coefficients of interest $\alpha^d$ as the causal impacts of subsidized housing on outcome $y$, for each distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects.  A causal interpretation requires the assumption that absent the completion of a housing project, constructed and unconstructed areas would experience the same changes in outcomes.  
@@ -506,41 +506,41 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
         \vspace{2mm}
         \begin{subfigure}[b]{0.49\textwidth}
             \centering
-            \caption[]{Total Houses}  
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
+            \caption[]{\small Total Houses}  
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
             \label{fig:DDDtotal}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.49\textwidth}  
             \centering 
-            \caption[]{Formal Houses}
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
+            \caption[]{\small Formal Houses}
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
             \label{fig:DDDformal}
         \end{subfigure}
-        \vskip -1mm \vskip 0pt
+        \vskip 1mm \vskip 0pt
         \begin{subfigure}[b]{0.49\textwidth}
             \centering
-            \caption[]{Informal Houses}
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
+            \caption[]{\small Informal Houses}
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
             \label{fig:DDDinformal}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.49\textwidth}  
             \centering
-            \caption[]{Backyard Informal Houses}  
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
+            \caption[]{\small Backyard Informal Houses}  
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
             \label{fig:DDDbackyard}
         \end{subfigure}
-        \vskip -1mm \vskip 0pt
+        \vskip 1mm \vskip 0pt
         \begin{subfigure}[b]{.49\textwidth}  
             \centering
-            \caption[]{Non-Backyard Informal Houses} 
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={.5cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
+            \caption[]{\small Non-Backyard Informal Houses} 
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
             \label{fig:DDDnonbackyard}
         \end{subfigure}
         \hfill \hspace{.02\textwidth}
