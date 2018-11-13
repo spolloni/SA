@@ -59,7 +59,7 @@ global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same gr
 
 
 global graph_means_het     = 0;
-global graph_meansdiff_het     = 1;
+global graph_meansdiff_het     = 0;
 
 global graph_plotdiff          = 0;   /* plots changes over time for placebo and rdp */
 global graph_plotdiff_het      = 0;
@@ -69,7 +69,7 @@ global graph_plottriplediff_het= 0;
   global same_control="no";   /*  if yes, keeps the same unconstructed reference for both close and far */
 
 
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 

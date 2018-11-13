@@ -57,6 +57,7 @@ global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 0;
+global graph_plotmeans_cntproj = 0;
 global graph_plottriplediff    = 1;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
@@ -270,11 +271,18 @@ use bbluplot_reg_admin_$size, clear;
 cd ../..;
 cd $output ;
 
-drop if distance_rdp > $dist_max & distance_rdp<.; /* get rid of far away places */
-drop if distance_placebo > $dist_max & distance_placebo<.;
+replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
+replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
+replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
 
-drop if distance_rdp < $dist_min ; /* get rid of way too close places */
-drop if distance_placebo < $dist_min ;
+replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
+replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
+replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+
+drop if distance_rdp == . & distance_placebo == .;
+drop if cluster_rdp == . & cluster_placebo == .;  
 
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
@@ -284,14 +292,14 @@ g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)' if dists_rdp==. | post==0;
+replace dists_rdp=`=r(max)'+ $bin if dists_rdp==. | post==0;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)' if dists_placebo==. | post==0;
+replace dists_placebo=`=r(max)'+ $bin if dists_placebo==. | post==0;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;
@@ -358,7 +366,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     legend(order(2 "`5'" 1 "`6'"  ) symx(6)
     ring(0) position(`9') bm(medium) rowgap(small) col(1)
     colgap(small) size(medsmall) region(lwidth(none)))
-    aspect(`10');;
+    aspect(.7);;
     graphexportpdf `1', dropeps;
   restore;
 
@@ -376,13 +384,13 @@ if $graph_plotmeans_rdpplac == 1 {;
   plotmeans_pre 
     bblu_for_pre_means for rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
     2;
 
   plotmeans_pre 
     bblu_inf_pre_means inf rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
     2;
 
   * plotmeans_pre 
@@ -455,7 +463,7 @@ if $graph_plotmeans_rawchan == 1 {;
     legend(order(2 "`5'" 1 "`6'"  ) symx(6) col(1)
     ring(0) position(`9') bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
-    aspect(`10');;
+    aspect(.7);;
     graphexportpdf `1', dropeps;
   restore;
 
@@ -473,13 +481,13 @@ if $graph_plotmeans_rawchan == 1 {;
   plotchanges 
     bblu_for_rawchanges for rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
+    "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   plotchanges 
     bblu_inf_rawchanges inf rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1000" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
+    "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   * plotchanges 
@@ -500,6 +508,61 @@ if $graph_plotmeans_rawchan == 1 {;
 ************************************************;
 
 ************************************************;
+* 1.4 * Count Projects by Distance            **;
+************************************************;
+if $graph_plotmeans_cntproj == 1 {;
+
+  preserve;
+    keep drdp cluster_rdp;
+    duplicates drop;
+    drop if cluster_rdp==. | drdp==.;
+    bys drdp: gen Nrdp = _N;
+    ren drdp D;
+    keep D Nrdp;
+    duplicates drop;
+    save "${temp}pmeans_rdp_temp.dta", replace;
+  restore;
+
+  preserve;
+    keep dplacebo cluster_placebo;
+    duplicates drop;
+    drop if cluster_placebo==. | dplacebo==.;
+    bys dplacebo: gen Nplacebo = _N;
+    ren dplacebo D;
+    keep D Nplacebo;
+    duplicates drop;
+    save "${temp}pmeans_placebo_temp.dta", replace;
+  restore;
+
+  preserve; 
+    use "${temp}pmeans_rdp_temp.dta", clear;
+    merge 1:1 D using "${temp}pmeans_placebo_temp.dta";
+    keep if _merge==3;
+    drop _merge;
+
+    replace D = D + $bin/2;
+    
+    tw
+    (sc Nrdp D, m(o) mc(black)) 
+    (sc Nplacebo D, m(o) mc(maroon)),
+    xtitle("Distance from project border (meters)",height(5))
+    ytitle("Observed Projects",height(5) si(medsmall))
+    xline(0,lw(medthin)lp(shortdash))
+    ylabel(0(20)80, tp(c) labs(small))
+    xlabel(-400(200)1200, tp(c) labs(small))
+    legend(order(1 "Constructed" 2 "Unconstructed"  ) symx(6) col(1)
+    ring(0) position(5) bm(medium) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(.5);
+    graphexportpdf projectcounts, dropeps;
+  restore;
+
+};
+************************************************;
+************************************************;
+************************************************;
+
+************************************************;
 * 3.1 MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
 ************************************************;
 if $graph_plottriplediff == 1 {;
@@ -513,7 +576,7 @@ program plotregsingle;
     egen contin = sieve(parm), keep(n);
     destring contin, replace force;
     replace contin=contin+${dist_min};
-    drop if contin>= $dist_max - $bin;
+    drop if contin > $dist_max - $bin;
     drop if strpos(parm, "all") >0;
 
     replace contin = contin + $bin/2;
@@ -524,7 +587,7 @@ program plotregsingle;
     global graph1 "
     (rspike max90 min90 contin, lc(gs7) lw(vthin))
     (connected estimate contin, ms(d) msiz(small)
-    mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin) )";
+    mlc(gs0) mfc(gs0) lc(gs0) m(o) lp(none) lw(medthin) )";
     
     tw 
     $graph1 
@@ -533,14 +596,14 @@ program plotregsingle;
     xline(0,lw(thin)lp(shortdash))
     xtitle("Distance from project border (meters)",height(5))
     ytitle("Structures per km{superscript:2}",height(2))
-    xlabel(-400(200)1000, tp(c) labs(small)  )
+    xlabel(-400(200)1200, tp(c) labs(small)  )
     ylabel(-1500(500)1500, tp(c) labs(small)  )
     plotr(lw(medthick ))
     legend(order($legend1) symx(6) col(1)
-    ring(0) position(2) bm(medium) rowgap(small)  
+    ring(0) position(2) bm(medium) rowgap(small) 
     colgap(small) size(*.95) region(lwidth(none)))
     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
-    aspect(.6);
+    aspect(.77);
     graphexportpdf `1', dropeps;
   restore;
 end;
@@ -552,7 +615,7 @@ foreach level in `r(levels)' {;
   gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
   global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_1500;
+omit dists_all dists_rdp_1550;
 
 foreach var in $outcomes {;
   replace `var' = 400*`var';

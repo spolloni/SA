@@ -95,9 +95,6 @@ local tresh = `r(mean)' + 6*`r(sd)';
 gen big_seller_rdp = (nn > `tresh' & seller_name != "" & gov!=1);
 drop n nn;
 
-pause on;
-pause;
-
 * indicate RDP (multiple definitions);
 gen rdp = ( gov==1 | no_seller_rdp ==1 | big_seller_rdp==1 );
 gen rdp_never = (rdp==0);
