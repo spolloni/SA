@@ -55,7 +55,7 @@
 \maketitle
 \begin{abstract}
 
-	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no change in housing quantity, quality, or price. 
+	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no changes in housing quantity, quality, or price. 
 
  %\\
 %\vspace{0in}\\
@@ -72,24 +72,130 @@
 \spacing{1.4}
 \section{Introduction} \label{sec:introduction}
 
-In developing countries, 30\% of urban populations live in crowded slums where households often suffer from unsanitary conditions and high crime rates \citep{mdg}. Combined with low infrastructure access and insecure property rights, slum conditions are thought to pose long-lasting obstacles to upward mobility and local economic development \citep{10.1257/jep.27.4.187}. We study a common policy response where governments replace slums with serviced formal structures and move slum dwellers into public housing projects. These programs aim to provide not only direct health and economic benefits to recipients, but also greater incentives for neighbors to invest in their homes and communities.  Local investments may reduce negative externalities and steer residents away from poverty traps. At the same time, subsidized housing may attract slums by improving access to bulk services like water and sanitation as well as providing under-utilized developable land within project areas. These indirect housing opportunities are especially salient in South Africa where {\it backyarding} is a common and widely documented form of land use.\footnote{See recent work by \cite{Brueckner2018backyarding}.} In this way, public housing programs may ultimately exacerbate the same negative externalities they were designed to remediate. While much of the existing literature has focused on estimating direct recipient impacts \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}, the broader consequences of subsidized housing for urban development remain poorly understood.
+%Fitting naturally in a treatment-effects framework, 
+%Policymakers motivate these projects with two central arguments.  
+%with two central goals
+%- put in perspective 
+%35,786 mill 1 757 451 (2\%) of government budget
+
+In developing countries, 30\% of urban populations live in crowded slums that often suffer from low infrastructure access, unsanitary conditions, and high crime rates \citep{mdg}.  The main policy response has been building large-scale housing projects.  For example, the South African government has provided over 3 million dwellings since 1994, housing around 20\% of their total population.\footnote{\citep{dhsreports} counts dwellings while the percentage is from authors' calculations using the 2016 General Household Survey.}  To motivate these projects, policymakers stress how moving from slums to public housing improves household wellbeing, which is well supported by existing research.\footnote{Existing research links public housing to improvements in child health, women's employment, and wellbeing for recipient households \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}.}  Policymakers then push a step further and argue that the benefits of public housing spillover to neighboring areas.  In South Africa, housing projects are proposed for ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}.  Spillover effects may account for a significant share of the total welfare effects of housing projects.  \cite{diamond2016wants} calculate that affordable housing in the US generates large welfare impacts on surrounding areas, often exceeding the total costs of these programs.  Welfare effects may be even greater developing settings where preexisting slums impose negative externalities on neighboring areas (\cite{10.1257/jep.27.4.187}).
+
+In contrast to optimism from policymakers, economic theory has more ambiguous predictions for the types of spillover effects produced by housing projects.  Projects may increase local housing supply, which can depress prices and new construction.  Housing projects may also provide negative amenity value by bringing large numbers of low-income households to a neighborhood.  At the same time, improved infrastructure and greater housing quality within projects may stimulate housing investments nearby.\footnote{Studying affordable housing projects in the US, \cite{diamond2016wants} confirm the importance of these opposing amenity effects according to baseline neighborhood quality.}  Any positive effects may be dampened if projects also attract greater slum growth nearby.\footnote{\cite{Brueckner2018backyarding} document the common practice of ``backyarding'' where households construct informal dwellings on the same land plot as project houses.}  Both the policy importance and theoretical ambiguity of these spillover effects motivate empirical analysis in a developing context.  However, researchers have so far lacked the spatial data and quantity of housing projects needed to precisely identify impacts on local neighborhoods.
+
+
+%Developing countries feature additional housing externalities such as poor sanitation, 
+
+% - any welfare accounting needs to take into account spillover effects
+% - diamond finds they are important in developed countries
+% - there are reason to believe they may be especially important in developing countries because externalities are often more salient/stronger
+
+
+%Studying public housing projects in the US, \cite{diamond2016wants} find that their welfare effects on surrounding areas dwarf the costs of public housing in low-income areas.  
+%However, researchers have lacked similar spatial data or quantity of housing projects needed to precisely measure spillovers in a developing setting.  
+
+
+ 
+
+% Lacking precise spatial data or large numbers of housing projects
+
+This paper analyzes the direct and spillover effects of a large public housing program in South Africa.  We combine administrative records for \input{figures/total_cluster_rdp}constructed and \input{figures/total_cluster_placebo}planned but unconstructed projects with spatial data on property transactions, formal and informal housing densities, and dwelling characteristics.  To measure spillovers, we implement a simple difference-in-differences design at varying distances from project boundaries.  At each distance, we compare changes in outcomes for constructed projects to changes for planned but unconstructed projects.  This non-parametric approach allows us to precisely capture how spillover effects dissipate across space.  Planned but unconstructed project areas provide useful counterfactuals since governments often select lower-quality, less populated land for building housing projects.  These unconstructed areas closely resemble constructed project areas at baseline across a range of measures including preexisting housing density.  
+
+
+% Baseline similarities suggest that outcomes for both areas would have evolved similarly in the absence of project construction, which is our main identifying assumption.  
+% before and after project construction
+
+Looking within project areas, we estimate large improvements in access to services and home quality, but little effects on housing density.  Small effects on total density mask a large compositional change from informal to formal housing.  We also find greater densities of informal backyard houses, but not enough to offset the steep declines in other types of informal housing.  Using census data, we find little change in household demographics, employment, or population.  Taken together, these results suggest that housing projects may provide positive local amenities through better house quality and improved infrastructure.  Moreover, there is little evidence of countervailing supply effects, population sorting, or slum growth within project areas.
+
+Despite better housing quality within projects, we estimate zero spillover effects across our full range of outcomes.  Housing projects do not appear to stimulate additional construction of formal or informal dwellings at all distances outside project boundaries.  Similarly, demographics and housing quality in neighboring areas remains the same after project construction.  Leveraging the exact timing of construction, we do not detect a discrete change in formal housing prices just following construction although we provide some evidence that housing markets anticipate projects.
+
+These findings provide suggestive evidence that neighborhood externalities may play a minimal role in housing markets in developing countries.  Another interpretation is that informal backyard houses produce strongly negative externalities which negate any positive benefits of formal project houses.  
+From a policy perspective, these results suggest that spillover effects may merit less emphasis than the direct effects on recipients in designing future housing policy.  
+
+We proceed by first providing background on the South African housing program in Section~\ref{section:background}.  In Section~\ref{section:model}, we develop a conceptual framework of housing supply and housing externalities to help interpret the results. Section~\ref{section:data} describes the data used to measure outcomes and details our approach to identifying housing projects while Section~\ref{section:descriptives} provides descriptive evidence.  We present spillover results for residential home prices in Section~\ref{section:resultsprices} and demographic outcomes in Section~\ref{section:resultscensus}.  Section~\ref{section:discussion} includes a discussion of our findings before providing some concluding thoughts.
+
+
+
+
+
+% but no effects on surrounding areas.  We also find no statistically significant effects of public housing on prices in the formal market.  
+
+
+
+%[ MOVE THIS LOWER PLEASE ]  Like prior studies in the US, the substantial uncertainty in project timing due to difficulties coordinating many stakeholders and sources of funding limits the extent to which local housing markets are able to anticipate the projects \citep{diamond2016wants, serihistory}.  
+
+%To address the potential endogenous placement of housing projects, we use \input{figures/total_cluster_placebo}planned but unconstructed projects as our counterfactual project areas.
+
+
+
+%To interpret these findings, we provide a simple conceptual framework balancing the amenity effects of improved housing quality against the price and quantity effects of a housing supply shock.  This framework helps shed light on the absence of spillover effects detected in our analysis.
+
+
+% At the same time, relocating low-income households to project areas may constitute a negative amenity to surrounding housing markets (another source).  
+
+
+
+
+
+% show that spillovers depend on existing neighborhood quality, finding positive effects for low-income areas 
+
+
+% Our empirical strategy combines...
+
+
+% - housing is an amenity -- affect local values
+
+% - housing is also a supply shock -- affect local values
+
+% - backyarding, which can have their own 
+
+
+
+
+
+% impacts of public housing projects on the price, quality, and quantity of housing both within and just outside project footprints.  
+
+%the existing literature has focused on estimating direct recipient impacts \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}
+
+
+% , the broader consequences of subsidized housing for urban development remain poorly understood.
+
+
+%According to the Department of Human Settlements, this program is designed not only to serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also to generate community-wide benefits, ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}. 
+
+
+
+% We estimate economic spillovers from a large-scale housing program in South Africa, focusing on the quality, density, and price of nearby housing. Providing over 3 million houses, this program is one of the largest in the developing world and continues to respond to large backlogs in demand \citep{dhsreports}.  
+
+
+%%%% replacement versus greenfield pitch
+
+
+%Combined with low infrastructure access and insecure property rights, slum conditions are thought to pose long-lasting obstacles to upward mobility and local economic development \citep{10.1257/jep.27.4.187}. 
+
+
+% We study a common policy response where governments replace slums with serviced formal structures and move slum dwellers into public housing projects. 
+
+
+%These programs aim to provide not only direct health and economic benefits to recipients, but also greater incentives for neighbors to invest in their homes and communities.  Local investments may reduce negative externalities and steer residents away from poverty traps. 
+
+%At the same time, subsidized housing may attract slums by improving access to bulk services like water and sanitation as well as providing under-utilized developable land within project areas. 
+%These indirect housing opportunities are especially salient in South Africa where {\it backyarding} is a common and widely documented form of land use.\footnote{See recent work by \cite{Brueckner2018backyarding}.} 
+
+%In this way, public housing programs may ultimately exacerbate the same negative externalities they were designed to remediate. 
+
 
 % While these policies aim to reduce slum growth
 %While these policies are often motivated by immediate health and economic benefits for recipients, economic theory emphasizes how public housing can provide incentives for neighbors to invest more in their own homes and communities, reducing negative externalities and steering communities away from poverty traps.{}
 % In this paper, we document another
 % We find that these policies can have 
 
-We estimate economic spillovers from a large-scale housing program in South Africa, focusing on the quality, density, and price of nearby housing. Providing over 3 million houses, this program is one of the largest in the developing world and continues to respond to large backlogs in demand \citep{dhsreports}.  According to the Department of Human Settlements, this program is designed not only to serve as ``a key strategy for poverty alleviation'' for direct beneficiaries, but also to generate community-wide benefits, ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}. 
 
-We combine administrative records for \input{figures/total_cluster_rdp}completed housing projects in the province of Gauteng, with data on property transactions, formal and informal housing densities, and dwelling characteristics to measure the local impact of these projects.   We find evidence of greater access to services, improved home quality, and a greater share of formal housing stock within project areas but no effects on surrounding areas.  Examining nearby housing transactions, we find no statistically significant effects of public housing on prices in the formal market.  To interpret these findings, we provide a simple conceptual framework balancing the amenity effects of improved housing quality against the price and quantity effects of a housing supply shock.  This framework helps shed light on the absence of spillover effects detected in our analysis.
 
-Our empirical estimates rely on a difference-in-differences design leveraging both the timing of housing project construction as well as the precise geography of treated areas. Like prior studies in the US, the substantial uncertainty in project timing due to difficulties coordinating many stakeholders and sources of funding limits the extent to which local housing markets are able to anticipate the projects \citep{diamond2016wants, serihistory}.  To address the potential endogenous placement of housing projects, we analyze \input{figures/total_cluster_placebo}planned but unconstructed projects as counterfactuals and detect no impacts of these uncompleted projects on local housing markets.
 
-\begin{comment}
-Our zero spillover estimates stand in contrast to a large literature in development that has found positive impacts of public housing on direct recipients.  Relying on small-scale experimental designs, previous studies have linked public housing to improvements in employment outcomes \citep{franklin2016enabled}, self-reported wellbeing \citep{galiani2017shelter, devoto2012happiness}, and child health outcomes \citep{cattaneo2009housing}.  Data limitations both in finding a large enough sample of housing projects and in identifying outcomes at a precise spatial scale have prevented previous studies from identifying spillover effects.  Taken alongside these previous studies, our findings suggest that policymakers may be able to continue emphasizing direct benefits to recipients in designing future housing policy since spillover affects appear to be minimal.
-\end{comment}
 
-We proceed by first providing background on the South African housing program in Section~\ref{section:background}.  In Section~\ref{section:model}, we develop a conceptual framework of housing supply and housing externalities to help interpret the results. Section~\ref{section:data} describes the data used to measure outcomes and details our approach to identifying housing projects while Section~\ref{section:descriptives} provides descriptive evidence.  We present spillover results for residential home prices in Section~\ref{section:resultsprices} and demographic outcomes in Section~\ref{section:resultscensus}.  Section~\ref{section:discussion} includes a discussion of our findings before providing some concluding thoughts.
+% Our zero spillover estimates stand in contrast to a large literature in development that has found positive impacts of public housing on direct recipients.  Relying on small-scale experimental designs, previous studies have linked public housing to improvements in employment outcomes \citep{franklin2016enabled}, self-reported wellbeing \citep{galiani2017shelter, devoto2012happiness}, and child health outcomes \citep{cattaneo2009housing}.  Data limitations both in finding a large enough sample of housing projects and in identifying outcomes at a precise spatial scale have prevented previous studies from identifying spillover effects.  Taken alongside these previous studies, our findings suggest that policymakers may be able to continue emphasizing direct benefits to recipients in designing future housing policy since spillover affects appear to be minimal.
+
+
 
 
 \section{Subsidized Housing in South Africa} \label{section:background}
