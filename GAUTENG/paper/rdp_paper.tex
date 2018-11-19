@@ -453,10 +453,11 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
 \vspace{-2mm}
 \begin{tabular}{lDDDDDDDD}
 \toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
  & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
 \input{figures/census_hh_DDregs}
 \bottomrule
-\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. * p$<$0.10,** p$<$0.05,*** p$<$0.01 }
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
 \end{tabular}
 \end{table}
 % \begin{table}
@@ -565,14 +566,15 @@ We estimate impacts on five housing density measures: 1) total houses, 2) formal
 \begin{table}[h!]
 \small
 \centering
-\caption{Triple Difference Estimates }\label{table:DDD}
+\caption{Triple Difference Estimates }\label{table:bbluDDD}
 \vspace{-2mm}
 \begin{tabular}{lCCCCC}
 \toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5) \\
  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Backyard Housing & \small Non-Bkyrd Housing \\ \midrule 
 \input{figures/bblu_regDDD}
 \bottomrule
-\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. * p$<$0.10,** p$<$0.05,*** p$<$0.01 }
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
 \end{tabular}
 \end{table}
 
@@ -626,11 +628,10 @@ Figure~\ref{figure:distplot} separately plots coefficients for average home pric
 
 Unconstructed projects in the right panel of Figure~\ref{figure:distplot} exhibit a similarly increasing price gradient before project implementation, again consistent with project land having a negative amenity effect on nearby prices. This gradient remains unchanged in periods after the expected construction date.  These results provide suggestive evidence that the exact location of housing project selection does not appear to be strongly correlated with local housing market trends.
 \begin{figure}
-\caption{Price Estimates over Distance from Project}\label{figure:distplot}
+\caption{Triple Difference Price Estimates over Distance from Project}\label{figure:distplot}
 \centering
-Constructed Projects \hspace{3.6cm} Unconstructed Projects
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/distance_plot_rdp.pdf}
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/distance_plot_placebo.pdf}\\
+\includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot}
+\vspace{-2mm}
 \end{figure}
 The change in price gradients following project construction (left panel of Figure~\ref{figure:distplot}) is observed to be greatest at distances less than 700 meters from the project boundary.  Given this result, we then use this threshold to define distance rings of ``near'' and ``far'' to examine how prices might change over time relative to date of project construction.
 
@@ -639,13 +640,8 @@ Figure~\ref{figure:timeplot} plots coefficients for average price changes over t
 Focusing on constructed projects in the left panel, areas far from project boundaries follow a stable zero trend with respect to the completion of projects.  Meanwhile, areas close to the project boundaries experience a slight but stable decline in prices over the period.  According to the point estimates, the decline is economically significant reaching 15\% below average prices (given that the outcome is log-prices).  This decline may provide evidence of anticipatory behavior: local homeowners hear news about a new housing project and decide to sell their houses, anticipating a price drop due to the housing project.
 
 For unconstructed projects in the right panel, areas far and near from project boundaries follow similar parallel trends to constructed projects leading up to the expected completion date and remain indistinguishable for the entire duration after this date.  This null result helps to exclude competing explanations that rely on the timing of housing projects such as targeting housing programs according to hyper-local housing market trends or pairing housing projects with other place-based policies.  One caveat for these results is that measurement error both in matching project names to budget statements and in assigning the proper date of completion for each project may bias results toward zero.  It is unclear the extent to which anticipation effects might have a role in this case; if nearby homeowners have little information on when a project will be constructed, then we should expect to see the same anticipation effects as for constructed projects.  However, if local homeowners are well informed about the local dynamics determining project construction, then anticipation effects would likely be more muted in the case of unconstructed projects.
-\begin{figure}
-\caption{Price Estimates over Time}\label{figure:timeplot}
-\centering
-Constructed Projects \hspace{3.6cm} Unconstructed Projects
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/time_plot_rdp.pdf}
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/time_plot_placebo.pdf}
-\end{figure}
+
+
 To test the significance of these effects in a regression framework, we first run two simple difference-in-differences regressions separately for constructed and unconstructed projects where ``Post'' is defined as anytime after expected project construction and ``Near'' includes properties within 700m of project boundaries.  We also conduct a triple-differences analysis which adds the indicator $C_{it}$ for whether a project is constructed as well as the full set of interaction terms with this indicator in the following equation:
 \begin{equation*}
 P_{itp} \, = \, \alpha D_{tp}T_{ip} C_{it} \, + \,\theta_1 D_{tp} \, + \, \theta_2 T_{ip}+ \, \theta_3 C_{it}+ \, \theta_4 D_{tp} T_{ip} \, + \, \theta_5 C_{it} T_{ip}  \, + \, \theta_6 C_{it} T_{ip} \, +  \lambda_p \,  + \, \eta_{t} \, + \, \varepsilon_{itp}
@@ -653,11 +649,19 @@ P_{itp} \, = \, \alpha D_{tp}T_{ip} C_{it} \, + \,\theta_1 D_{tp} \, + \, \theta
 This triple-differences specification allows for a slightly less restrictive form of parallel trends: instead of requiring price changes to be parallel close and far from a project, this approach simply requires that differential price changes close and far from a project for constructed areas would be the same in unconstructed project areas in the absence of construction.  
 
 Table~\ref{table:priceest} provides the estimation results with results for constructed projects in the first column, unconstructed projects in the second column, and finally triple-difference estimates in the third column.  The coefficient of interest in the first column, $Post X Near$, translates the declining price gradient for nearby properties in constructed project areas in Figure~\ref{figure:timeplot} to a 7.5\% decrease in house prices which is significant at the 10\% level.  The corresponding difference-in-differences coefficient for planned but unconstructed projects in the second column predicts a much smaller and statistically insignificant decline in prices.  Pooling samples in the third column, the triple-difference coefficient of interest captures roughly the midpoint between the constructed and unconstructed difference-in-differences coefficients, resulting in a noisy 6\% decline in house prices.  Meanwhile to put this effect into perspective, being within 700m or in a constructed area both shift mean prices by 12\%, which are statistically significant at the 5\% level.  Taken together, these results provide weak evidence of a slight decline in home prices, which seem to be more driven by anticipation of project completion than by the direct impact of nearby formal housing.
-\begin{table}
-\caption{Price Estimates for Completed Projects}\label{table:priceest}
+
+\begin{table}[h!]
+\small
 \centering
-\input{figures/ddd_price_regs} \\
-\footnotesize{Outcomes are in log-purchase prices. ``Const'' refers to constructed while \\ ``Unconst'' refers to unconstructed housing projects.}
+\caption{Triple Difference Estimates }\label{table:priceDDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCC}
+\toprule
+ & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
+\input{figures/price_regDDD.tex}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
 \end{table}
 
 
@@ -714,6 +718,21 @@ Density is measured in structures per $\text{km}^{2}$.
 \vspace{2mm}
 \caption*{\footnotesize {\bf Note:} We consider every census small areas whose centroid fall within 1500m of a project boundary. We denote small areas with over 30\% area overlap with project boundaries as "project" small areas, and use household responses within these geographies to capture dwelling characteristics inside project boundaries. All remaining small areas are denoted as "spillover" geographies, and are used to capture dwelling characteristics nearby.}
 \end{figure}
+
+\begin{table}[h!]
+\small
+\centering
+\caption{Census Composition Estimates }\label{table:censusperson}
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small High School & \small Monthly Income \\ \midrule 
+\input{figures/census_pers_DDregs}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
 
 
 \pagebreak
