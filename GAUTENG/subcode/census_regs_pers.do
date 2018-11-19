@@ -251,6 +251,24 @@ replace unemployed = 0 if employment ==1;
 lab var unemployed "Unemployed";
 
 * schooling;
+gen educ_yrs = education + 1  if education<=12 & !missing(education);
+replace educ_yrs = 0 if ((education==99 & year ==2001)|(education==98 & year ==2011)) & !missing(education);
+replace educ_yrs = 10 if (education==13) & !missing(education);
+replace educ_yrs = 11 if (education==14) & !missing(education);
+replace educ_yrs = 12 if (education==15) & !missing(education);
+replace educ_yrs = 12.5 if (education==16) & !missing(education);
+replace educ_yrs = 13 if (education==17) & !missing(education);
+replace educ_yrs = 13.5 if (education==18) & !missing(education);
+replace educ_yrs = 14 if (education==19) & !missing(education);
+replace educ_yrs = 14 if (education==20) & !missing(education);
+replace educ_yrs = 14 if (education==21) & !missing(education);
+replace educ_yrs = 14 if (education==22) & !missing(education);
+replace educ_yrs = 15 if (education==23) & !missing(education);
+replace educ_yrs = 16 if (education==24) & !missing(education);
+replace educ_yrs = 16 if (education==25) & !missing(education);
+replace educ_yrs = 17 if (education==26) & !missing(education);
+replace educ_yrs = 17 if (education==27) & !missing(education);
+replace educ_yrs = 18 if (education==28) & !missing(education);
 gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
 gen schooling_postsec = (education>=12 & education<=30) if !missing(education) & age>=18;
 
@@ -335,7 +353,7 @@ global outcomes "
   age 
   outside_gp
   unemployed
-  schooling_postsec
+  educ_yrs
   inc_value_earners  
   ";
 
@@ -416,7 +434,7 @@ estout $outcomes using census_pers_DDregs.tex, replace
     "\textsuperscript{c}" 0.10 
     "\textsuperscript{b}" 0.05 
     "\textsuperscript{a}" 0.01) ;
-    
+
 };
 
 *****************************************************************;
