@@ -86,7 +86,8 @@ global trans_hist = 0;
 global dist_regs  = 0;
 global time_regs  = 0;
 global dd_regs    = 0;
-global ddd_regs   = 0;
+global ddd_regs_t = 0;
+global ddd_regs_d = 1;
 global simple_reg = 0;
 
 * load data; 
@@ -110,11 +111,12 @@ foreach v in _rdp _placebo _joined {;
   * create distance dummies;
   sum distance`v';
   if $max == 0 {;
-    global max = round(ceil(`r(max)'),100);
+    global max = round(ceil(`r(max)'),$bin);
   };
   egen dists`v' = cut(distance`v'),at(0($bin)$max); 
   replace dists`v' = 9999 if distance`v' <0 | distance`v'>=$max | distance`v' ==. ;
   replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+
   * create date dummies;
   gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
   replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
@@ -143,37 +145,37 @@ g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 
-**** PRINT STATISTIC : percent of transactions excluded with seller_name criteria  ;
-preserve;
-  keep if
-       rdp_never ==1 &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
-  g total=_N;
-  g s30 = s_N<30;
-  egen s30s = sum(s30);
-  g s30share=1-(s30s/total);
-  sum s30share, detail;
-  file open myfile using "s30.tex", write replace;
-  local h : di %10.0fc `=r(mean)*100';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+* **** PRINT STATISTIC : percent of transactions excluded with seller_name criteria  ;
+* preserve;
+*   keep if
+*        rdp_never ==1 &
+*        purch_price > 2000 & purch_price<800000 &
+*        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+*   g total=_N;
+*   g s30 = s_N<30;
+*   egen s30s = sum(s30);
+*   g s30share=1-(s30s/total);
+*   sum s30share, detail;
+*   file open myfile using "s30.tex", write replace;
+*   local h : di %10.0fc `=r(mean)*100';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
 
 
-**** PRINT STATISTIC : total price observations  ;
-preserve;
-  keep if s_N<30     & 
-       rdp_never ==1  &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
-  g total=_N;
-  sum total, detail;
-  file open myfile using "total_price_obs.tex", write replace;
-  local h : di %10.0fc `=r(mean)';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+* **** PRINT STATISTIC : total price observations  ;
+* preserve;
+*   keep if s_N<30     & 
+*        rdp_never ==1  &
+*        purch_price > 2000 & purch_price<800000 &
+*        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+*   g total=_N;
+*   sum total, detail;
+*   file open myfile using "total_price_obs.tex", write replace;
+*   local h : di %10.0fc `=r(mean)';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
 
 *****************************************************************;
 *****************************************************************;
@@ -510,12 +512,10 @@ restore;
 *****************************************************************;
 *************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
 *****************************************************************;
-if $ddd_regs ==1 {;
+if $ddd_regs_t ==1 {;
 
-*gen dreg_far_rdp = 0;
-*gen dreg_far_placebo = 0;
-gen dreg_far = 0;
-levelsof mo2con_reg_rdp;
+levelsof dists_rdp;
+global dists_all "";
 foreach level in `r(levels)' {;
 
   gen  dreg_`level' = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1)) |
