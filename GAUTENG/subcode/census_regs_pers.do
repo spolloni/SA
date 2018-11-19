@@ -3,156 +3,245 @@ set more off
 set scheme s1mono
 set matsize 11000
 set maxvar 32767
+set max_memory 8g, permanently
 #delimit;
+
+***************************************;
+*  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
+***************************************;
+cap program drop omit;
+program define omit;
+
+  local original ${`1'};
+  local temp1 `0';
+  local temp2 `1';
+  local except: list temp1 - temp2;
+  local modified;
+  foreach e of local except{;
+   local modified = " `modified' o.`e'"; 
+  };
+  local new: list original - except;
+  local new " `modified' `new'";
+  global `1' `new';
+
+end;
 
 ******************;
 *  CENSUS REGS   *;
 ******************;
 
-* global output = "Output/GAUTENG/censusregs" ;
+* SET OUTPUT GLOBAL;
+ global output = "Output/GAUTENG/censusregs" ;
 * global output = "Code/GAUTENG/paper/figures" ;
-global output = "Code/GAUTENG/presentations/presentation_lunch";
-
-* PARAMETERS;
-global area = .3;
+*global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * RUN LOCALLY?;
 global LOCAL = 1;
 
-* MAKE DATASET?;
-global DATA_PREP = 0;
+* DOFILE SECTIONS;
+global data_load = 0;
+global data_prep = 1;
+global data_stat = 0;
+global data_regs = 1;
+global data_regs_DDD = 0;
 
+* PARAMETERS;
+global drop_others= 1; /* everything relative to unconstructed */
+global tresh_area = 0.3; /* Area ratio for "inside" vs spillover */
+global tresh_dist = 1500; /* Area ratio inside vs spillover */
+
+global tresh_area_DDD = 0.75;
+global tresh_dist_DDD = 400;
+global tresh_dist_max_DDD = 1200;
 
 if $LOCAL==1 {;
 	cd ..;
 };
 
-* import plotreg program;
-do subcode/import_plotreg.do;
-
 * load data;
 cd ../..;
 cd Generated/Gauteng;
 
-if $DATA_PREP==1 {;
+*****************************************************************;
+************************ LOAD DATA ******************************;
+*****************************************************************;
+if $data_load==1 {;
 
   local qry = " 
 
   	SELECT 
 
-        AA.*, (RANDOM()/(2*9223372036854775808)+.5) as random,
+        AA.*, GP.con_mo_placebo, GR.con_mo_rdp,
 
-        BB.mode_yr, BB.frac1,
+        (RANDOM()/(2*9223372036854775808)+.5) as random 
 
-        CC.placebo_yr 
+    FROM (
 
-    FROM
+      SELECT 
 
-  	(
+        A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, 
+        A.P02_Yr AS birth_yr, A.P05_Mar AS marit_stat, A.P06_Race AS race, 
+        A.P07_lng AS language, A.P09a_Prv AS birth_prov, A.P22_Incm AS income, 
+        A.P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
+        A.P19b_Ind AS industry, A.P19c_Occ as occupation, 
 
-    SELECT A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, A.P02_Yr AS birth_yr,
-           A.P05_Mar AS marit_stat, A.P06_Race AS race, A.P07_lng AS language, P09a_Prv AS birth_prov,
-           A.P22_Incm AS income, P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
-           A.P19b_Ind AS industry, A.P19c_Occ as occupation, 
+        cast(B.input_id AS TEXT) as sal_code_rdp, 
+        B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int,
+        cast(BP.input_id AS TEXT) as sal_code_placebo, 
+        BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
 
-           'census2001pers' AS source, 'rdp' AS hulltype, 2001 AS year
+        IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-    FROM census_pers_2001 AS A 
-    JOIN distance_sal_2001_rdp AS B ON B.sal_code=A.SAL
-    /* WHERE area_int > $area */
+        'census2001pers' AS source, 2001 AS year, A.SAL AS area_code
 
-    UNION ALL 
+      FROM census_pers_2001 AS A 
 
-    SELECT A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, A.P02_Yr AS birth_yr,
-           A.P05_Mar AS marit_stat, A.P06_Race AS race, A.P07_lng AS language, P09a_Prv AS birth_prov,
-           A.P22_Incm AS income, P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
-           A.P19b_Ind AS industry, A.P19c_Occ as occupation,
+      LEFT JOIN (
+        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+        FROM distance_sal_2001_rdp 
+        WHERE distance<=2000
+        GROUP BY input_id 
+        HAVING COUNT(input_id)<=50 
+          AND distance == MIN(distance)
+      ) AS B ON A.SAL=B.input_id
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int, 
+      LEFT JOIN (
+        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+        FROM distance_sal_2001_placebo 
+        WHERE distance<=2000
+        GROUP BY input_id 
+        HAVING COUNT(input_id)<=50 
+          AND distance == MIN(distance)
+      ) AS BP ON A.SAL=BP.input_id
 
-           'census2001pers' AS source, 'placebo' AS hulltype, 2001 AS year
+      LEFT JOIN (
+        SELECT sal_code, area_int AS area_int_rdp 
+        FROM int_rdp_sal_2001
+        GROUP BY sal_code
+        HAVING area_int_rdp = MAX(area_int_rdp)
+      ) AS IR ON IR.sal_code = A.SAL
 
-    FROM census_pers_2001 AS A  
-    JOIN distance_sal_2001_placebo AS B ON B.sal_code=A.SAL
-    /* WHERE area_int > $area */
+      LEFT JOIN (
+        SELECT sal_code, area_int AS area_int_placebo 
+        FROM int_placebo_sal_2001
+        GROUP BY sal_code
+        HAVING area_int_placebo = MAX(area_int_placebo)
+      ) AS IP ON IP.sal_code = A.SAL
 
-    UNION ALL 
+      LEFT JOIN area_sal_2001 AS QQ ON QQ.sal_code = A.SAL
 
-    SELECT A.F03_SEX AS sex, A.F02_AGE AS age, A.P02_RELATION AS relation, A.P01_YEAR AS birth_yr,
-           A.P03_MARITAL_ST AS marit_stat, A.P05_POP_GROUP AS race, A.P06A_LANGUAGE AS language,
-           A.P07_PROV_POB AS birth_prov, A.P16_INCOME AS income, A.P20_EDULEVEL AS education,
-           A.DERP_EMPLOY_STATUS_OFFICIAL AS employment, A.DERP_INDUSTRY AS industry, A.DERP_OCCUPATION AS occupation,
+      /* *** */
+      UNION ALL 
+      /* *** */ 
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int,
+      SELECT 
 
-           'census2011pers' AS source, 'rdp' AS hulltype, 2011 AS year
+        A.F03_SEX AS sex, A.F02_AGE AS age, A.P02_RELATION AS relation, 
+        A.P01_YEAR AS birth_yr, A.P03_MARITAL_ST AS marit_stat, 
+        A.P05_POP_GROUP AS race, A.P06A_LANGUAGE AS language, 
+        A.P07_PROV_POB AS birth_prov, 
+        A.P16_INCOME AS income, A.P20_EDULEVEL AS education,
+        A.DERP_EMPLOY_STATUS_OFFICIAL AS employment, 
+        A.DERP_INDUSTRY AS industry, A.DERP_OCCUPATION AS occupation,
 
-    FROM census_pers_2011 AS A  
-    JOIN distance_sal_2011_rdp AS B ON B.sal_code=A.SAL_code
-    /* WHERE area_int > $area */
+        cast(B.input_id AS TEXT) as sal_code_rdp, 
+        B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
 
-    UNION ALL 
+        cast(BP.input_id AS TEXT) as sal_code_placebo, 
+        BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
 
-    SELECT A.F03_SEX AS sex, A.F02_AGE AS age, A.P02_RELATION AS relation, A.P01_YEAR AS birth_yr,
-           A.P03_MARITAL_ST AS marit_stat, A.P05_POP_GROUP AS race, A.P06A_LANGUAGE AS language,
-           A.P07_PROV_POB AS birth_prov, A.P16_INCOME AS income, A.P20_EDULEVEL AS education,
-           A.DERP_EMPLOY_STATUS_OFFICIAL AS employment, A.DERP_INDUSTRY AS industry, A.DERP_OCCUPATION AS occupation,
+        IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-           cast(B.sal_code AS TEXT) as sal_code, B.distance, B.cluster, B.area_int,
+        'census2011pers' AS source, 2011 AS year, A.SAL_CODE AS area_code
 
-           'census2011pers' AS source, 'placebo' AS hulltype, 2011 AS year
+      FROM census_pers_2011 AS A 
 
-    FROM census_pers_2011 AS A  
-    JOIN distance_sal_2011_placebo AS B ON B.sal_code=A.SAL_code
-    /* WHERE area_int > $area */
+      LEFT JOIN (
+        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+        FROM distance_sal_2011_rdp 
+        WHERE distance<=2000
+        GROUP BY input_id 
+        HAVING COUNT(input_id)<=50 
+          AND distance == MIN(distance)
+      ) AS B ON A.SAL_CODE=B.input_id
+
+      LEFT JOIN (
+        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+        FROM distance_sal_2011_placebo 
+        WHERE distance<=2000
+        GROUP BY input_id HAVING COUNT(input_id)<=50 
+        AND distance == MIN(distance)
+      ) AS BP ON A.SAL_CODE=BP.input_id
+
+      LEFT JOIN (
+        SELECT sal_code, area_int AS area_int_rdp
+        FROM int_rdp_sal_2011
+        GROUP BY sal_code
+        HAVING area_int_rdp = MAX(area_int_rdp)
+      ) AS IR ON IR.sal_code = A.SAL_CODE
+
+      LEFT JOIN (
+        SELECT sal_code, area_int AS area_int_placebo 
+        FROM int_placebo_sal_2011
+        GROUP BY sal_code
+        HAVING area_int_placebo = MAX(area_int_placebo)
+      ) AS IP ON IP.sal_code = A.SAL_CODE
+
+      LEFT JOIN area_sal_2011 AS QQ ON QQ.sal_code = A.SAL_CODE
 
     ) AS AA
 
-    LEFT JOIN (SELECT DISTINCT cluster, cluster_siz, mode_yr, frac1, frac2 
-    FROM rdp_clusters) AS BB on AA.cluster = BB.cluster
+    LEFT JOIN (
+      SELECT cluster_placebo, con_mo_placebo 
+      FROM cluster_placebo
+    ) AS GP ON AA.cluster_placebo = GP.cluster_placebo
 
-    LEFT JOIN placebo_conhulls AS CC on CC.cluster = AA.cluster
+    LEFT JOIN (
+      SELECT cluster_rdp, con_mo_rdp 
+      FROM cluster_rdp
+    ) AS GR ON AA.cluster_rdp = GR.cluster_rdp
 
-    WHERE random < .5
+    WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
+    AND random < .75
 
     ";
 
   odbc query "gauteng";
-  odbc load, exec("`qry'") clear;	
+  odbc load, exec("`qry'") clear;
+
+  destring area_int_placebo area_int_rdp, replace force;  
+
+  /* throw out clusters that were too early in the process */
+  replace distance_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+  replace area_int_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+  replace sal_code_placebo ="" if con_mo_placebo<515 | con_mo_placebo==.;
+  replace cluster_placebo  =.  if con_mo_placebo<515 | con_mo_placebo==.;
+
+  replace distance_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+  replace area_int_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+  replace sal_code_rdp ="" if con_mo_rdp<515 | con_mo_rdp==.;
+  replace cluster_rdp  =.  if con_mo_rdp<515 | con_mo_rdp==.;
+
+  *drop if distance_rdp==. & distance_placebo==.;	
   		
-  save DDcensus_pers, replace;
+  save DDcensus_pers_admin, replace;
 
 };
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 
-use DDcensus_pers, clear;
+*****************************************************************;
+************************ PREPARE DATA ***************************;
+*****************************************************************;
+if $data_prep==1 {;
+
+use DDcensus_pers_admin, clear;
 
 * go to working dir;
 cd ../..;
 cd Output/GAUTENG/censusregs;
-
-global ifsample = "
-  (cluster < 1000 & frac1>.5 & mode_yr>2002 )
-  |(cluster >= 1009 & placebo_yr!=. & placebo_yr > 2002 )
-  ";
-
-* group definitions;
-gen gr = .;
-replace gr=1 if area_int >= .3;
-replace gr=2 if area_int < .3 ;
-
-* drop clusters with no SAL;
-bys cluster year: gen N = _N;
-drop if N<100;
-bys cluster: egen sd = sd(year);
-drop if sd==0;
-drop N sd;
-
-* treatment and post vars;
-gen post   = (year==2011);
-gen treat  = (cluster<1000);
-gen ptreat = post*treat; 
 
 * employment;
 gen unemployed = .;
@@ -163,12 +252,13 @@ lab var unemployed "Unemployed";
 
 * schooling;
 gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
-gen schooling_hschool = (education>=0 & education<=12) if !missing(education);
-lab var schooling_hschool "Over HS Educ." ;
-replace schooling_hschool=. if unemployed==.;
+gen schooling_postsec = (education>=12 & education<=30) if !missing(education) & age>=18;
 
 * race;
 gen black = (race==1) if !missing(race);
+
+* born outside Gauteng;
+gen outside_gp = (birth_prov!=7) if !missing(birth_prov);
 
 * income;
 gen inc_value = . ;
@@ -188,51 +278,151 @@ gen inc_value_earners = inc_value ;
 replace inc_value_earners = . if inc_value==0;
 lab var inc_value_earners "HH Income";
 
+* cluster for SEs;
+replace area_int_rdp =0 if area_int_rdp ==.;
+replace area_int_placebo =0 if area_int_placebo ==.;
+gen placebo = (distance_placebo < distance_rdp);
+gen placebo2 = (area_int_placebo> area_int_rdp);
+replace placebo = 1 if placebo2==1;
+drop placebo2;
+gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
+gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 
-g gr_1=gr==1;
-lab var gr_1 "Project Area";
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 
-g gr_2=gr==2;
-lab var gr_2 "Spillover";
+*****************************************************************;
+********************* RUN REGRESSIONS ***************************;
+*****************************************************************;
+if $data_regs==1 {;
 
-g gr_1_treat = gr_1*treat;
-lab var gr_1_treat "Project X Complete";
+g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
+g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
+g project = (project_rdp==1 | project_placebo==1);
+g project_post = project ==1 & year==2011;
+g project_post_rdp = project_rdp ==1 & year==2011;
 
-g gr_2_treat = gr_2*treat;
-lab var gr_2_treat "Spillover X Complete";
+g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
+g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
+g spillover = (spillover_rdp==1 | spillover_placebo==1);
+g spillover_post = spillover == 1 & year==2011;
+g spillover_post_rdp = spillover_rdp==1 & year==2011; 
 
-g gr_1_post = gr_1*post;
-lab var gr_1_post "Project X Post";
-
-g gr_2_post = gr_2*post;
-lab var gr_2_post "Spillover X Post";
-
-g gr_1_post_treat = gr_1*post*treat;
-lab var gr_1_post_treat "Project X Post X Complete";
-
-g gr_2_post_treat = gr_2*post*treat;
-lab var gr_2_post_treat "Spillover X Post X Complete";
-
+g others = project !=1 & spillover !=1;
+g others_post = others==1 & year==2011;
 
 
-global vars "  gr_1_post_treat gr_2_post_treat  gr_1_post gr_2_post gr_2_treat gr_2 ";
-global outcomes "inc_value_earners unemployed";
-order $vars;
+global regressors "
+  project_post_rdp
+  project_post
+  project_rdp
+  project
+  spillover_post_rdp
+  spillover_post
+  spillover_rdp
+  spillover
+  others_post
+  ";
 
-local table_name "census_DD_pers_sample.tex";
-
-areg schooling_hschool $vars if $ifsample , a(cluster) cl(cluster);
-       outreg2 using "`table_name'", label  tex(frag) 
-replace addtext(Project FE, YES) keep(gr_*) 
-addnote("Standard errors are clustered at the project level.");
-
-foreach var of varlist $outcomes {;
-areg `var' $vars if $ifsample , a(cluster) cl(cluster);
-       outreg2 using "`table_name'", label  tex(frag) 
-append addtext(Project FE, YES) keep(gr_*) ;
+if $drop_others == 1{;
+drop if others==1;
+omit regressors spillover others_post;
 };
 
-exit STATA, clear;
+global outcomes "
+  age 
+  outside_gp
+  unemployed
+  schooling_postsec
+  inc_value_earners  
+  ";
+
+eststo clear;
+
+foreach var of varlist $outcomes {;
+  areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  test project_post_rdp = spillover_post_rdp;
+  estadd scalar pval = `=r(p)';
+  sum `var' if e(sample)==1 & year ==2001, detail;
+  estadd scalar Mean2001 = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2011, detail;
+  estadd scalar Mean2011 = `=r(mean)';
+  count if e(sample)==1 & spillover==1 & project!=1;
+  estadd scalar hhspill = `=r(N)';
+  count if e(sample)==1 & project==1;
+  estadd scalar hhproj = `=r(N)';
+  preserve;
+    keep if e(sample)==1;
+    quietly tab cluster_rdp;
+    global projectcount = r(r);
+    quietly tab cluster_placebo;
+    global projectcount = $projectcount + r(r);
+  restore;
+  estadd scalar projcount = $projectcount;
+  eststo `var';
+};
+
+global X "{\tim}";
+
+estout $outcomes using census_pers_DDregs.tex, replace
+  style(tex) 
+  drop(_cons)
+  rename(
+    project_post_rdp "project${X}post${X}constr"
+    project_post "project${X}post"
+    project_rdp "project${X}constr"
+    spillover_post_rdp "spillover${X}post${X}constr"
+    spillover_post "spillover${X}post"
+    spillover_rdp "spillover${X}constr"
+  )
+  noomitted
+  mlabels(,none) 
+  collabels(none)
+  cells( b(fmt(3) star ) se(par fmt(3)) )
+  varlabels(,el(
+    "project${X}post${X}constr" [0.5em] 
+    "project${X}post" [0.5em] 
+    "project${X}constr" [0.5em] 
+    project [0.5em] 
+    "spillover${X}post${X}constr" [0.5em] 
+    "spillover${X}post" [0.5em] 
+    "spillover${X}constr" " \midrule"
+  ))
+  stats( pval Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
+    labels(
+      "{\it p}-val, h\textsubscript{0}: project=spill. "
+      "Mean Outcome 2001" 
+      "Mean Outcome 2011" 
+      "R$^2$" 
+      "\# projects"
+      `"N project areas"'
+      `"N spillover areas"'  
+      "N" 
+    ) 
+    fmt(
+      %9.3fc
+      %9.2fc
+      %9.2fc 
+      %12.3fc 
+      %12.0fc 
+      %12.0fc 
+      %12.0fc  
+      %12.0fc 
+    )
+  )
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
+    
+};
+
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
 
 
 
