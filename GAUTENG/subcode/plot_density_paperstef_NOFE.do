@@ -296,7 +296,10 @@ estout $outcomes using bblu_regDDD.tex, replace
   varlabels(,el("-400m to 0m" [0.5em] "0m to 400m" " \midrule"))
   stats(meandepvar projcount r2 N , 
     labels("Mean dep. var." "\# Projects" "R$^2$" "N" ) fmt(%9.2fc %12.0fc %12.3fc %12.0fc ) )
-  starlevels( * 0.10 ** 0.05 *** 0.01) ;
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
 
 };
 ************************************************;

@@ -4,6 +4,8 @@ set scheme s1mono
 set matsize 11000
 set maxvar 32767
 #delimit;
+grstyle init;
+grstyle set imesh, horizontal;
 
 * RUN LOCALLY?;
 global LOCAL = 1;
@@ -57,8 +59,8 @@ global output = "Output/GAUTENG/gradplots";
 global rdp   = "`1'";
 global twl   = "3";   /* look at twl years before construction */
 global twu   = "4";   /* look at twu years after construction */
-global bin   = 250;   /* distance bin width for dist regs   */
-global max   = 2000;  /* distance maximum for distance bins */
+global bin   = 200;   /* distance bin width for dist regs   */
+global max   = 1200;  /* distance maximum for distance bins */
 global mbin  =  12;   /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 700;   /* distance to be considered treated  */
@@ -84,7 +86,8 @@ global trans_hist = 0;
 global dist_regs  = 0;
 global time_regs  = 0;
 global dd_regs    = 0;
-global ddd_regs   = 0;
+global ddd_regs_t = 0;
+global ddd_regs_d = 1;
 global simple_reg = 0;
 
 * load data; 
@@ -108,11 +111,12 @@ foreach v in _rdp _placebo _joined {;
   * create distance dummies;
   sum distance`v';
   if $max == 0 {;
-    global max = round(ceil(`r(max)'),100);
+    global max = round(ceil(`r(max)'),$bin);
   };
   egen dists`v' = cut(distance`v'),at(0($bin)$max); 
   replace dists`v' = 9999 if distance`v' <0 | distance`v'>=$max | distance`v' ==. ;
   replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+
   * create date dummies;
   gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
   replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
@@ -141,37 +145,37 @@ g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 
-**** PRINT STATISTIC : percent of transactions excluded with seller_name criteria  ;
-preserve;
-  keep if
-       rdp_never ==1 &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
-  g total=_N;
-  g s30 = s_N<30;
-  egen s30s = sum(s30);
-  g s30share=1-(s30s/total);
-  sum s30share, detail;
-  file open myfile using "s30.tex", write replace;
-  local h : di %10.0fc `=r(mean)*100';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+* **** PRINT STATISTIC : percent of transactions excluded with seller_name criteria  ;
+* preserve;
+*   keep if
+*        rdp_never ==1 &
+*        purch_price > 2000 & purch_price<800000 &
+*        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+*   g total=_N;
+*   g s30 = s_N<30;
+*   egen s30s = sum(s30);
+*   g s30share=1-(s30s/total);
+*   sum s30share, detail;
+*   file open myfile using "s30.tex", write replace;
+*   local h : di %10.0fc `=r(mean)*100';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
 
 
-**** PRINT STATISTIC : total price observations  ;
-preserve;
-  keep if s_N<30     & 
-       rdp_never ==1  &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
-  g total=_N;
-  sum total, detail;
-  file open myfile using "total_price_obs.tex", write replace;
-  local h : di %10.0fc `=r(mean)';
-  file write myfile "`h'";
-  file close myfile ;
-restore ;
+* **** PRINT STATISTIC : total price observations  ;
+* preserve;
+*   keep if s_N<30     & 
+*        rdp_never ==1  &
+*        purch_price > 2000 & purch_price<800000 &
+*        purch_yr > 2000 & distance_rdp>0 & distance_placebo>0;
+*   g total=_N;
+*   sum total, detail;
+*   file open myfile using "total_price_obs.tex", write replace;
+*   local h : di %10.0fc `=r(mean)';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
 
 *****************************************************************;
 *****************************************************************;
@@ -258,19 +262,19 @@ program plotcoeffs_distance;
     global ubound = $max;
 
     tw
-      (rcap max95 min95 contin if post ==0, lc(gs7) lw(thin) )
-      (rcap max95 min95 contin if post ==1, lc("206 162 97") lw(thin) )
+      (rspike max95 min95 contin if post ==0, lc(gs7) lw(thin) )
+      (rspike max95 min95 contin if post ==1, lc(maroon) lw(thin) )
       (connected estimate contin if post ==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
-      (connected estimate contin if post ==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
-      xtitle("meters to project border",height(5))
-      ytitle("log-price coefficients",height(5))
-      xlabel($lbound(500)$ubound,labsize(small))
-      ylabel(-.4(.1).2,labsize(small))
+      (connected estimate contin if post ==1, ms(o) msiz(small) mlc(maroon) mfc(maroon) lc(maroon) lp(none) lw(medium)),
+      xtitle("Distance to project border",height(5))
+      ytitle("Log-Price Coefficients",height(-5))
+      xlabel(200(200)1200,labsize(small) tp(c) )
+      ylabel(-.4(.1).2,labsize(small) tp(c))
       yline(0,lw(thin)lp(shortdash))
-      legend(order(3 "pre-construction" 4 "post-construction") 
-      ring(0) position(5) bm(tiny) rowgap(small) 
-      colgap(small) size(medsmall) region(lwidth(none)))
-      note("`3'");;
+      legend(order(3 "pre-construction" 4 "post-construction") col(1) 
+      ring(0) position(5) bm(medium) rowgap(small)  symx(6)
+      colgap(small) size(*.95) region(lwidth(none)))
+      ;
 
       graphexportpdf `2', dropeps;
 
@@ -301,7 +305,7 @@ foreach v in _rdp _placebo {;
 * dummies global for regs;
 ds dreg* ;
 global dummies = "`r(varlist)'"; 
-omit dummies dreg_2000_pre_placebo dreg_2000_pre_rdp; 
+omit dummies dreg_1200_pre_placebo dreg_1200_pre_rdp; 
 
 * REG MONKEY;
 *reg lprice $dummies i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(cluster_joined);
@@ -351,20 +355,20 @@ program plotcoeffs_time;
     global ubound = 12*($twu-1);
 
     tw
-      (rcap max95 min95 contin if treat ==0, lc(gs7) lw(thin) )
-      (rcap max95 min95 contin if treat ==1, lc("206 162 97") lw(thin) )
+      (rspike max95 min95 contin if treat ==0, lc(gs7) lw(thin) )
+      (rspike max95 min95 contin if treat ==1, lc(maroon) lw(thin) )
       (connected estimate contin if treat ==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium)) 
-      (connected estimate contin if treat ==1, ms(o) msiz(small) mlc("145 90 7") mfc("145 90 7") lc(sienna) lp(none) lw(medium)),
+      (connected estimate contin if treat ==1, ms(o) msiz(small) mlc(maroon) mfc(maroon) lc(maroon) lp(none) lw(medium)),
       ///xtitle("months to modal construction month",height(5))
-      xtitle("years to project construction",height(5))
-      ytitle("log-price coefficients",height(5))
+      xtitle("Years to Construction",height(5))
+      ytitle("Log-Price Coefficients",height(-5))
       ///xlabel(-$lbound(12)$ubound,labsize(small))
-      xlabel(-36 "-3" -24 "-2" -12 "-1" 0 "event-year" 12 "1" 24 "2" 36 "3",labsize(small))
-      ylabel(-.4(.1).3,labsize(small))
-      yline(0,lw(thin)lp(shortdash))
-      legend(order(3 "> ${treat}m" 4 "< ${treat}m" ) 
-      ring(0) position(5) bm(tiny) rowgap(small) 
-      colgap(small) size(small) region(lwidth(none)))
+      xlabel(-36 "-3" -24 "-2" -12 "-1" 0 "constr. year" 12 "1" 24 "2" 36 "3",labsize(small)tp(c))
+      ylabel(-.4(.1).3,labsize(small)tp(c))
+      xline(-6,lw(thin)lp(shortdash))
+      legend(order(3 "> ${treat}m" 4 "< ${treat}m" ) col(1) 
+      ring(0) position(2) bm(medium) rowgap(small)  symx(6)
+      colgap(small) size(*.95) region(lwidth(none)))
       note("`3'");
 
       graphexportpdf `2', dropeps;
@@ -508,12 +512,10 @@ restore;
 *****************************************************************;
 *************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
 *****************************************************************;
-if $ddd_regs ==1 {;
+if $ddd_regs_t ==1 {;
 
-*gen dreg_far_rdp = 0;
-*gen dreg_far_placebo = 0;
-gen dreg_far = 0;
-levelsof mo2con_reg_rdp;
+levelsof dists_rdp;
+global dists_all "";
 foreach level in `r(levels)' {;
 
   gen  dreg_`level' = (mo2con_reg_rdp == `level' & (treat_rdp==0 | treat_rdp==1)) |

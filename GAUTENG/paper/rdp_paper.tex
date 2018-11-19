@@ -55,7 +55,7 @@
 \maketitle
 \begin{abstract}
 
-	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no changes in housing quantity, quality, or price. 
+	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, remote sensed housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no significant changes in housing quantity, quality, or price. 
 
  %\\
 %\vspace{0in}\\
@@ -78,7 +78,12 @@
 %- put in perspective 
 %35,786 mill 1 757 451 (2\%) of government budget
 
-In developing countries, 30\% of urban populations live in crowded slums that often suffer from low infrastructure access, unsanitary conditions, and high crime rates \citep{mdg}.  The main policy response has been building large-scale housing projects.  For example, the South African government has provided over 3 million dwellings since 1994, housing around 20\% of their total population.\footnote{\citep{dhsreports} counts dwellings while the percentage is from authors' calculations using the 2016 General Household Survey.}  To motivate these projects, policymakers stress how moving from slums to public housing improves household wellbeing, which is well supported by existing research.\footnote{Existing research links public housing to improvements in child health, women's employment, and wellbeing for recipient households \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}.}  Policymakers then push a step further and argue that the benefits of public housing spillover to neighboring areas.  In South Africa, housing projects are proposed for ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}.  Spillover effects may account for a significant share of the total welfare effects of housing projects.  \cite{diamond2016wants} calculate that affordable housing in the US generates large welfare impacts on surrounding areas, often exceeding the total costs of these programs.  Welfare effects may be even greater developing settings where preexisting slums impose negative externalities on neighboring areas (\cite{10.1257/jep.27.4.187}).
+30\% of urban populations in the developing world live in crowded slums characterized by low infrastructure access, unsanitary conditions, and high crime rates \citep{mdg}. These living conditions are thought to pose long-lasting obstacles to upward mobility and local economic development \citep{10.1257/jep.27.4.187}. We study a common policy response where governments replace slums with serviced formal structures and move slum dwellers into public housing projects.
+
+%The main policy response has been building large-scale housing projects. 
+%For example, the South African government has provided over 3 million dwellings since 1994, housing around 20\% of their total population.\footnote{\citep{dhsreports} counts dwellings while the percentage is from authors' calculations using the 2016 General Household Survey.}  
+
+To motivate these projects, policymakers stress how moving from slums to public housing improves household wellbeing, which is well supported by existing research.\footnote{Existing research links public housing to improvements in child health, women's employment, and wellbeing for recipient households \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}.}  Policymakers then push a step further and argue that the benefits of public housing spillover to neighboring areas.  In South Africa, housing projects are proposed for ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}.  Spillover effects may account for a significant share of the total welfare effects of housing projects.  \cite{diamond2016wants} calculate that affordable housing in the US generates large welfare impacts on surrounding areas, often exceeding the total costs of these programs.  Welfare effects may be even greater developing settings where preexisting slums impose negative externalities on neighboring areas (\cite{10.1257/jep.27.4.187}).
 
 In contrast to optimism from policymakers, economic theory has more ambiguous predictions for the types of spillover effects produced by housing projects.  Projects may increase local housing supply, which can depress prices and new construction.  Housing projects may also provide negative amenity value by bringing large numbers of low-income households to a neighborhood.  At the same time, improved infrastructure and greater housing quality within projects may stimulate housing investments nearby.\footnote{Studying affordable housing projects in the US, \cite{diamond2016wants} confirm the importance of these opposing amenity effects according to baseline neighborhood quality.}  Any positive effects may be dampened if projects also attract greater slum growth nearby.\footnote{\cite{Brueckner2018backyarding} document the common practice of ``backyarding'' where households construct informal dwellings on the same land plot as project houses.}  Both the policy importance and theoretical ambiguity of these spillover effects motivate empirical analysis in a developing context.  However, researchers have so far lacked the spatial data and quantity of housing projects needed to precisely identify impacts on local neighborhoods.
 
@@ -200,7 +205,7 @@ We proceed by first providing background on the South African housing program in
 
 \section{Subsidized Housing in South Africa} \label{section:background}
 
-The housing projects studied in this paper were implemented as part of a large national housing subsidy scheme enacted in 1994. Though periodically revised and renamed,\footnote{Public housing in South Africa has been delivered under the {\it Reconstruction and Development Program} (RDP) starting in 1994 and subsequently by its successor, {\it Breaking New Grounds}, as of 2004.} the program has consistently sought to redress the economic and geographic legacy of apartheid by providing formal housing to low-income households. Subsidized housing efforts at the national level have focused on constructing and allocating 40m$^2$, single-story, two-room dwellings in groups of 50 to 500 per project. According to government figures, upwards of 3 million housing units have been delivered between 1994 and 2015.
+The housing projects studied in this paper were implemented as part of a large national housing subsidy scheme enacted in 1994. Though periodically revised and renamed,\footnote{Public housing in South Africa has been delivered under the {\it Reconstruction and Development Program} (RDP) starting in 1994 and subsequently by its successor, {\it Breaking New Grounds}, as of 2004.} the program has consistently sought to redress the economic and geographic legacy of apartheid by providing formal housing to low-income households. Subsidized housing efforts at the national level have focused on constructing and allocating 40m$^2$, single-story, two-room dwellings in groups of 50 to 500 per project. According to government figures, upwards of 3 million housing units have been delivered nationally between 1994 and 2015.
 
 \subsection{Planning and Delivery}
 
@@ -219,7 +224,7 @@ In practice, these guidelines are loosely followed.  Recent reports point to cas
 
 \subsection{Backyard Shacks}
 
-By design, subsidized housing in South Africa offers recipients generous amounts of yard space, which often serve alternative land uses. The construction of informal backyard shacks is a common occurrence within project boundaries. Recipients typically enter agreements with tenants (at times relatives) to lease the shacks for cash or in-kind payments. According to the 2011 census, backyard tenants represent 7.5\% of South African households.\footnote{This figure jumps to 12.5\% for the province of Gauteng, where our study is conducted.} Though the structures are not as durable as their government-provisioned counterparts, living conditions are typically superior to conventional informal settlements. Tenants gain indirect access to their landlord's services such as water taps, electricity connections, and toilets, and benefit from reduced eviction threats and greater personal safety \citep{beall2003social}. \cite{Brueckner2018backyarding} note that {\it backyarding} is suggestive of inefficiencies in the program delivery, and allows to correct potential misallocations of resources. Importantly for our analysis, backyard shacks reveal that more households may benefit from subsidized housing than the listed number of direct recipients. According to the General Household Surveys (2009-2013), more than 33\% of government-provisioned homes have backyard shacks within two years of the delivery date. 
+By design, subsidized housing in South Africa offers recipients generous amounts of yard space, often diverted to alternative land uses. The construction of informal backyard shacks is a common occurrence within project boundaries. Recipients typically enter agreements with tenants (at times relatives) to lease the shacks for cash or in-kind payments. According to the 2011 census, backyard tenants represent 7.5\% of South African households.\footnote{This figure jumps to 12.5\% for the province of Gauteng, where our study is conducted.} Though the structures are not as durable as their government-provisioned counterparts, living conditions are typically superior to conventional informal settlements. Tenants gain indirect access to their landlord's services such as water taps, electricity connections, and toilets, and benefit from reduced eviction threats and greater personal safety \citep{beall2003social}. \cite{Brueckner2018backyarding} note that {\it backyarding} is suggestive of inefficiencies in the program delivery, and allows to correct potential misallocations of resources. Importantly for our analysis, backyard shacks reveal that more households may benefit from subsidized housing than the listed number of direct recipients. According to the General Household Surveys (2009-2013), more than 33\% of government-provisioned homes have backyard shacks within two years of the delivery date. 
 
 \section{Conceptual Framework}\label{section:model}
 
@@ -389,11 +394,11 @@ Our final data source consists of hand-coded building surveys derived from high-
 To estimate the urban development impacts of subsidized housing both within project boundaries as well as nearby, we implement a difference-in-differences strategy assessing changes in outcomes for constructed projects, using unconstructed projects as counterfactuals. Given the varying temporal and spatial granularities of our measured outcomes, we estimate different forms of the following specification:
 
 \begin{equation}
-y_{ipt} \, = \, \lambda_{ip} + \sum\limits_{d} I^d_{ip}\Big( \alpha^d D_{t}C_{p} \, + \, \beta^dD_{t} \, + \, \gamma^dC_{p} \, + \, \theta^{d} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
+y_{ipt} \, = \, \lambda_{ip} + \sum\limits_{d} I^d_{ip}\Big( \alpha^d D_{pt}C_{p} \, + \, \beta^dD_{pt} \, + \, \gamma^dC_{p} \, + \, \theta^{d} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
 \end{equation}
 
 % $D_{pt}$ and $C_{p}$ are post and treatment dummies, where 
-\noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$'s assigned construction date, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{t}$, constructed $C_{p}$, and interaction $D_{t}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. Specifications may also include fixed-effects $\lambda_{ip}$ at the project or unit level, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach therefore allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
+\noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$'s assigned construction date, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{pt}$, constructed $C_{p}$, and interaction $D_{pt}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. Specifications may also include fixed-effects $\lambda_{ip}$ at the project or unit level, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach therefore allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
 
 % As will be clear from sections \ref{lol} and \ref{lol}, 
 We interpret the coefficients of interest $\alpha^d$ as the causal impacts of subsidized housing on outcome $y$, for each distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects.  A causal interpretation requires the assumption that absent the completion of a housing project, constructed and unconstructed areas would experience the same changes in outcomes.  
@@ -559,10 +564,11 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
 \vspace{-2mm}
 \begin{tabular}{lDDDDDDDD}
 \toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
  & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
 \input{figures/census_hh_DDregs}
 \bottomrule
-\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. * p$<$0.10,** p$<$0.05,*** p$<$0.01 }
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
 \end{tabular}
 \end{table}
 % \begin{table}
@@ -609,44 +615,44 @@ Rows five through seven test for spillover effects in areas within 1.5 kilometer
 
 \begin{figure*}[t!]
         \centering
-        \caption{Housing Density Estimation}\label{fig:DDDbblu}
+        \vspace{2mm}
         \begin{subfigure}[b]{0.49\textwidth}
             \centering
-            \caption[]{Total Houses}  
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
+            \caption[]{\small Total Houses}  
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin}
             \label{fig:DDDtotal}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.49\textwidth}  
             \centering 
-            \caption[]{Formal Houses}
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
+            \caption[]{\small Formal Houses}
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin}     
             \label{fig:DDDformal}
         \end{subfigure}
-        \vskip -1mm \vskip 0pt
+        \vskip 1mm \vskip 0pt
         \begin{subfigure}[b]{0.49\textwidth}
             \centering
-            \caption[]{Informal Houses}
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
+            \caption[]{\small Informal Houses}
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin.pdf}
             \label{fig:DDDinformal}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.49\textwidth}  
             \centering
-            \caption[]{Backyard Informal Houses}  
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
+            \caption[]{\small Backyard Informal Houses}  
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin}
             \label{fig:DDDbackyard}
         \end{subfigure}
-        \vskip -1mm \vskip 0pt
+        \vskip 1mm \vskip 0pt
         \begin{subfigure}[b]{.49\textwidth}  
             \centering
-            \caption[]{Non-Backyard Informal Houses} 
-            \vspace{-2mm}
-            \includegraphics[width=\textwidth,trim={1cm .8cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
+            \caption[]{\small Non-Backyard Informal Houses} 
+            \vspace{-1mm}
+            \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin}    
             \label{fig:DDDnonbackyard}
         \end{subfigure}
         \hfill \hspace{.02\textwidth}
@@ -668,7 +674,23 @@ We also normalize the coefficient for the furthest distance bin outside of the b
 
 We estimate impacts on five housing density measures: 1) total houses, 2) formal houses, 3) informal houses, which are divided into 4) backyard houses and 5) informal non-backyard houses.  Figure~\ref{fig:DDDbblu} plots the $\alpha^{d}$ coefficients across all outcomes for distance bins within projects (negative distances) and outside projects (positive distances).  Figure~\ref{fig:DDDtotal} finds weak increases in housing within projects and just outside of projects (within 200 meters) before settling to zero at all greater distances.  Predicting increases of around 200 houses per kilometer near the project boundary, these coefficients are both statistically and economically insignificant given an average density of nearly 2,400 structures per kilometer.  
 
+\begin{table}[h!]
+\small
+\centering
+\caption{Triple Difference Estimates }\label{table:bbluDDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Backyard Housing & \small Non-Bkyrd Housing \\ \midrule 
+\input{figures/bblu_regDDD}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
 After measuring substantial numbers of houses per project in the descriptive evidence (Table~\ref{table:projectdescriptives}), it is surprising to find little evidence of housing spikes in these areas; however, the small effects on aggregate housing density mask larger shifts in the composition of housing.  Figure~\ref{fig:DDDformal} estimates over 30\% increases in formal housing density within project areas, which quickly dissipates just beyond their boundaries.  Coefficients within 200 meters inside the boundary are statistically different from those furthest away at the 10\% level.  Gains in formal housing density are almost entirely offset by losses in informal housing density as demonstrated by Figure~\ref{fig:DDDinformal}.  Informal housing density also seems to increase slightly just outside of project areas before stabilizing at zero growth further away.  Disaggregating informal housing further between backyard houses (Figure~\ref{fig:DDDbackyard}) and non-backyard houses (Figure~\ref{fig:DDDnonbackyard}) indicates that massive declines in non-backyard housing (of around 100\% of the average) are only partially offset by an almost doubling of the densities of backyard housing within projects.  Backyard housing growth extends slightly outside of the project boundary, accounting for the small increases in total housing observed in these regions (Figure~\ref{fig:DDDtotal}).
+
 
 
 
@@ -717,11 +739,10 @@ Figure~\ref{figure:distplot} separately plots coefficients for average home pric
 
 Unconstructed projects in the right panel of Figure~\ref{figure:distplot} exhibit a similarly increasing price gradient before project implementation, again consistent with project land having a negative amenity effect on nearby prices. This gradient remains unchanged in periods after the expected construction date.  These results provide suggestive evidence that the exact location of housing project selection does not appear to be strongly correlated with local housing market trends.
 \begin{figure}
-\caption{Price Estimates over Distance from Project}\label{figure:distplot}
+\caption{Triple Difference Price Estimates over Distance from Project}\label{figure:distplot}
 \centering
-Constructed Projects \hspace{3.6cm} Unconstructed Projects
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/distance_plot_rdp.pdf}
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/distance_plot_placebo.pdf}\\
+\includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot}
+\vspace{-2mm}
 \end{figure}
 The change in price gradients following project construction (left panel of Figure~\ref{figure:distplot}) is observed to be greatest at distances less than 700 meters from the project boundary.  Given this result, we then use this threshold to define distance rings of ``near'' and ``far'' to examine how prices might change over time relative to date of project construction.
 
@@ -730,13 +751,8 @@ Figure~\ref{figure:timeplot} plots coefficients for average price changes over t
 Focusing on constructed projects in the left panel, areas far from project boundaries follow a stable zero trend with respect to the completion of projects.  Meanwhile, areas close to the project boundaries experience a slight but stable decline in prices over the period.  According to the point estimates, the decline is economically significant reaching 15\% below average prices (given that the outcome is log-prices).  This decline may provide evidence of anticipatory behavior: local homeowners hear news about a new housing project and decide to sell their houses, anticipating a price drop due to the housing project.
 
 For unconstructed projects in the right panel, areas far and near from project boundaries follow similar parallel trends to constructed projects leading up to the expected completion date and remain indistinguishable for the entire duration after this date.  This null result helps to exclude competing explanations that rely on the timing of housing projects such as targeting housing programs according to hyper-local housing market trends or pairing housing projects with other place-based policies.  One caveat for these results is that measurement error both in matching project names to budget statements and in assigning the proper date of completion for each project may bias results toward zero.  It is unclear the extent to which anticipation effects might have a role in this case; if nearby homeowners have little information on when a project will be constructed, then we should expect to see the same anticipation effects as for constructed projects.  However, if local homeowners are well informed about the local dynamics determining project construction, then anticipation effects would likely be more muted in the case of unconstructed projects.
-\begin{figure}
-\caption{Price Estimates over Time}\label{figure:timeplot}
-\centering
-Constructed Projects \hspace{3.6cm} Unconstructed Projects
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm}]{figures/time_plot_rdp.pdf}
-\includegraphics[width=0.44\textwidth,trim={.77cm 0cm .21cm 0cm},clip]{figures/time_plot_placebo.pdf}
-\end{figure}
+
+
 To test the significance of these effects in a regression framework, we first run two simple difference-in-differences regressions separately for constructed and unconstructed projects where ``Post'' is defined as anytime after expected project construction and ``Near'' includes properties within 700m of project boundaries.  We also conduct a triple-differences analysis which adds the indicator $C_{it}$ for whether a project is constructed as well as the full set of interaction terms with this indicator in the following equation:
 \begin{equation*}
 P_{itp} \, = \, \alpha D_{tp}T_{ip} C_{it} \, + \,\theta_1 D_{tp} \, + \, \theta_2 T_{ip}+ \, \theta_3 C_{it}+ \, \theta_4 D_{tp} T_{ip} \, + \, \theta_5 C_{it} T_{ip}  \, + \, \theta_6 C_{it} T_{ip} \, +  \lambda_p \,  + \, \eta_{t} \, + \, \varepsilon_{itp}
@@ -744,11 +760,19 @@ P_{itp} \, = \, \alpha D_{tp}T_{ip} C_{it} \, + \,\theta_1 D_{tp} \, + \, \theta
 This triple-differences specification allows for a slightly less restrictive form of parallel trends: instead of requiring price changes to be parallel close and far from a project, this approach simply requires that differential price changes close and far from a project for constructed areas would be the same in unconstructed project areas in the absence of construction.  
 
 Table~\ref{table:priceest} provides the estimation results with results for constructed projects in the first column, unconstructed projects in the second column, and finally triple-difference estimates in the third column.  The coefficient of interest in the first column, $Post X Near$, translates the declining price gradient for nearby properties in constructed project areas in Figure~\ref{figure:timeplot} to a 7.5\% decrease in house prices which is significant at the 10\% level.  The corresponding difference-in-differences coefficient for planned but unconstructed projects in the second column predicts a much smaller and statistically insignificant decline in prices.  Pooling samples in the third column, the triple-difference coefficient of interest captures roughly the midpoint between the constructed and unconstructed difference-in-differences coefficients, resulting in a noisy 6\% decline in house prices.  Meanwhile to put this effect into perspective, being within 700m or in a constructed area both shift mean prices by 12\%, which are statistically significant at the 5\% level.  Taken together, these results provide weak evidence of a slight decline in home prices, which seem to be more driven by anticipation of project completion than by the direct impact of nearby formal housing.
-\begin{table}
-\caption{Price Estimates for Completed Projects}\label{table:priceest}
+
+\begin{table}[h!]
+\small
 \centering
-\input{figures/ddd_price_regs} \\
-\footnotesize{Outcomes are in log-purchase prices. ``Const'' refers to constructed while \\ ``Unconst'' refers to unconstructed housing projects.}
+\caption{Triple Difference Estimates }\label{table:priceDDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCC}
+\toprule
+ & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
+\input{figures/price_regDDD.tex}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
 \end{table}
 
 
@@ -806,11 +830,21 @@ Density is measured in structures per $\text{km}^{2}$.
 \caption*{\footnotesize {\bf Note:} We consider every census small areas whose centroid fall within 1500m of a project boundary. We denote small areas with over 30\% area overlap with project boundaries as "project" small areas, and use household responses within these geographies to capture dwelling characteristics inside project boundaries. All remaining small areas are denoted as "spillover" geographies, and are used to capture dwelling characteristics nearby.}
 \end{figure}
 
+\begin{table}[h!]
+\small
+\centering
+\caption{Census Composition Estimates }\label{table:censusperson}
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+\input{figures/census_pers_DDregs}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
 
-
-
-
-\end{document}
 
 \pagebreak
 \subsection{Project Counts}
@@ -821,6 +855,7 @@ Density is measured in structures per $\text{km}^{2}$.
 \includegraphics[scale=1.2,trim={.75cm .4cm .75cm 1cm,clip=true}]{figures/projectcounts.pdf}
 \end{figure}
 
+\end{document}
 
 
 
