@@ -5,10 +5,6 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
-* current definition : project area has 57 clusters spillover has 58 ;
-* new definition : ;
-
-
 ***************************************;
 *  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
 ***************************************;
@@ -45,8 +41,8 @@ global LOCAL = 1;
 global data_load = 0;
 global data_prep = 1;
 global data_stat = 0;
-global data_regs = 0;
-global data_regs_DDD = 1;
+global data_regs = 1;
+global data_regs_DDD = 0;
 
 * PARAMETERS;
 global drop_others= 1   ; /* everything relative to unconstructed */
@@ -87,8 +83,11 @@ local qry = "
       A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
       A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size,
 
-      cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-      cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+      cast(B.input_id AS TEXT) as sal_code_rdp,
+      B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
+
+      cast(BP.input_id AS TEXT) as sal_code_placebo, 
+      BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
@@ -98,7 +97,8 @@ local qry = "
 
     LEFT JOIN (
       SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-      FROM distance_sal_2001_rdp WHERE distance<=4000
+      FROM distance_sal_2001_rdp 
+      WHERE distance<=4000
       GROUP BY input_id 
       HAVING COUNT(input_id)<=50 
         AND distance == MIN(distance)
@@ -141,8 +141,11 @@ local qry = "
       A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
       A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size,
 
-      cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-      cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+      cast(B.input_id AS TEXT) as sal_code_rdp,
+      B.distance AS distance_rdp, B.target_id AS cluster_rdp,
+
+      cast(BP.input_id AS TEXT) as sal_code_placebo, 
+      BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
@@ -447,7 +450,7 @@ drop if others==1;
 omit regressors spillover others_post;
 };
 
-global outcomes1 "
+global outcomes "
   toilet_flush 
   water_inside 
   electric_cooking 
@@ -469,13 +472,15 @@ global outcomes1 "
 
 eststo clear;
 
-foreach var of varlist $outcomes1 {;
+foreach var of varlist $outcomes {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  test project_post_rdp = spillover_post_rdp;
+  estadd scalar pval = `=r(p)';
   sum `var' if e(sample)==1 & year ==2001, detail;
   estadd scalar Mean2001 = `=r(mean)';
   sum `var' if e(sample)==1 & year ==2011, detail;
   estadd scalar Mean2011 = `=r(mean)';
-  count if e(sample)==1 & spillover==1;
+  count if e(sample)==1 & spillover==1 & !project==1;
   estadd scalar hhspill = `=r(N)';
   count if e(sample)==1 & project==1;
   estadd scalar hhproj = `=r(N)';
@@ -491,6 +496,8 @@ foreach var of varlist $outcomes1 {;
 };
 
 areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
+test project_post_rdp = spillover_post_rdp;
+estadd scalar pval = `=r(p)';
 sum pop_density if e(sample)==1 & year ==2001, detail;
 estadd scalar Mean2001 = `=r(mean)';
 sum pop_density if e(sample)==1 & year ==2011, detail;
@@ -499,7 +506,7 @@ eststo pop_density;
 
 global X "{\tim}";
 
-estout $outcomes using census_hh_DDregs.tex, replace
+estout using census_hh_DDregs.tex, replace
   style(tex) 
   drop(_cons)
   rename(
@@ -523,32 +530,41 @@ estout $outcomes using census_hh_DDregs.tex, replace
     "spillover${X}post" [0.5em] 
     "spillover${X}constr" " \midrule"
   ))
-  stats(Mean2001 Mean2011 hhproj hhspill projcount r2 N , 
+  stats(pval Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
     labels(
+      "{\it p}-val, h\textsubscript{0}: project=spill. "
       "Mean Outcome 2001" 
       "Mean Outcome 2011" 
-      `"\# "Project" Households"'
-      `"\# "Spillover" Households"'
-      "\# Projects"
       "R$^2$" 
-      "N" 
+      "\# projects"
+      `"N project areas"'
+      `"N spillover areas"'  
+      "N"  
     ) 
     fmt(
+      %9.3fc
       %9.2fc
       %9.2fc 
+      %12.3fc 
       %12.0fc 
       %12.0fc 
       %12.0fc  
-      %12.3fc 
       %12.0fc 
     )
   )
-  starlevels( * 0.10 ** 0.05 *** 0.01) ;
-
-
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
+    
 };
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 
-
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 if $data_regs_DDD==1 {;
 
 keep if distance_rdp <= $tresh_dist_max_DDD  |  distance_placebo <= $tresh_dist_max_DDD ;
@@ -601,14 +617,15 @@ eststo clear;
 *areg toilet_flush $regressors , a(cluster_joined) cl(cluster_joined);
 *areg water_inside $regressors , a(cluster_joined) cl(cluster_joined);
 
-
 foreach var of varlist $outcomes1 {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  test project_post_rdp = spillover_post_rdp;
+  estadd scalar pval = `=r(p)';
   sum `var' if e(sample)==1 & year ==2001, detail;
   estadd scalar Mean2001 = `=r(mean)';
   sum `var' if e(sample)==1 & year ==2011, detail;
   estadd scalar Mean2011 = `=r(mean)';
-  count if e(sample)==1 & spillover==1;
+  count if e(sample)==1 & spillover==1 & project==1; 
   estadd scalar hhspill = `=r(N)';
   count if e(sample)==1 & project==1;
   estadd scalar hhproj = `=r(N)';
@@ -624,6 +641,8 @@ foreach var of varlist $outcomes1 {;
 };
 
 areg pop_density ${regressors} if a_n==1, a(cluster_joined) cl(cluster_joined);
+test project_post_rdp = spillover_post_rdp;
+estadd scalar pval = `=r(p)';
 sum pop_density if e(sample)==1 & year ==2001, detail;
 estadd scalar Mean2001 = `=r(mean)';
 sum pop_density if e(sample)==1 & year ==2011, detail;
@@ -660,28 +679,32 @@ estout $outcomes using census_hh_DDDregs.tex, replace
     spillover [0.5em] 
     post  [0.5em] " \midrule"
   ))
-  stats(Mean2001 Mean2011 hhproj hhspill projcount r2 N , 
+  stats(pval Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
     labels(
+      "{\it p}-val, h\textsubscript{0}: project=spill. "
       "Mean Outcome 2001" 
       "Mean Outcome 2011" 
-      `"\# "Project" Households"'
-      `"\# "Spillover" Households"'
-      "\# Projects"
       "R$^2$" 
-      "N" 
+      "\# projects"
+      `"N project areas"'
+      `"N spillover areas"'  
+      "N"  
     ) 
     fmt(
+      %9.3fc
       %9.2fc
       %9.2fc 
+      %12.3fc 
       %12.0fc 
       %12.0fc 
       %12.0fc  
-      %12.3fc 
       %12.0fc 
     )
   )
-  starlevels( * 0.10 ** 0.05 *** 0.01) ;
-
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
 
 };
 *****************************************************************;
