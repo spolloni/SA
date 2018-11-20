@@ -84,8 +84,8 @@ global ifhists = "
 * what to run?;
 
 global ddd_regs_d = 0;
-global ddd_regs_t = 0;
-global ddd_table  = 1;
+global ddd_regs_t = 1;
+global ddd_table  = 0;
 
 * load data; 
 cd ../..;
@@ -292,8 +292,12 @@ global dists_all "
   plus3 rdpplus3  
   other rdpother ${dists_all}";
 
-*reg lprice $dists_all i.purch_yr#i.latlongroup i.purch_mo erf_size* if $ifregs, cl(latlongroup);
-areg lprice $dists_all i.purch_yr#i.purch_mo if $ifregs,  a(cluster_joined) cl(cluster_joined);
+areg lprice $dists_all i.purch_yr#i.purch_mo if $ifregs,  a(cluster_joined);
+
+*adjustment terms to get the right coeffs;
+global adj_plus1 = _b[rdpplus1] - _b[rdpminus1];
+global adj_plus2 = _b[rdpplus2] - _b[rdpminus1];
+global adj_plus3 = _b[rdpplus3] - _b[rdpminus1];
 
 * plot the coeffs;
 preserve;
@@ -311,20 +315,20 @@ preserve;
   replace group =3  if strpos(parm,"plus2") >0;
   replace group =4  if strpos(parm,"plus3") >0;
 
-  pause on;
-  pause;
-
-
   drop if contin == .;
-  keep if strpos(parm,"rdp") >0 & strpos(parm,"post") >0;
 
-  *reaarrange continuous var;
-  drop if contin > 9000;
+  replace estimate = estimate + $adj_plus1 if group==2;
+  replace estimate = estimate + $adj_plus2 if group==3;
+  replace estimate = estimate + $adj_plus3 if group==4;
+
   sort contin;
+  drop if contin > 9000;
 
   tw
-    (rspike max90 min90 contin, lc(gs7) lw(thin) )
-    (connected estimate contin, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium))
+    (connected estimate contin if group==1, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(solid) lw(medium))
+    (connected estimate contin if group==2, ms(o) msiz(medium) mlc(maroon) mfc(maroon) lc(maroon) lp(solid) lw(medium))
+    (connected estimate contin if group==3, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(shortdash) lw(medium))
+    (connected estimate contin if group==4, ms(o) msiz(medium) mlc(maroon) mfc(maroon) lc(maroon) lp(longdash) lw(medium))
     ,
     xtitle("Distance to project border (meters)",height(5))
     ytitle("Effect on log housing prices.",height(5))
@@ -335,13 +339,18 @@ preserve;
     ylabel(-.4(.2).4)
     yline(0,lw(thin)lp(shortdash))
     graphregion(margin(r=7))
-    legend(order(2 "DDD coefficients" 1 "90% Confidence Intervals" ) symx(6) col(1)
-    ring(0) position(2) bm(medium) rowgap(small)  
-    colgap(small) size(*.95) region(lwidth(none)))
+    legend(order(
+      1 "1 year pre-const." 
+      2 "1st year post-const."
+      3 "2nd year post-const." 
+      4 "3rd year post-const."   
+    )) /// symx(6) col(1)
+    /// ring(0) position(2) bm(medium) rowgap(small)  
+    /// colgap(small) size(*.95) region(lwidth(none)))
     note("`3'");
 
 restore;
-graphexportpdf timeplot_admin_${treat}, dropeps;
+graphexportpdf DDDplot_pertime, dropeps;
 
 };
 *****************************************************************;
