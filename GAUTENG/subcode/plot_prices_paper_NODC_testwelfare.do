@@ -68,10 +68,8 @@ global round = 0.15;  /* rounding for lat-lon FE */
 
 * data subset for regs (1);
 global ifregs = "
-       s_N <30 &
-       rdp_never ==1 &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
+       purch_price > 2000 & purch_price<800000 & purch_yr > 2000 & s_N <30 & 
+       ( ( rdp_never==1 ) | ( rdp_never==0 & pn>1 & pn<=4 & distance_rdp<0 ))
        ";
 
 global ifhists = "
@@ -83,10 +81,10 @@ global ifhists = "
 
 * what to run?;
 
-global ddd_regs_d = 0;
+global ddd_regs_d = 1;
 global ddd_regs_t = 0;
-global ddd_regs_t_alt = 1;
-global ddd_table  = 1;
+global ddd_regs_t_alt = 0;
+global ddd_table  = 0;
 
 * load data; 
 cd ../..;
@@ -97,6 +95,14 @@ use gradplot_admin.dta, clear;
 cd ../..;
 cd $output ;
 
+* get transaction counts after construction;
+sort property_id purch_yr purch_mo purch_day; 
+by property_id: g pn=_n;
+replace pn=. if mo2con_rdp<-1;
+egen pn_min=min(pn), by(property_id);
+replace pn = pn-pn_min+1;
+drop pn_min;
+
 
 * treatment dummies;
 gen treat_rdp  = (distance_rdp <= $treat);
@@ -106,30 +112,8 @@ replace treat_placebo = 2 if distance_placebo > $max;
 gen treat_joined = (distance_joined <= $treat);
 replace treat_joined = 2 if distance_joined > $max;
 
-foreach v in _rdp _placebo _joined {;
-  * create distance dummies;
-  sum distance`v';
-  if $max == 0 {;
-    global max = round(ceil(`r(max)'),$bin);
-  };
-  egen dists`v' = cut(distance`v'),at(0($bin)$max); 
-  replace dists`v' = 9999 if distance`v' <0 | distance`v'>=$max | distance`v' ==. ;
-  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
-
-  * create date dummies;
-  gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
-  replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
-  replace mo2con_reg`v' = floor(mo2con`v'/$mbin) if mo2con_reg`v' > 0 & mo2con_reg`v'!=. ;
-  replace mo2con_reg`v' = abs(mo2con_reg`v' - 1000) if mo2con`v'<0;
-  replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
-  * prepost dummies;
-  gen prepost_reg`v' = cond(mo2con_reg`v'<1000, 1, 0);
-  replace prepost_reg`v' = 2 if mo2con_reg`v' > 9000;
-};
-
 * transaction count per seller;
 bys seller_name: g s_N=_N;
-
 
 *extra time-controls;
 gen day_date_sq = day_date^2;
@@ -151,6 +135,30 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 if $ddd_regs_d ==1 {;
 
 
+foreach v in _rdp _placebo _joined {;
+  * create distance dummies;
+  sum distance`v';
+  if $max == 0 {;
+    global max = round(ceil(`r(max)'),$bin);
+  };
+  egen dists`v' = cut(distance`v'),at(0($bin)$max);
+  replace dists`v' = dists`v' + $bin ;
+  replace dists`v' = 0 if distance`v'<=0; 
+  replace dists`v' = 9999 if  distance`v'>=$max | distance`v' ==. ;
+  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+
+  * create date dummies;
+  gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
+  replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = floor(mo2con`v'/$mbin) if mo2con_reg`v' > 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = abs(mo2con_reg`v' - 1000) if mo2con`v'<0;
+  replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
+  * prepost dummies;
+  gen prepost_reg`v' = cond(mo2con_reg`v'<1000, 1, 0);
+  replace prepost_reg`v' = 2 if mo2con_reg`v' > 9000;
+};
+
+
 levelsof dists_joined;
 global dists_all "";
 foreach level in `r(levels)' {;
@@ -169,10 +177,11 @@ foreach level in `r(levels)' {;
   
 };
 
+global max1 = $max + $bin ;
 omit dists_all 
-  dists_all_$max dists_rdp_$max
-  dists_post_$max dists_rdp_post_$max
-  dists_other_$max dists_rdp_other_$max ;
+  dists_all_$max1 dists_rdp_$max1
+  dists_post_$max1 dists_rdp_post_$max1
+  dists_other_$max1 dists_rdp_other_$max1 ;
 gen rdp = placebo==0; 
 gen post = (prepost_reg_joined ==1 ); 
 gen rdppost = rdp*post; 
@@ -204,9 +213,9 @@ preserve;
     ,
     xtitle("Distance to project border (meters)",height(5))
     ytitle("Effect on log housing prices",height(5))
-    xlabel(200 "0-200m" 400 "200-400m"
-           600 "400-600m" 800 "600-800m"
-           1000 "800-1000m" 1200 "1000-1200m",
+    xlabel(200 "<0m" 400 "0-200m" 600 "200-400m"
+           800 "400-600m" 1000 "600-800m"
+           1200 "800-1000m" 1400 "1000-1200m",
            labsize(small))
     ylabel(-.4(.2).4)
     yline(0,lw(thin)lp(shortdash))
@@ -232,6 +241,29 @@ graphexportpdf price_regs_DDDplot, dropeps;
 *****************************************************************;
 if $ddd_regs_t ==1 {;
 
+
+foreach v in _rdp _placebo _joined {;
+  * create distance dummies;
+  sum distance`v';
+  if $max == 0 {;
+    global max = round(ceil(`r(max)'),$bin);
+  };
+  egen dists`v' = cut(distance`v'),at(0($bin)$max);
+  replace dists`v' = dists`v' + $bin ;
+  replace dists`v' = 0 if distance`v'<=0; 
+  replace dists`v' = 9999 if  distance`v'>=$max | distance`v' ==. ;
+  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+
+  * create date dummies;
+  gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
+  replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = floor(mo2con`v'/$mbin) if mo2con_reg`v' > 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = abs(mo2con_reg`v' - 1000) if mo2con`v'<0;
+  replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
+  * prepost dummies;
+  gen prepost_reg`v' = cond(mo2con_reg`v'<1000, 1, 0);
+  replace prepost_reg`v' = 2 if mo2con_reg`v' > 9000;
+};
 
 
 gen prepost_regt_joined = 0;
@@ -371,6 +403,29 @@ graphexportpdf DDDplot_pertime, dropeps;
 *************   DDD REGRESSION WITH TIME  ALTERNATE  *********************;
 *****************************************************************;
 if $ddd_regs_t_alt ==1 {;
+
+
+foreach v in _rdp _placebo _joined {;
+  * create distance dummies;
+  sum distance`v';
+  if $max == 0 {;
+    global max = round(ceil(`r(max)'),$bin);
+  };
+  egen dists`v' = cut(distance`v'),at(0($bin)$max);
+  replace dists`v' = 9999 if distance`v'<0 | distance`v'>=$max | distance`v' ==. ;
+  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+
+  * create date dummies;
+  gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
+  replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = floor(mo2con`v'/$mbin) if mo2con_reg`v' > 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = abs(mo2con_reg`v' - 1000) if mo2con`v'<0;
+  replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
+  * prepost dummies;
+  gen prepost_reg`v' = cond(mo2con_reg`v'<1000, 1, 0);
+  replace prepost_reg`v' = 2 if mo2con_reg`v' > 9000;
+};
+
 
 gen prepost_regt_joined = 0;
 replace prepost_regt_joined = 1 if mo2con_joined < -12   & mo2con_joined>= -24; 
@@ -554,6 +609,27 @@ graphexportpdf DDDplot_pertime_alt, dropeps;
 *****************************************************************;
 if $ddd_table ==1 {;
 
+
+foreach v in _rdp _placebo _joined {;
+  * create distance dummies;
+  sum distance`v';
+  if $max == 0 {;
+    global max = round(ceil(`r(max)'),$bin);
+  };
+  egen dists`v' = cut(distance`v'),at(0($bin)$max);
+  replace dists`v' = 9999 if distance`v'<0 | distance`v'>=$max | distance`v' ==. ;
+  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+
+  * create date dummies;
+  gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
+  replace mo2con_reg`v' = -ceil(abs(mo2con`v')/$mbin) if mo2con_reg`v' < 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = floor(mo2con`v'/$mbin) if mo2con_reg`v' > 0 & mo2con_reg`v'!=. ;
+  replace mo2con_reg`v' = abs(mo2con_reg`v' - 1000) if mo2con`v'<0;
+  replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
+  * prepost dummies;
+  gen prepost_reg`v' = cond(mo2con_reg`v'<1000, 1, 0);
+  replace prepost_reg`v' = 2 if mo2con_reg`v' > 9000;
+};
 
 
 gen dists_joined_table = dists_joined;
