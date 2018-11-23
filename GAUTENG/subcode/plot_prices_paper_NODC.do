@@ -51,8 +51,8 @@ end;
 *******************;
 
 * SET OUTPUT FOLDER ;
-*global output = "Output/GAUTENG/gradplots";
-global output = "Code/GAUTENG/paper/figures";
+global output = "Output/GAUTENG/gradplots";
+*global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
@@ -61,7 +61,7 @@ global twl   = "3";   /* look at twl years before construction */
 global twu   = "3";   /* look at twu years after construction */
 global bin   = 200;   /* distance bin width for dist regs   */
 global max   = 1200;  /* distance maximum for distance bins */
-global mbin  =  12;   /* months bin width for time-series   */
+global mbin  = 12;   /* months bin width for time-series   */
 global msiz  = 20;    /* minimum obs per cluster            */
 global treat = 700;   /* distance to be considered treated  */
 global round = 0.15;  /* rounding for lat-lon FE */
@@ -85,8 +85,12 @@ global ifhists = "
 
 global ddd_regs_d = 0;
 global ddd_regs_t = 0;
-global ddd_regs_t_alt = 1;
-global ddd_table  = 1;
+global ddd_table  = 0;
+
+global ddd_regs_t_alt  = 0;
+global ddd_regs_t2_alt = 0;
+
+global countour = 1;
 
 * load data; 
 cd ../..;
@@ -365,15 +369,142 @@ graphexportpdf DDDplot_pertime, dropeps;
 *****************************************************************;
 *****************************************************************;
 
+*****************************************************************;
+*************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
+*****************************************************************;
+if $ddd_table ==1 {;
 
+
+
+gen dists_joined_table = dists_joined;
+replace dists_joined_table = 800 
+  if dists_joined_table == 1000 | dists_joined_table == 1200;
+
+levelsof dists_joined_table;
+global dists_all "";
+foreach level in `r(levels)' {;
+
+    gen dists_all_`level'  = (dists_joined == `level'); 
+    gen dists_rdp_`level'  = (dists_joined == `level' & placebo==0) ;
+    gen dists_post_`level' = (dists_joined == `level' & prepost_reg_joined ==1);
+    gen dists_rdp_post_`level' = (dists_joined == `level' & placebo==0 & prepost_reg_joined==1);
+    gen dists_other_`level' = (dists_joined == `level' & prepost_reg_joined ==2);
+    gen dists_rdp_other_`level' = (dists_joined == `level' & placebo==0 & prepost_reg_joined ==2);
+    global dists_all "
+      dists_all_`level' dists_rdp_`level' 
+      dists_post_`level' dists_rdp_post_`level' 
+      dists_other_`level' dists_rdp_other_`level'
+      ${dists_all}";
+  
+};
+
+omit dists_all 
+  dists_all_800 dists_rdp_800
+  dists_post_800 dists_rdp_post_800
+  dists_other_800 dists_rdp_other_800 ;
+gen rdp = placebo==0; 
+gen post = (prepost_reg_joined ==1 ); 
+gen rdppost = rdp*post; 
+gen other = (prepost_reg_joined ==2);
+gen rdpother = rdp*other;
+global dists_all "rdp post rdppost other rdpother ${dists_all}";
+
+eststo clear;
+
+egen clyrgroup = group(purch_yr cluster_joined);
+egen latlonyr = group(purch_yr latlongroup);
+
+reg lprice $dists_all i.purch_yr#i.purch_mo erf_size* if $ifregs, cl(cluster_joined);
+estadd local cubes "\checkmark";
+estadd local projfe ".";
+estadd local yrprfe ".";
+estadd local latlfe ".";
+estadd local ymfe "\checkmark";
+estadd local  mfe ".";
+eststo;
+
+areg lprice $dists_all i.purch_yr#i.purch_mo erf_size* if $ifregs, a(cluster_joined) cl(cluster_joined);
+estadd local cubes "\checkmark";
+estadd local projfe "\checkmark";
+estadd local yrprfe ".";
+estadd local latlfe ".";
+estadd local ymfe "\checkmark";
+estadd local  mfe ".";
+eststo;
+
+areg lprice $dists_all i.purch_mo erf_size* if $ifregs, a(clyrgroup) cl(cluster_joined);
+estadd local cubes "\checkmark";
+estadd local projfe ".";
+estadd local yrprfe "\checkmark";
+estadd local latlfe ".";
+estadd local ymfe ".";
+estadd local  mfe "\checkmark";
+eststo;
+
+areg lprice $dists_all i.purch_mo erf_size* if $ifregs, a(latlonyr) cl(latlongroup);
+estadd local cubes "\checkmark";
+estadd local projfe ".";
+estadd local yrprfe ".";
+estadd local latlfe "\checkmark";
+estadd local ymfe ".";
+estadd local mfe "\checkmark";
+eststo;
+
+global X "{\tim}";
+
+estout  using price_regDDD.tex, replace
+  style(tex)
+  keep(
+    dists_rdp_post_600 
+    dists_rdp_post_400 
+    dists_rdp_post_200
+  )
+  varlabels(
+    dists_rdp_post_600 "400m to 600m" 
+    dists_rdp_post_400 "200m to 400m" 
+    dists_rdp_post_200 "0 to 200m",
+    el(
+      dists_rdp_post_200 [0.5em] 
+      dists_rdp_post_400 [0.5em] 
+      dists_rdp_post_600 " \midrule"
+  )) 
+  order(
+    dists_rdp_post_200
+    dists_rdp_post_400
+    dists_rdp_post_600  
+  )
+  mlabels(,none)
+  collabels(none)
+  cells( b(fmt(3) ) se(par fmt(3)) )
+  stats(cubes projfe yrprfe latlfe ymfe mfe r2 N , 
+    labels(
+      "Cubic in lot size" 
+      "Project \textsc{FE}" 
+      "Year${X}Project \textsc{FE}"
+      "Year${X}Lat-Lon cell \textsc{FE}"
+      "Year-Month \textsc{FE}"
+      "Month \textsc{FE}"
+      "R$^2$" 
+      "N" ) 
+    fmt(%18s %18s %18s %18s %18s %18s %12.3fc %12.0fc )
+  )
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01);
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
 
 *****************************************************************;
-*************   DDD REGRESSION WITH TIME  ALTERNATE  *********************;
+*************   DDD REGRESSION WITH TIME  ALTERNATE  ************;
 *****************************************************************;
 if $ddd_regs_t_alt ==1 {;
 
 gen prepost_regt_joined = 0;
-replace prepost_regt_joined = 1 if mo2con_joined < -12   & mo2con_joined>= -24; 
+replace prepost_regt_joined = 1 if mo2con_joined >= -24 & mo2con_joined < -12; 
 replace prepost_regt_joined = 2 if mo2con_joined >= -12 & mo2con_joined< 0; 
 replace prepost_regt_joined = 3 if mo2con_joined >= 0  & mo2con_joined< 12; 
 replace prepost_regt_joined = 4 if mo2con_joined >= 12 & mo2con_joined< 24; 
@@ -536,144 +667,197 @@ graphexportpdf DDDplot_pertime_alt, dropeps;
 *****************************************************************;
 *****************************************************************;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 *****************************************************************;
-*************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
+*************   DDD REGRESSION WITH TIME  ALTERNATE  ************;
 *****************************************************************;
-if $ddd_table ==1 {;
+if $ddd_regs_t2_alt ==1 {;
+
+gen close = (dists_joined<=400);
+replace close = 2 if dists_joined==9999;
+
+gen prepost_regt_joined = 0;
+replace prepost_regt_joined = 1 if mo2con_joined >= -24 & mo2con_joined < -12; 
+replace prepost_regt_joined = 2 if mo2con_joined >= -12 & mo2con_joined< 0; 
+replace prepost_regt_joined = 3 if mo2con_joined >= 0  & mo2con_joined< 12; 
+replace prepost_regt_joined = 4 if mo2con_joined >= 12 & mo2con_joined< 24; 
+replace prepost_regt_joined = 5 if mo2con_joined >= 24 & mo2con_joined< 36; 
+replace prepost_regt_joined = 6 if mo2con_reg_joined >9000; 
 
 
-
-gen dists_joined_table = dists_joined;
-replace dists_joined_table = 800 
-  if dists_joined_table == 1000 | dists_joined_table == 1200;
-
-levelsof dists_joined_table;
+levelsof prepost_regt_joined;
 global dists_all "";
 foreach level in `r(levels)' {;
 
-    gen dists_all_`level'  = (dists_joined == `level'); 
-    gen dists_rdp_`level'  = (dists_joined == `level' & placebo==0) ;
-    gen dists_post_`level' = (dists_joined == `level' & prepost_reg_joined ==1);
-    gen dists_rdp_post_`level' = (dists_joined == `level' & placebo==0 & prepost_reg_joined==1);
-    gen dists_other_`level' = (dists_joined == `level' & prepost_reg_joined ==2);
-    gen dists_rdp_other_`level' = (dists_joined == `level' & placebo==0 & prepost_reg_joined ==2);
-    global dists_all "
-      dists_all_`level' dists_rdp_`level' 
-      dists_post_`level' dists_rdp_post_`level' 
-      dists_other_`level' dists_rdp_other_`level'
-      ${dists_all}";
+  gen time_`level'_close_rdp  = prepost_regt_joined==`level' & close ==1 & placebo==0;
+  gen time_`level'_far_rdp    = prepost_regt_joined==`level' & close ==0 & placebo==0;
+  gen time_`level'_other_rdp  = prepost_regt_joined==`level' & close ==2 & placebo==0;
+  gen time_`level'_close_plac = prepost_regt_joined==`level' & close ==1 & placebo==1;
+  gen time_`level'_far_plac   = prepost_regt_joined==`level' & close ==0 & placebo==1;
+  gen time_`level'_other_plac = prepost_regt_joined==`level' & close ==2 & placebo==1;
+
+  global dists_all "
+    time_`level'_close_rdp 
+    time_`level'_far_rdp   
+    time_`level'_other_rdp 
+    time_`level'_close_plac
+    time_`level'_far_plac  
+    time_`level'_other_plac
+    ${dists_all}";
+
+};
+
+
+
+omit dists_all  time_2_close_rdp;
+
+
+*areg lprice $dists_all i.purch_yr#i.purch_mo if $ifregs,  a(cluster_joined);
+areg lprice $dists_all i.purch_yr if $ifregs, a(cluster_joined);
+
+* plot the coeffs;
+preserve;
+
+  parmest, fast le(90); 
+  keep if strpos(parm, "time") > 0; 
+  drop if strpos(parm, "other") > 0;
+
+  egen contin = sieve(parm), keep(n);
+  destring contin, replace;
+
+  gen near = strpos(parm,"close") >0 ;
+  gen rdp = strpos(parm,"rdp") >0 ;
+
+  sort contin;
+  drop if contin==6;
+
+  tw
+    (connected estimate contin if near==1 & rdp==1, ms(o) msiz(medium) mlc("`c1' 0  0") mfc("`c1' 0 0") lc("`c1' 0 0") lp(solid) lw(medium))
+    (connected estimate contin if near==1 & rdp==0, ms(o) msiz(medium) mlc("`c1' 0 100") mfc("`c1' 0 100") lc("`c1' 0 100") lp(longdash) lw(medium))
+    (connected estimate contin if near==0 & rdp==1, ms(o) msiz(medium) mlc("`c1' 0  0") mfc("`c1' 0 0") lc(maroon) lp(solid) lw(medium))
+    (connected estimate contin if near==0 & rdp==0, ms(o) msiz(medium) mlc("`c1' 0 100") mfc("`c1' 0 100") lc(maroon) lp(longdash) lw(medium))
+  ;
+
+restore;
+graphexportpdf DDDplot_pertime_alt, dropeps;
+    graph export "DDDplot_pertime_alt2.pdf", as(pdf) replace  ;
+
+
+};
+*****************************************************************;
+*****************************************************************;
+*****************************************************************;
+
+
+*****************************************************************;
+**************************CONTOUR********************************;
+*****************************************************************;
+if $countour ==1 {;
+*preserve;
+
+  keep if $ifregs==1;
+
+  * make residuals;
+  egen clyrgroup = group(purch_yr cluster_joined);
+  areg lprice i.purch_yr#i.purch_mo erf_size* if $ifregs, a(cluster_joined);
+  *reg lprice i.purch_yr if $ifregs;
+  predict e, residuals;
+
+  drop if dists_joined > 9000;
+  drop if mo2con_reg_joined > 9000;
+
+  gen pre = mo2con_reg_joined>1000;
   
-};
+  
+  collapse (mean) e, by(pre dists_joined placebo);
+  reshape wide e, i( placebo dists_joined) j(pre);
+  replace dists_joined = dists_joined- $bin/2;
 
-omit dists_all 
-  dists_all_800 dists_rdp_800
-  dists_post_800 dists_rdp_post_800
-  dists_other_800 dists_rdp_other_800 ;
-gen rdp = placebo==0; 
-gen post = (prepost_reg_joined ==1 ); 
-gen rdppost = rdp*post; 
-gen other = (prepost_reg_joined ==2);
-gen rdpother = rdp*other;
-global dists_all "rdp post rdppost other rdpother ${dists_all}";
+  tw
+  (connected e1 dists_joined if placebo==1,
+    ms(d) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
+  (connected e1 dists_joined if placebo==0,
+    ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)),
+  xlabel(0(200)1200, labs(small))
+  ylabel(-.3(.1).3, labs(small))
+  xtitle("Distance from project border (meters)",height(5))
+  ytitle("Mean residualized log purchase price",height(-5))
+  plotr(lw(medthick ))
+    legend(order(2 "Constructed" 1 "Unconstructed"  ) symx(6)
+    ring(0) position(11) bm(medium) rowgap(small) col(1)
+    colgap(small) size(medsmall) region(lwidth(none)))
+  aspect(.75);
+  graphexportpdf price_pre_means, dropeps;
 
-eststo clear;
+  gen e = e0-e1;
+  replace dists_joined = dists_joined+7 if placebo==1;
+  replace dists_joined = dists_joined-7 if placebo==0;
 
-egen clyrgroup = group(purch_yr cluster_joined);
-egen latlonyr = group(purch_yr latlongroup);
+  tw
+  (dropline e dists_joined if placebo==1,  col(maroon) lw(medthick) msiz(small) m(O))
+  (dropline e dists_joined if placebo==0,  col(gs0) lw(medthick) msiz(small) m(O)),
+  xlabel(0(200)1200, labs(small))
+  ylabel(-.3(.1).3, labs(small))
+  xtitle("Distance from project border (meters)",height(5))
+  ytitle("Mean change in residualized log purchase price",height(-5))
+  plotr(lw(medthick ))
+    legend(order(2 "Constructed" 1 "Unconstructed"  ) symx(6)
+    ring(0) position(2) bm(medium) rowgap(small) col(1)
+    colgap(small) size(medsmall) region(lwidth(none)))
+  aspect(.75)
+  ;
+  graphexportpdf prices_rawchanges, dropeps;
 
-reg lprice $dists_all i.purch_yr#i.purch_mo erf_size* if $ifregs, cl(cluster_joined);
-estadd local cubes "\checkmark";
-estadd local projfe ".";
-estadd local yrprfe ".";
-estadd local latlfe ".";
-estadd local ymfe "\checkmark";
-estadd local  mfe ".";
-eststo;
-
-areg lprice $dists_all i.purch_yr#i.purch_mo erf_size* if $ifregs, a(cluster_joined) cl(cluster_joined);
-estadd local cubes "\checkmark";
-estadd local projfe "\checkmark";
-estadd local yrprfe ".";
-estadd local latlfe ".";
-estadd local ymfe "\checkmark";
-estadd local  mfe ".";
-eststo;
-
-areg lprice $dists_all i.purch_mo erf_size* if $ifregs, a(clyrgroup) cl(cluster_joined);
-estadd local cubes "\checkmark";
-estadd local projfe ".";
-estadd local yrprfe "\checkmark";
-estadd local latlfe ".";
-estadd local ymfe ".";
-estadd local  mfe "\checkmark";
-eststo;
-
-areg lprice $dists_all i.purch_mo erf_size* if $ifregs, a(latlonyr) cl(latlongroup);
-estadd local cubes "\checkmark";
-estadd local projfe ".";
-estadd local yrprfe ".";
-estadd local latlfe "\checkmark";
-estadd local ymfe ".";
-estadd local mfe "\checkmark";
-eststo;
-
-global X "{\tim}";
-
-estout  using price_regDDD.tex, replace
-  style(tex)
-  keep(
-    dists_rdp_post_600 
-    dists_rdp_post_400 
-    dists_rdp_post_200
-  )
-  varlabels(
-    dists_rdp_post_600 "400m to 600m" 
-    dists_rdp_post_400 "200m to 400m" 
-    dists_rdp_post_200 "0 to 200m",
-    el(
-      dists_rdp_post_200 [0.5em] 
-      dists_rdp_post_400 [0.5em] 
-      dists_rdp_post_600 " \midrule"
-  )) 
-  order(
-    dists_rdp_post_200
-    dists_rdp_post_400
-    dists_rdp_post_600  
-  )
-  mlabels(,none)
-  collabels(none)
-  cells( b(fmt(3) ) se(par fmt(3)) )
-  stats(cubes projfe yrprfe latlfe ymfe mfe r2 N , 
-    labels(
-      "Cubic in lot size" 
-      "Project \textsc{FE}" 
-      "Year${X}Project \textsc{FE}"
-      "Year${X}Lat-Lon cell \textsc{FE}"
-      "Year-Month \textsc{FE}"
-      "Month \textsc{FE}"
-      "R$^2$" 
-      "N" ) 
-    fmt(%18s %18s %18s %18s %18s %18s %12.3fc %12.0fc )
-  )
-  starlevels( 
-    "\textsuperscript{c}" 0.10 
-    "\textsuperscript{b}" 0.05 
-    "\textsuperscript{a}" 0.01);
-
+*restore;
 };
 *****************************************************************;
 *****************************************************************;
 *****************************************************************;
+
+* *****************************************************************;
+* **************************CONTOUR********************************;
+* *****************************************************************;
+* if $couZtour ==1 {;
+* *preserve;
+
+*   keep if $ifregs==1;
+
+*   * make residuals;
+*   egen clyrgroup = group(purch_yr cluster_joined);
+*   areg lprice i.purch_mo erf_size* if $ifregs, a(clyrgroup);
+*   *reg lprice i.purch_yr if $ifregs;
+*   predict e, residuals;
+
+*   drop if dists_joined > 9000;
+*   drop if mo2con_reg_joined > 9000;
+
+*   mlowess lprice distance_joined mo2con_joined if placebo==1, nograph predict(prede1) log;
+*   mlowess lprice distance_joined mo2con_joined if placebo==0, nograph predict(prede2) log;
+
+*   egen prede = rowfirst(prede1-prede2);
+
+*   gen rdists = round(distance_joined,50);
+
+*   replace mo2con_reg_joined = - (mo2con_reg_joined -1000) if mo2con_reg_joined>1000 ;
+
+*   collapse (mean) prede, by(mo2con_reg_joined rdists placebo);
+
+*   export delimited using "lowess.csv", replace;
+
+
+
+* *restore;
+* };
+* *****************************************************************;
+* *****************************************************************;
+* *****************************************************************;
+
+
+
+
+
+
+
+
+
+
+
