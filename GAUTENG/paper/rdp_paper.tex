@@ -55,7 +55,7 @@
 \maketitle
 \begin{abstract}
 
-	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, remote sensed housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using a difference-in-differences design.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no significant changes in housing quantity, quality, or price. 
+	Does subsidized housing improve neighborhood quality in developing countries? We estimate economic spillovers from a large public housing program in South Africa using geocoded deeds records, remotely sensed housing density, and census data.  To identify project impacts, we compare constructed and unconstructed projects at fine geographic levels using difference-in-differences designs.  Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. Yet just outside of project footprints, we detect no significant changes in housing quantity, quality, or price. 
 
  %\\
 %\vspace{0in}\\
@@ -82,7 +82,11 @@
 
 The promoted goals of these programs are twofold. First, policymakers stress how subsidized housing improves household wellbeing along a variety of dimensions. This is well supported by existing studies on direct recipient impacts, which link housing programs to improvements in child health, women's employment, and quality of life \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}. A second set of policy goals pertains to broader urban development impacts, driven by spillovers to neighboring areas. For instance, subsidized housing in South Africa is proposed for ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}. 
 
-Spillover effects may account for a significant share of the total welfare impacts of housing projects.  In the US, \cite{diamond2016wants} calculate that affordable housing in low-income areas generates substantial benefits on surrounding areas, often exceeding the total costs of these programs.  In developing settings, lax building codes and zoning laws make for more ambiguous predictions on the types of spillovers produced by housing projects.
+Spillover effects may account for a significant share of the total welfare impacts of housing projects.  In the US, \cite{diamond2016wants} calculate that affordable housing in low-income areas generates substantial benefits on surrounding areas, often exceeding the total costs of these programs. In developing countries, lax building codes and weak zoning laws make for more ambiguous predictions on the types of spillovers produced by housing projects.
+
+%These effects are heterogeneous, however, and depend on the relative urban amenity provided by the government-sponsored constructions.
+
+
 
 Welfare effects may be even greater developing settings where preexisting slums impose negative externalities on neighboring areas.
 
@@ -392,9 +396,9 @@ Our final data source consists of hand-coded building surveys derived from high-
 
 To estimate the urban development impacts of subsidized housing both within project boundaries as well as nearby, we implement a difference-in-differences strategy assessing changes in outcomes for constructed projects, using unconstructed projects as counterfactuals. Given the varying temporal and spatial granularities of our measured outcomes, we estimate different forms of the following specification:
 
-\begin{equation}
+\begin{flalign}
 y_{ipt} \, = \, \lambda_{ip} + \sum\limits_{d} I^d_{ip}\Big( \alpha^d D_{pt}C_{p} \, + \, \beta^dD_{pt} \, + \, \gamma^dC_{p} \, + \, \theta^{d} \Big) \, + \, \delta X_{ipt} \, + \, \varepsilon_{ipt}
-\end{equation}
+\end{flalign}
 
 % $D_{pt}$ and $C_{p}$ are post and treatment dummies, where 
 \noindent where $y_{ipt}$ is the outcome for unit $i$ in vicinity of project $p$ observed at time $t$. $D_{pt}$ equals one if period $t$ is after project $p$'s assigned construction date, and $C_{p}$ equals one if project $p$ is constructed. We interact the post $D_{pt}$, constructed $C_{p}$, and interaction $D_{pt}C_{p}$ terms with a set of distance dummies $I^d_{ipt}$, where $I^d_{ipt}$ equals one if unit $i$ is located at distance $d$ from the boundary of project $p$. Specifications may also include fixed-effects $\lambda_{ip}$ at the project or unit level, a vector $X_{ipt}$ of additional control variables, and an idiosyncratic error term $\varepsilon_{ipt}$.  Distances $d$ account for impacts both inside and outside of project boundaries. This approach therefore allows for difference-in-differences estimates to vary flexibly according to geographic exposure to housing projects.
@@ -534,15 +538,15 @@ Figure~\ref{fig:changeprice} graphs average changes in log-purchase prices befor
         %\vspace{2mm}
         \begin{subfigure}[b]{0.495\textwidth}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pre_means}
+            \includegraphics[width=\textwidth,trim={1.1cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pre_means}
             \caption[Network2]%
             {{\small pre-period log-purchase prices }}    
             \label{fig:preprice}
         \end{subfigure}
-        \vskip 1mm \vskip 0pt
+        \hfill
         \begin{subfigure}[b]{0.495\textwidth}   
             \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/prices_rawchanges}
+            \includegraphics[width=\textwidth,trim={1.1cm .3cm 0.1cm 0cm}, clip=true]{figures/prices_rawchanges}
             \caption[]%
             {{\small change in log-purchase prices}}    
             \label{fig:changeprice}
