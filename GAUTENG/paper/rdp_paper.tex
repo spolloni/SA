@@ -86,7 +86,7 @@ Spillover effects may account for a significant share of the total welfare impac
 
 Both the policy importance and theoretical ambiguity of these mechanisms motivate empirical analysis in a developing context.  Until recently, however, data limitations have largely precluded researchers from constructing granular measurements on the quantity, quality, and price of housing, both formal and informal. Using novel data sources, this paper contributes to filling this gap by identifying impacts on local neighborhoods at high spatial resolutions.   
 
-We analyze the direct and spillover effects of a large public housing program in South Africa.  We combine administrative records for \input{figures/total_cluster_rdp}constructed and \input{figures/total_cluster_placebo}planned but unconstructed projects with spatial data on property transactions, formal and informal housing densities, and dwelling characteristics.  To measure spillovers, we implement a simple difference-in-differences design at varying distances from pro\-ject boundaries.  At every distance, we compare changes in outcomes for constructed projects to changes for planned but unconstructed projects. When feasible, our estimates include a third layer of differencing, comparing effects near versus far from project boundaries. In this way, we are able to net-out systematic time-varying differences between treated and control areas, absent project construction. Our econometric approach allows us to flexibly capture how spillover effects change across space.  Planned but unconstructed project areas provide useful counterfactuals since governments may select unobservably worse land plots to build subsidized housing projects.  These control areas resemble treated areas at baseline across a range of measures, including preexisting housing density.  
+We analyze the direct and spillover effects of a large public housing program in South Africa.  We combine administrative records for \input{figures/total_cluster_rdp}constructed and \input{figures/total_cluster_placebo}planned but unconstructed projects with spatial data on property transactions, formal and informal housing densities, and dwelling characteristics.  To measure spillovers, we implement a difference-in-differences design at varying distances from pro\-ject boundaries.  At every distance, we compare changes in outcomes for constructed projects to changes for planned but unconstructed projects. When feasible, our estimates include a third layer of differencing, comparing effects near versus far from project boundaries. In this way, we are able to net-out systematic time-varying differences between treated and control areas, absent project construction. Our econometric approach allows us to flexibly capture how spillover effects change across space.  Planned but unconstructed project areas provide useful counterfactuals since governments may select unobservably worse land plots to build subsidized housing projects.  These control areas resemble treated areas at baseline across a range of measures, including preexisting housing density.  
 
 
 Within project boundaries, we find large improvements in access to services and home quality, but little net effects on total housing development. Compared to unconstructed areas, households living within projects (either in subsidized formal or informal housing) are more than 10 percentage points more likely to access flush toilets, indoor water taps, and electricity. The small net effects on total housing density mask a compositional change from informal to formal structures. We find greater densities of informal {\it backyard} dwellings, but not enough to offset steep declines in other types of informal housing. On the whole, these results suggest that subsidized housing projects provide positive local amenities through better house quality and improved infrastructure.
@@ -371,7 +371,7 @@ Figure~\ref{fig:rawpricemeans} performs an analogous exercise with property tran
         %\vspace{2mm}
         \begin{subfigure}[b]{0.495\textwidth}
             \centering
-            \includegraphics[width=\textwidth,trim={1.1cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pre_means}
+            \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pre_means}
             \caption[Network2]%
             {{\small pre-period log-purchase prices }}    
             \label{fig:preprice}
@@ -379,7 +379,7 @@ Figure~\ref{fig:rawpricemeans} performs an analogous exercise with property tran
         \hfill
         \begin{subfigure}[b]{0.495\textwidth}   
             \centering 
-            \includegraphics[width=\textwidth,trim={1.1cm .3cm 0.1cm 0cm}, clip=true]{figures/prices_rawchanges}
+            \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/prices_rawchanges}
             \caption[]%
             {{\small change in log-purchase prices}}    
             \label{fig:changeprice}
@@ -416,14 +416,14 @@ To draw statistical inference on the patterns depicted in section \ref{section:d
  & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
 \input{figures/census_hh_DDregs}
 \bottomrule
-\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
 \end{tabular}
 \end{table}
 }
 \end{landscape}
 }
 
-To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-sections and test for differential 10-year changes between constructed and unconstructed project areas. Because these data have low spatial resolutions, we define two levels of exposure to the policy: $D=\{\text{\small\it project},\text{\small\it spillover}\}$. As in table \ref{table:projectdescriptivescensus}, households labeled as {\it project} live in census small areas with over 30\% area overlap with project boundaries. The remaining {\it spillover} households live in small areas with less than 30\% area overlap, but whose centroids still fall within 1.5 km of a project boundary. Appendix \ref{appendix:bufferdesign} maps an example of {\it project} and {\it spillover} small areas for a given constructed project. With these definitions in hand, we estimate:
+To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-sections and test for differential 10-year changes between constructed and unconstructed project areas. Because these data have coarser spatial resolutions, we define two levels of exposure to the policy: $D=\{\text{\small\it project},\text{\small\it spillover}\}$. As in table \ref{table:projectdescriptivescensus}, {\it project} households live in census small areas with over 30\% area overlap with project boundaries. The remaining {\it spillover} households live in small areas with less than 30\% area overlap, but whose centroids still fall within 1.5 km of a project boundary. Appendix \ref{appendix:bufferdesign} illustrates an example of these two definitions for a given constructed project. Our estimating equation is:
 
 \vspace{-4mm}
 
@@ -431,15 +431,28 @@ To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-se
 \quad y_{ipt} \, = \, \lambda_{p} \,+\, \sum\limits_{\substack{d\in \{project,\\ spillover\}}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \,\Big) + \, \theta I^{project}_{ip} \, +  \, \varepsilon_{ipt} \quad 
 \end{equation}
 
-\noindent where observations within 2001 {\it spillover} small areas for unconstructed projects are the omitted category. We note that in (\ref{eq:censushh}), the $\textsc{\small Post}_{pt}$ dummy simply indicates observations in the 2011 cross-section. We estimate equation (\ref{eq:censushh}) over the same binary outcomes tabulated in table \ref{table:projectdescriptivescensus}, with the addition of a population density variable computed at the small area level. We construct this additional outcome by computing the sum of household sizes  and dividing it by the square-kilometer area of the census small area.
+\noindent where 2001 households inside {\it spillover} small areas for unconstructed projects are the omitted category. We estimate equation (\ref{eq:censushh}) using the same binary outcomes tabulated in table \ref{table:projectdescriptivescensus}, with the addition of a population density variable computed at the small area level. We construct this additional outcome by computing the sum of household sizes  and dividing it by the square-kilometer area of the census small area. To allow for arbitrary correlations between observations within the same project area, we cluster standard errors at the project level. 
 
-Table~\ref{table:censusestimates} provides estimates of $\alpha^d$, $\beta^d$, $\gamma^d$, and $\theta$ for each outcome. Rows 1 through 4 describe effects for households in our {\it project} exposure definition, while rows 5 through 7 describe effects for our {\it spillover} definition. Rows 3 and 7 respectively show that for {\it project} and {\it spillover} exposures, the model cannot reject that treated and control project areas are equal at baseline, in 2001. The difference-in-differences coefficients of interest in the first row (project$\,\times\,$post$\,\times\,$const) document large and statistically significant improvements in access to services such as flush toilets, indoor water taps, and electricity.\footnote{With the exception of electricity for lighting, which falls short of the 10\% significance level. } The economic magnitudes of these estimates are large at more than 10 percentage points, which is consistent with the policy successfully providing higher quality housing.
+Table~\ref{table:censusestimates} provides estimates of $\alpha^d$, $\beta^d$, $\gamma^d$, and $\theta$ for each outcome. Rows 1 through 4 describe effects for households in our {\it project} exposure definition, while rows 5 through 7 describe effects for our {\it spillover} definition. Rows 3 and 7 respectively show that for both {\it project} and {\it spillover} exposures, the model cannot reject the null that treated and control areas are equal at baseline (in 2001). The difference-in-differences coefficients in the first row (project$\,\times\,$post$\,\times\,$const) document statistically significant improvements in access to services such as flush toilets, indoor water taps, and electricity.\footnote{With the exception of electricity for lighting, which falls short of the 10\% significance level. } With probability increases exceeding 10 percentage points, the economic magnitudes of these estimates are large, consistent with the policy successfully providing better housing. We note that households living within {\it project} exposure areas need not be direct recipients of government houses, since our definition is inclusive of indirect recipients such as backyard shack dwellers as well. 
 
-We do not find corresponding effects for households living in the vicinity of treated areas. Row 5 of table \ref{table:censusestimates} documents that household living in {\it spillover} areas do not experience statistically significant improvement in their living conditions. These results provide little evidence that finishing a housing project differentially benefits housing quality in nearby areas.
-
+We do not find corresponding effects for households in the vicinity of constructed projects. With the exception of number of rooms in column (6), row 5 of table \ref{table:censusestimates} detects no statistically significant effects for outcomes in {\it spillover} areas. Though 95\% confidence intervals admit sizeable positive effects, we can rule in most cases that this effect equals its {\it project} counterpart.\footnote{Row 8 of table~\ref{table:censusestimates} tests the hypothesis that the {\it project} and {\it spillover} DID effects are equal, and reports p-values from the associated F-test.} These results suggest that households adjacent to constructed projects are not incentivized to invest in higher housing quality. 
 
 
 \subsection{Housing Density Effects}\label{section:bbluestimates}
+
+We assess impacts on housing densities by estimating:
+
+\vspace{-4mm}
+
+\begin{equation} \label{eq:bblu}
+\begin{aligned}
+\quad y_{ipt} \, =& \, \lambda_{0} \,+\, \sum\limits_{d\in D\setminus\{1200m\}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \theta^{d} \Big) \\
+& \, + \, \alpha^o \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^o\textsc{\small Post}_{pt} \, + \, \gamma^o\textsc{\small Const}_{p} \, + \, \varepsilon_{ipt} \quad 
+\end{aligned}
+\end{equation}
+
+\noindent Drawing from figure \ref{fig:rawbblumeans}, we define the set of distances $D$ as containing every 50m distance intervals from 400m inside project boundaries to 1200m outside project boundaries. Equation (\ref{eq:bblu}) departs from (\ref{eq:main}) in that coefficients $\alpha^d$ are expressed relative to the DID effect in the furthest distance bin, $\alpha^{1200m}$, which is normalized to zero. This rearrangement introduces  a third layer of differencing, comparing double-differences near versus far from project boundaries. A triple-differences strategy allows for differential trends between constructed and unconstructed projects, so long as these trends are identical $\forall d\in D$ in the absence of project construction. It further requires that any spillover effects fully dissipate within 1,200 meters from project boundaries, which figure~\ref{fig:rawbblumeans} supports.
+%(2) differential shocks to local housing markets for constructed versus unconstructed projects are uncorrelated with distance within this radius, and (3) recipient households are not drawn from households living at 1,200 meters from the project area.
 
 \begin{figure*}[t!]
     \centering
@@ -487,28 +500,17 @@ We do not find corresponding effects for households living in the vicinity of tr
     \begin{minipage}{0.47\textwidth}   
     \vspace{-6cm}
     \caption[]
-    {\small DDD coefficients for fives types of housing densities.} \label{fig:DDDbblu}
+    {\small DDD coefficients (equation \ref{eq:bblu}) for fives types of housing densities.} \label{fig:DDDbblu}
 	\end{minipage}
 \end{figure*} 
 
-To assess impacts on housing densities, we pool the 2001 and 2012 grid-cell datasets, and test for differential 10-year changes between constructed and unconstructed project areas. 
-
-\vspace{-4mm}
-
-\begin{equation} \label{eq:bblu}
-\begin{aligned}
-\quad y_{ipt} \, =& \, \lambda_{0} \,+\, \sum\limits_{d\in D\setminus\{1200m\}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \theta^{d} \Big) \\
-& \, + \, \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \varepsilon_{ipt} \quad 
-\end{aligned}
-\end{equation}
-
-Drawing from our setup in figure \ref{fig:rawbblumeans}
+We estimate impacts on five housing density measures: 1) total houses, 2) formal houses, 3) informal houses, which are divided into 4) backyard shacks and 5) informal non-backyard houses.  Figure~\ref{fig:DDDbblu} plots the $\alpha^{d}$ coefficients across all outcomes for distance bins within projects (negative distances) and outside projects (positive distances). We accompany figure~\ref{fig:DDDbblu} with table~\ref{table:bbluDDD}, which provides point-estimates and standard errors for wider 400m distance bins relative to the omitted category [400m,1200m]. As in our previous estimation, we cluster standard at the project level for all regressions.
 
 
+Figure~\ref{fig:DDDtotal} finds weak increases in total housing within and just outside ($\leq\,$200 meters) of projects before settling to zero at all greater distances.  Predicting increases of around 200 houses per kilometer near the project boundary, these coefficients are both statistically and economically insignificant given an average density of nearly 2,400 structures per kilometer.  
 
-We also normalize the coefficient for the furthest distance bin outside of the boundary, $\alpha^{d=1200}$ to zero so that the other coefficients, $\alpha^{d \neq 1200}$ can be interpreted relative to this furthest category.  Comparing coefficients in this way allows for a triple-differences interpretation by adding the near/far difference to the constructed/unconstructed and pre/post differences.  This triple-differences interpretation requires the additional assumption that the differential changes between constructed and unconstructed projects at all distances from project boundaries would have evolved in the same ways as corresponding changes furthest from project boundaries in the absence of project construction.  This assumption is likely to hold when (1) any spillover effects fully dissipate within 1,200 meters from project boundaries, (2) differential shocks to local housing markets for constructed versus unconstructed projects are uncorrelated with distance within this radius, and (3) recipient households are not drawn from households living at 1,200 meters from the project area.
+After measuring substantial numbers of houses per project in the descriptive evidence (Table~\ref{table:projectdescriptives}), it is surprising to find little evidence of housing spikes in these areas; however, the small effects on aggregate housing density mask larger shifts in the composition of housing.  Figure~\ref{fig:DDDformal} estimates over 30\% increases in formal housing density within project areas, which quickly dissipates just beyond their boundaries.  Coefficients within 200 meters inside the boundary are statistically different from those furthest away at the 10\% level.  Gains in formal housing density are almost entirely offset by losses in informal housing density as demonstrated by Figure~\ref{fig:DDDinformal}.  Informal housing density also seems to increase slightly just outside of project areas before stabilizing at zero growth further away.  Disaggregating informal housing further between backyard houses (Figure~\ref{fig:DDDbackyard}) and non-backyard houses (Figure~\ref{fig:DDDnonbackyard}) indicates that massive declines in non-backyard housing (of around 100\% of the average) are only partially offset by an almost doubling of the densities of backyard housing within projects.  Backyard housing growth extends slightly outside of the project boundary, accounting for the small increases in total housing observed in these regions (Figure~\ref{fig:DDDtotal}).
 
-We estimate impacts on five housing density measures: 1) total houses, 2) formal houses, 3) informal houses, which are divided into 4) backyard houses and 5) informal non-backyard houses.  Figure~\ref{fig:DDDbblu} plots the $\alpha^{d}$ coefficients across all outcomes for distance bins within projects (negative distances) and outside projects (positive distances).  Figure~\ref{fig:DDDtotal} finds weak increases in housing within projects and just outside of projects (within 200 meters) before settling to zero at all greater distances.  Predicting increases of around 200 houses per kilometer near the project boundary, these coefficients are both statistically and economically insignificant given an average density of nearly 2,400 structures per kilometer.  
 
 \begin{table}[h!]
 \small
@@ -525,15 +527,19 @@ We estimate impacts on five housing density measures: 1) total houses, 2) formal
 \end{tabular}
 \end{table}
 
-After measuring substantial numbers of houses per project in the descriptive evidence (Table~\ref{table:projectdescriptives}), it is surprising to find little evidence of housing spikes in these areas; however, the small effects on aggregate housing density mask larger shifts in the composition of housing.  Figure~\ref{fig:DDDformal} estimates over 30\% increases in formal housing density within project areas, which quickly dissipates just beyond their boundaries.  Coefficients within 200 meters inside the boundary are statistically different from those furthest away at the 10\% level.  Gains in formal housing density are almost entirely offset by losses in informal housing density as demonstrated by Figure~\ref{fig:DDDinformal}.  Informal housing density also seems to increase slightly just outside of project areas before stabilizing at zero growth further away.  Disaggregating informal housing further between backyard houses (Figure~\ref{fig:DDDbackyard}) and non-backyard houses (Figure~\ref{fig:DDDnonbackyard}) indicates that massive declines in non-backyard housing (of around 100\% of the average) are only partially offset by an almost doubling of the densities of backyard housing within projects.  Backyard housing growth extends slightly outside of the project boundary, accounting for the small increases in total housing observed in these regions (Figure~\ref{fig:DDDtotal}).
-
-
 \subsection{Price Effects}\label{section:resultsprices}
 
 To identify the spillover effects of public housing on local housing markets, our empirical strategy adopts the specification from Section~\ref{section:bbluestimates}, instead using transaction price as an outcome:
 \begin{equation}
 \label{equation:prices}
 P_{ipt} \, = \sum\limits_{d} I^d_{ip}\Big( \alpha^d D_tC_p \, + \, \beta^dD_t \, + \theta^{d} \Big) \, + \, \lambda_p \, + \, \eta_t \, + \, X_i \, +  \, \varepsilon_{ipt}
+\end{equation}
+
+\begin{equation} \label{eq:bblu}
+\begin{aligned}
+\quad y_{ipt} \, =& \, \lambda_{0} \,+\, \sum\limits_{d\in D\setminus\{1200m\}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \theta^{d} \Big) \\
+& \, + \, \alpha^o \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^o\textsc{\small Post}_{pt} \, + \, \gamma^o\textsc{\small Const}_{p} \, + \, \varepsilon_{ipt} \quad 
+\end{aligned}
 \end{equation}
 
 \noindent The outcome, $P_{itp}$, is measured in terms of the log-purchase price of property $i$ sold at time $t$ in the vicinity of project $p$.  Since we observe the exact transaction date, we set $D_{tp}$\,=1 if date $t$ is after the month of project implementation and zero otherwise.  As before, $C_{p}\,\,$=1 if project $p$ has been constructed and $I^d_{ip}$\,=1 if property $i$ is within distance bin $d$ of project $p$.  To account for smaller sample sizes than in the density estimation, we consider wider 200 meter distance bins from zero to 1200 meters.  Additionally, $\lambda_p$ includes a project fixed effect, controlling for any fixed, unobserved drivers of house prices that vary between projects.  Likewise, $\eta_{t}$ controls for year, year-month, and calendar month fixed effects depending on the specification to account for any factors such as shifts in aggregate housing demand that may be correlated with prices and the timing of housing projects.  To control for property characteristics, $X_i$ includes up to a cubic polynomial in lot size and a control for latitude-longitude cells in some specifications.  Each $\alpha^d$ captures the causal differences-in-differences effect for distance bin $d$ given that the parallel trends assumption also holds at each distance $d$.  
