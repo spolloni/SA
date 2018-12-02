@@ -55,10 +55,10 @@ global bblu_query_data  = 0; /* query data */
 global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 0;
 global graph_plotmeans_cntproj = 0;
-global graph_plottriplediff    = 1;
+global graph_plottriplediff    = 0;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
@@ -368,6 +368,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(.7);;
     graphexportpdf `1', dropeps;
+   * save "${temp}`1'.dta", replace ;
   restore;
 
   end;
