@@ -87,10 +87,10 @@ global ddd_regs_d = 0;
 global ddd_regs_t = 0;
 global ddd_table  = 0;
 
-global ddd_regs_t_alt  = 0;
+global ddd_regs_t_alt  = 1;
 global ddd_regs_t2_alt = 0;
 
-global countour = 1;
+global countour = 0;
 
 * load data; 
 cd ../..;
@@ -596,6 +596,8 @@ preserve;
   keep if strpos(parm,"rdp") >0 
     & (strpos(parm,"plus") >0 | strpos(parm,"minus") >0);
   gen contin = regexs(1) if regexm(parm,".*_([^_]*)$");
+ 
+
   destring contin, replace;
   gen group = 0;
   replace group =1  if strpos(parm,"minus2") >0;
@@ -621,45 +623,192 @@ preserve;
   replace group = 2 if group==5;
   drop if group==6;
 
+  graph drop _all;
 
-*     yline(0,lw(thin)lp(shortdash))  ;
+  sum estimate if contin == 1200 & group == -2;
+  global yval1 = r(mean);
+  global yval1off = r(mean) - .008;
+  global yval1txt = string(round(r(mean),.01),"%9.2f");
 
-local c1 "0";
+  sum estimate if contin == 1200 & group == 2;
+  global yval2 = r(mean);
+  global yval2off = r(mean) + .008;
+  global yval2txt = string(round(r(mean),.01),"%9.2f");
 
-  sort group;
+
   tw
-    (connected estimate group if contin==200, ms(o) msiz(medium) mlc("`c1' 0  0") mfc("`c1' 0 0") lc("`c1' 0 0") lp(solid) lw(medium))
-    (connected estimate group if contin==400, ms(o) msiz(medium) mlc("`c1' 0 100") mfc("`c1' 0 100") lc("`c1' 0 100") lp(longdash) lw(medium))
-    (connected estimate group if contin==600, ms(o) msiz(medium) mlc("`c1' 0 140") mfc("`c1' 0 140") lc("`c1' 0 140") lp(longdash_dot) lw(medium))
-    (connected estimate group if contin==800, ms(o) msiz(medium) mlc("`c1' 0 180") mfc("`c1' 0 180") lc("`c1' 0 180") lp(dash) lw(medium))
-    (connected estimate group if contin==1000, ms(o) msiz(medium) mlc("`c1' 0 220") mfc("`c1' 0 220") lc("`c1' 0 220") lp(dash_dot) lw(medium))
-    (connected estimate group if contin==1200, ms(o) msiz(medium) mlc("`c1' 0 255") mfc("`c1' 0 255") lc("`c1' 0 255") lp(shortdash) lw(medium))
+    (line estimate group if contin==600, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==900, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==300, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==1200, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(solid) lw(medthick))
+    (sc estimate group if contin==1200 & abs(group)==2, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lw(medthick)
+      text($yval1off -2 "$yval1txt" , placement(s) siz(vsmall))
+      text($yval2off  2 "$yval2txt" , placement(n) siz(vsmall)))
     ,
-    xtitle("Years to project",height(5))
-    ytitle("Effect on log housing prices",height(5))
+    plotregion(margin(l=3 r=3))
+    graphregion(margin(l=1 r=2 t=2.3 b=1))
+    title("Effects at 900-1200m", size(small) box bexpand color(white)  bcolor(gs4))
+    xtitle("",height(5))
+    ytitle("",height(5))
     xlabel(-2 "-2" -1 "-1"
            0 "1" 1 "2"
            2 "3" ,
-           labsize(small))  
-    ylabel(-.4(.2).2)
-
+           labsize(small) nolabels noticks) 
+    ylabel(-.3(.1).03, nolabels noticks) 
     xline(-.5,lw(thin)lp(shortdash))
-    graphregion(margin(r=7))
-    legend(order(
-      1 "0-200m" 
-      2 "200-400m"
-      3 "400-600m"
-      4 "600-800m"
-      5 "800-1000m" 
-      6 "1000-1200m"  
-    )) /// symx(6) col(1)
-    /// ring(0) position(2) bm(medium) rowgap(small)  
-    /// colgap(small) size(*.95) region(lwidth(none)))
-    note("`3'");
+    legend(off)
+    name(d1200);
 
-restore;
-graphexportpdf DDDplot_pertime_alt, dropeps;
-    graph export "DDDplot_pertime_alt.pdf", as(pdf) replace  ;
+  sum estimate if contin == 900 & group == -2;
+  global yval1 = r(mean);
+  global yval1off = r(mean) - .008;
+  global yval1txt = string(round(r(mean),.01),"%9.2f");
+
+  sum estimate if contin == 900 & group == 2;
+  global yval2 = r(mean);
+  global yval2off = r(mean) + .008;
+  global yval2txt = string(round(r(mean),.01),"%9.2f");
+
+
+  tw
+    (line estimate group if contin==600, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==300, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==1200, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==900, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(solid) lw(medthick))
+    (sc estimate group if contin==900 & abs(group)==2, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lw(medthick)
+      text($yval1off -2 "$yval1txt" , placement(s) siz(vsmall))
+      text($yval2off  2 "$yval2txt" , placement(n) siz(vsmall)))
+    ,
+    plotregion(margin(l=3 r=3))
+    graphregion(margin(l=1 r=2 t=2.3 b=1))
+    title("Effects at 600-900m", size(small) box bexpand color(white)  bcolor(gs4))
+    xtitle("",height(5))
+    ytitle("",height(5))
+    xlabel(-2 "-2" -1 "-1"
+           0 "1" 1 "2"
+           2 "3" ,
+           labsize(small) nolabels noticks) 
+    ylabel(-.3(.1).03, nolabels noticks) 
+    xline(-.5,lw(thin)lp(shortdash))
+    legend(off)
+    name(d900);
+
+  sum estimate if contin == 600 & group == -2;
+  global yval1 = r(mean);
+  global yval1off = r(mean) + .008;
+  global yval1txt = string(round(r(mean),.01),"%9.2f");
+
+  sum estimate if contin == 600 & group == 2;
+  global yval2 = r(mean);
+  global yval2off = r(mean) + .008;
+  global yval2txt = string(round(r(mean),.01),"%9.2f");
+
+
+  tw
+    (line estimate group if contin==300, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==900, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==1200, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==600, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(solid) lw(medthick))
+    (sc estimate group if contin==600 & abs(group)==2, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lw(medthick)
+      text($yval1off -2 "$yval1txt" , placement(n) siz(vsmall))
+      text($yval2off  2 "$yval2txt" , placement(n) siz(vsmall)))
+    ,
+    plotregion(margin(l=3 r=3))
+    graphregion(margin(l=1 r=2 t=2.3 b=1))
+    title("Effects at 300-600m", size(small) box bexpand color(white)  bcolor(gs4))
+    xtitle("",height(5))
+    ytitle("",height(5))
+    xlabel(-2 "-2" -1 "-1"
+           0 "0" 1 "1"
+           2 "2" ,
+           labsize(small) ) 
+    ylabel(-.3(.1).03, nolabels noticks) 
+    xline(-.5,lw(thin)lp(shortdash))
+    legend(off)
+    name(d600);
+
+
+
+  sum estimate if contin == 300 & group == -2;
+  global yval1 = r(mean);
+  global yval1off = r(mean) - .008;
+  global yval1txt = string(round(r(mean),.01),"%9.2f");
+
+  sum estimate if contin == 300 & group == 2;
+  global yval2 = r(mean);
+  global yval2off = r(mean) - .008;
+  global yval2txt = string(round(r(mean),.01),"%9.2f");
+
+
+  tw
+    (line estimate group if contin==600, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==900, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==1200, ms(o) msiz(medium) lc("179 128 128") lp(solid) lw(medthick))
+    (line estimate group if contin==300, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(solid) lw(medthick))
+    (sc estimate group if contin==300 & abs(group)==2, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lw(medthick)
+      text($yval1off -2 "$yval1txt" , placement(s) siz(vsmall))
+      text($yval2off  2 "$yval2txt" , placement(s) siz(vsmall)))
+    ,
+    plotregion(margin(l=3 r=3))
+    graphregion(margin(l=1 r=2 t=2.3 b=1))
+    title("Effects at 0-300m", size(small) box bexpand color(white)  bcolor(gs4))
+    xtitle("",height(5))
+    ytitle("",height(5))
+    xlabel(-2 "-2" -1 "-1"
+           0 "0" 1 "1"
+           2 "2" ,
+           labsize(small) ) 
+    ylabel(-.3(.1).03, nolabels noticks) 
+    xline(-.5,lw(thin)lp(shortdash))
+    legend(off)
+    name(d300);
+
+
+  graph combine d1200 d900 d600 d300, 
+    imargin(4 4 4 4) 
+    ysize(5) 
+    xsize(7.5) 
+    b1("years elapsed after project construction", height(1) size(small))
+    l1("log-price coefficient", height(0) size(small));
+
+
+
+*     yline(0,lw(thin)lp(shortdash))  ;
+
+* local c1 "0";
+
+*   sort group;
+*   tw
+*     (connected estimate group if contin==200, ms(o) msiz(medium) mlc("`c1' 0  0") mfc("`c1' 0 0") lc("`c1' 0 0") lp(solid) lw(medium))
+*     (connected estimate group if contin==400, ms(o) msiz(medium) mlc("`c1' 0 100") mfc("`c1' 0 100") lc("`c1' 0 100") lp(longdash) lw(medium))
+*     (connected estimate group if contin==600, ms(o) msiz(medium) mlc("`c1' 0 140") mfc("`c1' 0 140") lc("`c1' 0 140") lp(longdash_dot) lw(medium))
+*     (connected estimate group if contin==800, ms(o) msiz(medium) mlc("`c1' 0 180") mfc("`c1' 0 180") lc("`c1' 0 180") lp(dash) lw(medium))
+*     (connected estimate group if contin==1000, ms(o) msiz(medium) mlc("`c1' 0 220") mfc("`c1' 0 220") lc("`c1' 0 220") lp(dash_dot) lw(medium))
+*     (connected estimate group if contin==1200, ms(o) msiz(medium) mlc("`c1' 0 255") mfc("`c1' 0 255") lc("`c1' 0 255") lp(shortdash) lw(medium))
+*     ,
+*     xtitle("Years to project",height(5))
+*     ytitle("Effect on log housing prices",height(5))
+*     xlabel(-2 "-2" -1 "-1"
+*            0 "1" 1 "2"
+*            2 "3" ,
+*            labsize(small))  
+*     ylabel(-.4(.2).2)
+
+*     xline(-.5,lw(thin)lp(shortdash))
+*     graphregion(margin(r=7))
+*     legend(order(
+*       1 "0-300m" 
+*       2 "300-600m"
+*       3 "600-900m"
+*       4 "900-1200m"
+*     )) /// symx(6) col(1)
+*     /// ring(0) position(2) bm(medium) rowgap(small)  
+*     /// colgap(small) size(*.95) region(lwidth(none)))
+*     note("`3'");
+
+* restore;
+* graphexportpdf DDDplot_pertime_alt, dropeps;
+*     graph export "DDDplot_pertime_alt.pdf", as(pdf) replace  ;
 
 
 };

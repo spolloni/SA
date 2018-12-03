@@ -546,7 +546,7 @@ To identify the spillover effects of public housing on local housing markets, we
 
 \noindent The outcome, $y_{itp}$, is measured in terms of the log-purchase price of property $i$ sold at time $t$ in the vicinity of project $p$.  Since we observe the exact transaction date, we set $\textsc{\small Post}_{pt}$\,=1 if date $t$ is after the month of project implementation and zero otherwise.  To account for smaller sample sizes than in the density estimation, we consider wider 200 meter distance bins from 0 to 1200 meters.  Additionally, $\lambda_p$ includes a project fixed effect, controlling for any fixed, unobserved drivers of house prices that vary between projects.\footnote{The project fixed effect subsumes the $\textsc{\footnotesize Const}_{p}$ effect since construction status does not vary within project over time.}  $\eta_{t}$ controls for year, year-month, and calendar month fixed effects depending on the specification to account for any factors such as shifts in aggregate housing demand that may be correlated with prices and the timing of housing projects.  To control for property characteristics, $X_i$ includes up to a cubic polynomial in lot size and a control for latitude-longitude cells in some specifications. Similarly to section~\ref{section:bbluestimates}, coefficients $\alpha^d$ express double-difference effects relative to effects within 1,000 to 1,200 meters of projects, again allowing for a triple-differences interpretation.  
 
-\begin{figure}
+\begin{figure}[b!]
 \caption{Price Estimates over Distance from Project}\label{figure:distplot}
 \centering
 \includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot}
@@ -555,14 +555,14 @@ To identify the spillover effects of public housing on local housing markets, we
 
 Figure~\ref{figure:distplot} plots the coefficients for differential changes in log-prices for constructed relative to unconstructed projects at a range of distances outside project boundaries.  This specification includes project as well as calendar month fixed effects and includes only transactions that occur within three years of project construction.  Examining the point estimates, we find evidence of a drop in prices of around 0.1 log points or around 10\% within 200 meters of the project boundary.  Beyond 200 meters, this negative price effect disappears with all point estimates closely tracking zero.  Clustering standard errors at the project-level leaves wide confidence intervals at all distances, meaning that we are unable to reject equivalence between any coefficient and the price effect for the reference category at the 10\% confidence level.
 
-\begin{figure}
+\begin{figure}[b!]
 \caption{Time-to-Event Price Estimates}\label{figure:timeplot}
 \centering
-\includegraphics[width=0.9\textwidth,trim={0cm .1cm 0cm 0.1cm},clip=true]{figures/DDDplot_pertime_alt}
+\includegraphics[width=0.99\textwidth,trim={0cm 0cm 0cm 0cm},clip=true]{figures/DDDplot_pertime_alt_unspaghetti}
 \vspace{-2mm}
 \end{figure}
 
-To examine how these effects evolve over time, we interact an indicator for successful construction with year dummies relative to the date of construction.  We also estimate these trends separately for six different distance bins relative to the project boundary.  Figure~\ref{figure:timeplot} plots these coefficients, excluding the confidence intervals.  Further splitting the sample for this exercise widens the confidence intervals so that all 90\% intervals contain zero.  We set the reference category to be two-years prior to project construction for the furthest distance bin.  
+To examine how these effects evolve over time, we interact an indicator for successful construction with year dummies relative to the date of construction.  We estimate these trends separately for four different distance bins relative to the project boundary.  Figure~\ref{figure:timeplot} plots these coefficients, excluding the confidence intervals.  Further splitting the sample for this exercise widens the confidence intervals so that all 90\% intervals contain zero.  We set the reference category to be two-years prior to project construction for the furthest distance bin.  
 
 Examining the two years prior to construction, we see some evidence of anticipation with prices declining most steeply for distances within 600 meters of project construction.  After project construction, prices gradually recover to pre-project levels except for the closest distance bin (less than 200 meters) which continues to decline.  Time trends for distances beyond 600 meters appear relatively uncorrelated with the time of project completion, suggesting that these areas may be unaffected by project construction.
 
