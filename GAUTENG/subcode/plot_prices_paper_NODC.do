@@ -765,11 +765,12 @@ preserve;
 
 
   graph combine d1200 d900 d600 d300, 
-    imargin(4 4 4 4) 
+    imargin(3 3 3 3) 
     ysize(5) 
     xsize(7.5) 
     b1("years elapsed after project construction", height(1) size(small))
     l1("log-price coefficient", height(0) size(small));
+  graphexportpdf DDDplot_pertime_alt_unspaghetti, dropeps;
 
 
 
