@@ -924,9 +924,9 @@ if $countour ==1 {;
 
   tw
   (connected e1 dists_joined if placebo==1,
-    ms(d) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
+    ms(o) msiz(medium) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin))
   (connected e1 dists_joined if placebo==0,
-    ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)),
+    ms(d) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)),
   xlabel(0(200)1200, labs(small))
   ylabel(-.3(.1).3, labs(small))
   xtitle("Distance from project border (meters)",height(5))
@@ -943,8 +943,8 @@ if $countour ==1 {;
   replace dists_joined = dists_joined-7 if placebo==0;
 
   tw
-  (dropline e dists_joined if placebo==1,  col(maroon) lw(medthick) msiz(small) m(O))
-  (dropline e dists_joined if placebo==0,  col(gs0) lw(medthick) msiz(small) m(O)),
+  (dropline e dists_joined if placebo==1,  col(maroon) mfc(white) lw(medthick) msiz(medium) ms(o))
+  (dropline e dists_joined if placebo==0,  col(gs0) lw(medthick) msiz(small) m(d)),
   xlabel(0(200)1200, labs(small))
   ylabel(-.3(.1).3, labs(small))
   xtitle("Distance from project border (meters)",height(5))

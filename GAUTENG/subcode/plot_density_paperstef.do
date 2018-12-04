@@ -354,8 +354,8 @@ if $graph_plotmeans_rdpplac == 1 {;
     replace D = D + $bin/2;
 
     twoway 
-    (connected `2'_`4' D, ms(d) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
-    (connected `2'_`3' D, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
+    (connected `2'_`4' D, ms(o) msiz(medium) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin))
+    (connected `2'_`3' D, ms(d) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
     ,
     xtitle("Distance from project border (meters)",height(5))
     ytitle("Average 2001 density (structures per km{superscript:2})",height(3)si(medsmall))
@@ -452,8 +452,8 @@ if $graph_plotmeans_rawchan == 1 {;
     gen D`3' = D-7;
 
     twoway 
-    (dropline `2'_`4' D`4',  col(maroon) lw(medthick) msiz(small) m(O))
-    (dropline `2'_`3' D`3',  col(gs0) lw(medthick) msiz(small) m(O))
+    (dropline `2'_`4' D`4',  col(maroon) lw(medthick) msiz(medium) m(o) mfc(white))
+    (dropline `2'_`3' D`3',  col(gs0) lw(medthick) msiz(small) m(d))
     ,
     xtitle("Distance from project border (meters)",height(5))
     ytitle("2012-2001 density change (structures per km{superscript:2})",height(5) si(medsmall))
