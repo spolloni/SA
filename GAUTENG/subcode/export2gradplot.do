@@ -138,10 +138,10 @@ gen erf_size2 = erf_size^2;
 gen erf_size3 = erf_size^3;
 
 * save data;
-save "gradplot_admin.dta", replace;
+save "gradplot_admin_het.dta", replace;
 
 
-* KEY : EXPORT THE RELEVANT CLUSTERS AND CONSTRUCTION DATES to sql tables ;
+*KEY : EXPORT THE RELEVANT CLUSTERS AND CONSTRUCTION DATES to sql tables ;
 use "gradplot_admin.dta", clear;
 
 cap program drop gentable;
