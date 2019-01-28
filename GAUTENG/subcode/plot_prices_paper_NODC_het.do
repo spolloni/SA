@@ -56,7 +56,7 @@ global output = "Code/GAUTENG/paper/figures";
 *global output = "Code/GAUTENG/presentations/presentation_lunch";
 
 * PARAMETERS;
-global het      = 32; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 global rdp   = "`1'";
 global twl   = "3";   /* look at twl years before construction */
@@ -253,7 +253,7 @@ preserve;
 
 restore;
 graphexportpdf price_regs_DDDplot_het, dropeps;
-
+graph export "price_regs_DDDplot_het", as(pdf) replace; 
 
 };
 *****************************************************************;
@@ -394,6 +394,7 @@ preserve;
 
 restore;
 graphexportpdf DDDplot_pertime_het, dropeps;
+    graph export "DDDplot_pertime_het.pdf", as(pdf) replace  ;
 
 };
 *****************************************************************;

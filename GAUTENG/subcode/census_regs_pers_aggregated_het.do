@@ -46,7 +46,7 @@ global data_regs = 0;
 global data_regs_DDD = 0;
 
 * PARAMETERS; /* save over older files because its huge */
-global het      = 32; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 global drop_others= 1; /* everything relative to unconstructed */
 global tresh_area = 0.3; /* Area ratio for "inside" vs spillover */
@@ -75,69 +75,10 @@ if $data_load==1 {;
 
         AA.*, GP.con_mo_placebo, GR.con_mo_rdp,
 
-        (RANDOM()/(2*9223372036854775808)+.5) as random, 
 
       CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
 
     FROM (
-
-      SELECT 
-
-        A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, 
-        A.P02_Yr AS birth_yr, A.P05_Mar AS marit_stat, A.P06_Race AS race, 
-        A.P07_lng AS language, A.P09a_Prv AS birth_prov, A.P22_Incm AS income, 
-        A.P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
-        A.P19b_Ind AS industry, A.P19c_Occ as occupation, 
-
-        cast(B.input_id AS TEXT) as sal_code_rdp, 
-        B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-
-        cast(BP.input_id AS TEXT) as sal_code_placebo, 
-        BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
-
-        IR.area_int_rdp, IP.area_int_placebo, QQ.area,
-
-        'census2001pers' AS source, 2001 AS year, A.SAL AS area_code
-
-      FROM census_pers_2001 AS A 
-
-      LEFT JOIN (
-        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-        FROM distance_sal_2001_rdp 
-        WHERE distance<=2000
-        GROUP BY input_id 
-        HAVING COUNT(input_id)<=50 
-          AND distance == MIN(distance)
-      ) AS B ON A.SAL=B.input_id
-
-      LEFT JOIN (
-        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-        FROM distance_sal_2001_placebo 
-        WHERE distance<=2000
-        GROUP BY input_id 
-        HAVING COUNT(input_id)<=50 
-          AND distance == MIN(distance)
-      ) AS BP ON A.SAL=BP.input_id
-
-      LEFT JOIN (
-        SELECT sal_code, area_int AS area_int_rdp 
-        FROM int_rdp_sal_2001
-        GROUP BY sal_code
-        HAVING area_int_rdp = MAX(area_int_rdp)
-      ) AS IR ON IR.sal_code = A.SAL
-
-      LEFT JOIN (
-        SELECT sal_code, area_int AS area_int_placebo 
-        FROM int_placebo_sal_2001
-        GROUP BY sal_code
-        HAVING area_int_placebo = MAX(area_int_placebo)
-      ) AS IP ON IP.sal_code = A.SAL
-
-      LEFT JOIN area_sal_2001 AS QQ ON QQ.sal_code = A.SAL
-
-      /* *** */
-      UNION ALL 
-      /* *** */ 
 
       SELECT 
 
@@ -211,12 +152,124 @@ if $data_load==1 {;
   LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
 
     WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
-    AND random < .75
-
     ";
+
 
   odbc query "gauteng";
   odbc load, exec("`qry'") clear;
+
+
+  destring area_int_placebo area_int_rdp, replace force;   /* throw out clusters that were too early in the process */
+
+  replace distance_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+  replace area_int_placebo =.  if con_mo_placebo<515 | con_mo_placebo==.;
+  replace sal_code_placebo ="" if con_mo_placebo<515 | con_mo_placebo==.;
+  replace cluster_placebo  =.  if con_mo_placebo<515 | con_mo_placebo==.;
+
+  replace distance_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+  replace area_int_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
+  replace sal_code_rdp ="" if con_mo_rdp<515 | con_mo_rdp==.;
+  replace cluster_rdp  =.  if con_mo_rdp<515 | con_mo_rdp==.;
+
+  *drop if distance_rdp==. & distance_placebo==.; 
+      
+  save DDcensus_pers_admin_het_2011, replace;
+
+
+/*
+
+
+  local qry = " 
+
+    SELECT 
+
+        AA.*, GP.con_mo_placebo, GR.con_mo_rdp,
+
+        (RANDOM()/(2*9223372036854775808)+.5) as random, 
+
+      CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
+
+    FROM (
+
+      SELECT 
+
+        A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, 
+        A.P02_Yr AS birth_yr, A.P05_Mar AS marit_stat, A.P06_Race AS race, 
+        A.P07_lng AS language, A.P09a_Prv AS birth_prov, A.P22_Incm AS income, 
+        A.P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
+        A.P19b_Ind AS industry, A.P19c_Occ as occupation, 
+
+        cast(B.input_id AS TEXT) as sal_code_rdp, 
+        B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
+
+        cast(BP.input_id AS TEXT) as sal_code_placebo, 
+        BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+
+        IR.area_int_rdp, IP.area_int_placebo, QQ.area,
+
+        'census2001pers' AS source, 2001 AS year, A.SAL AS area_code
+
+      FROM census_pers_2001 AS A 
+
+      LEFT JOIN (
+        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+        FROM distance_sal_2001_rdp 
+        WHERE distance<=2000
+        GROUP BY input_id 
+        HAVING COUNT(input_id)<=50 
+          AND distance == MIN(distance)
+      ) AS B ON A.SAL=B.input_id
+
+      LEFT JOIN (
+        SELECT input_id, distance, target_id, COUNT(input_id) AS count 
+        FROM distance_sal_2001_placebo 
+        WHERE distance<=2000
+        GROUP BY input_id 
+        HAVING COUNT(input_id)<=50 
+          AND distance == MIN(distance)
+      ) AS BP ON A.SAL=BP.input_id
+
+      LEFT JOIN (
+        SELECT sal_code, area_int AS area_int_rdp 
+        FROM int_rdp_sal_2001
+        GROUP BY sal_code
+        HAVING area_int_rdp = MAX(area_int_rdp)
+      ) AS IR ON IR.sal_code = A.SAL
+
+      LEFT JOIN (
+        SELECT sal_code, area_int AS area_int_placebo 
+        FROM int_placebo_sal_2001
+        GROUP BY sal_code
+        HAVING area_int_placebo = MAX(area_int_placebo)
+      ) AS IP ON IP.sal_code = A.SAL
+
+      LEFT JOIN area_sal_2001 AS QQ ON QQ.sal_code = A.SAL
+
+    ) AS AA
+
+    LEFT JOIN (
+      SELECT cluster_placebo, con_mo_placebo 
+      FROM cluster_placebo
+    ) AS GP ON AA.cluster_placebo = GP.cluster_placebo
+
+    LEFT JOIN (
+      SELECT cluster_rdp, con_mo_rdp 
+      FROM cluster_rdp
+    ) AS GR ON AA.cluster_rdp = GR.cluster_rdp
+
+  LEFT JOIN cbd_dist AS CP ON CP.cluster = AA.cluster_placebo
+
+  LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
+
+    WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
+    AND random < .7
+
+    ";
+    
+
+  odbc query "gauteng";
+  odbc load, exec("`qry'") clear;
+
 
   destring area_int_placebo area_int_rdp, replace force;   /* throw out clusters that were too early in the process */
 
@@ -232,7 +285,10 @@ if $data_load==1 {;
 
   *drop if distance_rdp==. & distance_placebo==.;	
   		
-  save DDcensus_pers_admin, replace;
+  save DDcensus_pers_admin_het_2001, replace;
+
+
+*/
 
 };
 *****************************************************************;

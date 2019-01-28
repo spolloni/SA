@@ -58,7 +58,7 @@ global sizesq   = $size*$size;
 global dist_max = 1200;
 global dist_min = -400;
 
-global het      = 32; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 global dist_break_reg1 = 400; 
 * global dist_break_reg2 = 800; 
@@ -69,7 +69,7 @@ global dist_min_reg = -400;
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plottriplediff = 0;
-global reg_triplediff = 0;
+global reg_triplediff       = 0;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 

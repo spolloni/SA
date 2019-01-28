@@ -41,10 +41,10 @@ global LOCAL = 1;
 global data_load = 0;
 global data_prep = 0;
 global data_stat = 0;
-global data_regs = 0;
+global data_regs = 1;
 
 * PARAMETERS;
-global het      = 32; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 global drop_others= 1   ; /* everything relative to unconstructed */
 global tresh_area = 0.3 ; /* Area ratio for "inside" vs spillover */
