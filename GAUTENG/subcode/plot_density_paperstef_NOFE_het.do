@@ -58,7 +58,9 @@ global sizesq   = $size*$size;
 global dist_max = 1200;
 global dist_min = -400;
 
-global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global near "City";
+global far "Suburb";
 
 global dist_break_reg1 = 400; 
 * global dist_break_reg2 = 800; 
@@ -69,7 +71,7 @@ global dist_min_reg = -400;
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plottriplediff = 0;
-global reg_triplediff       = 0;
+global reg_triplediff       = 1;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -176,8 +178,8 @@ program plotregsingle_het;
 
     sort het contin;
 
-    global legend1 `" 2 "DDD: Under ${het}km from CBD "  "';
-    global legend2 `" 4 "DDD: Over ${het}km from CBD " "';
+    global legend1 `" 2 "DDD: ${near} "  "';
+    global legend2 `" 4 "DDD: ${far} " "';
     global graph1 "
     (rspike max90 min90 contin if het==1, lc(gs4) lw(vthin))
     (connected estimate contin if het==1, ms(d) msiz(small)
@@ -326,26 +328,26 @@ foreach var of varlist $outcomes {;
 
 estout $outcomes using bblu_regDDD_het.tex, replace
   style(tex) 
-  keep("-400m to 0m near CBD"  
-        "0m to 400m near CBD"
-      "-400m to 0m far CBD"  
-      "0m to 400m far CBD")
-  order("-400m to 0m near CBD"  
-        "0m to 400m near CBD"
-      "-400m to 0m far CBD"  
-      "0m to 400m far CBD") 
+  keep("${near} -400m to 0m"  
+        "${near} 0m to 400m"
+      "${far} -400m to 0m"  
+      "${far} 0m to 400m")
+  order("${near} -400m to 0m"  
+        "${near} 0m to 400m"
+      "${far} -400m to 0m"  
+      "${far} 0m to 400m") 
   rename(
-    dists_rdp_post_g_1_het "-400m to 0m near CBD"
-    dists_rdp_post_g_2_het "0m to 400m near CBD"
-    dists_rdp_post_g_1     "-400m to 0m far CBD"  
-    dists_rdp_post_g_2     "0m to 400m far CBD"
+    dists_rdp_post_g_1_het "${near} -400m to 0m"
+    dists_rdp_post_g_2_het "${near} 0m to 400m"
+    dists_rdp_post_g_1     "${far} -400m to 0m"  
+    dists_rdp_post_g_2     "${far} 0m to 400m"
   )
   mlabels(,none) 
   collabels(none)
   cells( b(fmt(2) star ) se(par fmt(2)) )
   varlabels(,el("-400m to 0m" [0.5em] "0m to 400m" " \midrule"))
   stats(meandepvar projcount_het projcount r2 N , 
-    labels("Mean dep. var." "\# Projects Near" "\# Projects Far"  "R$^2$" "N" ) fmt(%9.2fc %12.0fc %12.0fc %12.3fc %12.0fc ) )
+    labels("Mean dep. var." "\# Projects ${near}" "\# Projects ${far}"  "R$^2$" "N" ) fmt(%9.2fc %12.0fc %12.0fc %12.3fc %12.0fc ) )
   starlevels( 
     "\textsuperscript{c}" 0.10 
     "\textsuperscript{b}" 0.05 

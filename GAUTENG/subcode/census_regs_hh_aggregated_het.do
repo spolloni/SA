@@ -41,10 +41,19 @@ global LOCAL = 1;
 global data_load = 0;
 global data_prep = 0;
 global data_stat = 0;
-global data_regs = 1;
+global data_regs = 0;
 
 * PARAMETERS;
-global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global near "city";
+global far "suburb";
+
+** ID THE HET! ;
+* odbc load, exec("SELECT A.*, CP.*, CR.* FROM cbd_dist AS A LEFT JOIN cluster_placebo AS CP ON A.cluster=CP.cluster_placebo LEFT JOIN cluster_rdp AS CR ON A.cluster=CR.cluster_rdp") clear dsn(gauteng)
+* keep if cluster_rdp!=. | cluster_placebo!=.
+* drop if con_mo_placebo<515
+* drop if con_mo_rdp<515
+* sum cbd_dist, detail    ;
 
 global drop_others= 1   ; /* everything relative to unconstructed */
 global tresh_area = 0.3 ; /* Area ratio for "inside" vs spillover */
@@ -566,16 +575,16 @@ global X "{\tim}";
 estout using census_hh_DDregs_AGG_het_less.tex, replace
   style(tex) 
   rename(
-    project_post_rdp_het "near${X}proj"
-    spillover_post_rdp_het "near${X}spill"
-    project_post_rdp "far${X}proj"
-    spillover_post_rdp "far${X}spill"
+    project_post_rdp_het "${near}${X}proj"
+    spillover_post_rdp_het "${near}${X}spill"
+    project_post_rdp "${far}${X}proj"
+    spillover_post_rdp "${far}${X}spill"
   )
   keep(
-  "near${X}proj"
-  "near${X}spill"
-  "far${X}proj"
-  "far${X}spill")
+  "${near}${X}proj"
+  "${near}${X}spill"
+  "${far}${X}proj"
+  "${far}${X}spill")
   noomitted
   mlabels(,none) 
   collabels(none)
@@ -583,13 +592,13 @@ estout using census_hh_DDregs_AGG_het_less.tex, replace
   stats(pval_het pval r2 
       hhproj_het hhspill_het hhproj hhspill , 
     labels(
-      "{\it p}-val, h\textsubscript{0}: near proj = near spill "
-      "{\it p}-val, h\textsubscript{0}: far proj = far spill "
+      "{\it p}-val, h\textsubscript{0}: ${near} proj = ${near} spill "
+      "{\it p}-val, h\textsubscript{0}: ${far} proj = ${far} spill "
       "R$^2$" 
-      `"N near proj areas"'
-      `"N near spill areas"'  
-      `"N far proj areas"'
-      `"N far spill areas"'  
+      `"N ${near} proj areas"'
+      `"N ${near} spill areas"'  
+      `"N ${far} proj areas"'
+      `"N ${far} spill areas"'  
     ) 
     fmt(
       %9.3fc

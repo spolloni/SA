@@ -39,7 +39,7 @@ global output = "Code/GAUTENG/paper/figures";
 * RUN LOCALLY?;
 global LOCAL = 1;
 
-global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      =  30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 * PARAMETERS;
 global bin      = 50;   /* distance bin width for dist regs   */

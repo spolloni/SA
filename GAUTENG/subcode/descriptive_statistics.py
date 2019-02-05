@@ -271,11 +271,28 @@ def share_during_mode_year():
     con.close()
 
 
+def rdp_counts():
 
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute("DROP TABLE IF EXISTS rdp_counts;")
+    con.execute('''
+        CREATE TABLE rdp_counts AS
+        SELECT rdp.property_id, rdp.rdp_all, rdp.rdp_notownship, rdp_conhulls.cluster
+        from rdp
+        join erven on rdp.property_id = erven.property_id
+        join rdp_conhulls on st_intersects(rdp_conhulls.GEOMETRY, erven.GEOMETRY)
+        where rdp_all =1 ;  ''')
+    con.execute("CREATE INDEX rc ON rdp_counts (cluster);")
+
+rdp_counts()
 
 # share_during_mode_year()
 
 # count_ghs()
 
-count_census_small_areas()
+# count_census_small_areas()
 

@@ -4,10 +4,22 @@ set more off
 set scheme s1mono
 set matsize 11000
 set maxvar 32767
+
+
+cap prog drop print_1
+program print_1
+    file write newfile " `1' "
+    forvalues r=1/$cat_num {
+        in_stat newfile `2' `3' `4' "0" "${cat`r'}"
+        }      
+    file write newfile " \\ " _n
+end
+
+
 #delimit;
 
 
-global output = "Code/GAUTENG/presentations/presentation_lunch";
+* global output = "Code/GAUTENG/presentations/presentation_lunch";
 global output  = "Code/GAUTENG/paper/figures/";
 
 global LOCAL = 1;
@@ -16,11 +28,15 @@ global LOCAL = 1;
 
 
 ** set these equal to one to prep temporary datasets to make tables ;
-global census_prep = 1  ; 
-global gcro_prep   = 0  ;
-global price_prep  = 0  ;
-global bblu_prep   = 0  ;
 global cbd_prep    = 0  ;
+global rdp_count   = 0  ;
+global price_prep  = 0  ;
+
+global census_prep = 0  ; 
+global gcro_prep   = 0  ;
+global bblu_prep   = 0  ;
+
+global het      = 30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 global census_int  = .3 ; /* intersection % between census areas and project areas*/
 global size        = 50 ; /* just for which bblu file to pull */
@@ -64,166 +80,47 @@ cd Generated/GAUTENG;
 if $cbd_prep == 1 {;
 		*** Census Characteristics *** ;
 
+odbc load, exec("SELECT A.*, CP.*, CR.*, 
+PC.area AS area_placebo, PC.placebo_yr AS mode_yr_placebo, 
+CC.area AS area_rdp, CC.RDP_mode_yr AS mode_yr_rdp
+FROM cbd_dist AS A 
+LEFT JOIN cluster_placebo AS CP ON A.cluster=CP.cluster_placebo 
+LEFT JOIN cluster_rdp AS CR ON A.cluster=CR.cluster_rdp 
+LEFT JOIN placebo_conhulls AS PC ON A.cluster=PC.cluster
+LEFT JOIN rdp_conhulls AS CC ON A.cluster=CC.cluster") clear dsn(gauteng);
 
-local qry = "
-      SELECT A.*, B.cluster_rdp, C.cluster_placebo, D.cbd_dist
-      FROM  gcro AS A
-      LEFT JOIN cluster_rdp AS B ON A.cluster = B.cluster_rdp
-      LEFT JOIN cluster_placebo AS C ON A.cluster = C.cluster_placebo
-      LEFT JOIN cbd_dist AS D ON A.cluster = D.cluster
-      ";
-    qui odbc query "gauteng";
-    odbc load, exec("`qry'") clear;
-    drop if cluster_rdp==. & cluster_placebo==.;
-    g rdp = cluster_rdp!=.;
+keep if cluster_rdp!=. | cluster_placebo!=. ;
+drop if con_mo_placebo<515 ;
+drop if con_mo_rdp<515 ;
+sum cbd_dist, detail ;
 
+g mo = con_mo_rdp;
+replace mo = con_mo_placebo if mo==. & con_mo_placebo!=.;
+g rdp = cluster_rdp!=.;
 
-		 
-		  ttesting_nocluster cbd_dist;
-		  
-		  duplicates drop rdp, force;
-		  keep rdp cbd_dist *_ttest ;
-		  save dtable_pre_cbd.dta, replace;
+ren mode_yr_rdp mode_yr;
+replace mode_yr = mode_yr_placebo if mode_yr==. & mode_yr_placebo!=.;
+
+ren area_rdp area;
+replace area = area_placebo if area==. & area_placebo!=.;
+
+keep cluster cbd_dist rdp mo mode_yr area ;
+save dtable_pre_cbd.dta, replace;
+
 };
 
 
+if $rdp_count == 1 {;
 
+odbc load, exec("SELECT * FROM rdp_counts;") clear dsn(gauteng);
+egen rdp_count=sum(rdp_all), by(cluster);
+keep rdp_count cluster;
+duplicates drop cluster, force;
+save dtable_rdp_count.dta, replace;
 
-
-if $census_prep == 1 {;
-		*** Census Characteristics *** ;
-
-		global census_vars = " toilet_flush water_inside owner hh_size house tot_rooms pop_density ";
-
-
-use DDcensus_hh_admin, clear;
-
-* flush toilet?;
-gen toilet_flush = (toilet_typ==1|toilet_typ==2) if !missing(toilet_typ);
-lab var toilet_flush "Flush Toilet";
-
-* piped water?;
-gen water_inside = (water_piped==1 & year==2011)|(water_piped==5 & year==2001) if !missing(water_piped);
-lab var water_inside "Piped Water Inside";
-gen water_yard = (water_piped==1 | water_piped==2 & year==2011)|(water_piped==5 | water_piped==4 & year==2001) if !missing(water_piped);
-lab var water_yard "Piped Water Inside or Yard";
-
-* water source?;
-gen water_utility = (water_source==1) if !missing(water_source);
-lab var water_utility "Water from utility";
-
-* electricity?;
-gen electricity = (enrgy_cooking==1 | enrgy_heating==1 | enrgy_lighting==1) if (enrgy_lighting!=. & enrgy_heating!=. & enrgy_cooking!=.);
-lab var electricity "Access to electricity";
-gen electric_cooking  = enrgy_cooking==1 if !missing(enrgy_cooking);
-lab var electric_cooking "Electric Cooking";
-gen electric_heating  = enrgy_heating==1 if !missing(enrgy_heating);
-lab var electric_heating "Electric Heating";
-gen electric_lighting = enrgy_lighting==1 if !missing(enrgy_lighting);
-lab var electric_lighting "Electric Lighting";
-
-* tenure?;
-gen owner = ((tenure==2 | tenure==4) & year==2011)|((tenure==1 | tenure==2) & year==2001) if !missing(tenure);
-lab var owner "Owns House";
-
-* house?;
-gen house = dwelling_typ==1 if !missing(dwelling_typ);
-lab var house "Single House";
-
-* total rooms;
-replace tot_rooms=. if tot_rooms>9;
-lab var tot_rooms "No. Rooms";
-
-* household size rooms;
-replace hh_size=. if hh_size>10;
-lab var hh_size "Household Size";
-
-* household density;
-g o = 1;
-bys area_code: g a_n=_n;
-	
-	g a_n1=a_n==1;
-	egen aN = sum(a_n1);
-	sum aN, detail;
-	file open fi using "../../Code/GAUTENG/paper/figures/area_int.tex", write replace;
-	local h : di %10.0fc `=r(mean)';
-	file write fi "`h'";
-	file close fi;
-
-egen pop = sum(o), by(area_code year);
-g hh_density = (pop/area)*1000000;
-lab var hh_density "Households per km2";
-drop o pop;
-
-* pop density;
-egen pop = sum(hh_size), by(area_code year);
-g pop_density = (pop/area)*1000000;
-lab var pop_density "People per km2";
-drop pop;
-
-* cluster for SEs;
-replace area_int_rdp =0 if area_int_rdp ==.;
-replace area_int_placebo =0 if area_int_placebo ==.;
-gen placebo = (distance_placebo < distance_rdp);
-gen placebo2 = (area_int_placebo> area_int_rdp);
-replace placebo = 1 if placebo2==1;
-drop placebo2;
-gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
-gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
-
-
-g project_rdp = (area_int_rdp > $tresh_area);
-g project_placebo = (area_int_placebo > $tresh_area);
-keep if project_rdp==1 | project_placebo==1;
-g rdp = project_rdp==1;
-
-
-		ren cluster_joined cluster;
-		bys cluster rdp: g cn=_n;
-
-		  foreach v in $census_vars {;
-		  ttesting `v';
-		  };
-
-		  duplicates drop rdp, force;
-		  keep rdp $census_vars *_ttest ;
-
-		  save dtable_pre_census.dta, replace;
 };
 
 
-
-if $gcro_prep == 1 {;
-		*** GCRO data on area and rdp_density data ;
-		  
-		  global gcro_vars="area RDP_density";	
-
-		  local qry = "
-		  SELECT  A.*, CP.cluster_placebo, CR.cluster_rdp FROM gcro AS A
-		  LEFT JOIN cluster_placebo AS CP ON CP.cluster_placebo = A.cluster
-		  LEFT JOIN cluster_rdp     AS CR ON CR.cluster_rdp = A.cluster
-		  ";
-
-		  odbc query "gauteng";
-		  odbc load, exec("`qry'") clear;
-
-		  keep if cluster_placebo!=. | cluster_rdp!=.;
-		  g rdp = cluster_rdp!=.;
-		  
-		  bys rdp: g N=_N;
-		  g N_ttest = .;
-
-		  drop if area>50;
-
-		  foreach v in $gcro_vars {;
-		  ttesting_nocluster `v';
-		  };
-
-		  duplicates drop rdp, force;
-		  keep rdp $gcro_vars N *_ttest;
-
-		  save dtable_pre_gcro.dta, replace;
-};
 
 if $price_prep == 1 {;
 		*** Average Pre-Price in Uncompleted and Completed Areas *** ;
@@ -241,296 +138,167 @@ if $price_prep == 1 {;
 		       purch_yr > 2000
 		       ";
 
+
 		g cluster = cluster_rdp;
 		replace cluster = cluster_placebo if cluster==. & cluster_placebo!=.;
 
 		  keep if $ifregs;
-		  keep if mo2con_rdp<0 | mo2con_placebo<0;
-		  keep if distance_rdp<0 | distance_placebo<0;
+		  *keep if mo2con_rdp>515 | mo2con_placebo>515;
+		  keep if distance_rdp>0 | distance_placebo>0;
 
-		g rdp = distance_rdp<0;
+		  egen price_rdp = mean(purch_price), by(cluster_rdp);
+		  egen price_placebo = mean(purch_price), by(cluster_placebo);
+		  
+		  keep price_rdp price_placebo cluster_rdp cluster_placebo  ;
+		  duplicates drop cluster_rdp cluster_placebo, force  ;
+		  *duplicates drop cluster, force;
+		save dtable_pre_price.dta, replace;
 
-		bys cluster rdp: g cn=_n;
+		use dtable_pre_price.dta, clear;
+		ren cluster_rdp cluster;
+		ren price_rdp price;
 
-		ttesting purch_price;
+		keep if cluster!=.;
+		drop if cluster==.;
+		duplicates drop cluster, force;
+		keep cluster price;
+		save dtable_pre_price_rdp.dta, replace ;
 
-		duplicates drop rdp, force;
-		keep  purch_price *_ttest rdp;
+		use dtable_pre_price.dta, clear;
+		ren cluster_placebo cluster;
+		ren price_placebo price;
+
+		keep if cluster!=.;
+		drop if cluster==.;
+		duplicates drop cluster, force;
+		keep cluster price;
+
+		append using dtable_pre_price_rdp.dta;
 
 		save dtable_pre_price.dta, replace;
-};
 
-
-if $bblu_prep == 1 {;
-	*** Pre building density in Uncompleted and Completed Areas *** ;
-	global bblu_vars = "inf for total_buildings";
-	 
-	use bbluplot_reg_admin_$size, clear;
-
-	keep if post == 0 ;
-	keep if distance_rdp<0 | distance_placebo<0  ;
-
-	g cluster = cluster_rdp;
-	replace cluster = cluster_placebo if cluster==. & cluster_placebo!=.;
-
-	g rdp = distance_rdp<0;
-
-	bys cluster rdp: g cn=_n;
-
-	sort rdp;
-
-	foreach v in $bblu_vars {;
-	ttesting `v';
-	};
-
-	  duplicates drop rdp, force;
-	  keep rdp $bblu_vars *_ttest ;
-	save dtable_pre_build.dta, replace;
+		erase dtable_pre_price_rdp.dta;
 };
 
 
 
-cap program drop tables;
-program define tables `1' `2' `3' `4' `5';
-	file open fi using "`1'.tex", write replace;
-	
-	local COLS `=colsof(`2')';
-	local ROWS `=rowsof(`2')';
-	disp `COLS'	;
-	file write fi "\begin{tabular}{l*{1}{";
-	forvalues c=1/`COLS' {;
-		if `c'>1 {;
-		file write fi "c";
-		};
-		if `c'==`COLS' {;
-		file write fi  "c}}" _n		;
-		};
-	};
-*	file write fi "\hline" _n;
-*	file write fi "\hline " _n;
-
-	file write fi " &" ;
-	forvalues c=1/`COLS' {;
-		if `c'!=`COLS' {;
-		file write fi "`=`5'[`c']' &";
-		};
-		if `c'==`COLS' {;
-		file write fi "`=`5'[`c']'  \\" _n		;
-		};
-	};
-		file write fi "\hline " _n;
-
-	forvalues r=1/`ROWS' {;
-	file write fi  "`=`4'[`r']' & ";
-	forvalues c=1/`COLS' {;
-		local h "";
-		local htest "";
-		if missing(`=`2'[`r',`c']')!=1 {;
-		local h : di %10.`=`3'[`r',1]'fc `2'[`r',`c'];
-		local htest : di %10.2fc `2'[`r',`c'];
-		};
-		if `c'!=`COLS' {;
-		file write fi  "`h' & ";
-		};
-		if `c'==`COLS' {;
-		if `c'==3 {;
-		file write fi  "`htest'  \\" _n		;		
-		};
-		else {;
-		file write fi  "`h'  \\" _n		;
-		};
-		}		;
-		};
-	};
-*	file write fi "\hline" _n;
-	file write fi "\hline" _n;
-	file write fi "\end{tabular}";
-	file close fi;
-end			;
-		
-
-cap program drop table_prepping;
-prog define table_prepping;
-	global varlist_ttest = "";
-
-	foreach v in $varlist {;
-	global varlist_ttest = " $varlist_ttest `v'_ttest ";
-	};
-
-	estpost sum $varlist if rdp==0;
-		matrix c1=e(mean);
-	estpost sum $varlist if rdp==1;
-		matrix c2=e(mean);
-	estpost sum $varlist_ttest;
-		matrix c3=e(mean);
-		
-		matrix A1 = (c1',c2',c3');
 
-	g colnames = "";
-	replace colnames = "Unconstructed" in 1;
-	replace colnames = "Constructed" in 2;
-	replace colnames = "T-Stat" in 3; 
-end;
+use dtable_pre_cbd.dta, clear; 
 
+	merge 1:1 cluster using dtable_rdp_count.dta ;
+	drop if _merge==2;
+	drop _merge;
 
-cap program drop table_prepping_no_t;
-prog define table_prepping_no_t;
+	merge 1:1 cluster using dtable_pre_price.dta;
+	drop if _merge==2;
+	drop _merge;
 
-	estpost sum $varlist if rdp==0;
-		matrix c1=e(mean);
-	estpost sum $varlist if rdp==1;
-		matrix c2=e(mean);
-		
-		matrix A1 = (c1',c2');
+replace rdp_count = 0 if rdp_count==.;
 
-	g colnames = "";
-	replace colnames = "Uncompleted" in 1;
-	replace colnames = "Completed" in 2;
-end;
+* go to working dir;
+cd ../..;
+cd $output ;
 
 
+g het = cbd_dist<=$het ;
 
+global hopt1 = "& het==1";
+global hopt2 = "& het==0";
 
+g o=1;
+egen proj_count_het = sum(o), by(rdp het);
+egen proj_count = sum(o), by(rdp);
 
+#delimit cr;
 
+**** TABLE GENERATION ****
 
-	use dtable_pre_census.dta, clear;
-	append using dtable_pre_gcro.dta;
-	append using dtable_pre_price.dta;
-	append using dtable_pre_build.dta;
-	append using dtable_pre_cbd.dta;
+ global cat1="keep if rdp == 1  " 
+ global cat2="keep if rdp == 0  "
+ global cat_num=2
 
-	* go to working dir;
-	cd ../..;
-	cd $output ;
+    file open newfile using "descriptives_table.tex", write replace
+      print_1 "Number of Projects" proj_count  "mean" "%10.0fc"
+      print_1 "Area (km2)" area "mean" "%10.2fc"
+      print_1 "Median Construction Year" mode_yr  "p50" "%10.0f"
+      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
+      print_1 "House Price within 1km (Rands$^\dagger$)" price "mean" "%10.0fc"
+      print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+    file close newfile
 
-	expand 20;
 
+ global cat1="keep if rdp == 1 $hopt1 " 
+ global cat2="keep if rdp == 0 $hopt1 "
+ global cat3="keep if rdp == 1 $hopt2 "
+ global cat4="keep if rdp == 0 $hopt2 "
+ global cat_num=4
 
+    file open newfile using "descriptives_table_het.tex", write replace
+      print_1 "Number of Projects" proj_count_het  "mean" "%10.0fc"
+      print_1 "Area (km2)" area "mean" "%10.2fc"
+      print_1 "Median Construction Year" mode_yr  "p50" "%10.0f"
+      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
+      print_1 "House Price within 1km (Rands$^\dagger$)" price "mean" "%10.0fc"
+      print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+    file close newfile
 
-		** 1 **;
-		********************************************;
-		******** GENERATE DESCRIPTIVES TABLE *******;
-		********************************************;
 
 
-	preserve;
+/*
 
-		*global varlist=" N area RDP_density inf for pop_density purch_price ";
-		
-		global varlist=" N area RDP_density inf for purch_price cbd_dist";
+foreach var of varlist proj_count area mode_yr rdp_count price cbd_dist  {;
 
-		order $varlist;
-		local num : word count $varlist;
-		matrix define FOR=J(`num',1,0);
+global rr = 0.1;
 
-		matrix FOR[2,1] = 2;
+if "`var'"=="proj_count" | "`var'"=="mode_yr" {;
+global rr = 1;
+};
 
-		replace RDP_density_ttest = .;
-		replace RDP_density = . if rdp==0;
+sum `var' if rdp == 1 $hopt1 $ww;
+ss `=r(mean)' ${rr} "%12.0g";
+disp $val;
+matrix SUM[${zz},1] = $val;
 
-		matrix define PER=J(`num',1,0);
+sum `var' if rdp == 0 $hopt1 $ww;
+ss `=r(mean)' ${rr} "%12.0g";
+matrix SUM[${zz},2] = $val;
 
-		replace pop_density = pop_density*1000000;
+sum `var' if rdp == 1 $hopt2 $ww;
+ss `=r(mean)' ${rr} "%12.0g";
+matrix SUM[${zz},3] = $val;
 
-		replace inf = inf*(1000000/($size*$size)); /* convert to km */
-		replace for = for*(1000000/($size*$size)); /* convert to km */
+sum `var' if rdp == 0 $hopt2 $ww;
+ss `=r(mean)' ${rr} "%12.0g";
+matrix SUM[${zz},4] = $val;
 
-		g temp="";
-		replace temp = "Number of Projects" 				in 1;
-		replace temp = "Area (km2)" 						in 2;
-		replace temp = "Project Houses (per km2)" 	    in 3;
+global zz = ${zz} + 1 ;
+};
 
-		replace temp = "Informal Buildings (per km2)" 		in 4;
-		replace temp = "Formal Buildings (per km2)" 		in 5;
-		replace temp = "House Price (Rand)" 				in 6;
-		replace temp = "Distance to CBD (km)" 				in 7;
+*preserve;
+clear;
+svmat SUM; 
+tostring * , replace force ;
+gen names = "";
+order names, first;
+replace names = "Number of Projects" in 1;
+replace names = "Area (km2)" in 2;
+replace names = "Median Construction Year" in 3;
+replace names = "Delivered Houses" in 4;
+replace names = "House Price within 1km (Rands$^\dagger$)" in 5;
+replace names = "Distance to CBD$^\ddagger$ (km)" in 6;
 
-	*	replace temp = "Population (per km2)" 				in 6;
+*replace names = "N" in 8;
+*replace SUM1 = "$cons1" in 8;
+*replace SUM2 = "$uncons1" in 8;
+*replace SUM3 = "$cons2" in 8;
+*replace SUM4 = "$uncons2" in 8;
+*replace SUM5 = "$all" in 8;
 
+replace SUM4 = SUM4 + " \\";
 
+export delimited using "descriptives_table_het.tex", novar delimiter("&") replace;
 
-		table_prepping;
 
-			tables pre_descriptives A1 FOR temp colnames ;
-			
-	restore;
 
 
 
-
-	preserve;
-
-		*global varlist=" N area RDP_density inf for pop_density purch_price ";
-		
-		global varlist=" N area RDP_density inf for purch_price ";
-
-		order $varlist;
-		local num : word count $varlist;
-		matrix define FOR=J(`num',1,0);
-
-		matrix FOR[2,1] = 2;
-
-		replace RDP_density_ttest = .;
-		replace RDP_density = . if rdp==0;
-
-		matrix define PER=J(`num',1,0);
-
-		replace pop_density = pop_density*1000000;
-
-		replace inf = inf*(1000000/($size*$size)); /* convert to km */
-		replace for = for*(1000000/($size*$size)); /* convert to km */
-
-		g temp="";
-		replace temp = "Number of Projects" 				in 1;
-		replace temp = "Area (km2)" 						in 2;
-		replace temp = "Project Houses (per km2)" 	    in 3;
-
-		replace temp = "Informal Buildings (per km2)" 		in 4;
-		replace temp = "Formal Buildings (per km2)" 		in 5;
-		replace temp = "House Price (Rand)" 				in 6;
-
-	*	replace temp = "Population (per km2)" 				in 6;
-
-		table_prepping_no_t;
-
-			tables pre_descriptives_no_t A1 FOR temp colnames ;
-			
-	restore;
-
-
-
-
-		** 2 **;
-		******************************************;
-		******** GENERATE THE CENSUS TABLE *******;
-		******************************************;
-
-	preserve;
-
-		global varlist="  toilet_flush water_inside hh_size owner house tot_rooms pop_density";
-		order $varlist;
-		local num : word count $varlist;
-		matrix define FOR=J(`num',1,3);
-		matrix define PER=J(`num',1,0);
-
-		matrix FOR[3,1]=2;
-		matrix FOR[6,1]=2;
-		matrix FOR[7,1]=0;
-
-
-		*replace pop_density = pop_density*100;
-
-		g temp="";
-		replace temp = "Flush Toilet" 				in 1;
-		replace temp = "Piped Water in Home" 		in 2;
-		replace temp = "Household Size" 			in 3;
-		replace temp = "Owns House" 				in 4;
-		replace temp = "Single House" 				in 5;
-		replace temp = "Number of Rooms" 			in 6;
-		replace temp = "Pop. Density (per km2)" 	in 7;
-
-		table_prepping;
-
-			tables pre_descriptives_census A1 FOR temp colnames ;
-	restore;
