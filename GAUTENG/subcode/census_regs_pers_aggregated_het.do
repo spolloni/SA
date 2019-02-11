@@ -39,14 +39,17 @@ global output = "Code/GAUTENG/paper/figures" ;
 global LOCAL = 1;
 
 * DOFILE SECTIONS;
-global data_load = 1;
+global data_load = 0;
 global data_prep = 0;
-global data_stat = 0;
-global data_regs = 0;
-global data_regs_DDD = 0;
+* global data_stat = 0;
+global data_regs = 1;
+* global data_regs_DDD = 0;
 
 * PARAMETERS; /* save over older files because its huge */
-global het      = 30.03; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global het      = 30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
+global near "city" ;
+global far "suburb" ;
+
 
 global drop_others= 1; /* everything relative to unconstructed */
 global tresh_area = 0.3; /* Area ratio for "inside" vs spillover */
@@ -73,8 +76,9 @@ if $data_load==1 {;
 
   	SELECT 
 
-        AA.*, GP.con_mo_placebo, GR.con_mo_rdp,
+        AA.*, GP.con_mo_placebo, GR.con_mo_rdp,         
 
+        (RANDOM()/(2*9223372036854775808)+.5) as random, 
 
       CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
 
@@ -151,7 +155,7 @@ if $data_load==1 {;
 
   LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
 
-    WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
+    WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL) AND random < .6
     ";
 
 
@@ -175,8 +179,6 @@ if $data_load==1 {;
       
   save DDcensus_pers_admin_het_2011, replace;
 
-
-/*
 
 
   local qry = " 
@@ -262,7 +264,7 @@ if $data_load==1 {;
   LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
 
     WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
-    AND random < .7
+    AND random < .6
 
     ";
     
@@ -288,7 +290,14 @@ if $data_load==1 {;
   save DDcensus_pers_admin_het_2001, replace;
 
 
-*/
+  use DDcensus_pers_admin_het_2001, clear ;
+
+    append using DDcensus_pers_admin_het_2011 ;
+
+  save DDcensus_pers_admin_het,replace;
+
+  erase DDcensus_pers_admin_het_2001 ;
+  erase DDcensus_pers_admin_het_2011 ;
 
 };
 *****************************************************************;
@@ -300,11 +309,19 @@ if $data_load==1 {;
 *****************************************************************;
 if $data_prep==1 {;
 
-use DDcensus_pers_admin, clear;
+use DDcensus_pers_admin_het, clear;
+
 
 * go to working dir;
 cd ../..;
-cd Output/GAUTENG/censusregs;
+cd $output ;
+
+destring cbd_dist_rdp, replace force;
+g cbd_dist = cbd_dist_rdp;
+replace cbd_dist = cbd_dist_placebo if cbd_dist_rdp==. & cbd_dist_placebo!=.;
+
+g het = 0 if cbd_dist>${het} & cbd_dist<. ;
+replace het = 1 if cbd_dist<=${het} ;
 
 * employment;
 gen unemployed = .;
@@ -378,10 +395,10 @@ collapse
   (mean) unemployed educ_yrs black outside_gp age
   inc_value inc_value_earners schooling_noeduc schooling_postsec
   (firstnm) person_pop area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het 
   , by(area_code year);
 
-save temp_censuspers_agg.dta, replace;
+save temp_censuspers_agg_het.dta, replace;
 
 
 };
@@ -398,25 +415,46 @@ if $data_regs==1 {;
 cd ../..;
 cd $output;
 
-use temp_censuspers_agg.dta, replace;
+use temp_censuspers_agg_het.dta, replace;
 
-g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
-g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
-g project = (project_rdp==1 | project_placebo==1);
-g project_post = project ==1 & year==2011;
-g project_post_rdp = project_rdp ==1 & year==2011;
+g project_rdp_het = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist) & het==1;
+g project_placebo_het = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist) & het==1;
+g project_het = (project_rdp_het==1 | project_placebo_het==1) & het==1;
+g project_post_het = project_het ==1 & year==2011 & het==1;
+g project_post_rdp_het = project_rdp_het ==1 & year==2011 & het==1;
 
-g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
-g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
-g spillover = (spillover_rdp==1 | spillover_placebo==1);
-g spillover_post = spillover == 1 & year==2011;
-g spillover_post_rdp = spillover_rdp==1 & year==2011; 
+g spillover_rdp_het = project_rdp_het!=1 & distance_rdp<= $tresh_dist & het==1;
+g spillover_placebo_het = project_placebo_het!=1 & distance_placebo<= $tresh_dist & het==1;
+g spillover_het = (spillover_rdp_het==1 | spillover_placebo_het==1) & het==1;
+g spillover_post_het = spillover_het == 1 & year==2011 & het==1;
+g spillover_post_rdp_het = spillover_rdp_het==1 & year==2011 & het==1; 
 
-g others = project !=1 & spillover !=1;
+g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist) & het==0;
+g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist) & het==0;
+g project = (project_rdp==1 | project_placebo==1) & het==0;
+g project_post = project ==1 & year==2011 & het==0;
+g project_post_rdp = project_rdp ==1 & year==2011 & het==0;
+
+g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist & het==0;
+g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist & het==0;
+g spillover = (spillover_rdp==1 | spillover_placebo==1) & het==0;
+g spillover_post = spillover == 1 & year==2011 & het==0;
+g spillover_post_rdp = spillover_rdp==1 & year==2011 & het==0; 
+
+
+g others = project !=1 & spillover !=1 & project_het!=1 & spillover_het!=1;
 g others_post = others==1 & year==2011;
 
 
 global regressors "
+  project_post_rdp_het
+  project_post_het
+  project_rdp_het
+  project_het
+  spillover_post_rdp_het
+  spillover_post_het
+  spillover_rdp_het
+  spillover_het
   project_post_rdp
   project_post
   project_rdp
@@ -428,9 +466,10 @@ global regressors "
   others_post
   ";
 
+
 if $drop_others == 1{;
 drop if others==1;
-omit regressors spillover others_post;
+omit regressors spillover spillover_het others_post;
 };
 
 global outcomes "
@@ -445,13 +484,19 @@ eststo clear;
 
 foreach var of varlist $outcomes {;
   areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
+  test project_post_rdp_het = spillover_post_rdp_het;
+  estadd scalar pval_het = `=r(p)';
   test project_post_rdp = spillover_post_rdp;
   estadd scalar pval = `=r(p)';
   sum `var' if e(sample)==1 & year ==2001, detail;
   estadd scalar Mean2001 = `=r(mean)';
   sum `var' if e(sample)==1 & year ==2011, detail;
   estadd scalar Mean2011 = `=r(mean)';
-  count if e(sample)==1 & spillover==1 & project!=1;
+  count if e(sample)==1 & spillover_het==1 & !project_het==1;
+  estadd scalar hhspill_het = `=r(N)';
+  count if e(sample)==1 & project_het==1;
+  estadd scalar hhproj_het = `=r(N)';
+  count if e(sample)==1 & spillover==1 & !project==1;
   estadd scalar hhspill = `=r(N)';
   count if e(sample)==1 & project==1;
   estadd scalar hhproj = `=r(N)';
@@ -470,48 +515,46 @@ global X "{\tim}";
 
 estout $outcomes using census_pers_DDregs_AGG_het.tex, replace
   style(tex) 
-  drop(_cons)
-  rename(
-    project_post_rdp "project${X}post${X}constr"
-    project_post "project${X}post"
-    project_rdp "project${X}constr"
-    spillover_post_rdp "spillover${X}post${X}constr"
-    spillover_post "spillover${X}post"
-    spillover_rdp "spillover${X}constr"
-  )
+  keep( project_post_rdp_het 
+    spillover_post_rdp_het 
+    project_post_rdp 
+    spillover_post_rdp)
+  varlabels(
+    project_post_rdp_het "${near}${X}proj"
+    spillover_post_rdp_het "${near}${X}spill"
+    project_post_rdp "${far}${X}proj"
+    spillover_post_rdp "${far}${X}spill"
+  ,el(
+    project_post_rdp_het [0.5em] 
+  spillover_post_rdp_het [0.5em] 
+  project_post_rdp [0.5em] 
+  spillover_post_rdp  [1em] " \midrule"
+  ))
+
   noomitted
   mlabels(,none) 
   collabels(none)
   cells( b(fmt(3) star ) se(par fmt(3)) )
-  varlabels(,el(
-    "project${X}post${X}constr" [0.5em] 
-    "project${X}post" [0.5em] 
-    "project${X}constr" [0.5em] 
-    project [0.5em] 
-    "spillover${X}post${X}constr" [0.5em] 
-    "spillover${X}post" [0.5em] 
-    "spillover${X}constr" " \midrule"
-  ))
-  stats( pval Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
+
+  stats(pval_het pval r2 
+      hhproj_het hhspill_het hhproj hhspill , 
     labels(
-      "{\it p}-val, h\textsubscript{0}: project=spill. "
-      "Mean Outcome 2001" 
-      "Mean Outcome 2011" 
+      "{\it p}-val, h\textsubscript{0} ${near}:  proj = spill "
+      "{\it p}-val, h\textsubscript{0} ${far}: proj = spill "
       "R$^2$" 
-      "\# projects"
-      `"N project areas"'
-      `"N spillover areas"'  
-      "N" 
+      `"N ${near} proj areas"'
+      `"N ${near} spill areas"'  
+      `"N ${far} proj areas"'
+      `"N ${far} spill areas"'  
     ) 
     fmt(
       %9.3fc
-      %9.2fc
-      %9.2fc 
+      %9.3fc
       %12.3fc 
       %12.0fc 
       %12.0fc 
-      %12.0fc  
       %12.0fc 
+      %12.0fc  
     )
   )
   starlevels( 
@@ -525,7 +568,19 @@ estout $outcomes using census_pers_DDregs_AGG_het.tex, replace
 *****************************************************************;
 *****************************************************************;
 
+/*
+  rename(
+    project_post_rdp_het "${near}${X}proj"
+    spillover_post_rdp_het "${near}${X}spill"
+    project_post_rdp "${far}${X}proj"
+    spillover_post_rdp "${far}${X}spill"
+  )
 
+  keep(
+  "${near}${X}proj"
+  "${near}${X}spill"
+  "${far}${X}proj"
+  "${far}${X}spill")
 
 
 

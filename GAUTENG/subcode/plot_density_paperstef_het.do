@@ -42,7 +42,7 @@ global LOCAL = 1;
 global het      =  30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
 
 * PARAMETERS;
-global bin      = 50;   /* distance bin width for dist regs   */
+global bin      = 200;   /* distance bin width for dist regs   */
 global size     = 50;
 global sizesq   = $size*$size;
 global dist_max = 1200;
@@ -58,7 +58,7 @@ global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-* global graph_plotmeans_rawchan = 0;
+global graph_plotmeans_rawchan = 0;
 * global graph_plotmeans_cntproj = 0;
 * global graph_plottriplediff    = 0;
 
@@ -392,28 +392,28 @@ if $graph_plotmeans_rdpplac == 1 {;
   plotmeans_pre 
     bblu_for_pre_means_het_near for rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     1;
 
   plotmeans_pre 
     bblu_inf_pre_means_het_near inf rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     1;
   
   plotmeans_pre 
     bblu_for_pre_means_het_far for rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     0;
 
   plotmeans_pre 
     bblu_inf_pre_means_het_far inf rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
+    "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     0;
 
