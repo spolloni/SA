@@ -6,6 +6,20 @@ set matsize 11000
 set maxvar 32767
 
 
+program in_stat 
+    preserve 
+        `6' 
+        qui sum `2', detail 
+        local value=string(`=r(`3')',"`4'")
+        if `5'==0 {
+            file write `1' " & `value' "
+        }
+        if `5'==1 {
+            file write  `1' " & [`value'] "
+        }       
+    restore 
+end
+
 cap prog drop print_1
 program print_1
     file write newfile " `1' "
@@ -239,6 +253,28 @@ egen proj_count = sum(o), by(rdp);
       print_1 "Median Construction Year" mode_yr  "p50" "%10.0f"
       print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
       print_1 "House Price within 1km (Rands$^\dagger$)" price "mean" "%10.0fc"
+      print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+    file close newfile
+
+
+
+
+**** TABLE GENERATION ALL ****
+
+ global cat1="keep if rdp == 1 "
+ global cat2="keep if rdp == 0 "
+ global cat3="keep if rdp == 1 $hopt1 " 
+ global cat4="keep if rdp == 0 $hopt1 "
+ global cat5="keep if rdp == 1 $hopt2 "
+ global cat6="keep if rdp == 0 $hopt2 "
+ global cat_num=6
+
+    file open newfile using "descriptives_table_all.tex", write replace
+      print_1 "Number of Projects" o  "N" "%10.0fc"
+      print_1 "Area (km2)" area "mean" "%10.2fc"
+      print_1 "Median Construction Yr." mode_yr  "p50" "%10.0f"
+      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
+      print_1 "House Price in 1 km (R$^\dagger$)" price "mean" "%10.0fc"
       print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
     file close newfile
 

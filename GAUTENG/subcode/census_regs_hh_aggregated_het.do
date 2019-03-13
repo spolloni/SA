@@ -41,7 +41,7 @@ global LOCAL = 1;
 global data_load = 0;
 global data_prep = 0;
 global data_stat = 0;
-global data_regs = 0;
+global data_regs = 1;
 
 * PARAMETERS;
 global het      = 30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
@@ -585,6 +585,12 @@ estout using census_hh_DDregs_AGG_het_less.tex, replace
   "${near}${X}spill"
   "${far}${X}proj"
   "${far}${X}spill")
+  varlabels(,el(
+  "${near}${X}proj" [0.5em] 
+  "${near}${X}spill" [0.5em] 
+  "${far}${X}proj" [0.5em] 
+  "${far}${X}spill" [0.5em] 
+  ))
   noomitted
   mlabels(,none) 
   collabels(none)
@@ -592,8 +598,8 @@ estout using census_hh_DDregs_AGG_het_less.tex, replace
   stats(pval_het pval r2 
       hhproj_het hhspill_het hhproj hhspill , 
     labels(
-      "{\it p}-val, h\textsubscript{0}: ${near} proj = ${near} spill "
-      "{\it p}-val, h\textsubscript{0}: ${far} proj = ${far} spill "
+      "{\it p}-val, ${near}:  proj = spill "
+      "{\it p}-val, ${far}: proj = spill "
       "R$^2$" 
       `"N ${near} proj areas"'
       `"N ${near} spill areas"'  
