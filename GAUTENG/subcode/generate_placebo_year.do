@@ -6,10 +6,11 @@ set matsize 11000
 set maxvar 32767
 #delimit;
 
-global LOCAL = 0;
+global LOCAL = 1;
 
 prog define name_fix ;
 	replace name = lower(name);
+	replace name = subinstr(name,"extension","ext",.);	
 	replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"([a-z]+) x([0-9]+)");
 	replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"([a-z]+) x ([0-9]+)");
 	replace name = regexs(1)+" ext "+regexs(2) if regexm(name,"(.+)ext(.+)");
@@ -42,12 +43,13 @@ cd ../..;
 cd "Raw/GCRO/DOCUMENTS/budget_statement_3/";
 
 
-local qry = "SELECT  A.*, B.RDP_mode_yr 
+local qry = "SELECT  A.*, B.cluster_new AS cluster
 FROM gcro_publichousing AS A 
-LEFT JOIN gcro_temp_rdp_count AS B 
-ON A.OGC_FID = B.OGC_FID";
+LEFT JOIN gcro_link AS B 
+ON A.OGC_FID = B.cluster_original";
 	qui odbc query "gauteng";
 	odbc load, exec("`qry'") clear;
+
 	drop GEOMETRY;
 	name_fix;
 	duplicates drop name, force;
@@ -55,11 +57,13 @@ ON A.OGC_FID = B.OGC_FID";
 	ren name name_gcro;
 	drop objectid;
 	g ID_gcro=_n;
+
 save "temp/gcro.dta", replace;
 
 
 ** CLEAN 04 05; 
 import delimited using "temp/tab_04_05.csv", clear delimiter(",") colrange(2:) varnames(1);
+
 	drop if name=="sub total";
 		g name1=name[_n-1]+" " + name[_n] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n-1]!="nan";
 		replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
@@ -82,6 +86,7 @@ import delimited using "temp/tab_04_05.csv", clear delimiter(",") colrange(2:) v
 			drop cost_max;
 	duplicates drop name, force;
 	g ID = _n;
+	
 save "temp/tab_04_05.dta", replace;
 
 
@@ -91,6 +96,7 @@ import delimited using "temp/tab_05_06.csv", clear delimiter(",") colrange(2:) v
 	replace name1 = name[_n-1] if start[_n-1]=="nan" & start[_n]!="nan" & name[_n]=="nan";
 	g type1 = type[_n-1]+" " + type[_n] if start[_n-1]=="nan" & start[_n]!="nan";
 	drop if name1=="" | name1=="nan";
+
 	bys type1: g T_N=_N ;
 	keep if T_N>10 ;
 	drop T_N;
@@ -239,40 +245,39 @@ use "temp/gcro_merge.dta", clear;
 			egen max_score=max(score), by(ID_gcro);
 			keep if score+.00001>max_score;
 			drop max_score;
+			
 			egen min_start_yr=min(start_yr), by(ID_gcro);
 			egen max_end_yr = max(end_yr), by(ID_gcro);
 			keep if start_yr==min_start_yr;
-			drop min_start_yr;
+			drop min_start_yr max_end_yr;
 		duplicates drop ID_gcro, force;
 		merge 1:m ID_gcro using "temp/gcro.dta";
 		keep if _merge==3;
 		drop _merge;
 
-	*** Determine average years taken to complete  		;
-	*** using projects built between 2000 and 2004      ;
-	*** to give enough time to feasibly complete these projects 	;
+			egen max_score=max(score), by(cluster);
+			keep if score+.00001>max_score;
+			drop max_score;
+			
+			egen min_start_yr=min(start_yr), by(cluster);
+			egen max_end_yr = max(end_yr), by(cluster);
+			keep if start_yr==min_start_yr;
+			keep if end_yr==max_end_yr;
+			drop min_start_yr max_end_yr;
 
-	g year_post = RDP_mode_yr-start_yr;
+	keep cluster start_yr end_yr score;
+	order cluster start_yr end_yr score; 
 
-	sum year_post if RDP_mode_yr>=2000 & start_yr>=2000 & start_yr<=2004 & year_post>=0, detail ;
-
-
-	g placebo_year = start_yr + `=round(r(mean),1)';
-	** round to the nearest year because we are going at the year level ;
-
-	keep OGC_FID start_yr placebo_year score;
-	order OGC_FID start_yr placebo_year score; 
-
-	duplicates drop OGC_FID, force;
+	duplicates drop cluster, force;
 	
 	odbc exec("DROP TABLE IF EXISTS gcro_temp_year;"), dsn("gauteng");
 	odbc insert, table("gcro_temp_year") create;
 
-	disp $count_budget ;
-	disp ($score_04_05 + $score_05_06 + $score_06_07 + $score_08_09)/4;
+	*disp $count_budget ;
+	*disp ($score_04_05 + $score_05_06 + $score_06_07 + $score_08_09)/4;
 
 
 
 *	shell rm -r "temp";
 
-exit, STATA clear; 
+* exit, STATA clear; 

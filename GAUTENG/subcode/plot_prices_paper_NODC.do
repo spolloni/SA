@@ -1,8 +1,10 @@
-clear all
+
+clear
+est clear
+
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+
 #delimit;
 grstyle init;
 grstyle set imesh, horizontal;
@@ -11,7 +13,6 @@ grstyle set imesh, horizontal;
 global LOCAL = 1;
 if $LOCAL==1{;
   cd ..;
-  global rdp  = "all";
 };
 
 ***************************************;
@@ -50,57 +51,26 @@ end;
 *  PLOT GRADIENTS *;
 *******************;
 
-* SET OUTPUT FOLDER ;
-global output = "Output/GAUTENG/gradplots";
-*global output = "Code/GAUTENG/paper/figures";
-*global output = "Code/GAUTENG/presentations/presentation_lunch";
-
-* PARAMETERS;
-global rdp   = "`1'";
-global twl   = "3";   /* look at twl years before construction */
-global twu   = "3";   /* look at twu years after construction */
-global bin   = 200;   /* distance bin width for dist regs   */
-global max   = 1200;  /* distance maximum for distance bins */
-global mbin  = 12;   /* months bin width for time-series   */
-global msiz  = 20;    /* minimum obs per cluster            */
-global treat = 700;   /* distance to be considered treated  */
-global round = 0.15;  /* rounding for lat-lon FE */
-
 * data subset for regs (1);
-global ifregs = "
-       s_N <30 &
-       rdp_never ==1 &
-       purch_price > 2000 & purch_price<800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
-       ";
-
-global ifhists = "
-       s_N <30 &
-       rdp_never ==1 &
-       purch_price > 2000 & purch_price<1800000 &
-       purch_yr > 2000 & distance_rdp>0 & distance_placebo>0
-       ";
 
 * what to run?;
 
-global ddd_regs_d = 0;
-global ddd_regs_t = 0;
-global ddd_table  = 0;
+global ddd_regs_d = 1;
+global ddd_regs_t = 1;
+global ddd_table  = 1;
 
-global ddd_regs_t_alt  = 1;
+global ddd_regs_t_alt  = 0; /* these aren't working right now */
 global ddd_regs_t2_alt = 0;
-
 global countour = 0;
 
 * load data; 
 cd ../..;
 cd Generated/GAUTENG;
-use gradplot_admin.dta, clear;
+use "gradplot_admin${V}.dta", clear;
 
 * go to working dir;
 cd ../..;
 cd $output ;
-
 
 * treatment dummies;
 gen treat_rdp  = (distance_rdp <= $treat);
@@ -134,7 +104,6 @@ foreach v in _rdp _placebo _joined {;
 * transaction count per seller;
 bys seller_name: g s_N=_N;
 
-
 *extra time-controls;
 gen day_date_sq = day_date^2;
 gen day_date_cu = day_date^3;
@@ -148,12 +117,18 @@ egen latlongroup = group(latbin lonbin);
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
+g het = 1 if cbd_dist<${het};
+replace het = 0 if cbd_dist>=${het} & cbd_dist<.;
+
+save "price_regs${V}.dta", replace;
 
 *****************************************************************;
 *************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
 *****************************************************************;
 if $ddd_regs_d ==1 {;
 
+
+use "price_regs${V}.dta", clear;
 
 levelsof dists_joined;
 global dists_all "";
@@ -222,7 +197,7 @@ preserve;
     aspect(.6);
 
 restore;
-graphexportpdf price_regs_DDDplot, dropeps;
+graphexportpdf price_regs_DDDplot${V} , dropeps;
 
 };
 *****************************************************************;
@@ -236,6 +211,7 @@ graphexportpdf price_regs_DDDplot, dropeps;
 *****************************************************************;
 if $ddd_regs_t ==1 {;
 
+use "price_regs${V}.dta", clear;
 
 
 gen prepost_regt_joined = 0;
@@ -362,7 +338,7 @@ preserve;
     note("`3'");
 
 restore;
-graphexportpdf DDDplot_pertime, dropeps;
+graphexportpdf DDDplot_pertime${V} , dropeps;
 
 };
 *****************************************************************;
@@ -374,6 +350,7 @@ graphexportpdf DDDplot_pertime, dropeps;
 *****************************************************************;
 if $ddd_table ==1 {;
 
+use "price_regs${V}.dta", clear;
 
 
 gen dists_joined_table = dists_joined;
@@ -452,7 +429,7 @@ eststo;
 
 global X "{\tim}";
 
-estout  using price_regDDD.tex, replace
+estout  using "price_regDDD${V}.tex", replace
   style(tex)
   keep(
     dists_rdp_post_600 
@@ -498,10 +475,15 @@ estout  using price_regDDD.tex, replace
 *****************************************************************;
 *****************************************************************;
 
+
+/*
 *****************************************************************;
 *************   DDD REGRESSION WITH TIME  ALTERNATE  ************;
 *****************************************************************;
 if $ddd_regs_t_alt ==1 {;
+
+use "price_regs${V}.dta", clear;
+
 
 gen prepost_regt_joined = 0;
 replace prepost_regt_joined = 1 if mo2con_joined >= -24 & mo2con_joined < -12; 
@@ -822,6 +804,9 @@ preserve;
 *****************************************************************;
 if $ddd_regs_t2_alt ==1 {;
 
+use "price_regs${V}.dta", clear;
+
+
 gen close = (dists_joined<=400);
 replace close = 2 if dists_joined==9999;
 
@@ -904,6 +889,9 @@ graphexportpdf DDDplot_pertime_alt, dropeps;
 if $countour ==1 {;
 *preserve;
 
+use "price_regs${V}.dta", clear;
+
+
   keep if $ifregs==1;
 
   * make residuals;
@@ -955,52 +943,10 @@ if $countour ==1 {;
     colgap(small) size(medsmall) region(lwidth(none)))
   aspect(.75)
   ;
-  graphexportpdf prices_rawchanges, dropeps;
+  graphexportpdf "prices_rawchanges${V}", dropeps;
 
 *restore;
 };
-*****************************************************************;
-*****************************************************************;
-*****************************************************************;
-
-* *****************************************************************;
-* **************************CONTOUR********************************;
-* *****************************************************************;
-* if $couZtour ==1 {;
-* *preserve;
-
-*   keep if $ifregs==1;
-
-*   * make residuals;
-*   egen clyrgroup = group(purch_yr cluster_joined);
-*   areg lprice i.purch_mo erf_size* if $ifregs, a(clyrgroup);
-*   *reg lprice i.purch_yr if $ifregs;
-*   predict e, residuals;
-
-*   drop if dists_joined > 9000;
-*   drop if mo2con_reg_joined > 9000;
-
-*   mlowess lprice distance_joined mo2con_joined if placebo==1, nograph predict(prede1) log;
-*   mlowess lprice distance_joined mo2con_joined if placebo==0, nograph predict(prede2) log;
-
-*   egen prede = rowfirst(prede1-prede2);
-
-*   gen rdists = round(distance_joined,50);
-
-*   replace mo2con_reg_joined = - (mo2con_reg_joined -1000) if mo2con_reg_joined>1000 ;
-
-*   collapse (mean) prede, by(mo2con_reg_joined rdists placebo);
-
-*   export delimited using "lowess.csv", replace;
-
-
-
-* *restore;
-* };
-* *****************************************************************;
-* *****************************************************************;
-* *****************************************************************;
-
 
 
 

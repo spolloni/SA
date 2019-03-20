@@ -1,8 +1,10 @@
-clear all
+clear
+est clear
+
+
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+
 #delimit;
 grstyle init;
 grstyle set imesh, horizontal;
@@ -31,38 +33,12 @@ end;
 *  PLOT DENSITY  *;
 ******************;
 
-* SET OUTPUT;
-*global output = "Output/GAUTENG/bbluplots";
-global output = "Code/GAUTENG/paper/figures";
-*global output = "Code/GAUTENG/presentations/presentation_lunch";
-
-* RUN LOCALLY?;
-global LOCAL = 1;
-
-global het      =  30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
-
-* PARAMETERS;
-global bin      = 200;   /* distance bin width for dist regs   */
-global size     = 50;
-global sizesq   = $size*$size;
-global dist_max = 1200;
-global dist_min = -400;
-
-global dist_break_reg = 500; /* determines spillover vs control outside of project for regDDD */
-global dist_max_reg = 1500;
-global dist_min_reg = -500;
-
 * DOFILE SECTIONS;
-global bblu_query_data  = 0; /* query data */
-global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan = 0;
-* global graph_plotmeans_cntproj = 0;
-* global graph_plottriplediff    = 0;
-
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global graph_plotmeans_rawchan = 0;  /* I GUESS WE DONT DO THIS ONE HERE */
+global graph_plotmeans_cntproj = 0;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -94,170 +70,7 @@ if $LOCAL==1 {;
 cd ../..;
 cd Generated/Gauteng;
 
-************************************************;
-********* LOAD DATA  ***************************;
-************************************************;
-if $bblu_query_data == 1 {;
 
-  foreach time in pre post {;
-    if "`time'"=="post"{;
-    local where_post    " AND A.cf_units = 'High' ";
-    };
-  local qry = " 
-
-    SELECT AA.*, GP.con_mo_placebo, GR.con_mo_rdp, IR.cluster AS cluster_int_rdp, 
-    IP.cluster AS cluster_int_placebo, GC.RDP_density, GC.area
-
-    FROM 
-
-    (
-      SELECT 
-
-        B.distance AS distance_rdp, 
-        B.target_id AS cluster_rdp,
-
-        BP.distance AS distance_placebo, 
-        BP.target_id AS cluster_placebo, 
-
-        A.OGC_FID, 
-        A.s_lu_code, 
-        A.t_lu_code, 
-        AXY.X, AXY.Y
-
-      FROM 
-
-        bblu_`time'  AS A  
-
-      LEFT JOIN 
-        (SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-         FROM distance_bblu_`time'_rdp WHERE distance<=4000
-         GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)
-        ) AS B ON A.OGC_FID=B.input_id
-
-      LEFT JOIN 
-        (SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-         FROM distance_bblu_`time'_placebo WHERE distance<=4000
-         GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)
-        ) AS BP ON A.OGC_FID=BP.input_id  
-
-      LEFT JOIN bblu_`time'_xy AS AXY ON AXY.OGC_FID = A.OGC_FID
-
-      WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) `where_post'
-
-    ) AS AA 
-
-    LEFT JOIN 
-      (SELECT cluster_placebo, con_mo_placebo 
-       FROM cluster_placebo
-      ) AS GP ON AA.cluster_placebo = GP.cluster_placebo
-
-    LEFT JOIN 
-      (SELECT cluster_rdp, con_mo_rdp 
-      FROM cluster_rdp
-      ) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
-
-    LEFT JOIN gcro AS GC ON AA.cluster_rdp = GC.cluster
-
-    LEFT JOIN int_placebo_bblu_`time' AS IP ON IP.OGC_FID = AA.OGC_FID
-
-    LEFT JOIN int_rdp_bblu_`time' AS IR  ON IR.OGC_FID = AA.OGC_FID    
-
-    ";
-
-  odbc query "gauteng";
-  odbc load, exec("`qry'") clear;
-      save bbluplot_admin_`time'.dta, replace;
-};
-
-};
-************************************************;
-************************************************;
-************************************************;
-
-************************************************;
-********* CLEAN DATA  **************************;
-************************************************;
-if $bblu_clean_data==1 {;
-
-  use bbluplot_admin_pre.dta, clear;
-  g post = 0;
-  append using bbluplot_admin_post.dta;
-  replace post = 1 if post==.;
-
-  g formal = (s_lu_code=="7.1");
-
-  destring X Y, replace force;
-  drop if X==. | Y==. ;
-
-  /* throw out clusters for early projects (before 2001) */
-  replace distance_placebo =. if con_mo_placebo<515 | con_mo_placebo==.;
-  replace cluster_placebo  =. if con_mo_placebo<515 | con_mo_placebo==.;
-  replace distance_rdp =. if con_mo_rdp<515 | con_mo_rdp==.;
-  replace cluster_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
-
-  /* drop unmatched observations */
-  drop if distance_rdp ==. & distance_placebo ==. ;
-  drop if cluster_rdp ==. & cluster_placebo ==. ;
-
-  /* reverse distances for intersection */
-  replace distance_rdp = -1*distance_rdp if cluster_int_rdp!=.; 
-  replace distance_placebo = -1*distance_placebo if cluster_int_placebo!=.;
-
-  /* single distance & cluster var -- no doublecounting */
-  gen placebo = (distance_placebo < distance_rdp);
-  gen cluster_joined = cond(placebo==1, cluster_placebo, cluster_rdp);
-
-  /* create id's */
-  g id  = string(round(X,$size),"%10.0g") + string(round(Y,$size),"%10.0g") ;
-
-  outcome_gen;
-
-  foreach var in $outcomes {;
-    egen `var'_s = sum(`var'), by(id post);
-    drop `var';
-    ren `var'_s `var';
-  };
-
-  foreach v in _rdp _placebo {; 
-
-    /* replace mean distance within block */
-    egen dm`v' = mean(distance`v'), by(id);
-    drop distance`v';
-    ren dm`v' distance`v';
-
-    /* replace mode cluster within block */
-    egen dm`v' = mode(cluster`v'), maxmode by(id);
-    drop cluster`v';
-    ren dm`v' cluster`v';
-
-  };
-
-  keep  $outcomes  
-    post id cluster_placebo cluster_rdp cluster_joined
-    distance_rdp distance_placebo RDP_density;
-  duplicates drop id post, force;
-
-  egen id1 = group(id);
-  drop id;
-  ren id1 id;
-
-  tsset id post;
-
-  tsfill, full;
-
-  foreach var in $outcomes {;
-  replace `var'=0 if `var'==.;
-  };
-
-  foreach var of varlist cluster_placebo cluster_rdp distance_rdp distance_placebo RDP_density {;
-  egen `var'_m=max(`var'), by(id);
-  replace `var'=`var'_m if `var'==.;
-  drop `var'_m;
-  };
-
-  save bbluplot_reg_admin_$size, replace;
-
-};
 ************************************************;
 ************************************************;
 ************************************************;
@@ -290,21 +103,21 @@ drop if distance_rdp == . & distance_placebo == .;
 drop if cluster_rdp == . & cluster_placebo == .;  
 
 sum distance_rdp;
-global max = round(ceil(`r(max)'),$bin);
+global max = round(ceil(`r(max)'),${bin_het});
 
-egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
+egen dists_rdp = cut(distance_rdp),at($dist_min(${bin_het})$max);
 g drdp=dists_rdp;
-replace drdp=. if drdp>$max-$bin; 
+replace drdp=. if drdp>$max-${bin_het}; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)'+ $bin if dists_rdp==. | post==0;
+replace dists_rdp=`=r(max)'+ ${bin_het} if dists_rdp==. | post==0;
 
-egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
+egen dists_placebo = cut(distance_placebo),at($dist_min(${bin_het})$max); 
 g dplacebo = dists_placebo;
-replace dplacebo=. if dplacebo>$max-$bin;
+replace dplacebo=. if dplacebo>$max-${bin_het};
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)'+ $bin if dists_placebo==. | post==0;
+replace dists_placebo=`=r(max)'+ ${bin_het} if dists_placebo==. | post==0;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;
@@ -357,7 +170,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     keep if _merge==3;
     drop _merge;
 
-    replace D = D + $bin/2;
+    replace D = D + ${bin_het}/2;
 
     twoway 
     (connected `2'_`4' D, ms(o) msiz(medium) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin))
@@ -390,28 +203,28 @@ if $graph_plotmeans_rdpplac == 1 {;
   *   4;
 
   plotmeans_pre 
-    bblu_for_pre_means_het_near for rdp placebo
+    bblu_for_pre_means_het_near${V} for rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     1;
 
   plotmeans_pre 
-    bblu_inf_pre_means_het_near inf rdp placebo
+    bblu_inf_pre_means_het_near${V} inf rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     1;
   
   plotmeans_pre 
-    bblu_for_pre_means_het_far for rdp placebo
+    bblu_for_pre_means_het_far${V} for rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
     0;
 
   plotmeans_pre 
-    bblu_inf_pre_means_het_far inf rdp placebo
+    bblu_inf_pre_means_het_far${V} inf rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "2000" "'
     2
@@ -470,7 +283,7 @@ if $graph_plotmeans_rawchan == 1 {;
      keep if _merge==3;
      drop _merge;
 
-    replace D = D + $bin/2;
+    replace D = D + ${bin_het}/2;
     gen D`4' = D+7;
     gen D`3' = D-7;
 
@@ -496,51 +309,22 @@ if $graph_plotmeans_rawchan == 1 {;
   global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
   global yl = "1(1)7";
 
-  * plotchanges 
-  *   bblu_total_buildings_rawchanges total_buildings rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'  
-  *   4;
+
 
   plotchanges 
-    bblu_for_rawchanges_het_near for rdp placebo
+    bblu_for_rawchanges_het_near${V} for rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2
     ;
 
   plotchanges 
-    bblu_inf_rawchanges_het_near inf rdp placebo
+    bblu_inf_rawchanges_het_near${V} inf rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2
     ;
 
-  * plotchanges 
-  *   bblu_for_rawchanges_het_far for rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
-  *   2
-  *   0;
-
-  * plotchanges 
-  *   bblu_inf_rawchanges_het_far inf rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
-  *   2
-  *   0;
-
-  * plotchanges 
-  *   bblu_inf_backyard_rawchanges inf_backyard rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
-  *   2;
-
-  * plotchanges 
-  *   bblu_inf_non_backyard_rawchanges inf_non_backyard rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
-  *   2;
 
 };
 ************************************************;
@@ -580,7 +364,7 @@ if $graph_plotmeans_cntproj == 1 {;
     keep if _merge==3;
     drop _merge;
 
-    replace D = D + $bin/2;
+    replace D = D + ${bin_het}/2;
     
     tw
     (sc Nrdp D, m(o) mc(black)) 
@@ -588,86 +372,13 @@ if $graph_plotmeans_cntproj == 1 {;
     xtitle("Distance from project border (meters)",height(5))
     ytitle("Observed Projects",height(5) si(medsmall))
     xline(0,lw(medthin)lp(shortdash))
-    ylabel(0(20)80, tp(c) labs(small))
+    ylabel(${cntproj_y}, tp(c) labs(small))
     xlabel(-400(200)1200, tp(c) labs(small))
     legend(order(1 "Constructed" 2 "Unconstructed"  ) symx(6) col(1)
     ring(0) position(5) bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(.5);
-    graphexportpdf projectcounts_het, dropeps;
+    graphexportpdf projectcounts_het${V}, dropeps;
   restore;
 
 };
-************************************************;
-************************************************;
-************************************************;
-
-
-* ************************************************;
-* * 3.1 MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
-* ************************************************;
-* if $graph_plottriplediff == 1 {;
-
-* cap program drop plotregsingle;
-* program plotregsingle;
-
-*   preserve;
-*   parmest, fast le(90);
-
-*     egen contin = sieve(parm), keep(n);
-*     destring contin, replace force;
-*     replace contin=contin+${dist_min};
-*     drop if contin > $dist_max - $bin;
-*     drop if strpos(parm, "all") >0;
-
-*     replace contin = contin + $bin/2;
-
-*     sort contin;
-
-*     global legend1 `" 2 "DDD Coefficients" 1 "90% Confidence Intervals" "';
-*     global graph1 "
-*     (rspike max90 min90 contin, lc(gs7) lw(vthin))
-*     (connected estimate contin, ms(d) msiz(small)
-*     mlc(gs0) mfc(gs0) lc(gs0) m(o) lp(none) lw(medthin) )";
-    
-*     tw 
-*     $graph1 
-*     ,
-*     yline(0,lw(thin)lp(shortdash))
-*     xline(0,lw(thin)lp(shortdash))
-*     xtitle("Distance from project border (meters)",height(5))
-*     ytitle("Structures per km{superscript:2}",height(2))
-*     xlabel(-400(200)1200, tp(c) labs(small)  )
-*     ylabel(-1500(500)1500, tp(c) labs(small)  )
-*     plotr(lw(medthick ))
-*     legend(order($legend1) symx(6) col(1)
-*     ring(0) position(2) bm(medium) rowgap(small) 
-*     colgap(small) size(*.95) region(lwidth(none)))
-*     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
-*     aspect(.77);
-*     graphexportpdf `1', dropeps;
-*   restore;
-* end;
-
-* levelsof dists_rdp;
-* global dists_all "";
-* foreach level in `r(levels)' {;
-*   gen dists_rdp_`level' = dists_rdp== `level';
-*   gen dists_all_`level' = (dists_rdp == `level' | dists_placebo == `level');
-*   global dists_all "dists_all_`level' dists_rdp_`level' ${dists_all}";
-* };
-* omit dists_all dists_rdp_1550;
-
-* foreach var in $outcomes {;
-*   replace `var' = 400*`var';
-*   sum `var', detail;
-*   global mean_outcome= string(round(r(mean),.01),"%9.2f");
-*   areg `var' $dists_all , cl(cluster_reg) a(id);
-*   plotregsingle distplotDDD_bblu_`var'_admin; 
-*   replace `var' = `var'/400;
-* };
-
-* };
-************************************************;
-************************************************;
-************************************************;

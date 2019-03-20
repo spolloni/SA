@@ -10,7 +10,7 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.placebofuns import make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
+from subcode.placebofuns import make_gcro_all, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
@@ -52,7 +52,7 @@ workers = int(multiprocessing.cpu_count()-1)
 ################
 
 dist_threshold  = 4000   # define neighborhood radius in meters
-hulls           = ['rdp','placebo'] 
+hulls           = ['gcro'] 
 
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
@@ -60,9 +60,9 @@ _1_c_IMPORT = 0  # import CENSUS
 _1_d_IMPORT = 0  # import GCRO + landplots
 _1_e_IMPORT = 0  # import GHS
 
-_2_FLAGRDP_ = 0
+_2_FLAGRDP_ = 0 # DON"T NEED
 _3_GCRO_a_  = 0
-_3_GCRO_b_  = 0
+_3_GCRO_b_  = 0 # DON"T NEED
 
 _4_a_DISTS_ = 0  # buffers and hull creation
 _4_b_DISTS_ = 0  # ERVEN distance
@@ -78,7 +78,7 @@ _7_DD_REGS_     = 0  # DD regressions with census data
 ### NOT UPDATED YET ###
 _8_TABLES_      = 0  # DESCRIPTIVES (haven't updated yet)
 
-_9_MAP_         = 1 
+_9_MAP_         = 0
 
 #############################################
 # STEP 1:   import RAW data into SQL tables #
@@ -197,7 +197,7 @@ if _2_FLAGRDP_ ==1:
 
     print '\n'," Identifying sample and RDP properties... ",'\n'
 
-    dofile = "subcode/rdp_flag.do"
+    dofile = "subcode/rdp_flag_gcro.do"
     cmd = ['stata-mp', 'do', dofile]
     subprocess.call(cmd)
 
@@ -212,12 +212,13 @@ if _3_GCRO_a_ == 1:
 
     print '\n'," Defining Placebo and RDPs from gcro ... ",'\n'
 
-    import_budget(rawgcro)
+    # import_budget(rawgcro)
+    # make_gcro(db)
 
-    make_gcro(db)
+    make_gcro_all(db)
 
-    for hull in hulls:
-        make_gcro_conhulls(db,hull)
+    # for hull in hulls:
+    #     make_gcro_conhulls(db,hull)
 
     print  '\n',  " generated GCRO tables NAMED placebo_conhulls and rdp_conhulls : DONE! ", '\n'
 
@@ -375,3 +376,12 @@ if _9_MAP_ == 1:
     print '\n'," Makes final map ... ", '\n'
 
 
+
+# sequence for results
+# export2gradplot.do   // makes the key cluster files 
+
+# densities:
+# plot_density_paperstef_het.do // run WITH data query/clean, because this is where it comes from!
+# plot_density_paperstef.do // then run this one WITHOUT data query/clean
+# plot_density_paperstef_NOFE.do // runs analysis
+# plot_density_paperstef_NOFE_het.do // runs heterogeneity analysis

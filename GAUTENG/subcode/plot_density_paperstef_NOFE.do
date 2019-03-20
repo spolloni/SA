@@ -1,8 +1,11 @@
-clear all
+clear
+est clear
+
+
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+*set matsize 11000
+*set maxvar 32767
 #delimit;
 grstyle init;
 grstyle set imesh, horizontal;
@@ -39,35 +42,20 @@ program define remove;
 
 end;
 
+
+
+
+global bblu_do_analysis = 1; /* do analysis */
+
+global graph_plottriplediff    = 1;
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
+
+
+
+
 ******************;
 *  PLOT DENSITY  *;
 ******************;
-
-* SET OUTPUT;
-global output = "Output/GAUTENG/bbluplots";
-*global output = "Code/GAUTENG/paper/figures";
-*global output = "Code/GAUTENG/presentations/presentation_lunch";
-
-* RUN LOCALLY?;
-global LOCAL = 1;
-
-* PARAMETERS;
-global bin      = 50;   /* distance bin width for dist regs   */
-global size     = 50;
-global sizesq   = $size*$size;
-global dist_max = 1200;
-global dist_min = -400;
-
-global dist_break_reg1 = 400; 
-* global dist_break_reg2 = 800; 
-global dist_max_reg = 1200;
-global dist_min_reg = -400;
-
-* DOFILE SECTIONS;
-global bblu_do_analysis = 1; /* do analysis */
-
-global graph_plottriplediff = 0;
-global reg_triplediff = 1;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -144,6 +132,7 @@ replace dists_placebo=`=r(max)' + $bin if dists_placebo==.;
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
+save plot_density_reg${V}.dta, replace ;
 };
 ************************************************;
 ************************************************;
@@ -153,6 +142,8 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 * 3.1 MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
 ************************************************;
 if $graph_plottriplediff == 1 {;
+
+use plot_density_reg${V}.dta, clear ;
 
 cap program drop plotregsingle;
 program plotregsingle;
@@ -218,7 +209,7 @@ foreach var in $outcomes {;
   sum `var', detail;
   global mean_outcome= string(round(r(mean),.01),"%9.2f");
   reg `var' $dists_all, cl(cluster_reg)  ; /// a(cluster_reg)
-  plotregsingle distplotDDD_bblu_`var'_admin; 
+  plotregsingle distplotDDD_bblu_`var'_admin${V}; 
   replace `var' = `var'/400;
 };
 
@@ -231,6 +222,9 @@ foreach var in $outcomes {;
 * 3.2 *** MAKE TRIPLE DIFFERENCE TABLES HERE ***;
 ************************************************;
 if $reg_triplediff == 1 {;
+
+
+use plot_density_reg${V}.dta, clear; 
 
 foreach v in rdp placebo {;
   g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min;
@@ -282,7 +276,7 @@ foreach var of varlist $outcomes {;
   eststo `var';
 };
 
-estout $outcomes using bblu_regDDD.tex, replace
+estout $outcomes using bblu_regDDD${V}.tex, replace
   style(tex) 
   keep("-400m to 0m" "0m to 400m")
   order("-400m to 0m" "0m to 400m") 

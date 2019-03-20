@@ -1,4 +1,9 @@
-clear all
+
+
+clear 
+est clear
+
+
 set more off
 set scheme s1mono
 set matsize 11000
@@ -31,36 +36,17 @@ end;
 *  PLOT DENSITY  *;
 ******************;
 
-* SET OUTPUT;
-global output = "Output/GAUTENG/bbluplots";
-*global output = "Code/GAUTENG/paper/figures";
-*global output = "Code/GAUTENG/presentations/presentation_lunch";
 
-* RUN LOCALLY?;
-global LOCAL = 1;
-
-* PARAMETERS;
-global bin      = 50;   /* distance bin width for dist regs   */
-global size     = 50;
-global sizesq   = $size*$size;
-global dist_max = 1200;
-global dist_min = -400;
-
-global dist_break_reg = 500; /* determines spillover vs control outside of project for regDDD */
-global dist_max_reg = 1500;
-global dist_min_reg = -500;
-
-* DOFILE SECTIONS;
-global bblu_query_data  = 0; /* query data */
-global bblu_clean_data  = 0; /* clean data for analysis */
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan = 0;
-global graph_plotmeans_cntproj = 0;
-global graph_plottriplediff    = 0;
+global graph_plotmeans_rawchan = 1;
+global graph_plotmeans_cntproj = 1;
+global graph_plottriplediff    = 1;
 
-global reg_triplediff       = 0; /* creates regression analogue for triple difference */
+global reg_triplediff       = 1; /* creates regression analogue for triple difference */
+
+
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -92,173 +78,6 @@ if $LOCAL==1 {;
 cd ../..;
 cd Generated/Gauteng;
 
-************************************************;
-********* LOAD DATA  ***************************;
-************************************************;
-if $bblu_query_data == 1 {;
-
-  foreach time in pre post {;
-    if "`time'"=="post"{;
-    local where_post    " AND A.cf_units = 'High' ";
-    };
-  local qry = " 
-
-    SELECT AA.*, GP.con_mo_placebo, GR.con_mo_rdp, IR.cluster AS cluster_int_rdp, 
-    IP.cluster AS cluster_int_placebo, GC.RDP_density, GC.area
-
-    FROM 
-
-    (
-      SELECT 
-
-        B.distance AS distance_rdp, 
-        B.target_id AS cluster_rdp,
-
-        BP.distance AS distance_placebo, 
-        BP.target_id AS cluster_placebo, 
-
-        A.OGC_FID, 
-        A.s_lu_code, 
-        A.t_lu_code, 
-        AXY.X, AXY.Y
-
-      FROM 
-
-        bblu_`time'  AS A  
-
-      LEFT JOIN 
-        (SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-         FROM distance_bblu_`time'_rdp WHERE distance<=4000
-         GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)
-        ) AS B ON A.OGC_FID=B.input_id
-
-      LEFT JOIN 
-        (SELECT input_id, distance, target_id, COUNT(input_id) AS count 
-         FROM distance_bblu_`time'_placebo WHERE distance<=4000
-         GROUP BY input_id HAVING COUNT(input_id)<=50 AND distance == MIN(distance)
-        ) AS BP ON A.OGC_FID=BP.input_id  
-
-      LEFT JOIN bblu_`time'_xy AS AXY ON AXY.OGC_FID = A.OGC_FID
-
-      WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) `where_post'
-
-    ) AS AA 
-
-    LEFT JOIN 
-      (SELECT cluster_placebo, con_mo_placebo 
-       FROM cluster_placebo
-      ) AS GP ON AA.cluster_placebo = GP.cluster_placebo
-
-    LEFT JOIN 
-      (SELECT cluster_rdp, con_mo_rdp 
-      FROM cluster_rdp
-      ) AS GR ON AA.cluster_rdp = GR.cluster_rdp    
-
-    LEFT JOIN gcro AS GC ON AA.cluster_rdp = GC.cluster
-
-    LEFT JOIN int_placebo_bblu_`time' AS IP ON IP.OGC_FID = AA.OGC_FID
-
-    LEFT JOIN int_rdp_bblu_`time' AS IR  ON IR.OGC_FID = AA.OGC_FID    
-
-    ";
-
-  odbc query "gauteng";
-  odbc load, exec("`qry'") clear;
-      save bbluplot_admin_`time'.dta, replace;
-};
-
-};
-************************************************;
-************************************************;
-************************************************;
-
-************************************************;
-********* CLEAN DATA  **************************;
-************************************************;
-if $bblu_clean_data==1 {;
-
-  use bbluplot_admin_pre.dta, clear;
-  g post = 0;
-  append using bbluplot_admin_post.dta;
-  replace post = 1 if post==.;
-
-  g formal = (s_lu_code=="7.1");
-
-  destring X Y, replace force;
-  drop if X==. | Y==. ;
-
-  /* throw out clusters for early projects (before 2001) */
-  replace distance_placebo =. if con_mo_placebo<515 | con_mo_placebo==.;
-  replace cluster_placebo  =. if con_mo_placebo<515 | con_mo_placebo==.;
-  replace distance_rdp =. if con_mo_rdp<515 | con_mo_rdp==.;
-  replace cluster_rdp =.  if con_mo_rdp<515 | con_mo_rdp==.;
-
-  /* drop unmatched observations */
-  drop if distance_rdp ==. & distance_placebo ==. ;
-  drop if cluster_rdp ==. & cluster_placebo ==. ;
-
-  /* reverse distances for intersection */
-  replace distance_rdp = -1*distance_rdp if cluster_int_rdp!=.; 
-  replace distance_placebo = -1*distance_placebo if cluster_int_placebo!=.;
-
-  /* single distance & cluster var -- no doublecounting */
-  gen placebo = (distance_placebo < distance_rdp);
-  gen cluster_joined = cond(placebo==1, cluster_placebo, cluster_rdp);
-
-  /* create id's */
-  g id  = string(round(X,$size),"%10.0g") + string(round(Y,$size),"%10.0g") ;
-
-  outcome_gen;
-
-  foreach var in $outcomes {;
-    egen `var'_s = sum(`var'), by(id post);
-    drop `var';
-    ren `var'_s `var';
-  };
-
-  foreach v in _rdp _placebo {; 
-
-    /* replace mean distance within block */
-    egen dm`v' = mean(distance`v'), by(id);
-    drop distance`v';
-    ren dm`v' distance`v';
-
-    /* replace mode cluster within block */
-    egen dm`v' = mode(cluster`v'), maxmode by(id);
-    drop cluster`v';
-    ren dm`v' cluster`v';
-
-  };
-
-  keep  $outcomes  
-    post id cluster_placebo cluster_rdp cluster_joined
-    distance_rdp distance_placebo RDP_density;
-  duplicates drop id post, force;
-
-  egen id1 = group(id);
-  drop id;
-  ren id1 id;
-
-  tsset id post;
-
-  tsfill, full;
-
-  foreach var in $outcomes {;
-  replace `var'=0 if `var'==.;
-  };
-
-  foreach var of varlist cluster_placebo cluster_rdp distance_rdp distance_placebo RDP_density {;
-  egen `var'_m=max(`var'), by(id);
-  replace `var'=`var'_m if `var'==.;
-  drop `var'_m;
-  };
-
-  save bbluplot_reg_admin_$size, replace;
-
-};
-************************************************;
-************************************************;
-************************************************;
 
 ************************************************;
 ********* ANALYZE DATA  ************************;
@@ -376,35 +195,19 @@ if $graph_plotmeans_rdpplac == 1 {;
   global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
   global yl = "2(1)7";
 
-  * plotmeans_pre 
-  *   bblu_total_buildings_pre_means total_buildings rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'  
-  *   4;
 
   plotmeans_pre 
-    bblu_for_pre_means for rdp placebo
+    bblu_for_pre_means${V} for rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
     2;
 
   plotmeans_pre 
-    bblu_inf_pre_means inf rdp placebo
+    bblu_inf_pre_means${V} inf rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" "'
     2;
 
-  * plotmeans_pre 
-  *   bblu_inf_backyard_pre_means inf_backyard rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
-  *   2;
-
-  * plotmeans_pre 
-  *   bblu_inf_non_backyard_pre_means inf_non_backyard rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1000" `"0 "0" 1 "400" 2 "800" 3 "1200" 4 "1600" 5 "2000""'
-  *   2;
 
 };
 ************************************************;
@@ -473,35 +276,18 @@ if $graph_plotmeans_rawchan == 1 {;
   global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
   global yl = "1(1)7";
 
-  * plotchanges 
-  *   bblu_total_buildings_rawchanges total_buildings rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'  
-  *   4;
-
   plotchanges 
-    bblu_for_rawchanges for rdp placebo
+    bblu_for_rawchanges${V} for rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
   plotchanges 
-    bblu_inf_rawchanges inf rdp placebo
+    bblu_inf_rawchanges${V} inf rdp placebo
     "Constructed" "Unconstructed"
     "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
     2;
 
-  * plotchanges 
-  *   bblu_inf_backyard_rawchanges inf_backyard rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
-  *   2;
-
-  * plotchanges 
-  *   bblu_inf_non_backyard_rawchanges inf_non_backyard rdp placebo
-  *   "Constructed" "Unconstructed"
-  *   "-400(200)1200" `"1 "400" 2 "800" 3 "1200" 4 "1600""'
-  *   2;
 
 };
 ************************************************;
@@ -555,7 +341,7 @@ if $graph_plotmeans_cntproj == 1 {;
     ring(0) position(5) bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(.5);
-    graphexportpdf projectcounts, dropeps;
+    graphexportpdf projectcounts${V}, dropeps;
   restore;
 
 };
@@ -623,7 +409,7 @@ foreach var in $outcomes {;
   sum `var', detail;
   global mean_outcome= string(round(r(mean),.01),"%9.2f");
   areg `var' $dists_all , cl(cluster_reg) a(id);
-  plotregsingle distplotDDD_bblu_`var'_admin; 
+  plotregsingle distplotDDD_bblu_`var'_admin${V}; 
   replace `var' = `var'/400;
 };
 

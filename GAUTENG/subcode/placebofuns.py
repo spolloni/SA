@@ -65,6 +65,7 @@ def projects_shp(db):
 
 
 
+
 def make_gcro_link(db):
     
     # connect to DB
@@ -87,12 +88,71 @@ def make_gcro_link(db):
     cur.execute("CREATE INDEX gcro_link_cluster_original ON gcro_link (cluster_original);")
     cur.execute("CREATE INDEX gcro_link_cluster_new ON gcro_link (cluster_new);")
 
-
     con.commit()
     con.close()
 
     return 
 
+
+
+
+
+
+def make_gcro_all(db):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    
+    # create table with Union of shapes that make the cut
+    union_name = 'gcro_conhulls'
+    cur.execute('DROP TABLE IF EXISTS {}_union;'.format(union_name))
+    make_qry = '''
+               CREATE TABLE {}_union AS 
+               SELECT ST_UNION(ST_MAKEVALID(G.GEOMETRY)) AS GEOMETRY
+               FROM gcro_publichousing as G
+               '''.format(union_name)
+    cur.execute(make_qry)
+    cur.execute(''' SELECT RecoverGeometryColumn('{}_union',
+                        'GEOMETRY',2046,'MULTIPOLYGON','XY');'''.format(union_name))
+
+    # create table of elementary geometries;
+    chec_qry = '''
+               SELECT type,name from SQLite_Master
+               WHERE type="table" AND name ="{}";
+               '''.format(union_name)
+    drop_qry = '''
+               SELECT DisableSpatialIndex('{}','GEOMETRY');
+               SELECT DiscardGeometryColumn('{}','GEOMETRY');
+               DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+               DROP TABLE IF EXISTS {};
+               '''.format(union_name,union_name,union_name,union_name)
+    make_qry = '''
+                SELECT ElementaryGeometries('{}_union', 'GEOMETRY',
+                      '{}', 'cluster', 'parent');
+                UPDATE {} SET cluster = cluster + 1000;
+                ALTER TABLE {} ADD COLUMN area FLOAT;
+                UPDATE {} SET area = ST_AREA(GEOMETRY)/1000000;
+               '''.format(union_name,union_name,union_name,union_name,union_name)
+
+    cur.execute(chec_qry)
+    result = cur.fetchall()
+    if result:
+        cur.executescript(drop_qry)
+    cur.executescript(make_qry)
+
+
+    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(union_name))
+    cur.execute('''SELECT DiscardGeometryColumn('{}_union','GEOMETRY');'''.format(union_name))
+    cur.execute('DROP TABLE IF EXISTS {}_union;'.format(union_name))
+    
+    con.commit()
+    con.close()
+
+    return 
 
 
 def make_gcro(db):
@@ -260,9 +320,13 @@ def make_gcro(db):
     return 
 
 
+
+
+
+
 def make_gcro_conhulls(db,hull):
     if hull=='rdp':
-        cond = ' WHERE A.RDP_density>0 AND RDP_mode_yr>2002'
+        cond = ' WHERE A.RDP_density>0 AND RDP_mode_yr>=2002'
     if hull=='placebo':
         cond = ' WHERE A.RDP_density==0'
 

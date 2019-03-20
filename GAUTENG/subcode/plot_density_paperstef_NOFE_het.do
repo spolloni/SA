@@ -1,8 +1,10 @@
-clear all
+clear 
+est clear
+
+
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+
 #delimit;
 grstyle init;
 grstyle set imesh, horizontal;
@@ -43,34 +45,12 @@ end;
 *  PLOT DENSITY  *;
 ******************;
 
-* SET OUTPUT;
-*global output = "Output/GAUTENG/bbluplots";
-global output = "Code/GAUTENG/paper/figures";
-*global output = "Code/GAUTENG/presentations/presentation_lunch";
 
-* RUN LOCALLY?;
-global LOCAL = 1;
-
-* PARAMETERS;
-global bin      = 50;   /* distance bin width for dist regs   */
-global size     = 50;
-global sizesq   = $size*$size;
-global dist_max = 1200;
-global dist_min = -400;
-
-global het      = 30.396; /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
-global near "City";
-global far "Suburb";
-
-global dist_break_reg1 = 400; 
-* global dist_break_reg2 = 800; 
-global dist_max_reg = 1200;
-global dist_min_reg = -400;
 
 * DOFILE SECTIONS;
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plottriplediff = 0;
+global graph_plottriplediff = 1;
 global reg_triplediff       = 1;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
@@ -150,6 +130,7 @@ replace dists_placebo=`=r(max)' + $bin if dists_placebo==.;
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
+save plot_density_reg_het${V}.dta, replace ;
 };
 ************************************************;
 ************************************************;
@@ -159,6 +140,8 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 * 3.1 MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
 ************************************************;
 if $graph_plottriplediff == 1 {;
+
+use  plot_density_reg_het${V}.dta, clear;
 
 cap program drop plotregsingle_het;
 program plotregsingle_het;
@@ -259,6 +242,8 @@ foreach var in $outcomes {;
 * 3.2 *** MAKE TRIPLE DIFFERENCE TABLES HERE ***;
 ************************************************;
 if $reg_triplediff == 1 {;
+
+use  plot_density_reg_het${V}.dta, clear;
 
 foreach v in rdp placebo {;
   g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min;
