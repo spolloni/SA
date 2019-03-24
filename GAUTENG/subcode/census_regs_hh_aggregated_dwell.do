@@ -57,15 +57,15 @@ cd Generated/Gauteng;
 *****************************************************************;
 if $data_prep==1 {;
 
-use "DDcensus_hh_admin_cbd${V}", clear;
+use "DDcensus_hh_admin${V}", clear;
 
 * go to working dir;
 cd ../..;
 cd $output;
 
 
-g cbd_dist = cbd_dist_rdp ;
-replace cbd_dist = cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ; /* take priority of RDP (very close to placebo) for double counted areas (since they are measured from treated clusters) */
+*g cbd_dist = cbd_dist_rdp ;
+*replace cbd_dist = cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ; /* take priority of RDP (very close to placebo) for double counted areas (since they are measured from treated clusters) */
 g het =1 if  cbd_dist<=$het ;
 replace het = 0 if cbd_dist>$het & cbd_dist<. ;  /* NOTE! cbd_dist is only measured for treated/placebo clusters!!  careful! */
 

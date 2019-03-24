@@ -229,7 +229,7 @@ foreach var in $outcomes {;
   sum `var', detail;
   global mean_outcome= string(round(r(mean),.01),"%9.2f");
   reg `var' $dists_all, cl(cluster_reg)  ; /// a(cluster_reg)
-  plotregsingle_het distplotDDD_bblu_`var'_admin_het; 
+  plotregsingle_het distplotDDD_bblu_`var'_admin_het${V}; 
   replace `var' = `var'/400;
 };
 
@@ -247,8 +247,8 @@ use  plot_density_reg_het${V}.dta, clear;
 
 foreach v in rdp placebo {;
   g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min;
-  replace dists_`v'_g = 2 if dists_`v' >= 0 - $dist_min & dists_`v' < $dist_break_reg1 - $dist_min  ;
-  replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg1 - $dist_min  & dists_`v' < $dist_max_reg - $dist_min;
+  replace dists_`v'_g = 2 if dists_`v' >= 0 - $dist_min & dists_`v' < $dist_break_reg - $dist_min  ;
+  replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg - $dist_min  & dists_`v' < $dist_max_reg - $dist_min;
   replace dists_`v'_g = 4 if dists_`v' >= $dist_max_reg - $dist_min;
   * replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg1 - $dist_min  & dists_`v' < $dist_break_reg2 - $dist_min  ;
   * replace dists_`v'_g = 4 if dists_`v' >= $dist_break_reg2 - $dist_min & dists_`v' < $dist_max_reg - $dist_min;
@@ -311,7 +311,7 @@ foreach var of varlist $outcomes {;
   eststo `var';
 };
 
-estout $outcomes using bblu_regDDD_het.tex, replace
+estout $outcomes using bblu_regDDD_het${V}.tex, replace
   style(tex) 
   keep("${near} -400m to 0m"  
         "${near} 0m to 400m"

@@ -84,11 +84,11 @@ foreach v in _rdp _placebo _joined {;
   * create distance dummies;
   sum distance`v';
   if $max == 0 {;
-    global max = round(ceil(`r(max)'),$bin);
+    global max = round(ceil(`r(max)'),$bin_price);
   };
-  egen dists`v' = cut(distance`v'),at(0($bin)$max); 
+  egen dists`v' = cut(distance`v'),at(0($bin_price)$max); 
   replace dists`v' = 9999 if distance`v' <0 | distance`v'>=$max | distance`v' ==. ;
-  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+  replace dists`v' = dists`v'+$bin_price if dists`v'!=9999;
 
   * create date dummies;
   gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
@@ -908,7 +908,7 @@ use "price_regs${V}.dta", clear;
   
   collapse (mean) e, by(pre dists_joined placebo);
   reshape wide e, i( placebo dists_joined) j(pre);
-  replace dists_joined = dists_joined- $bin/2;
+  replace dists_joined = dists_joined- $bin_price/2;
 
   tw
   (connected e1 dists_joined if placebo==1,

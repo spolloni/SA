@@ -120,11 +120,12 @@ foreach v in _rdp _placebo _joined {;
   * create distance dummies;
   sum distance`v';
   if $max == 0 {;
-    global max = round(ceil(`r(max)'),$bin);
+    global max = round(ceil(`r(max)'),$bin_price);
   };
-  egen dists`v' = cut(distance`v'),at(0($bin)$max); 
+  egen dists`v' = cut(distance`v'),at(0($bin_price)$max); 
   replace dists`v' = 9999 if distance`v' <0 | distance`v'>=$max | distance`v' ==. ;
-  replace dists`v' = dists`v'+$bin if dists`v'!=9999;
+  replace dists`v' = dists`v'+$bin_price
+   if dists`v'!=9999;
 
   * create date dummies;
   gen mo2con_reg`v' = mo2con`v' if mo2con`v'<=12*$twu-1 & mo2con`v'>=-12*$twl ; 
@@ -173,25 +174,25 @@ drop if distance_rdp == . & distance_placebo == .;
 drop if cluster_rdp == . & cluster_placebo == .;  
 
 sum distance_rdp;
-global max = round(ceil(`r(max)'),$bin);
+global max = round(ceil(`r(max)'),$bin_price);
 
 drop dists_rdp; 
 
-egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
+egen dists_rdp = cut(distance_rdp),at($dist_min($bin_price)$max);
 g drdp=dists_rdp;
-replace drdp=. if drdp>$max-$bin; 
+replace drdp=. if drdp>$max-$bin_price; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)'+ $bin if dists_rdp==. | post==0;
+replace dists_rdp=`=r(max)'+ $bin_price if dists_rdp==. | post==0;
 
 drop dists_placebo;
 
-egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
+egen dists_placebo = cut(distance_placebo),at($dist_min($bin_price)$max); 
 g dplacebo = dists_placebo;
-replace dplacebo=. if dplacebo>$max-$bin;
+replace dplacebo=. if dplacebo>$max-$bin_price;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)'+ $bin if dists_placebo==. | post==0;
+replace dists_placebo=`=r(max)'+ $bin_price if dists_placebo==. | post==0;
 
 
 keep if $ifregs ;
@@ -232,7 +233,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     keep if _merge==3;
     drop _merge;
 
-    replace D = D + $bin/2;
+    replace D = D + $bin_price/2;
 
     twoway 
     (connected `2'_`4' D, ms(d) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
@@ -313,7 +314,7 @@ if $graph_plotmeans_rawchan == 1 {;
      keep if _merge==3;
      drop _merge;
 
-    replace D = D + $bin/2;
+    replace D = D + $bin_price/2;
     gen D`4' = D+7;
     gen D`3' = D-7;
 

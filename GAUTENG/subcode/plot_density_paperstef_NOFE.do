@@ -47,7 +47,7 @@ end;
 
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plottriplediff    = 1;
+global graph_plottriplediff = 1;
 global reg_triplediff       = 1; /* creates regression analogue for triple difference */
 
 
@@ -227,10 +227,10 @@ if $reg_triplediff == 1 {;
 use plot_density_reg${V}.dta, clear; 
 
 foreach v in rdp placebo {;
-  g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min;
-  replace dists_`v'_g = 2 if dists_`v' >= 0 - $dist_min & dists_`v' < $dist_break_reg1 - $dist_min  ;
-  replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg1 - $dist_min  & dists_`v' < $dist_max_reg - $dist_min;
-  replace dists_`v'_g = 4 if dists_`v' >= $dist_max_reg - $dist_min;
+  g dists_`v'_g = 1 if dists_`v' < 0 - $dist_min_reg ;
+  replace dists_`v'_g = 2 if dists_`v' >= 0 - $dist_min_reg  & dists_`v' < $dist_break_reg - $dist_min_reg  ;
+  replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg - $dist_min_reg  & dists_`v' < $dist_max_reg - $dist_min_reg;
+  replace dists_`v'_g = 4 if dists_`v' >= $dist_max_reg - $dist_min_reg;
   * replace dists_`v'_g = 3 if dists_`v' >= $dist_break_reg1 - $dist_min  & dists_`v' < $dist_break_reg2 - $dist_min  ;
   * replace dists_`v'_g = 4 if dists_`v' >= $dist_break_reg2 - $dist_min & dists_`v' < $dist_max_reg - $dist_min;
   * replace dists_`v'_g = 5 if dists_`v' >= $dist_max_reg - $dist_min;
@@ -253,12 +253,15 @@ foreach level in `r(levels)' {;
 omit dists_all_g dists_all_g_3 dists_post_g_3 dists_rdp_g_3 dists_rdp_post_g_3;
 * omit dists_all_g dists_all_g_4 dists_post_g_4 dists_rdp_g_4 dists_rdp_post_g_4;
 
+
+
 drop if  dists_rdp==. &  dists_placebo ==.;
 
 gen rdp = dists_rdp <= $dist_max - $bin +`=abs($dist_min)' & dists_rdp!=.;
 gen rdppost = rdp*post;
 
 global dists_all_g "rdp rdppost post ${dists_all_g}";
+
 
 foreach var of varlist $outcomes {;
   replace `var' = 400*`var';
@@ -276,7 +279,7 @@ foreach var of varlist $outcomes {;
   eststo `var';
 };
 
-estout $outcomes using bblu_regDDD${V}.tex, replace
+estout $outcomes using "bblu_regDDD${V}.tex", replace
   style(tex) 
   keep("-400m to 0m" "0m to 400m")
   order("-400m to 0m" "0m to 400m") 

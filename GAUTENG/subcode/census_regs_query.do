@@ -278,7 +278,7 @@ collapse
 cd ../..;
 cd $output;
 
-save "temp_censushh_agg.dta${V}", replace;
+save "temp_censushh_agg${V}.dta", replace;
 
 };
 *****************************************************************;

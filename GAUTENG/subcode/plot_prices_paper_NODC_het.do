@@ -906,7 +906,7 @@ if $countour ==1 {;
   
   collapse (mean) e, by(pre dists_joined placebo);
   reshape wide e, i( placebo dists_joined) j(pre);
-  replace dists_joined = dists_joined- $bin/2;
+  replace dists_joined = dists_joined- $bin_price/2;
 
   tw
   (connected e1 dists_joined if placebo==1,

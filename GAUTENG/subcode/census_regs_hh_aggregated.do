@@ -52,7 +52,7 @@ cd $output;
 
 * go to working dir;
 
-use "temp_censushh_agg.dta${V}", replace;
+use "temp_censushh_agg${V}.dta", replace;
 
 
     ***** SUMMARY STATS REGS **** ;

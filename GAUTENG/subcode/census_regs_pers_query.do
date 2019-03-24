@@ -142,7 +142,7 @@ if $data_load==1 {;
   odbc load, exec("`qry'") clear;
 
 
-  destring area_int_placebo area_int_rdp, replace force;   /* throw out clusters that were too early in the process */
+  destring area_int_placebo area_int_rdp cbd_dist_rdp cbd_dist_placebo, replace force;   /* throw out clusters that were too early in the process */
 
   save "DDcensus_pers_admin_het_2011${V}.dta", replace;
 
@@ -232,7 +232,7 @@ if $data_load==1 {;
   odbc load, exec("`qry'") clear;
 
 
-  destring area_int_placebo area_int_rdp, replace force;   /* throw out clusters that were too early in the process */
+  destring area_int_placebo area_int_rdp cbd_dist_rdp cbd_dist_placebo, replace force;   /* throw out clusters that were too early in the process */
 
   		
   save "DDcensus_pers_admin_het_2001${V}.dta", replace;

@@ -1,9 +1,9 @@
 
-clear all
+clear
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+
+
 #delimit;
 
 local qry = "SELECT A.*, B.score 
@@ -19,3 +19,7 @@ duplicates drop cluster, force;
 
 browse if score!=.;
 browse if max_score==1; /* 44 match exactly */
+
+
+
+

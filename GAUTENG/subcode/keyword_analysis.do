@@ -1,15 +1,10 @@
 
-clear all
+clear
+
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+
 #delimit;
-
-global output = "Code/GAUTENG/presentations/presentation_lunch";
-*global output = "Code/GAUTENG/paper/figures/";
-
-
 
 global LOCAL = 1;
 
@@ -21,167 +16,70 @@ cd $output ;
 
 
   local qry = "
-  SELECT  B.*, CP.con_mo_placebo, CR.con_mo_rdp, A.cluster_new
+  SELECT  B.descriptio, A.cluster_new, CR.cluster
   FROM gcro_link AS A 
   JOIN gcro_publichousing   AS B ON B.OGC_FID = A.cluster_original
-  LEFT JOIN cluster_placebo AS CP ON CP.cluster_placebo = A.cluster_new 
-  LEFT JOIN cluster_rdp     AS CR ON CR.cluster_rdp = A.cluster_new 
+  LEFT JOIN rdp_cluster     AS CR ON CR.cluster = A.cluster_new 
   ";
 
   odbc query "gauteng";
   odbc load, exec("`qry'") clear;	
 
 
-drop GEO;
+g rdp = cluster!=. ;
+
 
 replace desc = lower(desc);
 
-g 		rdp = 0 if con_mo_placebo!=.;
-replace rdp = 1 if con_mo_rdp!=.;
-drop if rdp==.;
-
-
-
 *global varlist="implementation uncertain planning current complete proposed informal investigating";
 
+g status = . ;
+replace status = 1 if regexm(desc,"implementation")==1 | regexm(desc,"complete")==1 ;
+replace status = 2 if regexm(desc,"planning")==1 | regexm(desc,"investigat")==1  ;
+replace status = 3 if regexm(desc,"proposed")==1 |  regexm(desc,"uncertain")==1  | regexm(desc,"future")==1  ;
 
-global varlist_start=" future proposed investigating planning uncertain implementation  complete";
+egen max_status = max(status), by(cluster_new)  ;
+drop status  ;
+ren max_status status  ;
+replace status = 0 if status==.  ;
 
-global varlist_single=" uncertain planning";
+duplicates drop cluster_new, force  ;
 
-g id =2;
-foreach v in $varlist_start {;
-replace id = 1 if regexm(desc,"`v'")==1 ; 
-};
-sort id hectares; /* make sure we are keeping the descriptions with keywords! */
-duplicates drop cluster_new rdp, force;
-
-
-foreach v in $varlist_single {;
-	g `v'_id = regexm(desc,"`v'")==1 ; 
-	egen `v' = sum(`v'), by(rdp)     ;
-};
-
-g future_id = 	regexm(desc,"future")==1 | 
-				regexm(desc,"investigating")==1 | 
-				regexm(desc,"proposed")==1;
-	egen future= sum(future_id), by(rdp)     ;
+cap prog drop write;
+prog define write;
+	file open newfile using "`1'", write replace;
+	file write newfile "`=string(round(`2',`3'),"`4'")'";
+	file close newfile;
+end;
 
 
-g implementation_id = 	regexm(desc,"implementation")==1 | 
-				regexm(desc,"complete")==1 ;
+count if status==1 & rdp==1 ;
+write implementation_r `=r(N)' 1 "%12.0fc" ;
+count if status==1 & rdp==0 ;
+write implementation_p  `=r(N)' 1 "%12.0fc" ;
 
-	egen implementation= sum(implementation_id), by(rdp)     ;
+count if status==2 & rdp==1 ;
+write planning_r `=r(N)' 1 "%12.0fc" ;
+count if status==2 & rdp==0 ;
+write planning_p `=r(N)' 1 "%12.0fc" ;
 
+count if status==3 & rdp==1 ;
+write proposed_r `=r(N)' 1 "%12.0fc" ;
+count if status==3 & rdp==0 ;
+write proposed_p `=r(N)' 1 "%12.0fc" ;
 
-g none = 1;
-foreach var of varlist *_id {;
-replace none = 0 if `var'==1;
-};
+count if status==0 & rdp==1 ;
+write none_r `=r(N)' 1 "%12.0fc" ;
+count if status==0 & rdp==0 ;
+write none_p `=r(N)' 1 "%12.0fc" ;
 
-ren none none_id;
-egen none=sum(none_id), by(rdp);
-drop *_id;
-
-bys rdp: g total=_N;
-
-global varlist=" implementation planning future uncertain none";
-
-
-
-g temp="";
-replace temp = "Implementation, Completed" in 1;
-replace temp = "Planning" in 2;
-replace temp = "Future, Investigating, Proposed" in 3;
-replace temp = "Uncertain" in 4;
-replace temp = "No Description" in 5;
-*replace temp = "Total" in 6;
+count if  rdp==1 ;
+write total_r `=r(N)' 1 "%12.0fc" ;
+count if  rdp==0 ; 
+write total_p `=r(N)' 1 "%12.0fc" ;
 
 
 
-*duplicates drop rdp, force;
 
-order $varlist;
-local num : word count $varlist;
-
-
-estpost sum $varlist if rdp==0;
-	matrix meanf1=e(mean);
-	matrix list meanf1;
-
-estpost sum $varlist if rdp==1;
-	matrix meanf2=e(mean);
-	matrix list meanf2;
-	
-
-	matrix A1 = (meanf1',meanf2');
-
-matrix define FOR=J(`num',1,0);
-matrix define PER=J(`num',1,0);
-
-
-*forvalues r=1/`num' {;
-*local var `: word `r' of $varlist ' ;
-*replace temp = "`var'" in `r';
-*};
-
-g colnames = "";
-replace colnames = "Unconstructed" in 1;
-replace colnames = "Constructed" in 2;
-
-
-cap program drop tables;
-program define tables `1' `2' `3' `4' `5';
-	file open fi using "`1'.tex", write replace;
-	
-	local COLS `=colsof(`2')';
-	local ROWS `=rowsof(`2')';
-	disp `COLS'	;
-	file write fi "\begin{tabular}{l*{1}{";
-	forvalues c=1/`COLS' {;
-		if `c'>1 {;
-		file write fi "c";
-		};
-		if `c'==`COLS' {;
-		file write fi  "c}}" _n		;
-		};
-	};
-*	file write fi "\hline" _n;
-*	file write fi "\hline " _n;
-
-	file write fi " &" ;
-	forvalues c=1/`COLS' {;
-		if `c'!=`COLS' {;
-		file write fi "`=`5'[`c']' &";
-		};
-		if `c'==`COLS' {;
-		file write fi "`=`5'[`c']'  \\" _n		;
-		};
-	};
-		file write fi "\hline " _n;
-
-	forvalues r=1/`ROWS' {;
-	file write fi  "`=`4'[`r']' & ";
-	forvalues c=1/`COLS' {;
-		local h : di %10.`=`3'[`r',1]'fc `2'[`r',`c'];
-		if `c'!=`COLS' {;
-		file write fi  "`h' & ";
-		};
-		if `c'==`COLS' {;
-		file write fi  "`h'  \\" _n		;
-		}		;
-		};
-		* if `r'==`=`ROWS'-1' {;
-		* 	file write fi  "\hline ";
-		* };
-	};
-*	file write fi "\hline" _n;
-	file write fi "\hline" _n;
-	file write fi "\end{tabular}";
-	file close fi;
-end			;
-		 
-
-	tables keyword_analysis A1 FOR temp colnames ;
 	
 	

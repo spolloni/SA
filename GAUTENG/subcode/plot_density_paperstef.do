@@ -42,9 +42,9 @@ global bblu_do_analysis = 1; /* do analysis */
 global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan = 1;
 global graph_plotmeans_cntproj = 1;
-global graph_plottriplediff    = 1;
+global graph_plottriplediff    = 0;
 
-global reg_triplediff       = 1; /* creates regression analogue for triple difference */
+global reg_triplediff       = 0; /* creates regression analogue for triple difference */
 
 
 

@@ -1,0 +1,530 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+
+\Large New Method 3
+
+% \begin{figure}[t]
+% \caption{Transaction Price Histogram}\label{figure:transactionhist}
+% \centering
+% \tcbox[colback=white,boxrule=.35mm,boxsep=0mm]{\includegraphics[scale=.4,trim={0cm 0cm -1cm 0cm}]{figures/summary_pricedist.pdf}}
+% %\\
+% %\footnotesize{Note: Transactions are censored at R100,000.}
+% \end{figure}
+
+\vspace{0mm}
+\begin{table}[h!]
+\centering
+\caption{Housing Project Areas Description}\label{table:projectdescriptives}
+\vspace{0mm}
+\begin{tabular}{l*{1}{cccccc}}
+\toprule
+  & \multicolumn{2}{c}{\textbf{All}}& \multicolumn{2}{c}{\textbf{City}}  & \multicolumn{2}{c}{\textbf{Suburb}}   \\
+  &Const. & Unconst. &Const. & Unconst.   & Const. & Unconst. \\
+\midrule
+\input{figures/descriptives_table_all_3}
+\bottomrule
+\multicolumn{7}{l}{\scriptsize Const. refers to constructed projects and unconst. refers to unconstructed projects.}\\[-.5em]
+\multicolumn{7}{l}{\scriptsize $^*$Calculated from {\it expected} completion dates using Gauteng National Treasury budget reports.}\\[-.5em]
+\multicolumn{7}{l}{\scriptsize $^\dagger$ The USD averaged to about 7.70 Rands during the 2001-2011 period.}\\[-.5em]
+\multicolumn{7}{l}{\scriptsize $^\ddagger$Measured as the average minimum distance with respect to Johannesburg and Pretoria CBDs. } \\[-.5em]
+\multicolumn{7}{l}{\scriptsize City includes projects whose centroids are within 30.4 km of their nearest CBD.} \\[-.5em]
+\multicolumn{7}{l}{\scriptsize Suburb includes projects whose centroids are further than 30.4 km from their nearest CBD.}
+\end{tabular}
+\end{table} 
+
+
+
+\begin{table}[h!]
+	\centering
+	\caption{Dwelling Characteristics at Baseline from 2001 Census}\label{table:projectdescriptivescensus}
+\vspace{-2mm}
+\begin{tabular}{l*{1}{ccc}}
+\toprule
+& Constructed & Unconstructed & All Small Areas \\
+\midrule
+\input{figures/census_at_baseline_AGG_3} 
+\bottomrule
+\multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 30\% } \\ [-.5em]
+\multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+\multicolumn{4}{l}{\scriptsize ``All''  includes all small areas.}
+\end{tabular}
+\end{table}
+
+
+
+\begin{figure*}[h!]
+        \centering
+        \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
+        {\small Pre-Period Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_3}
+            \caption[Network2]%
+            {{\small pre-period formal housing density}}    
+            \label{fig:prefor}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_3}
+            \caption[]%
+            {{\small pre-period informal housing density}}    
+            \label{fig:preinf}
+        \end{subfigure}
+        \label{fig:rawbblumeans}
+        \vspace{-6mm}
+    \end{figure*} 
+
+
+\begin{figure*}[h!]
+        \centering
+        \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects: City versus Suburb]
+        {\small Pre-Period Housing Densities in Constructed and Unconstructed Projects: City versus Suburb} 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_het_near_3.pdf}
+            \caption[Network2]%
+            {{\small \textbf{City:} formal density}}    
+            \label{fig:prefor_near_het}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_het_near_3.pdf}
+            \caption[]%
+            {{\small \textbf{City:} informal density}}    
+            \label{fig:preinf_near_het}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_het_far_3.pdf}
+            \caption[Network2]%
+            {{\small \textbf{Suburb:} formal density}}    
+            \label{fig:prefor_far_het}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_het_far_3.pdf}
+            \caption[]%
+            {{\small \textbf{Suburb:} informal density}}    
+            \label{fig:preinf_far_het}
+        \end{subfigure}
+        \label{fig:rawbblumeans_het}
+        \vspace{-6mm}
+    {\scriptsize City includes areas within 30.4 km of a CBD and Suburb includes areas over 30.4 km away from a CBD.}
+    \end{figure*} 
+
+
+
+\begin{figure*}[t!]
+        \centering
+        \caption[ Changes in Housing Densities in Constructed and Unconstructed Projects Areas]
+        {\small Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_3}
+            \caption[]%
+            {{\small formal housing density change}}    
+            \label{fig:forchange}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_3}
+            \caption[]%
+            {{\small informal housing density change}}    
+            \label{fig:infchange}
+        \end{subfigure}
+        \label{fig:rawbblumeanschange}
+        \vspace{-6mm}
+    \end{figure*} 
+
+
+% \begin{figure*}[t!]
+%         \centering
+%         \caption[ House Prices outside Constructed and Unconstructed Projects Areas ]
+%         {\small House Prices outside Constructed and Unconstructed projects } 
+%         %\vspace{2mm}
+%         \begin{subfigure}[b]{0.495\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pre_means}
+%             \caption[Network2]%
+%             {{\small pre-period log-purchase prices }}    
+%             \label{fig:preprice}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.495\textwidth}   
+%             \centering 
+%             \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/prices_rawchanges}
+%             \caption[]%
+%             {{\small change in log-purchase prices}}    
+%             \label{fig:changeprice}
+%         \end{subfigure}
+%         \label{fig:rawpricemeans}
+%         \vspace{-6mm}
+% \end{figure*} 
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates}\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/census_hh_DDregs_AGG_3}
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+
+% \afterpage{%
+%   \clearpage% 
+% \begin{landscape}
+% {\footnotesize
+% \begin{table}[]
+% \small
+% \centering
+% \caption{Census Household-level Post\tim\unskip Constructed Coefficients: City Versus Suburb}\label{table:censusestimateshet}
+% \vspace{-2mm}
+% \begin{tabular}{lDDDDDDDD}
+% \toprule
+%  & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+%  & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+% \input{figures/census_hh_DDregs_AGG_het}
+% \bottomrule
+% \multicolumn{9}{l}{\footnotesize All difference-in-differences controls are included in the specification while only the interaction terms for Post\tim Constructed are shown.} \\
+% \multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table}
+% }
+% \end{landscape}
+% }
+
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Post\tim\unskip Constructed Coefficients: City Versus Suburb and Informal Versus Formal Housing}\label{table:censusestimates_dwellhet}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+% & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\
+  & \multicolumn{8}{c}{ } \\
+ & \multicolumn{8}{c}{Formal Houses} \\ \midrule 
+\input{figures/census_hh_DDregs_AGG_dwell_het_for_3}
+  & \multicolumn{8}{c}{ } \\
+ & \multicolumn{8}{c}{Informal Houses} \\ \midrule 
+% & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+% & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/census_hh_DDregs_AGG_dwell_het_inf_3}
+
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All difference-in-differences controls are included in the specification while only the interaction terms for Post\tim Constructed are shown.} \\
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+
+\begin{table}[h!] 
+\caption{Effect of Housing Projects on Socio-demographics}
+\label{table:sorting}
+\small
+\centering
+%\caption{Census Composition Estimates }
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+\input{figures/census_pers_DDregs_AGG_3}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
+\multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h!] 
+\caption{Census Household-level Post\tim\unskip Constructed Coefficients: City Versus Suburb}
+\label{table:sorting_het}
+\small
+\centering
+%\caption{Census Composition Estimates }
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+\input{figures/census_pers_DDregs_AGG_het_2}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize All difference-in-differences controls are included in the specification while only the interaction terms} \\
+\multicolumn{6}{l}{\footnotesize  for Post\tim Constructed are shown. Standard errors clustered at the project level in parenthesis.  }\\
+\multicolumn{6}{l}{\footnotesize \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01. P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+\end{tabular}
+\end{table}
+
+
+
+%(2) differential shocks to local housing markets for constructed versus unconstructed projects are uncorrelated with distance within this radius, and (3) recipient households are not drawn from households living at 1,200 meters from the project area.
+
+\begin{figure*}[t!]
+    \centering
+    \vspace{2mm}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \caption[]{\small Total Houses}  
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin_3}
+        \label{fig:DDDtotal}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}  
+        \centering 
+        \caption[]{\small Formal Houses}
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin_3}     
+        \label{fig:DDDformal}
+    \end{subfigure}
+    \vskip 1mm \vskip 0pt
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \caption[]{\small Informal Houses}
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin_3.pdf}
+        \label{fig:DDDinformal}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}  
+        \centering
+        \caption[]{\small Backyard Informal Houses}  
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin_3}
+        \label{fig:DDDbackyard}
+    \end{subfigure}
+    \vskip 1mm \vskip 0pt
+    \begin{subfigure}[b]{.49\textwidth}  
+        \centering
+        \caption[]{\small Non-Backyard Informal Houses} 
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin_3}    
+        \label{fig:DDDnonbackyard}
+    \end{subfigure}
+    \hfill \hspace{.02\textwidth}
+    \begin{minipage}{0.47\textwidth}   
+    \vspace{-6cm}
+    \caption[]
+    {\small DDD coefficients (equation \ref{eq:bblu}) for fives types of housing densities.} \label{fig:DDDbblu}
+	\end{minipage}
+\end{figure*} 
+
+
+
+
+\begin{figure*}[t!]
+    \centering
+    \vspace{2mm}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \caption[]{\small Total Houses}  
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_total_buildings_admin_het_3}
+        \label{fig:DDDtotal_het}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}  
+        \centering 
+        \caption[]{\small Formal Houses}
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_for_admin_het_3}     
+        \label{fig:DDDformal_het}
+    \end{subfigure}
+    \vskip 1mm \vskip 0pt
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \caption[]{\small Informal Houses}
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_admin_het_3}
+        \label{fig:DDDinformal_het}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}  
+        \centering
+        \caption[]{\small Backyard Informal Houses}  
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_backyard_admin_het_3}
+        \label{fig:DDDbackyard_het}
+    \end{subfigure}
+    \vskip 1mm \vskip 0pt
+    \begin{subfigure}[b]{.49\textwidth}  
+        \centering
+        \caption[]{\small Non-Backyard Informal Houses} 
+        \vspace{-1mm}
+        \includegraphics[width=\textwidth,trim={.5cm .3cm .3cm 0cm}, clip=true]{figures/distplotDDD_bblu_inf_non_backyard_admin_het_3}    
+        \label{fig:DDDnonbackyard_het}
+    \end{subfigure}
+    \hfill \hspace{.02\textwidth}
+    \begin{minipage}{0.47\textwidth}   
+    \vspace{-6cm}
+    \caption[]
+    {\small DDD coefficients (equation \ref{eq:bblu}) for fives types of housing densities.} \label{fig:DDDbblu_het}
+	\end{minipage}
+\end{figure*} 
+
+
+\begin{table}[h!]
+\small
+\centering
+\caption{Triple Difference Estimates }\label{table:bbluDDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Backyard Housing & \small Non-Bkyrd Housing \\ \midrule 
+\input{figures/bblu_regDDD_3}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h!]
+\small
+\centering
+\caption{Triple Difference Estimates }\label{table:bbluDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Backyard Housing & \small Non-Bkyrd Housing \\ \midrule 
+\input{figures/bblu_regDDD_het_3}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize ``Near'' is within 32 km from the CBD and ``Far'' is greater than 32km from the CBD.}  \\
+\multicolumn{6}{l}{Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+\begin{figure}
+\caption{Price Estimates over Distance from Project}\label{figure:distplot}
+\centering
+\includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot_3}
+\vspace{-2mm}
+\end{figure}
+
+\begin{figure}
+\caption{Price Estimates over Distance from Project Het}\label{figure:distplot_het}
+\centering
+\includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot_het_3}
+\vspace{-2mm}
+\end{figure}
+
+
+% \begin{table}
+% \small
+% \centering
+% \caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD}
+% \vspace{-2mm}
+% \begin{tabular}{lCCCC}
+% \toprule
+%  & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
+% \input{figures/price_regDDD.tex}
+% \bottomrule
+% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table} 
+
+% \begin{table}
+% \small
+% \centering
+% \caption{Triple Difference Estimates on Log-Prices Het}\label{table:priceDDD_het}
+% \vspace{-2mm}
+% \begin{tabular}{lCCCC}
+% \toprule
+%  & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
+% \input{figures/price_regDDD_het.tex}
+% \bottomrule
+% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table} 
+
+% \begin{figure}[t!]
+% \caption{Time-to-Event Price Estimates}\label{figure:timeplot}
+% \centering
+% \includegraphics[width=0.99\textwidth,trim={0cm 0cm 0cm 0cm},clip=true]{figures/DDDplot_pertime_alt_unspaghetti}
+% \vspace{-2mm}
+% \end{figure}
+
+
+
+
+\end{document}
+
+

@@ -147,16 +147,6 @@ gen lprice = log(purch_price);
 gen erf_size2 = erf_size^2;
 gen erf_size3 = erf_size^3;
 
-cap program drop gengov;
-program gengov;
-
-   local who = "seller";
-
-   if "`1'"=="buyer" {;
-      local who = "`1'";
-      local var = "_`1'";
-      }; 
-
       
 * save data;
 save "gradplot_admin${V}.dta", replace;

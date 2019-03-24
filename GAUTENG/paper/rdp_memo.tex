@@ -1,0 +1,96 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+
+Project definitions
+
+\begin{itemize}
+    \item \textbf{Original}
+        \begin{itemize}
+        %    \item start with union gcro shapes (397)
+            \item classify shapes with RDP houses as Constructed (otherwise Unconstructed) \\[.5em]
+            RDP houses:
+                \begin{itemize}
+                    \item government in the seller name (and price filter)
+                    \item do not have BBLU structure in the pre-period
+                    \item median sale year after 2002
+                \end{itemize}
+            \item keep only ones that fuzzy merge with budget dates
+        \end{itemize}
+
+    \item \textbf{New Method 1}
+        \begin{itemize}
+        %    \item start with union gcro shapes (397)
+            \item classify shapes with RDP houses as Constructed (otherwise Unconstructed) \\[.5em]
+            RDP houses:
+                \begin{itemize}
+                    \item government in the seller name (with a couple more government name definitions from a careful read of seller names and project names) (and price filter)
+                    \item (no bblu condition)
+                    \item median sale year after 2001
+                \end{itemize}
+            \item (use fuzzy merge with budget dates only for price regs)
+        \end{itemize}
+
+    \item \textbf{New Method 2}
+        \begin{itemize}
+            \item Same as New Method 1 except shapes with area less than 0.5 km2 are excluded
+        \end{itemize}
+
+    \item \textbf{New Method 3}
+        \begin{itemize}
+            \item classify shapes with project descriptions with any of these words [current, complete, implementation] as Constructed 
+            \item and shapes with any of these words as [planning, uncertain, proposed, investigating, future] as Unconstructed 
+            \item Note: this approach merges overlapping project descriptions to the union of shapes (397) 
+                \begin{itemize}
+                    \item alternative future approach: just use the initial set of gcro (600+) shapes and their project descriptions
+                \end{itemize}
+        \end{itemize}
+\end{itemize}
+
+
+
+
+\end{document}
+
+
