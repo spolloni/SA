@@ -10,7 +10,7 @@ from subcode.data2sql import add_trans, add_erven, add_bonds
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
-from subcode.placebofuns import make_gcro_all, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
+from subcode.placebofuns import make_gcro_all, make_gcro_full, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
 from subcode.distfuns import selfintersect, intersGEOM
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
@@ -52,7 +52,7 @@ workers = int(multiprocessing.cpu_count()-1)
 ################
 
 dist_threshold  = 4000   # define neighborhood radius in meters
-hulls           = ['gcro'] 
+hulls           = ['gcro_full']  # gcro  IS THE OLD ONE!!!!
 
 _1_a_IMPORT = 0  # import LIGHTSTONE
 _1_b_IMPORT = 0  # import BBLU
@@ -64,11 +64,11 @@ _2_FLAGRDP_ = 0 # DON"T NEED
 _3_GCRO_a_  = 0
 _3_GCRO_b_  = 0 # DON"T NEED
 
-_4_a_DISTS_ = 0  # buffers and hull creation
-_4_b_DISTS_ = 0  # ERVEN distance
-_4_c_DISTS_ = 0  # BBLU distance
-_4_d_DISTS_ = 0  # EA distance
-_4_e_DISTS_ = 0  # create x y table for BBLU
+_4_a_DISTS_ = 1  # buffers and hull creation
+_4_b_DISTS_ = 1  # ERVEN distance
+_4_c_DISTS_ = 1  # BBLU distance
+_4_d_DISTS_ = 1  # EA distance
+_4_e_DISTS_ = 1  # create x y table for BBLU
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
 _6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
@@ -215,7 +215,10 @@ if _3_GCRO_a_ == 1:
     # import_budget(rawgcro)
     # make_gcro(db)
 
+    
     make_gcro_all(db)
+    make_gcro_full(db)
+    
 
     # for hull in hulls:
     #     make_gcro_conhulls(db,hull)

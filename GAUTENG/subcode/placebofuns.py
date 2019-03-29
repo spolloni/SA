@@ -155,6 +155,37 @@ def make_gcro_all(db):
     return 
 
 
+
+def make_gcro_full(db):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    
+    # create table with Union of shapes that make the cut
+    union_name = 'gcro_full_conhulls'
+    cur.execute('DROP TABLE IF EXISTS {};'.format(union_name))
+    make_qry = '''
+               CREATE TABLE {} AS 
+               SELECT G.GEOMETRY AS GEOMETRY, hectares, OGC_FID, OGC_FID AS cluster
+               FROM gcro_publichousing as G;
+               '''.format(union_name)
+    cur.executescript(make_qry)
+    cur.execute(''' SELECT RecoverGeometryColumn('{}',
+                        'GEOMETRY',2046,'MULTIPOLYGON','XY');'''.format(union_name))
+
+    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(union_name))
+    cur.execute('''SELECT DiscardGeometryColumn('{}','GEOMETRY');'''.format(union_name))
+
+    con.commit()
+    con.close()
+
+    return 
+
+
 def make_gcro(db):
 
     # connect to DB

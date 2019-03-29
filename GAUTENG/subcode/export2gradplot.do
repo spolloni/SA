@@ -75,6 +75,7 @@ cd ../..;
 if $LOCAL==1{;cd ..;};
 cd Generated/GAUTENG;
 
+
 * load data; 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;
