@@ -64,11 +64,11 @@ _2_FLAGRDP_ = 0 # DON"T NEED
 _3_GCRO_a_  = 0
 _3_GCRO_b_  = 0 # DON"T NEED
 
-_4_a_DISTS_ = 1  # buffers and hull creation
-_4_b_DISTS_ = 1  # ERVEN distance
-_4_c_DISTS_ = 1  # BBLU distance
-_4_d_DISTS_ = 1  # EA distance
-_4_e_DISTS_ = 1  # create x y table for BBLU
+_4_a_DISTS_ = 0  # buffers and hull creation
+_4_b_DISTS_ = 0  # ERVEN distance
+_4_c_DISTS_ = 0  # BBLU distance
+_4_d_DISTS_ = 0  # EA distance
+_4_e_DISTS_ = 0  # create x y table for BBLU
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
 _6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
