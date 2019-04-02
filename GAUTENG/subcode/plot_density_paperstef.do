@@ -6,8 +6,8 @@ est clear
 
 set more off
 set scheme s1mono
-set matsize 11000
-set maxvar 32767
+*set matsize 11000
+*set maxvar 32767
 #delimit;
 grstyle init;
 grstyle set imesh, horizontal;
@@ -186,7 +186,8 @@ if $graph_plotmeans_rdpplac == 1 {;
     ring(0) position(`9') bm(medium) rowgap(small) col(1)
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(.7);;
-    graphexportpdf `1', dropeps;
+    *graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace;
    * save "${temp}`1'.dta", replace ;
   restore;
 
@@ -268,7 +269,8 @@ if $graph_plotmeans_rawchan == 1 {;
     ring(0) position(`9') bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(.7);;
-    graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace;
+    *graphexportpdf `1', dropeps;
   restore;
 
   end;
@@ -341,7 +343,8 @@ if $graph_plotmeans_cntproj == 1 {;
     ring(0) position(5) bm(medium) rowgap(small) 
     colgap(small) size(medsmall) region(lwidth(none)))
     aspect(.5);
-    graphexportpdf projectcounts${V}, dropeps;
+    *graphexportpdf projectcounts${V}, dropeps;
+    graph export "projectcounts${V}.pdf", as(pdf) replace;
   restore;
 
 };
@@ -391,7 +394,8 @@ program plotregsingle;
     colgap(small) size(*.95) region(lwidth(none)))
     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
     aspect(.77);
-    graphexportpdf `1', dropeps;
+    *graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace;
   restore;
 end;
 

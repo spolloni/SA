@@ -197,8 +197,8 @@ preserve;
     aspect(.6);
 
 restore;
-graphexportpdf price_regs_DDDplot${V} , dropeps;
-
+*graphexportpdf price_regs_DDDplot${V} , dropeps;
+graph export "price_regs_DDDplot${V}.pdf", replace as(pdf);
 };
 *****************************************************************;
 *****************************************************************;
@@ -338,8 +338,8 @@ preserve;
     note("`3'");
 
 restore;
-graphexportpdf DDDplot_pertime${V} , dropeps;
-
+* graphexportpdf DDDplot_pertime${V} , dropeps;
+graph export "DDDplot_pertime${V}.pdf", as(pdf) replace;
 };
 *****************************************************************;
 *****************************************************************;

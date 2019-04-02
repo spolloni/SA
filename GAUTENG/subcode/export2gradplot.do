@@ -35,31 +35,31 @@ local qry = "
 
   LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count, R.mode_yr_rdp, R.con_mo_rdp
-          FROM distance_erven_gcro AS D
+          FROM distance_erven_gcro${flink} AS D
           JOIN rdp_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=4000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
         ) AS D ON D.input_id=B.property_id
 
-  LEFT JOIN (SELECT IT.* FROM  int_gcro_erven AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
+  LEFT JOIN (SELECT IT.* FROM  int_gcro${flink}_erven AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
       AS E ON E.property_id = B.property_id
 
   LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_erven_gcro AS D
+          FROM distance_erven_gcro${flink} AS D
           JOIN placebo_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=4000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
         ) AS F ON F.input_id=B.property_id
 
-  LEFT JOIN (SELECT IT.* FROM  int_gcro_erven AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster ) 
+  LEFT JOIN (SELECT IT.* FROM  int_gcro${flink}_erven AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster ) 
       AS G ON G.property_id = B.property_id
 
-  LEFT JOIN  gcro AS GC ON D.target_id = GC.cluster
+  LEFT JOIN  gcro${flink} AS GC ON D.target_id = GC.cluster
 
-  LEFT JOIN  cbd_dist AS CB ON CB.cluster = GC.cluster
+  LEFT JOIN  cbd_dist${flink} AS CB ON CB.cluster = GC.cluster
 
-  LEFT JOIN gcro_temp_year AS GY ON GY.cluster = GC.cluster
+  LEFT JOIN gcro${flink}_temp_year AS GY ON GY.cluster = GC.cluster
 
 
   ";

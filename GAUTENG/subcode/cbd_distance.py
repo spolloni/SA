@@ -45,8 +45,27 @@ def cbd_gen():
 
 
 
-cbd_gen()
+#cbd_gen()
 
+
+def cbd_gen_full():
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute("DROP TABLE IF EXISTS cbd_dist_full;")
+    con.execute('''
+        CREATE TABLE cbd_dist_full AS
+        SELECT MIN(ST_distance(A.GEOMETRY,ST_Centroid(B.GEOMETRY)))/1000 AS cbd_dist, A.town, B.objectid as cluster
+        FROM cbd_centroids AS A, gcro_publichousing AS B
+        GROUP BY B.objectid
+                ''')
+    cur.execute("CREATE INDEX cbd_dist_full_id ON cbd_dist_full (cluster);")
+    con.close()
+
+
+cbd_gen_full()
 
 
 

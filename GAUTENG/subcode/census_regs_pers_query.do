@@ -84,7 +84,7 @@ if $data_load==1 {;
 
       LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_sal_2011_gcro AS D
+          FROM distance_sal_2011_gcro${flink} AS D
           JOIN rdp_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=2000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
@@ -92,7 +92,7 @@ if $data_load==1 {;
 
       LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_sal_2011_gcro AS D
+          FROM distance_sal_2011_gcro${flink} AS D
           JOIN placebo_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=2000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
@@ -100,7 +100,7 @@ if $data_load==1 {;
 
     LEFT JOIN  
     (SELECT IT.sal_code, IT.area_int AS area_int_rdp, IT.cluster  
-    FROM  int_gcro_sal_2011 
+    FROM  int_gcro${flink}_sal_2011 
     AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster
     GROUP BY IT.sal_code
         HAVING IT.area_int = MAX(IT.area_int)
@@ -109,7 +109,7 @@ if $data_load==1 {;
 
     LEFT JOIN     
     (SELECT IT.sal_code, IT.area_int AS area_int_placebo, IT.cluster  
-    FROM  int_gcro_sal_2011 
+    FROM  int_gcro${flink}_sal_2011 
     AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster
     GROUP BY IT.sal_code
         HAVING IT.area_int = MAX(IT.area_int)
@@ -130,9 +130,9 @@ if $data_load==1 {;
       FROM cluster_rdp
     ) AS GR ON AA.cluster_rdp = GR.cluster_rdp
 
-  LEFT JOIN cbd_dist AS CP ON CP.cluster = AA.cluster_placebo
+  LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
 
-  LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
+  LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
 
     WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL) AND random < .6
     ";
@@ -182,7 +182,7 @@ if $data_load==1 {;
 
     LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_sal_2001_gcro AS D
+          FROM distance_sal_2001_gcro${flink} AS D
           JOIN rdp_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=2000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
@@ -190,7 +190,7 @@ if $data_load==1 {;
 
     LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_sal_2001_gcro AS D
+          FROM distance_sal_2001_gcro${flink} AS D
           JOIN placebo_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=2000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
@@ -198,7 +198,7 @@ if $data_load==1 {;
 
     LEFT JOIN  
     (SELECT IT.sal_code, IT.area_int AS area_int_rdp, IT.cluster  
-    FROM  int_gcro_sal_2001 
+    FROM  int_gcro${flink}_sal_2001 
     AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster
     GROUP BY IT.sal_code
         HAVING IT.area_int = MAX(IT.area_int)
@@ -207,7 +207,7 @@ if $data_load==1 {;
 
     LEFT JOIN     
     (SELECT IT.sal_code, IT.area_int AS area_int_placebo, IT.cluster  
-    FROM  int_gcro_sal_2001 
+    FROM  int_gcro${flink}_sal_2001 
     AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster
     GROUP BY IT.sal_code
         HAVING IT.area_int = MAX(IT.area_int)
@@ -218,9 +218,9 @@ if $data_load==1 {;
 
     ) AS AA
 
-  LEFT JOIN cbd_dist AS CP ON CP.cluster = AA.cluster_placebo
+  LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
 
-  LEFT JOIN cbd_dist AS CR ON CR.cluster = AA.cluster_rdp
+  LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
 
     WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
     AND random < .6

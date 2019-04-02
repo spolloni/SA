@@ -1,3 +1,5 @@
+
+
 clear
 est clear
 
@@ -182,7 +184,8 @@ program plotregsingle;
     colgap(small) size(*.95) region(lwidth(none)))
     note("Mean Structures per km{superscript:2}: $mean_outcome  " ,ring(0) position(4))
     aspect(.72);
-    graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace;
+    *graphexportpdf `1', dropeps;
   restore;
 end;
 

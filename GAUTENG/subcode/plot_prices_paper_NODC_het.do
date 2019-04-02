@@ -168,7 +168,7 @@ preserve;
     aspect(.6);
 
 restore;
-graphexportpdf price_regs_DDDplot_het${V}, dropeps;
+* graphexportpdf price_regs_DDDplot_het${V}, dropeps;
 graph export "price_regs_DDDplot_het${V}.pdf", as(pdf) replace; 
 
 };
@@ -310,7 +310,7 @@ preserve;
     note("`3'");
 
 restore;
-graphexportpdf DDDplot_pertime_het${V}, dropeps;
+* graphexportpdf DDDplot_pertime_het${V}, dropeps;
     graph export "DDDplot_pertime_het${V}.pdf", as(pdf) replace  ;
 
 };

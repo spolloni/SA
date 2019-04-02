@@ -116,16 +116,16 @@ erase "temp_placebo.dta" ;
 *** GET AREA!  CBD_DIST ;
 
 
-odbc load, exec("SELECT G.area, G.cluster, R.rdp_id, P.placebo_id, C.cbd_dist FROM gcro AS G 
+odbc load, exec("SELECT G.area, G.cluster, R.rdp_id, P.placebo_id, C.cbd_dist FROM gcro${flink} AS G 
 LEFT JOIN (SELECT cluster, 1 AS rdp_id FROM rdp_cluster) AS R ON G.cluster = R.cluster
 LEFT JOIN (SELECT cluster, 1 AS placebo_id FROM placebo_cluster) AS P ON G.cluster = P.cluster 
-JOIN cbd_dist AS C ON C.cluster = G.cluster
+JOIN cbd_dist${flink} AS C ON C.cluster = G.cluster
 ;") clear dsn(gauteng) ;
 
+destring rdp_id placebo_id, replace force;
+keep if rdp_id==1 | placebo_id==1;
 
-keep if rdp_id=="1" | placebo_id=="1";
-
-g rdp =rdp_id=="1";
+g rdp =rdp_id==1;
 
 keep rdp area cbd_dist cluster;
 

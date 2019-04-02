@@ -3,7 +3,13 @@
 global output = "Code/GAUTENG/paper/figures"
 
 ** SET VERSION
-global V="_3"
+global V="_4"
+
+
+global flink = ""
+if "${V}" == "_4" | "${V}" == "_5" { 
+	global flink = "_full" 
+}
 
 * RUN LOCALLY?
 global LOCAL = 1
@@ -54,33 +60,33 @@ global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1
 *** RUN FILES *** 						Number of Sub-options
 global rdp_flag_gcro  					= 1
 
-global plot_density_paperstef_query		= 1 /* 2 NO V */
-global plot_density_paperstef 			= 1 /* 4 (6?) */
-global plot_density_paperstef_het 		= 1 /* 2 (4?) */
-global plot_density_paperstef_NOFE 	    = 1 /* 3 */
-global plot_density_paperstef_NOFE_het  = 1 /* 3 */
+global plot_density_paperstef_query		= 0 /* 2 NO V */
+global plot_density_paperstef 			= 0 /* 4 (6?) */
+global plot_density_paperstef_het 		= 0 /* 2 (4?) */
+global plot_density_paperstef_NOFE 	    = 0 /* 3 */
+global plot_density_paperstef_NOFE_het  = 0 /* 3 */
 
-global census_regs_query  				= 1 /* 2 YES V */
-global census_regs_hh_aggregated  	    = 1 /* 0 */
-global census_regs_hh_aggregated_het 	= 1 /* 0 */
-global census_regs_hh_aggregated_dwell  = 1 /* 2 */
+global census_regs_query  				= 0 /* 2 YES V */
+global census_regs_hh_aggregated  	    = 0 /* 0 */
+global census_regs_hh_aggregated_het 	= 0 /* 0 */
+global census_regs_hh_aggregated_dwell  = 0 /* 2 */
 
-global census_regs_pers_query 			= 1 /* 2 YES V */
-global census_regs_pers_aggregated      = 1 /* 0 */
-global census_regs_pers_aggregated_het  = 1 /* 0 */
+global census_regs_pers_query 			= 0 /* 2 YES V */
+global census_regs_pers_aggregated      = 0 /* 0 */
+global census_regs_pers_aggregated_het  = 0 /* 0 */
 
-global generate_placebo_year 			= 1 /* 0 NO V NEEDS UPDATE */
-global export2gradplot 					= 1 /* 0  YES V ! */
-global plot_prices_paper_NODC 			= 1 /* 6 make price reg dataset here! */
-global plot_prices_paper_NODC_het 		= 1 /* 5 */
+global generate_placebo_year 			= 0 /* 0 NO V NEEDS UPDATE */
+global export2gradplot 					= 0 /* 0  YES V ! */
+global plot_prices_paper_NODC 			= 0 /* 6 make price reg dataset here! */
+global plot_prices_paper_NODC_het 		= 0 /* 5 */
 
 global price_histogram 					= 0 /* 0 */
-global descriptive_table 				= 1 /* 0 */
+global descriptive_table 				= 0 /* 0 */
 global keyword_analysis 				= 0 /* 0 */
+
 
 *** SET MACROS
 *** MATCHING STATISTICS
-
 
 if $rdp_flag_gcro == 1 {
 	if "$V" == "" {
@@ -91,6 +97,16 @@ if $rdp_flag_gcro == 1 {
 	}
 	if "$V" == "_3" {
 		do rdp_flag_gcro_3.do   /* define according to keywords! */
+		cd ../..
+		cd Code/GAUTENG/subcode
+	}
+	if "$V" == "_4" {
+		do rdp_flag_gcro_4.do   /* define according to keywords! */
+		cd ../..
+		cd Code/GAUTENG/subcode
+	}
+	if "$V" == "_5" {
+		do rdp_flag_gcro_5.do   /* define according to keywords! */
 		cd ../..
 		cd Code/GAUTENG/subcode
 	}
@@ -170,7 +186,12 @@ do census_regs_pers_aggregated_het.do
 ***** PRICES *****
 
 if ${generate_placebo_year} == 1 {
-do generate_placebo_year.do 
+	if "${flink}"=="_full" {
+		do generate_placebo_year_full.do 
+	}
+	else {
+		do generate_placebo_year.do 
+	}
 	cd ../../../..
 	cd Code/GAUTENG/subcode
 }

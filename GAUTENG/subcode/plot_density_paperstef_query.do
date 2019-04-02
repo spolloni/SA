@@ -107,7 +107,7 @@ if $bblu_query_data == 1 {;
 
       LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_bblu_`time'_gcro AS D
+          FROM distance_bblu_`time'_gcro${flink} AS D
           JOIN rdp_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=4000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
@@ -115,7 +115,7 @@ if $bblu_query_data == 1 {;
 
       LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_bblu_`time'_gcro AS D
+          FROM distance_bblu_`time'_gcro${flink} AS D
           JOIN placebo_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=4000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
@@ -137,16 +137,16 @@ if $bblu_query_data == 1 {;
        FROM placebo_cluster
       ) AS GP ON AA.cluster_placebo = GP.cluster
 
-    LEFT JOIN gcro AS GC ON AA.cluster_rdp = GC.cluster
+    LEFT JOIN gcro${flink} AS GC ON AA.cluster_rdp = GC.cluster
 
-    LEFT JOIN (SELECT IT.* FROM  int_gcro_bblu_`time' AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster ) 
+    LEFT JOIN (SELECT IT.* FROM  int_gcro${flink}_bblu_`time' AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster ) 
       AS IP ON IP.OGC_FID = AA.OGC_FID
-    LEFT JOIN (SELECT IT.* FROM  int_gcro_bblu_`time' AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
+    LEFT JOIN (SELECT IT.* FROM  int_gcro${flink}_bblu_`time' AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
       AS IR ON IR.OGC_FID = AA.OGC_FID
 
-    LEFT JOIN cbd_dist AS RC ON AA.cluster_rdp = RC.cluster
+    LEFT JOIN cbd_dist${flink} AS RC ON AA.cluster_rdp = RC.cluster
 
-    LEFT JOIN cbd_dist AS RP ON AA.cluster_placebo = RP.cluster
+    LEFT JOIN cbd_dist${flink} AS RP ON AA.cluster_placebo = RP.cluster
 
     ";
 
