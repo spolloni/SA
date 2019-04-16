@@ -11,10 +11,11 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.placebofuns import make_gcro_all, make_gcro_full, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
-from subcode.distfuns import selfintersect, intersGEOM
+from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
-from subcode.add_grid import bblu_xy, add_grid, add_grid_counts, grid_to_erven
+#from subcode.add_grid import bblu_xy, grid_to_erven
+#  add_grid, add_grid_counts, 
 #from paper.descriptive_statistics import cbd_gen
 from subcode.distfuns_admin import dist, intersPOINT, areaGEOM
 
@@ -69,6 +70,8 @@ _4_b_DISTS_ = 0  # ERVEN distance
 _4_c_DISTS_ = 0  # BBLU distance
 _4_d_DISTS_ = 0  # EA distance
 _4_e_DISTS_ = 0  # create x y table for BBLU
+_4_f_DISTS_ = 1  # GRID DISTANCE!
+
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
 _6_PLOTS_bblu_  = 0  # distance plots:  bblu densities
@@ -284,10 +287,23 @@ if _4_d_DISTS_ ==1:
         intersGEOM(db,geom,hull,yr) 
         print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
 
-if _4_e_DISTS_ == 1:
-    print '\n'," Making BBLU xy table...",'\n'
-    bblu_xy(db)
-    print '\n'," Done BBLU XY ! ",'\n'
+# if _4_e_DISTS_ == 1:
+#     print '\n'," Making BBLU xy table...",'\n'
+#     bblu_xy(db)
+#     print '\n'," Done BBLU XY ! ",'\n'
+
+
+
+if _4_f_DISTS_ ==1:
+    print '\n'," Distance part F: distances for grids... ",'\n'        
+    for hull in hulls:
+        import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.grid_id
+                                FROM  grid_temp_3  AS  p '''
+        dist(db,hull,'grid_temp_3',import_script,dist_threshold)
+        print '\n'," -- Grid Distance ", '\n'
+        intersGEOMgrid(db,hull,'grid_temp_3') 
+        print '\n'," -- grid: done!", '\n'
 
 
 #############################################

@@ -58,12 +58,13 @@ use "temp_censushh_agg${V}.dta", replace;
     ***** SUMMARY STATS REGS **** ;
 
 
-mat SUM = J(8, 3,.);
+mat SUM = J(9, 3,.);
 keep if year ==2001;
-g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
-g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
-*replace project_placebo = 0 if (project_placebo==1 & project_rdp==1) & area_int_placebo < area_int_rdp;
-*replace project_rdp = 0 if (project_placebo==1 & project_rdp==1) & area_int_placebo > area_int_rdp;
+g project_rdp     = (area_int_rdp     > $tresh_area & area_int_rdp    >=area_int_placebo);
+g project_placebo = (area_int_placebo > $tresh_area & area_int_placebo> area_int_rdp);
+
+* g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
+* g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
 
 * toilet_flush means;
 sum toilet_flush if project_rdp ==1 $ww;
@@ -121,6 +122,18 @@ matrix SUM[7,2] = round(r(mean),.01);
 sum hh_size $ww;
 matrix SUM[7,3] = round(r(mean),.01);
 
+* area_int means;
+g asum = area_int_rdp + area_int_placebo;
+sum asum if project_rdp ==1 $ww;
+matrix SUM[8,1] = round(r(mean),.01);
+sum asum if project_placebo ==1 $ww;
+matrix SUM[8,2] = round(r(mean),.01);
+sum asum $ww;
+matrix SUM[8,3] = round(r(mean),.01);
+
+
+
+
 * Counts;
 count if project_rdp ==1;
 global cons: di %15.0fc r(N);
@@ -128,6 +141,7 @@ count if project_placebo ==1;
 global uncons: di %15.0fc r(N);
 count;
 global all: di %15.0fc r(N);
+
 
 preserve;
 clear;
@@ -142,11 +156,12 @@ replace names = "Electricity for Heating" in 4;
 replace names = "Electricity for Lighting" in 5;
 replace names = "Number of Rooms" in 6;
 replace names = "Household Size" in 7;
+replace names = "\% Area Overlap with Projects" in 8;
 
-replace names = "N" in 8;
-replace SUM1 = "$cons" in 8;
-replace SUM2 = "$uncons" in 8;
-replace SUM3 = "$all" in 8;
+replace names = "N" in 9;
+replace SUM1 = "$cons" in 9;
+replace SUM2 = "$uncons" in 9;
+replace SUM3 = "$all" in 9;
 
 replace SUM3 = SUM3 + " \\";
 
@@ -162,38 +177,31 @@ restore;
 
 use "temp_censushh_agg${V}.dta", replace;
 
-g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
-g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
-g project = (project_rdp==1 | project_placebo==1);
-g project_post = project ==1 & year==2011;
-g project_post_rdp = project_rdp ==1 & year==2011;
+keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 
-g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
-g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
-g spillover = (spillover_rdp==1 | spillover_placebo==1);
-g spillover_post = spillover == 1 & year==2011;
-g spillover_post_rdp = spillover_rdp==1 & year==2011; 
+g proj     = (area_int_rdp     > $tresh_area ) | (area_int_placebo > $tresh_area);
+g spill1      = proj==0 & ( distance_rdp<=$dist_break_reg1 | 
+                            distance_placebo<=$dist_break_reg1 );
+g spill2      = proj==0 & ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
+                              | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
 
-g others = project !=1 & spillover !=1;
-g others_post = others==1 & year==2011;
+g con = distance_rdp<=distance_placebo;
 
+
+g proj_con = proj*con ;
+g spill1_con = spill1*con ;
+g spill2_con = spill2*con ;
+
+g post = year==2011;
+
+foreach var of varlist proj_con spill1_con spill2_con proj spill1 spill2 con  {;
+g `var'_post = `var'*post;
+};
 
 global regressors "
-  project_post_rdp
-  project_post
-  project_rdp
-  project
-  spillover_post_rdp
-  spillover_post
-  spillover_rdp
-  spillover
-  others_post
+   proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post con_post proj_con spill1_con spill2_con proj spill1 spill2 con 
   ";
 
-if $drop_others == 1{;
-drop if others==1;
-omit regressors spillover others_post;
-};
 
 global outcomes "
   toilet_flush 
@@ -204,6 +212,23 @@ global outcomes "
   tot_rooms
   hh_size
   ";
+
+lab var proj "inside";
+lab var spill1 "0-${dist_break_reg1}m out";
+lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m out";
+lab var con "constr";
+lab var proj_con "inside $\times$ constr";
+lab var spill1_con "0-${dist_break_reg1}m out $\times$ constr";
+lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr";
+
+lab var proj_post "inside $\times$ post";
+lab var spill1_post "0-${dist_break_reg1}m out $\times$ post";
+lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ post";
+lab var con_post "constr $\times$ post";
+lab var proj_con_post "inside $\times$ constr $\times$ post";
+lab var spill1_con_post "0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
 
 * preserve ; 
 *   g an1 = a_n==1;
@@ -219,15 +244,15 @@ eststo clear;
 
 foreach var of varlist $outcomes {;
   areg `var' $regressors $ww , a(cluster_joined) cl(cluster_joined);
-  test project_post_rdp = spillover_post_rdp;
-  estadd scalar pval = `=r(p)';
+  *test proj_con_post = spill1_con_post;
+  *estadd scalar pval = `=r(p)';
   sum `var' if e(sample)==1 & year ==2001 $ww, detail;
   estadd scalar Mean2001 = `=r(mean)';
   sum `var' if e(sample)==1 & year ==2011 $ww, detail;
   estadd scalar Mean2011 = `=r(mean)';
-  count if e(sample)==1 & spillover==1 & !project==1;
+  count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1;
   estadd scalar hhspill = `=r(N)';
-  count if e(sample)==1 & project==1;
+  count if e(sample)==1 & proj==1;
   estadd scalar hhproj = `=r(N)';
   preserve;
     keep if e(sample)==1;
@@ -241,15 +266,15 @@ foreach var of varlist $outcomes {;
 };
 
 areg pop_density ${regressors} $ww, a(cluster_joined) cl(cluster_joined);
-test project_post_rdp = spillover_post_rdp;
-estadd scalar pval = `=r(p)';
+*  test proj_con_post = spill1_con_post;
+*estadd scalar pval = `=r(p)';
 sum pop_density if e(sample)==1 & year ==2001, detail;
 estadd scalar Mean2001 = `=r(mean)';
 sum pop_density if e(sample)==1 & year ==2011, detail;
 estadd scalar Mean2011 = `=r(mean)';
-count if e(sample)==1 & spillover==1 & !project==1;
+count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1;
 estadd scalar hhspill = `=r(N)';
-count if e(sample)==1 & project==1;
+count if e(sample)==1 & proj==1;
 estadd scalar hhproj = `=r(N)';
 preserve;
   keep if e(sample)==1;
@@ -265,31 +290,22 @@ global X "{\tim}";
 
 estout using "census_hh_DDregs_AGG${V}.tex", replace
   style(tex) 
-  drop(_cons)
-  rename(
-    project_post_rdp "project${X}post${X}constr"
-    project_post "project${X}post"
-    project_rdp "project${X}constr"
-    spillover_post_rdp "spillover${X}post${X}constr"
-    spillover_post "spillover${X}post"
-    spillover_rdp "spillover${X}constr"
-  )
+
+keep( 
+    proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post 
+    con_post proj_con spill1_con spill2_con proj spill1 spill2 con
+  ) varlabels(, el(     proj_con_post "[0.01em]" spill1_con_post "[0.01em]" spill2_con_post "[0.5em]"
+   proj_post "[0.01em]"  spill1_post "[0.01em]" spill2_post  "[0.1em]"
+    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.01em]" spill2_con "[0.5em]"
+     proj "[0.01em]" spill1 "[0.01em]" spill2 "[0.01em]" con "[0.5em]" ))
+
+label 
   noomitted
   mlabels(,none) 
   collabels(none)
   cells( b(fmt(3) star ) se(par fmt(3)) )
-  varlabels(,el(
-    "project${X}post${X}constr" [0.5em] 
-    "project${X}post" [0.5em] 
-    "project${X}constr" [0.5em] 
-    project [0.5em] 
-    "spillover${X}post${X}constr" [0.5em] 
-    "spillover${X}post" [0.5em] 
-    "spillover${X}constr" " \midrule"
-  ))
-  stats(pval Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
+  stats(Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
     labels(
-      "{\it p}-val, h\textsubscript{0}: project=spill. "
       "Mean Outcome 2001" 
       "Mean Outcome 2011" 
       "R$^2$" 
@@ -299,7 +315,6 @@ estout using "census_hh_DDregs_AGG${V}.tex", replace
       "N"  
     ) 
     fmt(
-      %9.3fc
       %9.2fc
       %9.2fc 
       %12.3fc 
@@ -315,126 +330,22 @@ estout using "census_hh_DDregs_AGG${V}.tex", replace
     "\textsuperscript{a}" 0.01) ;
     
 
-    ***** DDD REGS **** ;
 
-
-use "temp_censushh_agg${V}.dta", replace;
-
-keep if distance_rdp <= $tresh_dist_max_DDD  |  distance_placebo <= $tresh_dist_max_DDD ;
-
-g project_rdp = (area_int_rdp > $tresh_area_DDD & distance_rdp<= $tresh_dist_DDD);
-g project_placebo = (area_int_placebo > $tresh_area_DDD & distance_placebo<= $tresh_dist_DDD);
-g project = (project_rdp==1 | project_placebo==1);
-g project_post = project ==1 & year==2011;
-g project_post_rdp = project_rdp ==1 & year==2011;
-
-g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist_DDD;
-g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist_DDD;
-g spillover = (spillover_rdp==1 | spillover_placebo==1);
-g spillover_post = spillover == 1 & year==2011;
-g spillover_post_rdp = spillover_rdp==1 & year==2011; 
-
-*g others      = project !=1 & spillover !=1;
-g  post = year==2011;
-g  rdp  = distance_rdp<= $tresh_dist_max_DDD;
-g  post_rdp = post*rdp;
-
-
-global regressors "
-  project_post_rdp
-  project_post
-  project_rdp
-  project
-  spillover_post_rdp
-  spillover_post
-  spillover_rdp
-  spillover
-  post_rdp
-  post
-  ";
-
-order $regressors;
-
-global outcomes1 "
-  toilet_flush 
-  water_inside 
-  electric_cooking 
-  electric_heating 
-  electric_lighting 
-  tot_rooms
-  hh_size
-  ";
-
-eststo clear;
-
-*areg toilet_flush $regressors , a(cluster_joined) cl(cluster_joined);
-*areg water_inside $regressors , a(cluster_joined) cl(cluster_joined);
-
-foreach var of varlist $outcomes1 {;
-  areg `var' $regressors , a(cluster_joined) cl(cluster_joined);
-  test project_post_rdp = spillover_post_rdp;
-  estadd scalar pval = `=r(p)';
-  sum `var' if e(sample)==1 & year ==2001, detail;
-  estadd scalar Mean2001 = `=r(mean)';
-  sum `var' if e(sample)==1 & year ==2011, detail;
-  estadd scalar Mean2011 = `=r(mean)';
-  count if e(sample)==1 & spillover==1 & project==1; 
-  estadd scalar hhspill = `=r(N)';
-  count if e(sample)==1 & project==1;
-  estadd scalar hhproj = `=r(N)';
-  preserve;
-    keep if e(sample)==1;
-    quietly tab cluster_rdp;
-    global projectcount = r(r);
-    quietly tab cluster_placebo;
-    global projectcount = $projectcount + r(r);
-  restore;
-  estadd scalar projcount = $projectcount;
-  eststo `var';
-};
-
-areg pop_density ${regressors}, a(cluster_joined) cl(cluster_joined);
-test project_post_rdp = spillover_post_rdp;
-estadd scalar pval = `=r(p)';
-sum pop_density if e(sample)==1 & year ==2001, detail;
-estadd scalar Mean2001 = `=r(mean)';
-sum pop_density if e(sample)==1 & year ==2011, detail;
-estadd scalar Mean2011 = `=r(mean)';
-eststo pop_density;
-
-global X "{\tim}";
-
-estout $outcomes using "census_hh_DDDregs${V}.tex", replace
+estout using "census_hh_DDregs_AGG_top${V}.tex", replace
   style(tex) 
-  drop(_cons)
-  rename(
-    project_post_rdp "project${X}post${X}constr"
-    project_post "project${X}post"
-    project_rdp "project${X}constr"
-    spillover_post_rdp "spillover${X}post${X}constr"
-    spillover_post "spillover${X}post"
-    spillover_rdp "spillover${X}constr"
-    post_rdp "post${X}constr"
-  )
+
+keep( 
+    proj_con_post spill1_con_post spill2_con_post 
+  ) varlabels(, el(     proj_con_post "[0.55em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]"
+   ))
+
+label 
   noomitted
   mlabels(,none) 
   collabels(none)
   cells( b(fmt(3) star ) se(par fmt(3)) )
-  varlabels(,el(
-    "project${X}post${X}constr" [0.5em] 
-    "project${X}post" [0.5em] 
-    "project${X}constr" [0.5em] 
-    project [0.5em] 
-    "spillover${X}post${X}constr" [0.5em] 
-    "spillover${X}post" [0.5em] 
-    "spillover${X}constr" [0.5em]  
-    "post${X}constr" [0.5em] 
-    spillover [0.5em] 
-    post  [0.5em] " \midrule"
-  ))
-  stats(pval Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
+  stats(Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
     labels(
-      "{\it p}-val, h\textsubscript{0}: project=spill. "
       "Mean Outcome 2001" 
       "Mean Outcome 2011" 
       "R$^2$" 
@@ -444,7 +355,6 @@ estout $outcomes using "census_hh_DDDregs${V}.tex", replace
       "N"  
     ) 
     fmt(
-      %9.3fc
       %9.2fc
       %9.2fc 
       %12.3fc 
@@ -459,3 +369,21 @@ estout $outcomes using "census_hh_DDDregs${V}.tex", replace
     "\textsuperscript{b}" 0.05 
     "\textsuperscript{a}" 0.01) ;
 
+
+
+
+
+* g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);å
+* g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
+* g project = (project_rdp==1 | project_placebo==1);
+* g project_post = project ==1 & year==2011;
+* g project_post_rdp = project_rdp ==1 & year==2011;
+
+* g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
+* g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
+* g spillover = (spillover_rdp==1 | spillover_placebo==1);
+* g spillover_post = spillover == 1 & year==2011;
+* g spillover_post_rdp = spillover_rdp==1 & year==2011; 
+
+* g others = project !=1 & spillover !=1;
+* g others_post = others==1 & year==2011;

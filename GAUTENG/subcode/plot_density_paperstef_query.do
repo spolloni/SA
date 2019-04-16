@@ -34,7 +34,7 @@ end;
 *  PLOT DENSITY  *;
 ******************;
 
-  global bblu_query_data  = 1 ; /* query data */
+  global bblu_query_data  = 0 ; /* query data */
   global bblu_clean_data  = 1 ; /* clean data for analysis */
 
 
@@ -194,6 +194,9 @@ if $bblu_clean_data==1 {;
   /* create id's */
   g id  = string(round(X,$size),"%10.0g") + string(round(Y,$size),"%10.0g") ;
 
+  egen Xs = mean(X), by(id);
+  egen Ys = mean(Y), by(id);
+
   outcome_gen;
 
   foreach var in $outcomes {;
@@ -206,8 +209,11 @@ if $bblu_clean_data==1 {;
 
     /* replace mean distance within block */
     egen dm`v' = mean(distance`v'), by(id);
+    egen dmin`v' = min(distance`v'), by(id);
     drop distance`v';
     ren dm`v' distance`v';
+
+    * replace min distance within block;
 
     /* replace mode cluster within block */
     egen dm`v' = mode(cluster`v'), maxmode by(id);
@@ -216,7 +222,7 @@ if $bblu_clean_data==1 {;
 
   };
 
-  keep  $outcomes     post id cluster_placebo cluster_rdp cluster_joined   distance_rdp distance_placebo cbd_dist;
+  keep  $outcomes   Xs Ys   post id cluster_placebo cluster_rdp cluster_joined   dmin* distance_rdp distance_placebo cbd_dist;
   duplicates drop id post, force;
 
   egen id1 = group(id);
@@ -231,7 +237,7 @@ if $bblu_clean_data==1 {;
   replace `var'=0 if `var'==.;
   };
 
-  foreach var of varlist cluster_placebo cluster_rdp distance_rdp distance_placebo cbd_dist {;
+  foreach var of varlist cluster_placebo cluster_rdp distance_rdp distance_placebo cbd_dist Xs Ys dmin*  {;
   egen `var'_m=max(`var'), by(id);
   replace `var'=`var'_m if `var'==.;
   drop `var'_m;

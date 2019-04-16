@@ -55,9 +55,9 @@ end;
 
 * what to run?;
 
-global ddd_regs_d = 1;
+global ddd_regs_d = 0;
 global ddd_regs_t = 1;
-global ddd_table  = 1;
+global ddd_table  = 0;
 
 global ddd_regs_t_alt  = 0; /* these aren't working right now */
 global ddd_regs_t2_alt = 0;
@@ -215,11 +215,14 @@ use "price_regs${V}.dta", clear;
 
 
 gen prepost_regt_joined = 0;
-replace prepost_regt_joined = 1 if mo2con_joined < 0   & mo2con_joined>= -12; 
-replace prepost_regt_joined = 2 if mo2con_joined >= 0  & mo2con_joined< 12; 
-replace prepost_regt_joined = 3 if mo2con_joined >= 12 & mo2con_joined< 24; 
-replace prepost_regt_joined = 4 if mo2con_joined >= 24 & mo2con_joined< 36; 
+replace prepost_regt_joined = 1 if mo2con_joined < 0   & mo2con_joined>= -24; 
+replace prepost_regt_joined = 2 if mo2con_joined >= 0  & mo2con_joined< 24; 
+replace prepost_regt_joined = 3 if mo2con_joined >= 24 & mo2con_joined< 48; 
+* replace prepost_regt_joined = 4 if mo2con_joined >= 24 & mo2con_joined< 48;
+replace prepost_regt_joined = 6 if  mo2con_joined < -24   & mo2con_joined>= -48; 
+
 replace prepost_regt_joined = 5 if mo2con_reg_joined >9000; 
+
 
 levelsof dists_joined;
 global dists_all "";
@@ -228,6 +231,9 @@ foreach level in `r(levels)' {;
     gen dists_all_`level'  = (dists_joined == `level'); 
 
     gen dists_rdp_`level'  = (dists_joined == `level' & placebo==0) ;
+
+    gen dists_minus2_`level' = (dists_joined == `level' & prepost_regt_joined ==6);
+    gen dists_rdp_minus2_`level' = (dists_joined == `level' & placebo==0 & prepost_regt_joined==6);
 
     gen dists_minus1_`level' = (dists_joined == `level' & prepost_regt_joined ==1);
     gen dists_rdp_minus1_`level' = (dists_joined == `level' & placebo==0 & prepost_regt_joined==1);
@@ -238,54 +244,64 @@ foreach level in `r(levels)' {;
     gen dists_plus2_`level' = (dists_joined == `level' & prepost_regt_joined ==3);
     gen dists_rdp_plus2_`level' = (dists_joined == `level' & placebo==0 & prepost_regt_joined==3);
 
-    gen dists_plus3_`level' = (dists_joined == `level' & prepost_regt_joined ==4);
-    gen dists_rdp_plus3_`level' = (dists_joined == `level' & placebo==0 & prepost_regt_joined==4);
+    * gen dists_plus3_`level' = (dists_joined == `level' & prepost_regt_joined ==4);
+    * gen dists_rdp_plus3_`level' = (dists_joined == `level' & placebo==0 & prepost_regt_joined==4);
 
     gen dists_other_`level' = (dists_joined == `level' & prepost_regt_joined ==5);
     gen dists_rdp_other_`level' = (dists_joined == `level' & placebo==0 & prepost_regt_joined ==5);
 
+
     global dists_all "
       dists_all_`level' dists_rdp_`level' 
+      dists_minus2_`level' dists_rdp_minus2_`level' 
       dists_minus1_`level' dists_rdp_minus1_`level' 
       dists_plus1_`level' dists_rdp_plus1_`level' 
       dists_plus2_`level' dists_rdp_plus2_`level' 
-      dists_plus3_`level' dists_rdp_plus3_`level' 
+ 
       dists_other_`level' dists_rdp_other_`level'
       ${dists_all}";
-  
+  *       dists_plus3_`level' dists_rdp_plus3_`level';
 };
 
 omit dists_all 
   dists_all_$max dists_rdp_$max 
+  dists_minus2_$max dists_rdp_minus2_$max 
   dists_minus1_$max dists_rdp_minus1_$max 
   dists_plus1_$max dists_rdp_plus1_$max 
   dists_plus2_$max dists_rdp_plus2_$max 
-  dists_plus3_$max dists_rdp_plus3_$max 
+
   dists_other_$max dists_rdp_other_$max;
+*    dists_plus3_$max dists_rdp_plus3_$max ;
+
 gen rdp = placebo==0; 
+gen minus2 = (prepost_regt_joined ==6); 
+gen rdpminus2 = rdp*minus2; 
 gen minus1 = (prepost_regt_joined ==1); 
 gen rdpminus1 = rdp*minus1; 
 gen plus1 = (prepost_regt_joined ==2); 
 gen rdpplus1 = rdp*plus1;
 gen plus2 = (prepost_regt_joined ==3); 
 gen rdpplus2 = rdp*plus2;
-gen plus3 = (prepost_regt_joined ==4); 
-gen rdpplus3 = rdp*plus3;
+* gen plus3 = (prepost_regt_joined ==4); 
+* gen rdpplus3 = rdp*plus3;
 gen other = (prepost_regt_joined ==5);
 gen rdpother = rdp*other;
 global dists_all "
-  rdp minus1 rdpminus1 
+  rdp minus2 rdpminus2 minus1 rdpminus1 
   plus1 rdpplus1
   plus2 rdpplus2 
-  plus3 rdpplus3  
+
   other rdpother ${dists_all}";
+  *   plus3 rdpplus3  
 
 areg lprice $dists_all i.purch_yr#i.purch_mo if $ifregs,  a(cluster_joined);
 
 *adjustment terms to get the right coeffs;
 global adj_plus1 = _b[rdpplus1] - _b[rdpminus1];
 global adj_plus2 = _b[rdpplus2] - _b[rdpminus1];
-global adj_plus3 = _b[rdpplus3] - _b[rdpminus1];
+* global adj_plus3 = _b[rdpplus3] - _b[rdpminus1];
+
+global adj_minus2 = _b[rdpminus2] - _b[rdpminus1];
 
 * plot the coeffs;
 preserve;
@@ -301,13 +317,16 @@ preserve;
   replace group =1  if strpos(parm,"minus1") >0;
   replace group =2  if strpos(parm,"plus1") >0;
   replace group =3  if strpos(parm,"plus2") >0;
-  replace group =4  if strpos(parm,"plus3") >0;
+  * replace group =4  if strpos(parm,"plus3") >0;
+
+  replace group =5  if strpos(parm,"minus2") >0;
 
   drop if contin == .;
 
   replace estimate = estimate + $adj_plus1 if group==2;
   replace estimate = estimate + $adj_plus2 if group==3;
-  replace estimate = estimate + $adj_plus3 if group==4;
+  * replace estimate = estimate + $adj_plus3 if group==4;
+  replace estimate = estimate + $adj_minus2 if group==5;
 
   sort contin;
   drop if contin > 9000;
@@ -316,7 +335,8 @@ preserve;
     (connected estimate contin if group==1, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(solid) lw(medium))
     (connected estimate contin if group==2, ms(o) msiz(medium) mlc(maroon) mfc(maroon) lc(maroon) lp(solid) lw(medium))
     (connected estimate contin if group==3, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(shortdash) lw(medium))
-    (connected estimate contin if group==4, ms(o) msiz(medium) mlc(maroon) mfc(maroon) lc(maroon) lp(longdash) lw(medium))
+    (connected estimate contin if group==5, ms(o) msiz(medium) mlc(blue) mfc(blue) lc(blue) lp(longdash) lw(medium))
+
     ,
     xtitle("Distance to project border (meters)",height(5))
     ytitle("Effect on log housing prices.",height(5))
@@ -328,16 +348,18 @@ preserve;
     yline(0,lw(thin)lp(shortdash))
     graphregion(margin(r=7))
     legend(order(
+      4 "2 year pre-const." 
       1 "1 year pre-const." 
       2 "1st year post-const."
       3 "2nd year post-const." 
-      4 "3rd year post-const."   
+ 
     )) /// symx(6) col(1)
     /// ring(0) position(2) bm(medium) rowgap(small)  
     /// colgap(small) size(*.95) region(lwidth(none)))
     note("`3'");
-
+*    (connected estimate contin if group==4, ms(o) msiz(medium) mlc(maroon) mfc(maroon) lc(maroon) lp(longdash) lw(medium));
 restore;
+*       4 "3rd year post-const."  ;
 * graphexportpdf DDDplot_pertime${V} , dropeps;
 graph export "DDDplot_pertime${V}.pdf", as(pdf) replace;
 };
@@ -950,6 +972,119 @@ use "price_regs${V}.dta", clear;
 
 
 
+
+
+* *****************************************************************;
+* *************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
+* *****************************************************************;
+
+* if $ddd_regs_d ==1 {;
+
+
+* use "price_regs${V}.dta", clear  ;
+
+* drop if mo2con_rdp==. & mo2con_placebo==.   ;
+* drop if distance_rdp<0 | distance_placebo<0 ;
+* keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
+
+* g spill1      = ( distance_rdp<=$dist_break_reg1 | 
+*                             distance_placebo<=$dist_break_reg1 );
+* g spill2      = ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
+*                               | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
+* g spill3      = ( (distance_rdp>$dist_break_reg2 & distance_rdp<=$dist_break_reg3) 
+*                               | (distance_placebo>$dist_break_reg2 & distance_placebo<=$dist_break_reg3) );
+
+* g con = distance_rdp<=distance_placebo;
+
+* g time = mo2con_rdp if distance_rdp<=distance_placebo              ;
+* replace time = mo2con_placebo if distance_placebo < distance_rdp   ;
+
+
+* g post =  time>0 & time<. ;
+* g con_post = post*con;
+
+
+* g spill1_post = spill1*post ;
+* g spill2_post = spill2*post ;
+* g spill3_post = spill3*post ;
+
+* g spill1_con = spill1*con ;
+* g spill2_con = spill2*con ;
+* g spill3_con = spill3*con ;
+
+* g spill1_con_post = spill1*con*post ;
+* g spill2_con_post = spill2*con*post ;
+* g spill3_con_post = spill3*con*post ;
+
+
+* lab var spill1 "0-${dist_break_reg1}m";
+* lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m";
+* lab var spill3 "${dist_break_reg2}-${dist_break_reg3}m";
+* lab var con "constr";
+
+* lab var spill1_con "0-${dist_break_reg1}m $\times$ constr";
+* lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m $\times$ constr";
+* lab var spill3_con "${dist_break_reg3}-${dist_break_reg2}m $\times$ constr";
+
+* lab var spill1_post "0-${dist_break_reg1}m out $\times$ post";
+* lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ post";
+* lab var con_post "constr $\times$ post";
+
+* lab var spill1_con_post "0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+* lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
+
+* global price_controls = "  spill1_con_post spill2_con_post spill3_con_post  
+*                             spill1_post       spill2_post    spill3_post  
+*                             spill1_con       spill2_con     spill3_con  
+*                             spill1 spill2 spill3  con  con_post" ;
+
+
+* areg lprice $price_controls i.purch_yr#i.purch_mo if $ifregs,  a(cluster_joined) cl(cluster_joined);
+
+
+* * plot the coeffs;
+* preserve;
+
+*   parmest, fast le(90);  
+
+*   * grab continuous var from varname;
+*   destring parm, gen(contin) i(post_ rdp dists long_and_far .) force;
+
+*   * keep only coeffs to plot;
+*   drop if contin == .;
+*   keep if strpos(parm,"rdp") >0 & strpos(parm,"post") >0;
+
+*   *reaarrange continuous var;
+*   drop if contin > 9000;
+*   sort contin;
+
+*   tw
+*     (rspike max90 min90 contin, lc(gs7) lw(thin) )
+*     (connected estimate contin, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medium))
+*     ,
+*     xtitle("Distance to project border (meters)",height(5))
+*     ytitle("Effect on log housing prices",height(5))
+*     xlabel(200 "0-200m" 400 "200-400m"
+*            600 "400-600m" 800 "600-800m"
+*            1000 "800-1000m" 1200 "1000-1200m",
+*            labsize(small))
+*     ylabel(-.4(.2).4)
+*     yline(0,lw(thin)lp(shortdash))
+*     graphregion(margin(r=7))
+*     legend(order(2 "DDD coefficients" 1 "90% Confidence Intervals" ) symx(6) col(1)
+*     ring(0) position(2) bm(medium) rowgap(small)  
+*     colgap(small) size(*.75) region(lwidth(none)))
+*     note("`3'")
+*     aspect(.6);
+
+* restore;
+* *graphexportpdf price_regs_DDDplot${V} , dropeps;
+* graph export "price_regs_DDDplot${V}.pdf", replace as(pdf);
+* };
+* *****************************************************************;
+* *****************************************************************;
+* *****************************************************************;
 
 
 

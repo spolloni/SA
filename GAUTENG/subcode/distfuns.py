@@ -62,6 +62,38 @@ def intersGEOM(db,geom,hull,year):
 
     return
 
+def intersGEOMgrid(db,hull,geom):
+
+    # connect to DB
+    con = sql.connect(db)
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    cur = con.cursor()
+
+    cur.execute('DROP TABLE IF EXISTS int_{}_{};'.format(hull,geom))
+
+    make_qry = '''
+               CREATE TABLE int_{}_{} AS 
+               SELECT A.grid_id, B.cluster, 
+               st_area(st_intersection(A.GEOMETRY,B.GEOMETRY)) / st_area(A.GEOMETRY) AS area_int
+               FROM {} as A, {}_conhulls as B
+               WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+               WHERE f_table_name='{}' AND search_frame=B.GEOMETRY)
+               AND st_intersects(A.GEOMETRY,B.GEOMETRY);
+               '''.format(hull,geom,geom,hull,geom)
+
+    index_qry = '''
+                CREATE INDEX int_{}_{}_index ON int_{}_{} (grid_id);
+                '''.format(hull,geom,hull,geom)
+
+    cur.execute(make_qry)
+    cur.execute(index_qry)
+
+    con.commit()
+    con.close()
+
+    return
+
 
 def selfintersect(db,dir,bw,hull):
 

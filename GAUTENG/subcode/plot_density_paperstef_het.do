@@ -88,16 +88,24 @@ cd $output ;
 
 g het = cbd_dist<= $het ; /* closer is het = 1 */
 
+replace distance_placebo = . if distance_rdp<0 ;
+replace distance_rdp     = . if distance_placebo<0;
 
-replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
-replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
-replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
-replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
+replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
+replace distance_rdp     = . if distance_rdp>distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 
-replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
-replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
-replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
-replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+keep if distance_rdp<${dist_max} | distance_placebo<${dist_max} ;
+
+
+* replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
+* replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
+* replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
+* replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
+
+* replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
+* replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
+* replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
+* replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
 
 drop if distance_rdp == . & distance_placebo == .;
 drop if cluster_rdp == . & cluster_placebo == .;  
@@ -110,14 +118,14 @@ g drdp=dists_rdp;
 replace drdp=. if drdp>$max-${bin_het}; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)'+ ${bin_het} if dists_rdp==. | post==0;
+*replace dists_rdp=`=r(max)'+ ${bin_het} if dists_rdp==. | post==0;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min(${bin_het})$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-${bin_het};
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)'+ ${bin_het} if dists_placebo==. | post==0;
+*replace dists_placebo=`=r(max)'+ ${bin_het} if dists_placebo==. | post==0;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;

@@ -138,7 +138,7 @@ format mo_date %tm;
 format hy_date %th;
 
 * joined to either placebo or rdp;
-gen placebo = (distance_placebo < distance_rdp);
+gen placebo = (distance_placebo < distance_rdp & distance_placebo<.);
 gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
 gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 gen mo2con_joined   = cond(placebo==1, mo2con_placebo, mo2con_rdp);

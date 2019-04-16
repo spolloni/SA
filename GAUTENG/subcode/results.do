@@ -6,6 +6,19 @@ global output = "Code/GAUTENG/paper/figures"
 global V="_4"
 
 
+*** probability that unflagged shapes are nearby?? (make figure there?)
+*** total distribution of shapes?!
+*** double-count shapes that are near other shapes?
+***** near the shapes should be higher density (because there's more shapes there!)
+
+*** distance from 50 by 50 squares?
+
+*** need to find the cut so that the bblu graphs look balanced,
+*** ideas: (1) look at small versus big shapes separately (ie. rdp/plac have very different proj sizes)
+*** deal with all the crazy clustering (ie. lots of projects surrounding other stuff... might be really tricky?)
+
+
+
 global flink = ""
 if "${V}" == "_4" | "${V}" == "_5" { 
 	global flink = "_full" 
@@ -27,8 +40,13 @@ global sizesq   = $size*$size
 global dist_max = 1200
 global dist_min = -400
 
-global dist_break_reg = 400 /* determines spillover vs control outside of project for regDDD */
-global dist_max_reg = 1200
+global dist_break_reg = 500 /* determines spillover vs control outside of project for regDDD */
+global dist_break_reg1 = 200 
+global dist_break_reg2 = 400 
+global dist_break_reg3 = 800 
+
+
+global dist_max_reg = 4000
 global dist_min_reg = -400
 
 
@@ -58,31 +76,39 @@ global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1
 
 
 *** RUN FILES *** 						Number of Sub-options
-global rdp_flag_gcro  					= 1
+global rdp_flag_gcro  					= 0
 
-global plot_density_paperstef_query		= 0 /* 2 NO V */
-global plot_density_paperstef 			= 0 /* 4 (6?) */
-global plot_density_paperstef_het 		= 0 /* 2 (4?) */
-global plot_density_paperstef_NOFE 	    = 0 /* 3 */
-global plot_density_paperstef_NOFE_het  = 0 /* 3 */
+** also need to add_grid.py, then main (gen grid distances)
+global grid_query 						= 0
+global grid_plot_density 				= 0 /* 3 YES V */
 
 global census_regs_query  				= 0 /* 2 YES V */
-global census_regs_hh_aggregated  	    = 0 /* 0 */
-global census_regs_hh_aggregated_het 	= 0 /* 0 */
-global census_regs_hh_aggregated_dwell  = 0 /* 2 */
+global census_regs_hh_aggregated  	    = 0 /* 0 YES V */
 
 global census_regs_pers_query 			= 0 /* 2 YES V */
 global census_regs_pers_aggregated      = 0 /* 0 */
-global census_regs_pers_aggregated_het  = 0 /* 0 */
 
-global generate_placebo_year 			= 0 /* 0 NO V NEEDS UPDATE */
+global generate_placebo_year_full   	= 0 /* 0 NO V NEEDS UPDATE double check?! */ 
 global export2gradplot 					= 0 /* 0  YES V ! */
 global plot_prices_paper_NODC 			= 0 /* 6 make price reg dataset here! */
-global plot_prices_paper_NODC_het 		= 0 /* 5 */
+* global plot_prices_paper_NODC_het 		= 0 /* 5 */
+
 
 global price_histogram 					= 0 /* 0 */
 global descriptive_table 				= 0 /* 0 */
 global keyword_analysis 				= 0 /* 0 */
+
+
+*global census_regs_hh_aggregated_het 	= 0 /* 0 */
+*global census_regs_hh_aggregated_dwell  = 0 /* 2 */
+*global census_regs_pers_aggregated_het  = 0 /* 0 */
+
+
+* global plot_density_paperstef_query		= 0 /* 2 NO V */
+* global plot_density_paperstef 			= 0 /* 4 (6?) */
+* global plot_density_paperstef_het 		= 0 /* 2 (4?) */
+* global plot_density_paperstef_NOFE 	    = 0 /* 3 */
+* global plot_density_paperstef_NOFE_het  = 0 /* 3 */
 
 
 *** SET MACROS

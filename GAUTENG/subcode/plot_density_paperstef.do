@@ -40,8 +40,8 @@ end;
 global bblu_do_analysis = 1; /* do analysis */
 
 global graph_plotmeans_rdpplac = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan = 1;
-global graph_plotmeans_cntproj = 1;
+global graph_plotmeans_rawchan = 0;
+global graph_plotmeans_cntproj = 0;
 global graph_plottriplediff    = 0;
 
 global reg_triplediff       = 0; /* creates regression analogue for triple difference */
@@ -79,6 +79,16 @@ cd ../..;
 cd Generated/Gauteng;
 
 
+* use bbluplot_reg_admin_$size, clear;
+* ren inf out ;
+* keep post id out ;
+* reshape wide out, i(id) j(post);
+* sample 5 ;  
+* g diff = out1-out0 ;
+* lowess diff out0 ; 
+
+
+
 ************************************************;
 ********* ANALYZE DATA  ************************;
 ************************************************;
@@ -86,21 +96,38 @@ if $bblu_do_analysis==1 {;
 
 use bbluplot_reg_admin_$size, clear;
 
+
+
+
 * go to working dir;
 cd ../..;
 cd $output ;
 
-replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
-replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
-replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
-replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
+* placebo's and rdp's that overlap: assign to RDPs! by the sequence;
 
-replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
-replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
-replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
-replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+* if inside rdp, then assign rdp;
+* if inside placebo (and not assigned to rdp already), then assign placebo;
 
-drop if distance_rdp == . & distance_placebo == .;
+replace distance_placebo = . if distance_rdp<0 ;
+replace distance_rdp     = . if distance_placebo<0;
+
+replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
+replace distance_rdp     = . if distance_rdp>distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
+
+keep if distance_rdp<${dist_max} | distance_placebo<${dist_max} ;
+
+*** JUST DO WITHIN PROJECT! *** ;
+
+* replace distance_rdp = . if (distance_rdp > $dist_max & distance_rdp<.);
+* replace distance_rdp = . if (distance_rdp < $dist_min & distance_rdp!=.);
+* replace cluster_rdp  = . if (distance_rdp > $dist_max & distance_rdp<.);
+* replace cluster_rdp  = . if (distance_rdp < $dist_min & distance_rdp!=.);
+
+* replace distance_placebo = . if (distance_placebo > $dist_max & distance_placebo<.);
+* replace distance_placebo = . if (distance_placebo < $dist_min & distance_placebo!=.);
+* replace cluster_placebo  = . if (distance_placebo > $dist_max & distance_placebo<.);
+* replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo!=.);
+
 drop if cluster_rdp == . & cluster_placebo == .;  
 
 sum distance_rdp;
@@ -111,18 +138,20 @@ g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)'+ $bin if dists_rdp==. | post==0;
+*replace dists_rdp=`=r(max)'+ $bin if dists_rdp==. | post==0;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)'+ $bin if dists_placebo==. | post==0;
+*replace dists_placebo=`=r(max)'+ $bin if dists_placebo==. | post==0;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
+
+* drop if dists_placebo==. | dists_rdp==. ; 
 
 };
 ************************************************;

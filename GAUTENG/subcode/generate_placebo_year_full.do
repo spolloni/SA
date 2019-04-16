@@ -241,14 +241,15 @@ save "temp/gcro_merge${flink}.dta", replace;
 *** HERE IS WHERE I MERGE BACK IN THE GCRO DATA TO CALCULATE THE YEAR;
 use "temp/gcro_merge${flink}.dta", clear;
 
-			egen max_score=max(score), by(ID_gcro);
-			keep if score+.00001>max_score;
-			drop max_score;
+
+			* egen max_score=max(score), by(ID_gcro);
+			* keep if score+.00001>max_score;
+			* drop max_score;
 			
-			egen min_start_yr=min(start_yr), by(ID_gcro);
-			egen max_end_yr = max(end_yr), by(ID_gcro);
-			keep if start_yr==min_start_yr;
-			drop min_start_yr max_end_yr;
+			* egen min_start_yr=min(start_yr), by(ID_gcro);
+			* egen max_end_yr = max(end_yr), by(ID_gcro);
+			* keep if start_yr==min_start_yr;
+			* drop min_start_yr max_end_yr;
 		duplicates drop ID_gcro, force;
 		merge 1:m ID_gcro using "temp/gcro${flink}.dta";
 		keep if _merge==3;

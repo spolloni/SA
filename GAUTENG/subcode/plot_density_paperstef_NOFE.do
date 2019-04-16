@@ -47,7 +47,7 @@ end;
 
 
 
-global bblu_do_analysis = 1; /* do analysis */
+global bblu_do_analysis     = 1; /* do analysis */
 
 global graph_plottriplediff = 1;
 global reg_triplediff       = 1; /* creates regression analogue for triple difference */
@@ -60,6 +60,9 @@ global reg_triplediff       = 1; /* creates regression analogue for triple diffe
 ******************;
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
+
+* global outcomes = " for  ";
+
 
 cap program drop outcome_gen;
 prog outcome_gen;
@@ -113,6 +116,11 @@ replace cluster_placebo  = . if (distance_placebo < $dist_min & distance_placebo
 drop if distance_rdp == . & distance_placebo == .;
 drop if cluster_rdp == . & cluster_placebo == .;
 
+
+replace distance_placebo = . if distance_rdp<distance_placebo  & distance_placebo<.;
+replace distance_rdp = . if distance_placebo<distance_rdp  & distance_rdp<.;
+
+
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
 
@@ -121,18 +129,21 @@ g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
 replace dists_rdp = dists_rdp+`=abs($dist_min)';
 sum dists_rdp, detail;
-replace dists_rdp=`=r(max)' + $bin if dists_rdp==. ;
+global d_max = `=r(max)' ;
+*replace dists_rdp=`=r(max)' + $bin if dists_rdp==. ;
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
 replace dists_placebo = dists_placebo+`=abs($dist_min)';
 sum dists_placebo, detail;
-replace dists_placebo=`=r(max)' + $bin if dists_placebo==.;
+*replace dists_placebo=`=r(max)' + $bin if dists_placebo==.;
 
 * create a cluster variable for the regression (quick fix!);
 g cluster_reg = cluster_rdp;
 replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
+
+*drop if dists_placebo==. | dists_rdp==. ; 
 
 save plot_density_reg${V}.dta, replace ;
 };
@@ -144,6 +155,8 @@ save plot_density_reg${V}.dta, replace ;
 * 3.1 MAKE TRIPLE DIFFERENCE (REGRESSIONS) HERE ;
 ************************************************;
 if $graph_plottriplediff == 1 {;
+
+
 
 use plot_density_reg${V}.dta, clear ;
 
@@ -176,7 +189,7 @@ program plotregsingle;
     xline(0,lw(thin)lp(shortdash))
     xtitle("Distance from project border (meters)",height(5))
     ytitle("Structures per km{superscript:2}",height(2))
-    xlabel(-400(200)1200, tp(c) labs(small)  )
+    xlabel(-400(200)${dist_max}, tp(c) labs(small)  )
     ylabel(-1200(400)1200, tp(c) labs(small)  )
     plotr(lw(medthick ))
     legend(order($legend1) symx(6) col(1)
@@ -198,7 +211,8 @@ foreach level in `r(levels)' {;
   gen dists_rdp_post_`level' = dists_rdp == `level'  & post==1;
   global dists_all "dists_all_`level' dists_rdp_`level' dists_post_`level' dists_rdp_post_`level' ${dists_all}";
 };
-omit dists_all dists_rdp_post_1550 dists_post_1550 dists_rdp_1550 dists_all_1550;
+
+omit dists_all dists_rdp_post_${d_max} dists_post_${d_max} dists_rdp_${d_max} dists_all_${d_max} ;
 
 drop if  dists_rdp==. &  dists_placebo ==.;
 

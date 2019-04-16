@@ -38,7 +38,7 @@ foreach v in $word_list {  ;
 
 
 
-keep cluster_new $word_list ; 
+keep cluster_new hectares $word_list ; 
 
 duplicates drop cluster_new, force ; 
 ren cluster_new cluster ; 
@@ -53,6 +53,10 @@ global $word_list = "${word_list} total" ;
 g rdp_proj_status = 0 if planning==1 | uncertain==1 | proposed==1 | investigating==1 | future==1 ; 
 replace rdp_proj_status = 1 if current ==1 | complete==1 | implementation==1  ;
 drop if rdp_proj_status==. ;
+
+*keep if hectares>=10;
+drop hectares;
+
 
 odbc exec("DROP TABLE IF EXISTS project_status ;"), dsn("gauteng");
 odbc insert, table("project_status") create;
