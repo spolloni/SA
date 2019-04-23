@@ -56,7 +56,7 @@ end;
 * what to run?;
 
 global ddd_regs_d = 0;
-global ddd_regs_t = 1;
+global ddd_regs_t = 0;
 global ddd_table  = 0;
 
 global ddd_regs_t_alt  = 0; /* these aren't working right now */

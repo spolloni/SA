@@ -3,6 +3,8 @@
 clear 
 est clear
 
+do reg_gen.do
+
 
 set more off
 set scheme s1mono
@@ -39,12 +41,14 @@ end;
 
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 1;
+global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff       	= 0; /* creates regression analogue for triple difference */
-global reg_triplediff2       	= 0; /* creates regression analogue for triple difference */
+global reg_triplediff       	= 1; /* creates regression analogue for triple difference */
+global reg_triplediff2        = 0; /* Two spillover bins */
+global reg_triplediff2_top    = 0; /* Two spillover bins */
+global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
 
 
@@ -70,6 +74,7 @@ prog label_outcomes;
   lab var inf_backyard "Backyard";
   lab var inf_non_backyard "Non-Backyard";
 end;
+
 
 if $LOCAL==1 {;
 	cd ..;
@@ -478,7 +483,198 @@ estout $outcomes using "bblu_gridDDD${V}.tex", replace
 ************************************************;
 ************************************************;
 
+
 if $reg_triplediff2 == 1 {;
+
+
+foreach v in $outcomes {;
+  replace `v'=`v'*400;
+};
+
+
+
+g proj   = distance_rdp_reg<=0 | distance_placebo_reg<=0 ;
+g spill1  = ( distance_rdp_reg>0 & distance_rdp_reg<$dist_break_reg1 ) | ( distance_placebo_reg>0 & distance_placebo_reg<$dist_break_reg1 ) ;
+g spill2  = ( distance_rdp_reg>=$dist_break_reg1 & distance_rdp_reg<=$dist_break_reg2 ) | ( distance_placebo_reg>=$dist_break_reg1 & distance_placebo_reg<=$dist_break_reg2 ) ;
+
+g con    = distance_rdp_reg!=. ;
+
+g proj_con = proj*con ;
+g spill1_con = spill1*con ;
+g spill2_con = spill2*con ;
+
+
+foreach var of varlist proj_con spill1_con spill2_con proj spill1 spill2 con  {;
+g `var'_post = `var'*post;
+};
+
+global regressors "
+   proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post con_post proj_con spill1_con spill2_con proj spill1 spill2 con 
+  ";
+
+lab var proj "inside";
+lab var spill1 "0-${dist_break_reg1}m out";
+lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m out";
+lab var con "constr";
+lab var proj_con "inside $\times$ constr";
+lab var spill1_con "0-${dist_break_reg1}m out $\times$ constr";
+lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr";
+
+lab var proj_post "inside $\times$ post";
+lab var spill1_post "0-${dist_break_reg1}m out $\times$ post";
+lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ post";
+lab var con_post "constr $\times$ post";
+lab var proj_con_post "inside $\times$ constr $\times$ post";
+lab var spill1_con_post "0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
+
+
+foreach var of varlist $outcomes {;
+  
+  *areg `var' $regressors , a(cluster_reg) cl(cluster_reg);
+
+  reg `var'_adj $regressors , cl(cluster_reg);
+
+  sum `var'_adj, detail;
+  estadd scalar meandepvar = round(r(mean),.1);
+  preserve;
+    keep if e(sample)==1;
+    quietly tab cluster_rdp;
+    global projectcount = r(r);
+    quietly tab cluster_placebo;
+    global projectcount = $projectcount + r(r);
+  restore;
+  estadd scalar projcount = $projectcount;
+  eststo `var';
+};
+
+
+
+estout using "bblu_gridDDD2_fe${V}.tex", replace
+  style(tex) 
+
+keep( 
+    proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post 
+    con_post proj_con spill1_con spill2_con proj spill1 spill2 con
+  ) varlabels(, el(     proj_con_post "[0.01em]" spill1_con_post "[0.01em]" spill2_con_post "[0.5em]"
+   proj_post "[0.01em]"  spill1_post "[0.01em]" spill2_post  "[0.1em]"
+    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.01em]" spill2_con "[0.5em]"
+     proj "[0.01em]" spill1 "[0.01em]" spill2 "[0.01em]" con "[0.5em]" ))
+
+label 
+  noomitted
+  mlabels(,none) 
+  collabels(none)
+  cells( b(fmt(3) star ) se(par fmt(3)) )
+  stats(meandepvar projcount r2 N , 
+    labels("Mean dep. var." "\# Projects" "R$^2$" "N" ) fmt(%9.1fc %12.0fc %12.3fc %12.0fc ) )
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
+    
+
+estout using "bblu_gridDDD2_fe_top${V}.tex", replace
+  style(tex) 
+
+keep( 
+    proj_con_post spill1_con_post spill2_con_post 
+  ) varlabels(, el(     proj_con_post "[0.55em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]"
+   ))
+
+label 
+  noomitted
+  mlabels(,none) 
+  collabels(none)
+  cells( b(fmt(3) star ) se(par fmt(3)) )
+  stats(meandepvar projcount r2 N , 
+    labels("Mean dep. var." "\# Projects" "R$^2$" "N" ) fmt(%9.1fc %12.0fc %12.3fc %12.0fc ) )
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
+
+
+};
+
+
+
+
+******************************* NOW DO TOPS SEPARATE BY TYPE!! ****************************** ;
+
+
+if $reg_triplediff2_top == 1 {;
+
+
+foreach v in $outcomes {;
+  replace `v'=`v'*400;
+};
+
+
+
+g proj   = distance_rdp_reg<=0 | distance_placebo_reg<=0 ;
+g spill1  = ( distance_rdp_reg>0 & distance_rdp_reg<$dist_break_reg1 ) | ( distance_placebo_reg>0 & distance_placebo_reg<$dist_break_reg1 ) ;
+g spill2  = ( distance_rdp_reg>=$dist_break_reg1 & distance_rdp_reg<=$dist_break_reg2 ) | ( distance_placebo_reg>=$dist_break_reg1 & distance_placebo_reg<=$dist_break_reg2 ) ;
+
+g con    = distance_rdp_reg!=. ;
+
+g proj_con = proj*con ;
+g spill1_con = spill1*con ;
+g spill2_con = spill2*con ;
+
+
+foreach var of varlist proj_con spill1_con spill2_con proj spill1 spill2 con  {;
+g `var'_post = `var'*post;
+};
+
+
+
+global regressors "
+   proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post con_post proj_con spill1_con spill2_con proj spill1 spill2 con 
+  ";
+
+lab var proj "inside";
+lab var spill1 "0-${dist_break_reg1}m out";
+lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m out";
+lab var con "constr";
+lab var proj_con "inside $\times$ constr";
+lab var spill1_con "0-${dist_break_reg1}m out $\times$ constr";
+lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr";
+
+lab var proj_post "inside $\times$ post";
+lab var spill1_post "0-${dist_break_reg1}m out $\times$ post";
+lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ post";
+lab var con_post "constr $\times$ post";
+lab var proj_con_post "inside $\times$ constr $\times$ post";
+lab var spill1_con_post "0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
+
+
+foreach var of varlist $outcomes {;
+  
+  *areg `var' $regressors , a(cluster_reg) cl(cluster_reg);
+
+  reg `var' $regressors , cl(cluster_reg);
+
+  sum `var', detail;
+  estadd scalar meandepvar = round(r(mean),.1);
+  preserve;
+    keep if e(sample)==1;
+    quietly tab cluster_rdp;
+    global projectcount = r(r);
+    quietly tab cluster_placebo;
+    global projectcount = $projectcount + r(r);
+  restore;
+  estadd scalar projcount = $projectcount;
+  eststo `var';
+};
+
+
+
+
+if $reg_triplediff2_fd == 1 {;
 
 
 sort id post;

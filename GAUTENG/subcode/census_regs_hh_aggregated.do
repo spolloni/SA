@@ -372,18 +372,195 @@ label
 
 
 
+********************************************************************************************* ;
+********************************************************************************************* ;
+******************************* HERE IS THE TYPE HET **************************************** ;
 
-* g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);å
-* g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
-* g project = (project_rdp==1 | project_placebo==1);
-* g project_post = project ==1 & year==2011;
-* g project_post_rdp = project_rdp ==1 & year==2011;
 
-* g spillover_rdp = project_rdp!=1 & distance_rdp<= $tresh_dist;
-* g spillover_placebo = project_placebo!=1 & distance_placebo<= $tresh_dist;
-* g spillover = (spillover_rdp==1 | spillover_placebo==1);
-* g spillover_post = spillover == 1 & year==2011;
-* g spillover_post_rdp = spillover_rdp==1 & year==2011; 
 
-* g others = project !=1 & spillover !=1;
-* g others_post = others==1 & year==2011;
+
+
+use "temp_censushh_agg${V}.dta", replace;
+
+
+
+keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
+
+g proj     = (area_int_rdp     > $tresh_area ) | (area_int_placebo > $tresh_area);
+g spill1      = proj==0 & ( distance_rdp<=$dist_break_reg1 | 
+                            distance_placebo<=$dist_break_reg1 );
+g spill2      = proj==0 & ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
+                              | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
+
+g con = distance_rdp<=distance_placebo;
+
+
+g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
+g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
+g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
+
+
+g proj_con = proj*con ;
+g spill1_con = spill1*con ;
+g spill2_con = spill2*con ;
+
+g post = year==2011;
+
+foreach var of varlist proj_con spill1_con spill2_con proj spill1 spill2 con  {;
+g `var'_post = `var'*post;
+};
+
+
+global regressors "
+   proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post con_post proj_con spill1_con spill2_con proj spill1 spill2 con 
+  ";
+
+global regressors2 "";
+
+foreach k in t1 t2 t3 {;
+foreach v in $regressors { ;
+  g `v'_`k' = `v'*`k' ;
+  global regressors2 = "  $regressors2 `v'_`k'  " ;
+} ;
+};
+
+global outcomes "
+  toilet_flush 
+  water_inside 
+  electric_cooking 
+  electric_heating 
+  electric_lighting 
+  tot_rooms
+  hh_size
+  ";
+
+* lab var proj "inside";
+* lab var spill1 "0-${dist_break_reg1}m out";
+* lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m out";
+* lab var con "constr";
+* lab var proj_con "inside $\times$ constr";
+* lab var spill1_con "0-${dist_break_reg1}m out $\times$ constr";
+* lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr";
+
+* lab var proj_post "inside $\times$ post";
+* lab var spill1_post "0-${dist_break_reg1}m out $\times$ post";
+* lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m out $\times$ post";
+* lab var con_post "constr $\times$ post";
+lab var proj_con_post_t1 "Green inside $\times$ constr $\times$ post ";
+lab var spill1_con_post_t1 "Green 0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+lab var spill2_con_post_t1 "Green ${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
+
+lab var proj_con_post_t2 "In-Situ inside $\times$ constr $\times$ post ";
+lab var spill1_con_post_t2 "In-Situ 0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+lab var spill2_con_post_t2 "In-Situ ${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
+lab var proj_con_post_t3 "Other inside $\times$ constr $\times$ post ";
+lab var spill1_con_post_t3 "Other 0-${dist_break_reg1}m out $\times$ constr $\times$ post";
+lab var spill2_con_post_t3 "Other ${dist_break_reg1}-${dist_break_reg2}m out $\times$ constr $\times$ post";
+
+
+* preserve ; 
+*   g an1 = a_n==1;
+*   egen AN=sum(an1);
+*   sum AN, detail;
+*   file open myfile using "total_blocks.tex", write replace;
+*   local h : di %10.0fc `=r(mean)';
+*   file write myfile "`h'";
+*   file close myfile ;
+* restore ;
+
+eststo clear;
+
+foreach var of varlist $outcomes {;
+  areg `var' $regressors2 $ww , a(cluster_joined) cl(cluster_joined);
+  *test proj_con_post = spill1_con_post;
+  *estadd scalar pval = `=r(p)';
+  sum `var' if e(sample)==1 & year ==2001 $ww, detail;
+  estadd scalar Mean2001 = `=r(mean)';
+  sum `var' if e(sample)==1 & year ==2011 $ww, detail;
+  estadd scalar Mean2011 = `=r(mean)';
+  count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1;
+  estadd scalar hhspill = `=r(N)';
+  count if e(sample)==1 & proj==1;
+  estadd scalar hhproj = `=r(N)';
+  preserve;
+    keep if e(sample)==1;
+    quietly tab cluster_rdp;
+    global projectcount = r(r);
+    quietly tab cluster_placebo;
+    global projectcount = $projectcount + r(r);
+  restore;
+  estadd scalar projcount = $projectcount;
+  eststo `var';
+};
+
+areg pop_density ${regressors2} $ww, a(cluster_joined) cl(cluster_joined);
+*  test proj_con_post = spill1_con_post;
+*estadd scalar pval = `=r(p)';
+sum pop_density if e(sample)==1 & year ==2001, detail;
+estadd scalar Mean2001 = `=r(mean)';
+sum pop_density if e(sample)==1 & year ==2011, detail;
+estadd scalar Mean2011 = `=r(mean)';
+count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1;
+estadd scalar hhspill = `=r(N)';
+count if e(sample)==1 & proj==1;
+estadd scalar hhproj = `=r(N)';
+preserve;
+  keep if e(sample)==1;
+  quietly tab cluster_rdp;
+  global projectcount = r(r);
+  quietly tab cluster_placebo;
+  global projectcount = $projectcount + r(r);
+restore;
+estadd scalar projcount = $projectcount;
+eststo pop_density;
+
+global X "{\tim}";
+
+estout using "census_hh_DDregs_type_AGG_top${V}.tex", replace
+  style(tex) 
+
+keep(
+    proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1 
+    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2
+    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3
+  ) 
+  varlabels(, el(     
+    proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.5em]"
+    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.5em]"
+    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.5em]"
+ ))
+
+label 
+  noomitted
+  mlabels(,none) 
+  collabels(none)
+  cells( b(fmt(3) star ) se(par fmt(3)) )
+  stats(Mean2001 Mean2011 r2 projcount hhproj hhspill N , 
+    labels(
+      "Mean Outcome 2001" 
+      "Mean Outcome 2011" 
+      "R$^2$" 
+      "\# projects"
+      `"N project areas"'
+      `"N spillover areas"'  
+      "N"  
+    ) 
+    fmt(
+      %9.2fc
+      %9.2fc 
+      %12.3fc 
+      %12.0fc 
+      %12.0fc 
+      %12.0fc  
+      %12.0fc 
+    )
+  )
+  starlevels( 
+    "\textsuperscript{c}" 0.10 
+    "\textsuperscript{b}" 0.05 
+    "\textsuperscript{a}" 0.01) ;
+    
+
+

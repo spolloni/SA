@@ -56,7 +56,9 @@ if $data_load==1 {;
 
         (RANDOM()/(2*9223372036854775808)+.5) as random, 
 
-      CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
+      CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo,
+
+        GT.type AS type_rdp, GTP.type AS type_placebo
 
     FROM (
 
@@ -134,6 +136,10 @@ if $data_load==1 {;
 
   LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
 
+  LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
+
+  LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
+  
     WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL) AND random < .6
     ";
 
@@ -156,7 +162,10 @@ if $data_load==1 {;
 
         (RANDOM()/(2*9223372036854775808)+.5) as random, 
 
-      CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
+      CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo, 
+        
+      GT.type AS type_rdp, GTP.type AS type_placebo
+
 
     FROM (
 
@@ -221,6 +230,10 @@ if $data_load==1 {;
   LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
 
   LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
+
+  LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
+
+  LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
 
     WHERE NOT (distance_rdp IS NULL AND distance_placebo IS NULL)
     AND random < .6
@@ -343,7 +356,7 @@ collapse
   (mean) unemployed educ_yrs black outside_gp age
   inc_value inc_value_earners schooling_noeduc schooling_postsec
   (firstnm) person_pop area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het 
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo
   , by(area_code year);
 
 save "temp_censuspers_agg_het${V}.dta", replace;

@@ -32,7 +32,7 @@ prog gen_het;
   g het = cbd_dist>= `=r(p50)' & cbd_dist<.;
 end;
 
-global data_load = 1;
+global data_load  = 1;
 global aggregate  = 1;
 
 if $LOCAL==1 {;
@@ -57,7 +57,9 @@ local qry = "
 
   AA.*,
 
-  CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo
+  CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo,
+
+  GT.type AS type_rdp, GTP.type AS type_placebo
 
   FROM (
 
@@ -177,6 +179,10 @@ local qry = "
 
   LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
 
+  LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
+
+  LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
+
   ";
 
 odbc query "gauteng";
@@ -271,7 +277,7 @@ collapse
   electricity electric_cooking electric_heating electric_lighting
   owner house tot_rooms hh_size
   (firstnm) hh_pop person_pop hh_density pop_density area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo
   , by(area_code year);
 
 

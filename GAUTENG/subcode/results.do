@@ -37,17 +37,20 @@ global far = "Suburb"
 * DENSITY PARAMETERS
 global size     = 50
 global sizesq   = $size*$size
-global dist_max = 1200
 global dist_min = -400
 
+global dist_max     = 1500
+global dist_max_reg = 1500
+
 global dist_break_reg = 500 /* determines spillover vs control outside of project for regDDD */
-global dist_break_reg1 = 200 
-global dist_break_reg2 = 400 
+
+global dist_break_reg1 = 300 
+global dist_break_reg2 = 600 
 global dist_break_reg3 = 800 
 
 
-global dist_max_reg = 4000
-global dist_min_reg = -400
+
+*global dist_min_reg = -400
 
 
 * CENSUS PARAMETERS
@@ -81,58 +84,47 @@ global rdp_flag_gcro  					= 0
 ** also need to add_grid.py, then main (gen grid distances)
 global grid_query 						= 0
 global grid_plot_density 				= 0 /* 3 YES V */
+global grid_plot_density_type 			= 0
+
 
 global census_regs_query  				= 0 /* 2 YES V */
-global census_regs_hh_aggregated  	    = 0 /* 0 YES V */
+global census_regs_hh_aggregatedt  	    = 0 /* 0 YES V */
 
-global census_regs_pers_query 			= 0 /* 2 YES V */
-global census_regs_pers_aggregated      = 0 /* 0 */
+global census_regs_pers_query 			 = 0 /* 2 YES V */
+global census_regs_pers_aggregatedt      = 0 /* 0 */
+
+
 
 global generate_placebo_year_full   	= 0 /* 0 NO V NEEDS UPDATE double check?! */ 
 global export2gradplot 					= 0 /* 0  YES V ! */
 global plot_prices_paper_NODC 			= 0 /* 6 make price reg dataset here! */
 * global plot_prices_paper_NODC_het 		= 0 /* 5 */
 
-
 global price_histogram 					= 0 /* 0 */
 global descriptive_table 				= 0 /* 0 */
 global keyword_analysis 				= 0 /* 0 */
 
 
-*global census_regs_hh_aggregated_het 	= 0 /* 0 */
-*global census_regs_hh_aggregated_dwell  = 0 /* 2 */
-*global census_regs_pers_aggregated_het  = 0 /* 0 */
 
 
-* global plot_density_paperstef_query		= 0 /* 2 NO V */
-* global plot_density_paperstef 			= 0 /* 4 (6?) */
-* global plot_density_paperstef_het 		= 0 /* 2 (4?) */
-* global plot_density_paperstef_NOFE 	    = 0 /* 3 */
-* global plot_density_paperstef_NOFE_het  = 0 /* 3 */
+global census_regs_hh_aggregated_het 	= 0 /* 0 */
+global census_regs_hh_aggregated_dwell  = 0 /* 2 */
+global census_regs_pers_aggregated_het  = 0 /* 0 */
+
+
+global plot_density_paperstef_query		= 0 /* 2 NO V */
+global plot_density_paperstef 			= 0 /* 4 (6?) */
+global plot_density_paperstef_het 		= 0 /* 2 (4?) */
+global plot_density_paperstef_NOFE 	    = 0 /* 3 */
+global plot_density_paperstef_NOFE_het  = 0 /* 3 */
 
 
 *** SET MACROS
 *** MATCHING STATISTICS
 
 if $rdp_flag_gcro == 1 {
-	if "$V" == "" {
-		do rdp_flag_gcro.do
-	}
-	if "$V" == "_2" {
-		do rdp_flag_gcro_2.do   /* area < .5 ! */
-	}
-	if "$V" == "_3" {
-		do rdp_flag_gcro_3.do   /* define according to keywords! */
-		cd ../..
-		cd Code/GAUTENG/subcode
-	}
 	if "$V" == "_4" {
 		do rdp_flag_gcro_4.do   /* define according to keywords! */
-		cd ../..
-		cd Code/GAUTENG/subcode
-	}
-	if "$V" == "_5" {
-		do rdp_flag_gcro_5.do   /* define according to keywords! */
 		cd ../..
 		cd Code/GAUTENG/subcode
 	}
@@ -140,7 +132,7 @@ if $rdp_flag_gcro == 1 {
 
 ***** DENSITY *****
 
-if ${plot_density_paperstef_query} == 1 { /* data */
+if ${plot_density_paperstef_query} == 1 {   /* data */
 do plot_density_paperstef_query.do
 	cd ../..
 	cd Code/GAUTENG/subcode
@@ -211,13 +203,13 @@ do census_regs_pers_aggregated_het.do
 
 ***** PRICES *****
 
-if ${generate_placebo_year} == 1 {
+if ${generate_placebo_year_full} == 1 {
 	if "${flink}"=="_full" {
 		do generate_placebo_year_full.do 
 	}
-	else {
-		do generate_placebo_year.do 
-	}
+	* else {
+	* 	do generate_placebo_year.do 
+	* }
 	cd ../../../..
 	cd Code/GAUTENG/subcode
 }
@@ -231,11 +223,11 @@ do plot_prices_paper_NODC.do
 	cd ../..
 	cd subcode
 }
-if ${plot_prices_paper_NODC_het} == 1 {
-do plot_prices_paper_NODC_het.do
-	cd ../..
-	cd subcode
-}
+* if ${plot_prices_paper_NODC_het} == 1 {
+* do plot_prices_paper_NODC_het.do
+* 	cd ../..
+* 	cd subcode
+* }
 
 if ${price_histogram} == 1 {
 do price_histogram.do
