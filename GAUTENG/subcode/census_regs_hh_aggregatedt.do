@@ -187,7 +187,15 @@ restore;
 
 
 
+
+
 use "temp_censushh_agg${V}.dta", replace;
+
+g Xs = round(X,${k}00);
+g Ys = round(Y,${k}00);
+
+egen LL = group(Xs Ys year);
+
 
 keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 
@@ -206,7 +214,9 @@ g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
-rgen ;
+
+
+rgen no_post ;
 rgen_type ;
 
 
@@ -214,4 +224,18 @@ regs census_test ;
 
 regs_type census_test_type ;
 
+
+* regs_dd hh_dd_test_const 1 ; 
+* regs_dd hh_dd_test_unconst 0 ; 
+
+* regs_type_dd hh_dd_test_const_type 1 ; 
+* regs_type_dd hh_dd_test_unconst_type 0 ; 
+
+* rgen_dd_full ;
+
+* regs_dd_full hh_dd_full ; 
+
+
+* rgen_dd_cc ;
+* regs_dd_cc hh_dd_cc ;
 

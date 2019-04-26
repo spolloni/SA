@@ -51,6 +51,9 @@ cd Generated/Gauteng;
 *****************************************************************;
 if $data_load == 1 {;
 
+*  cast(B.input_id AS TEXT) as sal_code_rdp, ; 
+* cast(BP.input_id AS TEXT) as sal_code_placebo,;
+
 local qry = " 
 
   SELECT 
@@ -71,12 +74,12 @@ local qry = "
       A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
       A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size,
 
-      cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-      cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+      B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
+       BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2001hh' AS source, 2001 AS year, A.SAL AS area_code
+      'census2001hh' AS source, 2001 AS year, A.SAL AS area_code,  XY.X, XY.Y
 
     FROM census_hh_2001 AS A  
 
@@ -116,6 +119,8 @@ local qry = "
 
     LEFT JOIN area_sal_2001 AS QQ ON QQ.sal_code = A.SAL
 
+    LEFT JOIN sal_2001_xy AS XY ON A.SAL = XY.sal_code
+
     /* *** */
     UNION ALL 
     /* *** */
@@ -128,12 +133,12 @@ local qry = "
       A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
       A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size,
 
-      cast(B.input_id AS TEXT) as sal_code_rdp, B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-      cast(BP.input_id AS TEXT) as sal_code_placebo, BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+      B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
+      BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2011hh' AS source, 2011 AS year, A.SAL_CODE AS area_code
+      'census2011hh' AS source, 2011 AS year, A.SAL_CODE AS area_code,  XY.X, XY.Y
 
     FROM census_hh_2011 AS A  
 
@@ -173,6 +178,8 @@ local qry = "
 
     LEFT JOIN area_sal_2011 AS QQ ON QQ.sal_code = A.SAL_CODE
 
+    LEFT JOIN sal_2011_xy AS XY ON A.SAL_CODE = XY.sal_code
+
   ) AS AA
 
   LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
@@ -184,6 +191,10 @@ local qry = "
   LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
 
   ";
+
+* XY.X, XY.Y;
+*     LEFT JOIN sal_2011_xy AS XY ON A.SAL_CODE = XY.sal_code;
+*     LEFT JOIN sal_2001_xy AS XY ON A.SAL = XY.sal_code; 
 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;	
@@ -206,6 +217,7 @@ save "DDcensus_hh_admin${V}.dta", replace;
 if $aggregate == 1 {;
 
 use "DDcensus_hh_admin${V}.dta", clear;
+
 
 g het =1 if  cbd_dist<=$het ;
 replace het = 0 if cbd_dist>$het & cbd_dist<. ;  /* NOTE! cbd_dist is only measured for treated/placebo clusters!!  careful! */
@@ -277,7 +289,7 @@ collapse
   electricity electric_cooking electric_heating electric_lighting
   owner house tot_rooms hh_size
   (firstnm) hh_pop person_pop hh_density pop_density area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo  X Y 
   , by(area_code year);
 
 
@@ -292,4 +304,5 @@ save "temp_censushh_agg${V}.dta", replace;
 *****************************************************************;
 
 * exit, STATA clear;
+
 

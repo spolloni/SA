@@ -85,15 +85,25 @@ global outcomes "
 rgen ;
 rgen_type ;
 
-regs census_pers_test ;
-regs_type census_pers_test_type ;
+* regs census_pers_test ;
+* regs_type census_pers_test_type ;
+
+* regs_dd pers_dd_test_const 1 ; 
+* regs_dd pers_dd_test_unconst 0 ; 
+
+* regs_type_dd pers_dd_test_const_type 1 ; 
+* regs_type_dd pers_dd_test_unconst_type 0 ; 
 
 
+* rgen_dd_full ;
+
+* regs_dd_full pers_dd_full ; 
+
+  
 
 
+rgen_dd_cc ;
 
 
-
-
-
+regs_dd_cc   pers_dd_cc ;
 

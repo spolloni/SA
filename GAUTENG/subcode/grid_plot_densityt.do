@@ -41,12 +41,12 @@ end;
 
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 0;
+global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 1;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2        = 1; /* Two spillover bins */
-global reg_triplediff2_type   = 1; /* Two spillover bins */
+global reg_triplediff2        = 0; /* Two spillover bins */
+global reg_triplediff2_type   = 0; /* Two spillover bins */
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
 
@@ -94,6 +94,22 @@ use bbluplot_grid.dta, clear;
 * go to working dir;
 cd ../..;
 cd $output ;
+
+
+* foreach var of varlist name_rdp desc_rdp name_placebo desc_placebo {;
+*   replace `var'=lower(`var');
+*   };
+* drop type_rdp type_placebo;
+
+
+* foreach v in rdp placebo { ; 
+* g type_`v'= 1 if regexm(desc_`v',"mixed")==1  | regexm(desc_`v',"people")==1 | regexm(desc_`v',"flag")==1 ; 
+* replace type_`v' = 2 if regexm(desc_`v',"essential")==1   ;
+* * g drop_`v' = (regexm(desc_`v',"hostel")==1 | regexm(name_`v',"hostel")==1) ; 
+* } ;
+
+* drop desc_rdp desc_placebo name_rdp name_placebo ; 
+
 
 ren rdp_cluster cluster_rdp;
 ren placebo_cluster cluster_placebo;
@@ -153,9 +169,54 @@ g spill2  = ( distance_rdp_reg>=$dist_break_reg1 & distance_rdp_reg<=$dist_break
 
 g con    = distance_rdp_reg!=. ;
 
+
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
+
+* drop if ( con==1 & drop_rdp==1 ) | (con==0 & drop_placebo==1) ;
+
+
+g Xs = round(X,${k}00);
+g Ys = round(Y,${k}00);
+* egen geo = group(Xs Ys);
+
+* cap drop Xsn;
+ bys Xs Ys: g Xsn=_n;
+ count if Xsn==1;
+global CC=r(N) ;
+
+
+
+
+* sum inf if distance_placebo<0
+* sum for if distance_placebo<0
+
+
+* g in_rdp = 0 if distance_placebo<0
+* replace in_rdp = 1 if distance_rdp<0
+
+
+* g cluster_tot = cluster_rdp if distance_rdp<0
+* replace cluster_tot= cluster_placebo if distance_placebo<0
+
+* egen m_inf = mean(inf), by(cluster_tot post)
+
+* bys cluster_tot post: g cn=_n
+
+* hist m_inf if cn==1 & post==0, by(in_rdp)
+
+
+* sum m_inf if cn==1 & post==0 & in_rdp==0
+* sum m_inf if cn==1 & post==0 & in_rdp==1
+
+
+* hist inf, by(in_rdp) bin(80)
+
+* sum inf if distance_rdp<0
+* sum for if distance_rdp<0 ;
+
+
 
 
 global outcomes="";
@@ -167,6 +228,21 @@ foreach v in $outcomes_pre {;
 rgen ;
 rgen_type ;
 
+* foreach v in for inf {;
+*   egen `v'_m = mean(`v'),  by( Xs Ys post ) ;
+* *  replace `v'_pre=`v'-`v'_m ;
+* g  `v'_pre=`v'-`v'_m ;
+*   drop `v'_m ;
+*   };
+
+foreach v in for inf {;
+  egen `v'_m = mean(`v'),  by( Xs Ys post ) ;
+*  replace `v'_fe=`v'-`v'_m ;
+g `v'_fe=`v'-`v'_m ;
+  drop `v'_m ;
+  };
+
+
 };
 
 
@@ -174,7 +250,15 @@ rgen_type ;
 
 if $reg_triplediff2 == 1 {;
 
-regs bblu_test ;
+* regs bblu_test ;
+
+* rgen_dd_full ;
+
+* regs_dd_full build_dd_full ; 
+
+rgen_dd_cc ;
+
+regs_dd_cc   build_dd_cc ;
 
 };
 
@@ -264,32 +348,35 @@ if $graph_plotmeans_rdpplac == 1 {;
 cap prog drop plotmeans_pre_prog;
 prog define plotmeans_pre_prog;
     plotmeans_pre 
-    bblu_`1'_pre_means${V}_`2' `1' rdp placebo
+    bblu_`1'_pre_means${V}_`2'_${k}k `1' rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)${dist_max_reg}" `"0 "0" 1 "400" 2 "800" 3 "1200"  "'
+    "-400(200)${dist_max_reg}" `"-1 "-400" 0 "0" 1 "400"  "'
     2 "`3'" "`4'";
 end;
 
-    plotmeans_pre 
-    bblu_for_pre_means${V} for rdp placebo
-    "Constructed" "Unconstructed"
-    "-400(200)${dist_max_reg}" `"0 "0" 1 "400" 2 "800" 3 "1200"  "'
-    2 ;
+*     plotmeans_pre 
+*     bblu_for_pre_means${V}_${k}k for_fe rdp placebo
+*     "Constructed" "Unconstructed"
+*     "-400(200)${dist_max_reg}" `"-1 "-400" 0 "0" 1 "400"  "'
+*     2 ;
 
-    plotmeans_pre 
-    bblu_inf_pre_means${V} inf rdp placebo
-    "Constructed" "Unconstructed"
-    "-400(200)${dist_max_reg}" `"0 "0" 1 "400" 2 "800" 3 "1200"  "'
-    2 ;
+* * `"0 "0" 1 "400" 2 "800" 3 "1200"  "' ;
 
-plotmeans_pre_prog for 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
-plotmeans_pre_prog inf 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
+*     plotmeans_pre 
+*     bblu_inf_pre_means${V}_${k}k inf_fe rdp placebo
+*     "Constructed" "Unconstructed"
+*     "-400(200)${dist_max_reg}" `"-1 "-400" 0 "0" 1 "400"  "'
+*     2 ;
 
-plotmeans_pre_prog for 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
-plotmeans_pre_prog inf 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
 
-plotmeans_pre_prog for 3 "keep if type_rdp>=3" "keep if type_placebo>=3" ;
-plotmeans_pre_prog inf 3 "keep if type_rdp>=3" "keep if type_placebo>=3" ;
+plotmeans_pre_prog for_fe 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
+plotmeans_pre_prog inf_fe 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
+
+plotmeans_pre_prog for_fe 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
+plotmeans_pre_prog inf_fe 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
+
+plotmeans_pre_prog for_fe 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
+plotmeans_pre_prog inf_fe 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
 
 
 
@@ -369,36 +456,38 @@ if $graph_plotmeans_rawchan == 1 {;
   cap  prog drop plotchanges_prog;
   prog define plotchanges_prog;
   plotchanges 
-    bblu_`1'_rawchanges${V}_`2' `1' rdp placebo
+    bblu_`1'_rawchanges${V}_`2'_${k}k `1' rdp placebo
     "Constructed" "Unconstructed"
-    "-400(200)${dist_max_reg}" `"1 "400" 2 "800" 3 "1200" "'
+    "-400(200)${dist_max_reg}" `"-1 "-400" 0 "0" 1 "400"  "'
     2 "`3'" "`4'";
   end;
 
-  plotchanges 
-    bblu_for_rawchanges${V} for rdp placebo
-    "Constructed" "Unconstructed"
-    "-400(200)${dist_max_reg}" `"1 "400" 2 "800" 3 "1200" "'
-    2 ;
+  * plotchanges 
+  *   bblu_for_rawchanges${V}_${k}k for_fe rdp placebo
+  *   "Constructed" "Unconstructed"
+  *   "-400(200)${dist_max_reg}" `"-1 "-400" 0 "0" 1 "400"  "'
+  *   2 ;
 
-  plotchanges 
-    bblu_inf_rawchanges${V} inf rdp placebo
-    "Constructed" "Unconstructed"
-    "-400(200)${dist_max_reg}" `"1 "400" 2 "800" 3 "1200" "'
-    2 ;
+  * * `"1 "400" 2 "800" 3 "1200" "' ;
 
-plotchanges_prog for 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
-plotchanges_prog inf 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
+  * plotchanges 
+  *   bblu_inf_rawchanges${V}_${k}k inf_fe rdp placebo
+  *   "Constructed" "Unconstructed"
+  *   "-400(200)${dist_max_reg}" `"-1 "-400" 0 "0" 1 "400"  "'
+  *   2 ;
 
-plotchanges_prog for 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
-plotchanges_prog inf 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
+plotchanges_prog for_fe 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
+plotchanges_prog inf_fe 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
 
-plotchanges_prog for 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
-plotchanges_prog inf 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
+plotchanges_prog for_fe 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
+plotchanges_prog inf_fe 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
 
-
+plotchanges_prog for_fe 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
+plotchanges_prog inf_fe 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
 
 };
+
+
 ************************************************;
 ************************************************;
 ************************************************;

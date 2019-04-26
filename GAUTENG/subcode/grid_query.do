@@ -35,15 +35,23 @@ cap prog drop grid_query;
 
 prog define grid_query;
 
+
+*  GC.name, GC.descriptio;
+*  GC.name, GC.descriptio;
+* 		      JOIN gcro_publichousing AS GC ON D.target_id = GC.OGC_FID; 
+*	          JOIN gcro_publichousing AS GC ON D.target_id = GC.OGC_FID;
+*	BP.name AS name_placebo, BP.descriptio AS desc_placebo, ;
+*	B.name AS name_rdp, B.descriptio AS desc_rdp ; 
+
 clear;
 	local qry = "
-	SELECT  AA.grid_id, C.OGC_FID, C.s_lu_code, C.t_lu_code, 
+	SELECT  AA.grid_id, C.OGC_FID, C.s_lu_code, C.t_lu_code, XY.X, XY.Y, 
 
 	B.distance AS rdp_distance, B.target_id AS rdp_cluster, IR.area_int AS area_int_rdp, 
 
 	BP.distance AS placebo_distance, BP.target_id AS placebo_cluster, IP.area_int AS area_int_placebo, 
 
-	GT.type AS type_rdp, GTP.type AS type_placebo
+ 	GT.type AS type_rdp, GTP.type AS type_placebo
 
 	FROM grid_temp_3 AS AA 
 
@@ -65,6 +73,8 @@ clear;
 
 	      LEFT JOIN (SELECT A.* FROM  bblu_`1' AS A WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) `2') 
 	      AS C ON A.OGC_FID = C.OGC_FID
+
+	      LEFT JOIN grid_xy AS XY ON XY.grid_id = AA.grid_id
 
 	    LEFT JOIN (SELECT IT.* FROM  int_gcro_full_grid_temp_3 AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
 	      AS IR ON IR.grid_id = AA.grid_id
@@ -111,7 +121,9 @@ grid_query pre ;
 grid_query post  " AND A.cf_units = 'High' "; 
 
 use bbluplot_grid_pre, clear;
+
 g post=0;
+
 append using bbluplot_grid_post;
 replace post=1 if post==.;
 

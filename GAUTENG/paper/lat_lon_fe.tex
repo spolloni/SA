@@ -1,0 +1,194 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+
+
+
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/census_test_top}
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/census_test_type_top}
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\begin{figure*}[h!]
+        \centering
+        \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
+        {\small around 5,200 1km Square Fixed Effects, each with 400 grid cells within  Pre-Period Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_10k.pdf}
+            \caption[Network2]%
+            {{\small pre-period formal housing density}}    
+            \label{fig:prefor}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_10k.pdf}
+            \caption[]%
+            {{\small pre-period informal housing density}}    
+            \label{fig:preinf}
+        \end{subfigure}
+        \label{fig:rawbblumeans}
+        \vspace{-6mm}
+        \centering
+        \caption[ Changes in Housing Densities in Constructed and Unconstructed Projects Areas]
+        {\small 1km Square Fixed Effects (400 grid cells within) Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_10k.pdf}
+            \caption[]%
+            {{\small formal housing density change}}    
+            \label{fig:forchange}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_10k.pdf}
+            \caption[]%
+            {{\small informal housing density change}}    
+            \label{fig:infchange}
+        \end{subfigure}
+        \label{fig:rawbblumeanschange}
+        \vspace{-6mm}
+    \end{figure*} 
+
+
+
+
+\begin{figure*}[h!]
+        \centering
+        \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
+        {\small around 20,000 0.5km Square Fixed Effects, each with 100 grid cells within  Pre-Period Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_5k.pdf}
+            \caption[Network2]%
+            {{\small pre-period formal housing density}}    
+            \label{fig:prefor}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_5k.pdf}
+            \caption[]%
+            {{\small pre-period informal housing density}}    
+            \label{fig:preinf}
+        \end{subfigure}
+        \label{fig:rawbblumeans}
+        \vspace{-6mm}
+        \centering
+        \caption[ Changes in Housing Densities in Constructed and Unconstructed Projects Areas]
+        {\small 0.5km Square Fixed Effects (100 grid cells within)  Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_5k.pdf}
+            \caption[]%
+            {{\small formal housing density change}}    
+            \label{fig:forchange}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_5k.pdf}
+            \caption[]%
+            {{\small informal housing density change}}    
+            \label{fig:infchange}
+        \end{subfigure}
+        \label{fig:rawbblumeanschange}
+        \vspace{-6mm}
+    \end{figure*} 
+
+
+
+\end{document}
+
+

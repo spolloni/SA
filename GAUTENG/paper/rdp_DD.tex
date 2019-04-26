@@ -1,0 +1,236 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs,tikz,graphicx}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+
+
+\begin{table}
+\begin{tabular}{lDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5) \\
+ & Total & Formal  & Informal & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
+\input{figures/bblu_test_top}
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\begin{table}
+\begin{tabular}{lDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5) \\
+ & Total & Formal  & Informal & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
+\input{figures/build_dd_full_top}
+\bottomrule
+\end{tabular}
+\begin{itemize}
+\item Everybody grew! 
+\item For constructed projects, areas within 600m grew faster than areas outside 600m
+\item For unconstructed projects, the same patterns hold, but the growth inside the project area is less than for constructed projects
+\end{itemize}
+\end{table}
+
+
+\begin{table}
+\begin{tabular}{lDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5) \\
+ & Total & Formal  & Informal & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
+\input{figures/build_dd_cc_top}
+\bottomrule
+\end{tabular}
+\begin{itemize}
+\item beyond 600m, constructed project areas had more building growth overall
+\item inside projects, constructed projects had more growth than unconstructed projects
+\item for spillover areas 0-600m, constructed projects broadly had LESS growth than unconstructed projects
+\end{itemize}
+\end{table}
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/census_test_top}
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/hh_dd_full_top}
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6)  & \small (7) & (8)\\
+ & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Electricity Heating & \small Electricity Lighting  & \small Number of Rooms  & \small Household Size & Population Density\\ \midrule 
+\input{figures/hh_dd_cc_top}
+\bottomrule
+\multicolumn{9}{l}{\footnotesize All regressions include project Fixed-Effects. Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\begin{table}[h!] 
+\caption{Effect of Housing Projects on Socio-demographics}
+\label{table:sorting}
+\small
+\centering
+%\caption{Census Composition Estimates }
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+\input{figures/census_pers_test_top}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
+\multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+\end{tabular}
+\end{table}
+
+
+
+
+\begin{table}[h!] 
+\caption{Effect of Housing Projects on Socio-demographics}
+\label{table:sorting}
+\small
+\centering
+%\caption{Census Composition Estimates }
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+\input{figures/pers_dd_full_top}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
+\multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+\begin{table}[h!] 
+\caption{Effect of Housing Projects on Socio-demographics}
+\label{table:sorting}
+\small
+\centering
+%\caption{Census Composition Estimates }
+\vspace{-2mm}
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+\input{figures/pers_dd_cc_top}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
+\multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+

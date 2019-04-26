@@ -48,6 +48,8 @@ global dist_break_reg1 = 300
 global dist_break_reg2 = 600 
 global dist_break_reg3 = 800 
 
+global k = 30   /* determines fixed effect size */
+
 
 
 *global dist_min_reg = -400
@@ -117,6 +119,10 @@ global plot_density_paperstef 			= 0 /* 4 (6?) */
 global plot_density_paperstef_het 		= 0 /* 2 (4?) */
 global plot_density_paperstef_NOFE 	    = 0 /* 3 */
 global plot_density_paperstef_NOFE_het  = 0 /* 3 */
+
+
+
+
 
 
 *** SET MACROS
