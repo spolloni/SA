@@ -54,6 +54,8 @@ if $data_load == 1 {;
 *  cast(B.input_id AS TEXT) as sal_code_rdp, ; 
 * cast(BP.input_id AS TEXT) as sal_code_placebo,;
 
+
+
 local qry = " 
 
   SELECT 
@@ -79,7 +81,9 @@ local qry = "
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2001hh' AS source, 2001 AS year, A.SAL AS area_code,  XY.X, XY.Y
+      2001 AS year, A.SAL AS area_code,  XY.X, XY.Y, 
+
+      SP.sp_code AS sp_1
 
     FROM census_hh_2001 AS A  
 
@@ -121,6 +125,8 @@ local qry = "
 
     LEFT JOIN sal_2001_xy AS XY ON A.SAL = XY.sal_code
 
+    LEFT JOIN sal_2001 AS SP ON A.SAL = SP.sal_code
+
     /* *** */
     UNION ALL 
     /* *** */
@@ -138,7 +144,9 @@ local qry = "
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      'census2011hh' AS source, 2011 AS year, A.SAL_CODE AS area_code,  XY.X, XY.Y
+      2011 AS year, A.SAL_CODE AS area_code,  XY.X, XY.Y, 
+
+      SP.sp_1
 
     FROM census_hh_2011 AS A  
 
@@ -176,6 +184,8 @@ local qry = "
      )  
     AS IP ON IP.sal_code = A.SAL_CODE
 
+    LEFT JOIN  (SELECT * FROM sal_2011_s2001 AS G GROUP BY G.sal_code HAVING G.area_int==max(G.area_int)) AS SP ON A.SAL_CODE = SP.sal_code
+
     LEFT JOIN area_sal_2011 AS QQ ON QQ.sal_code = A.SAL_CODE
 
     LEFT JOIN sal_2011_xy AS XY ON A.SAL_CODE = XY.sal_code
@@ -191,10 +201,6 @@ local qry = "
   LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
 
   ";
-
-* XY.X, XY.Y;
-*     LEFT JOIN sal_2011_xy AS XY ON A.SAL_CODE = XY.sal_code;
-*     LEFT JOIN sal_2001_xy AS XY ON A.SAL = XY.sal_code; 
 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear;	
@@ -289,7 +295,7 @@ collapse
   electricity electric_cooking electric_heating electric_lighting
   owner house tot_rooms hh_size
   (firstnm) hh_pop person_pop hh_density pop_density area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo  X Y 
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo  X Y sp_1
   , by(area_code year);
 
 

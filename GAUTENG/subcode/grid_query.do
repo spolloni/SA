@@ -51,7 +51,7 @@ clear;
 
 	BP.distance AS placebo_distance, BP.target_id AS placebo_cluster, IP.area_int AS area_int_placebo, 
 
- 	GT.type AS type_rdp, GTP.type AS type_placebo
+ 	GT.type AS type_rdp, GTP.type AS type_placebo, SA.sal_1, SA.sp_1
 
 	FROM grid_temp_3 AS AA 
 
@@ -84,6 +84,10 @@ clear;
 
 	    LEFT JOIN gcro_type AS GT ON GT.OGC_FID = B.target_id
 		LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = BP.target_id
+
+		LEFT JOIN 
+		(SELECT * FROM grid_s2001 AS G GROUP BY G.grid_id HAVING G.area_int==max(G.area_int))  
+		AS SA ON SA.grid_id = AA.grid_id
 
 	";
 

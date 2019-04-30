@@ -48,7 +48,7 @@ global dist_break_reg1 = 300
 global dist_break_reg2 = 600 
 global dist_break_reg3 = 800 
 
-global k = 30   /* determines fixed effect size */
+
 
 
 
@@ -78,6 +78,75 @@ global round = 0.15  /* rounding for lat-lon FE */
 
 global ifregs   = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<800000 & purch_yr > 2000 & distance_rdp>0 & distance_placebo>0"
 global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1800000 & purch_yr > 2000 & distance_rdp>0 & distance_placebo>0"
+
+
+
+
+****** ANALYSIS NOW *******
+****** ANALYSIS NOW *******
+****** ANALYSIS NOW *******
+
+* if `v'==2 {
+* global k = "mp_post"
+* }
+* if `v'==3 {
+* global k = "sp"    determines fixed effect size 
+* }
+* if `v'==4 {
+* global k = "mp"
+* }
+
+
+
+global analysis_now = 1
+
+
+forvalues v = 1/2 {
+
+if `v'==1 {
+global k = "sp_post"   /* determines fixed effect size */
+}
+if `v'==2 {
+global k = "none"
+}
+
+global post_control=""
+global post_control_price=""
+global no_post=""
+if substr("${k}",-4,4)=="post" {
+	global post_control = "post"
+	global post_control_price = "purch_yr"
+	global no_post = "no_post"
+}
+
+
+if $analysis_now == 1 {
+
+do grid_plot_densityt.do
+	cd ../..
+	cd subcode
+
+do census_regs_hh_aggregatedt.do
+	cd ../..
+	cd subcode
+
+do census_regs_pers_aggregatedt.do
+	cd ../..
+	cd subcode
+
+do plot_prices_paper_NODCt.do
+	cd ../..
+	cd subcode
+	
+}
+
+}
+
+
+
+
+
+/*
 
 
 *** RUN FILES *** 						Number of Sub-options
@@ -121,6 +190,12 @@ global plot_density_paperstef_NOFE 	    = 0 /* 3 */
 global plot_density_paperstef_NOFE_het  = 0 /* 3 */
 
 
+
+
+
+
+
+/*
 
 
 

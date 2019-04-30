@@ -27,7 +27,9 @@ local qry = "
 
          GY.start_yr, GY.end_yr, GY.score, 
 
-        GT.type AS type_rdp, GTP.type AS type_placebo
+        GT.type AS type_rdp, GTP.type AS type_placebo, 
+
+        SP.sp_1
 
   FROM transactions AS A
   JOIN erven AS B ON A.property_id = B.property_id
@@ -66,6 +68,8 @@ local qry = "
   LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = F.target_id
 
   LEFT JOIN gcro_type AS GT ON GT.OGC_FID   = D.target_id
+
+  LEFT JOIN erven_s2001 AS SP ON SP.property_id = A.property_id
 
   ";
 

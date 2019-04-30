@@ -43,6 +43,102 @@ def census_xy(db):
 
 # census_xy(db)
 
+#### FIX THIS !! 
+def grid_sal(db,table,input_file,idvar):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.sal_code AS sal_1, A.sp_code AS sp_1, A.mp_code AS mp_1, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS  area_int 
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                            GROUP BY G.{} ;
+
+                '''.format(table,idvar,input_file,'sal_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+
+# grid_sal(db,'grid_s2001','grid_temp_3','grid_id')
+# grid_sal(db,'sal_2011_s2001','sal_2011','sal_code')
+
+def grid_sal_point(db,table,input_file,idvar):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.sal_code AS sal_1, A.sp_code AS sp_1, A.mp_code AS mp_1 
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                            GROUP BY G.{} ;
+
+                '''.format(table,idvar,input_file,'sal_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+
+# grid_sal_point(db,'erven_s2001','erven','property_id')
+
+
+
+def grid_sal2011(db,table,input_file,idvar):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{} AS sal_code_2011, A.sal_code, A.sp_code, A.mp_code
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)  
+                                            GROUP BY A.sal_code, G.{};
+                '''.format(table,idvar,input_file,'sal_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+
+# grid_sal2011(db,'sal_2011_s2001','sal_2011','sal_code')
+
+
+
+def sal_2001_sal(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    # for name in ['2001', '2011']:
+    name  = 'grid_temp_3'
+    table = 'grid_sal_2001'
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.grid_id, A.sal_code, A.sp_code, A.mp_code
+                FROM grid_temp_3 AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)  
+                                            GROUP BY A.sal_code, G.grid_id;
+                '''.format(table,'sal_2001','grid_temp_3'))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'grid_id'))
+
+
+
+
+
+
+
+
 
 
 def bblu_xy(db):

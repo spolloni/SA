@@ -51,10 +51,13 @@ cd $output;
 use "temp_censuspers_agg_het${V}.dta", replace;
 
 
+
+
 keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 
 replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
+
 
 
 g proj     = (area_int_rdp     > $tresh_area ) | (area_int_placebo > $tresh_area);
@@ -71,6 +74,10 @@ g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
 g post = year==2011;
 
+cap drop cluster_joined;
+g cluster_joined = cluster_rdp if con==1 ; 
+replace cluster_joined = cluster_placebo if con==0 ; 
+
 
 
 global outcomes "
@@ -82,11 +89,16 @@ global outcomes "
   ";
 
 
-rgen ;
-rgen_type ;
+rgen ${no_post} ;
+rgen_type  ;
 
-* regs census_pers_test ;
-* regs_type census_pers_test_type ;
+gen_LL ;
+
+
+regs census_pers_test_${k}k ;
+regs_type census_pers_test_${k}k_type ;
+
+
 
 * regs_dd pers_dd_test_const 1 ; 
 * regs_dd pers_dd_test_unconst 0 ; 
@@ -102,8 +114,8 @@ rgen_type ;
   
 
 
-rgen_dd_cc ;
+* rgen_dd_cc ;
 
 
-regs_dd_cc   pers_dd_cc ;
+* regs_dd_cc   pers_dd_cc ;
 

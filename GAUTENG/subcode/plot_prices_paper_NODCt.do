@@ -112,6 +112,9 @@ g spill2      = proj==0 &  ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dis
                               | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
 g con = distance_rdp<=distance_placebo ;
 
+cap drop cluster_joined;
+g cluster_joined = cluster_rdp if con==1 ; 
+replace cluster_joined = cluster_placebo if con==0 ; 
 
 g post = (mo2con_rdp>0 & mo2con_rdp<.) |  (mo2con_placebo>0 & mo2con_placebo<.) ;
 
@@ -119,10 +122,21 @@ g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
-rgen ;
+
+* g Xs = round(latitude,${k}00);
+* g Ys = round(longitude,${k}00);
+
+* egen LL = group(Xs Ys purch_yr);
+
+
+
+rgen ${no_post} ;
 rgen_type ;
 lab_var ;
 lab_var_type ;
+
+
+gen_LL_price ; 
 
 
 save "price_regs${V}.dta", replace;
@@ -143,36 +157,70 @@ egen clyrgroup = group(purch_yr cluster_joined);
 egen latlonyr = group(purch_yr latlongroup);
 
 
-global fecount = 3 ;
-global rl1 = "Cluster FE";
-global rl2 = "Cluster {\tim} Year FE";
-global rl3 = "Lat.-Long. {\tim} Year FE";
+* global fecount = 3 ;
+global fecount = 1 ;
 
-mat define F = (0,1,0,0
-               \0,0,1,0
-               \0,0,0,1);
+global rl1 = "Lot Size Controls";
 
-global reg_1 = " reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined)" ;
-global reg_2 = " areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(cluster_joined) cl(cluster_joined)" ;
-global reg_3 = " areg lprice $regressors i.purch_mo erf_size*, a(clyrgroup) cl(cluster_joined)";
-global reg_4 = " areg lprice $regressors i.purch_mo erf_size*, a(latlonyr) cl(latlongroup) ";
-
-price_regs price_temp_Tester ;
-
-global reg_1 = " reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined)" ;
-global reg_2 = " areg lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, a(cluster_joined) cl(cluster_joined)" ;
-global reg_3 = " areg lprice $regressors2 i.purch_mo erf_size*, a(clyrgroup) cl(cluster_joined)";
-global reg_4 = " areg lprice $regressors2 i.purch_mo erf_size*, a(latlonyr) cl(latlongroup) ";
-
-price_regs_type price_type_Tester ;
-
-global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(latlonyr) cl(latlongroup)  "; 
-
-time_reg price_to_event ;
+mat define F = (0,1);
 
 
+global a_pre = "";
+global a_ll = "";
+if "${k}"!="none" {;
+global a_pre = "a";
+global a_ll = "a(LL)";
+};
+
+global reg_1 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
+global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
+
+price_regs price_fe_${k} ;
+
+global reg_1 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
+global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
+
+
+price_regs_type price_type_fe_${k} ;
+
+* global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(LL) cl(cluster_joined)  "; 
+
+* time_reg price_to_event_${k}  ;
 
 
 
+*** OLD SPECIFICATION *** ;
+
+* global rl2 = "Cluster {\tim} Year FE";
+* global rl3 = "Lat.-Long. {\tim} Year FE";
+
+* global rl1 = "Cluster FE";
+* global rl2 = "Cluster {\tim} Year FE";
+* global rl3 = "Lat.-Long. {\tim} Year FE";
+
+
+* mat define F = (0,1,0,0
+*                \0,0,1,0
+*                \0,0,0,1);
+
+* global reg_1 = " reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined)" ;
+* global reg_2 = " areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(cluster_joined) cl(cluster_joined)" ;
+* global reg_3 = " areg lprice $regressors i.purch_mo erf_size*, a(clyrgroup) cl(cluster_joined)";
+* global reg_4 = " areg lprice $regressors i.purch_mo erf_size*, a(latlonyr) cl(latlongroup) ";
+
+* price_regs price_temp_Tester ;
+
+
+
+* global reg_1 = " reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) a(LL)" ;
+* global reg_2 = " areg lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, a(cluster_joined) cl(cluster_joined)" ;
+* global reg_3 = " areg lprice $regressors2 i.purch_mo erf_size*, a(clyrgroup) cl(cluster_joined)";
+* global reg_4 = " areg lprice $regressors2 i.purch_mo erf_size*, a(latlonyr) cl(latlongroup) ";
+
+* price_regs_type price_type_Tester ;
+
+* global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(latlonyr) cl(latlongroup)  "; 
+
+* time_reg price_to_event ;
 
 

@@ -191,10 +191,6 @@ restore;
 
 use "temp_censushh_agg${V}.dta", replace;
 
-g Xs = round(X,${k}00);
-g Ys = round(Y,${k}00);
-
-egen LL = group(Xs Ys year);
 
 
 keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
@@ -210,19 +206,25 @@ g spill2      = proj==0 & ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist
 g con = distance_rdp<=distance_placebo;
 g post = year==2011;
 
+cap drop cluster_joined;
+g cluster_joined = cluster_rdp if con==1 ; 
+replace cluster_joined = cluster_placebo if con==0 ; 
+
+
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
 
+gen_LL ;
 
-rgen no_post ;
+rgen ${no_post} ;
 rgen_type ;
 
 
-regs census_test ;
+regs census_test_${k}k ;
 
-regs_type census_test_type ;
+regs_type census_test_${k}k_type ;
 
 
 * regs_dd hh_dd_test_const 1 ; 

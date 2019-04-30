@@ -31,7 +31,7 @@ end;
 global LOCAL = 1;
 
 * DOFILE SECTIONS;
-global data_load = 1;
+global data_load = 0;
 global data_prep = 1;
 
 
@@ -47,6 +47,10 @@ cd Generated/Gauteng;
 ************************ LOAD DATA ******************************;
 *****************************************************************;
 if $data_load==1 {;
+
+*         cast(BP.input_id AS TEXT) as sal_code_placebo, ;
+*         cast(B.input_id AS TEXT) as sal_code_rdp, ;
+
 
   local qry = " 
 
@@ -72,15 +76,15 @@ if $data_load==1 {;
         A.DERP_EMPLOY_STATUS_OFFICIAL AS employment, 
         A.DERP_INDUSTRY AS industry, A.DERP_OCCUPATION AS occupation,
 
-        cast(B.input_id AS TEXT) as sal_code_rdp, 
-        B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
 
-        cast(BP.input_id AS TEXT) as sal_code_placebo, 
+        B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
         BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
 
         IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-        'census2011pers' AS source, 2011 AS year, A.SAL_CODE AS area_code
+         2011 AS year, A.SAL_CODE AS area_code,  XY.X, XY.Y,
+
+        SP.sp_1
 
       FROM census_pers_2011 AS A 
 
@@ -119,6 +123,11 @@ if $data_load==1 {;
     AS IP ON IP.sal_code = A.SAL_CODE
 
       LEFT JOIN area_sal_2011 AS QQ ON QQ.sal_code = A.SAL_CODE
+
+      LEFT JOIN sal_2011_xy AS XY ON A.SAL_CODE = XY.sal_code
+
+    LEFT JOIN  (SELECT * FROM sal_2011_s2001 AS G GROUP BY G.sal_code HAVING G.area_int==max(G.area_int)) AS SP ON A.SAL_CODE = SP.sal_code
+
 
     ) AS AA
 
@@ -177,15 +186,14 @@ if $data_load==1 {;
         A.P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
         A.P19b_Ind AS industry, A.P19c_Occ as occupation, 
 
-        cast(B.input_id AS TEXT) as sal_code_rdp, 
         B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-
-        cast(BP.input_id AS TEXT) as sal_code_placebo, 
         BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
 
         IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-        'census2001pers' AS source, 2001 AS year, A.SAL AS area_code
+        2001 AS year, A.SAL AS area_code,  XY.X, XY.Y, 
+
+          SP.sp_code AS sp_1
 
       FROM census_pers_2001 AS A 
 
@@ -223,7 +231,11 @@ if $data_load==1 {;
      )  
     AS IP ON IP.sal_code = A.SAL
 
+      LEFT JOIN sal_2001_xy AS XY ON A.SAL = XY.sal_code
+
       LEFT JOIN area_sal_2001 AS QQ ON QQ.sal_code = A.SAL
+
+          LEFT JOIN sal_2001 AS SP ON A.SAL = SP.sal_code
 
     ) AS AA
 
@@ -356,7 +368,7 @@ collapse
   (mean) unemployed educ_yrs black outside_gp age
   inc_value inc_value_earners schooling_noeduc schooling_postsec
   (firstnm) person_pop area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo X Y sp_1 
   , by(area_code year);
 
 save "temp_censuspers_agg_het${V}.dta", replace;
