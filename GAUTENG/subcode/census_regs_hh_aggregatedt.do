@@ -4,7 +4,8 @@ est clear
 set more off
 set scheme s1mono
 
-do reg_gen.do
+do  reg_gen.do
+do  reg_gen_dd.do
 
 #delimit;
 
@@ -51,20 +52,16 @@ cd $output;
 *****************************************************************;
 *****************************************************************;
 
-global outcomes "
-  toilet_flush 
-  water_inside 
-  electric_cooking 
-  electric_heating 
-  electric_lighting 
-  tot_rooms
-  hh_size
-  pop_density
-  ";
+
+
 
 * go to working dir;
 
-use "temp_censushh_agg${V}.dta", replace;
+use "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", replace;
+
+
+
+
 
 
     ***** SUMMARY STATS REGS **** ;
@@ -189,7 +186,7 @@ restore;
 
 
 
-use "temp_censushh_agg${V}.dta", replace;
+use "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", replace;
 
 
 
@@ -198,17 +195,48 @@ keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 
-g proj     = (area_int_rdp     > $tresh_area ) | (area_int_placebo > $tresh_area);
+
+drop area_int_rdp area_int_placebo ;
+g area_int_rdp  =  census_cluster_int_rdp/cluster_area_rdp ; 
+g area_int_placebo = census_cluster_int_placebo/cluster_area_placebo ; 
+
+replace area_int_rdp =0 if area_int_rdp==.;
+replace area_int_placebo =0 if area_int_placebo==.;
+
+
+
+* g proj = (area_int_rdp_alt>.01 & area_int_rdp_alt<.) | (area_int_placebo_alt>.01 & area_int_placebo_alt<.) ;
+* g proj     = (area_int_rdp     > $tresh_area ) | (area_int_placebo > $tresh_area);
+
+g con = distance_rdp<=distance_placebo;
+
+g proj = area_int_rdp  if con==1
+
 g spill1      = proj==0 & ( distance_rdp<=$dist_break_reg1 | 
                             distance_placebo<=$dist_break_reg1 );
 g spill2      = proj==0 & ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
                               | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
-g con = distance_rdp<=distance_placebo;
+
+* browse area_int_rdp area_int_placebo distance_rdp distance_placebo census_area_placebo census_cluster_int_placebo census_b1_int_placebo census_b2_int_placebo census_area_rdp census_cluster_int_rdp census_b1_int_rdp census_b2_int_rdp cluster_area_placebo cluster_b1_area_placebo cluster_b2_area_placebo cluster_area_rdp cluster_b1_area_rdp cluster_b2_area_rdp
+* browse area_int_rdp census_cluster_int_rdp;
+
+
 g post = year==2011;
 
 cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
+
+if $many_spill == 1 { ;
+egen cj1 = group(cluster_joined proj spill1 spill2) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+if $many_spill == 0 {;
+egen cj1 = group(cluster_joined proj spill1) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
 
 
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
@@ -218,26 +246,222 @@ g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
 gen_LL ;
 
+
 rgen ${no_post} ;
 rgen_type ;
 
+g y1996= year==1996;
+g formal_house = house + house_bkyd ;
+g informal_house = shack_bkyd + shack_non_bkyd ;
 
-regs census_test_${k}k ;
+* if $spatial == 0 {;
 
-regs_type census_test_${k}k_type ;
+global outcomes "
+  toilet_flush 
+  water_inside 
+  electric_cooking 
+  electric_heating 
+  electric_lighting 
+  tot_rooms
+  hh_size
+  pop_density
+  ";
 
 
-* regs_dd hh_dd_test_const 1 ; 
+regs ch_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+
+regs_type ch_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+
+
+
+global outcomes "
+  formal_house
+  informal_house
+  owner
+  ";
+
+regs chouse_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+
+regs_type chouse_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+
+
+
+**** NOW DO DD *** ;
+
+global outcomes "
+  toilet_flush 
+  water_inside 
+  electric_cooking 
+  electric_heating 
+  electric_lighting 
+  tot_rooms
+  hh_size
+  pop_density
+  ";
+
+
+rgen_dd_full ;
+rgen_dd_cc ;
+
+regs_dd_full ch_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ; 
+
+regs_dd_cc ch_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ;
+
+
+global outcomes "
+  formal_house
+  informal_house
+  owner
+  ";
+
+regs_dd_full chouse_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ; 
+
+regs_dd_cc chouse_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ;
+
+
+* foreach var of varlist house_dens  house_bkyd_dens  shack_non_bkyd_dens  shack_bkyd_dens  {;
+* replace `var' = . if `var'>10000;
+* };
+
+* g total_building_dens = house_dens + house_bkyd_dens + shack_non_bkyd_dens + shack_bkyd_dens ;
+* g formal = house_dens + house_bkyd_dens ;
+
+* global outcomes "
+*   house_dens
+*   house_bkyd_dens
+*   shack_non_bkyd_dens
+*   shack_bkyd_dens
+*   owner
+*   ";
+
+
+* global outcomes "
+*   house_bkyd
+*   house
+*   shack_bkyd
+*   shack_non_bkyd
+*   owner
+*   ";
+
+
+
+
+
+* };
+
+
+
 * regs_dd hh_dd_test_unconst 0 ; 
 
 * regs_type_dd hh_dd_test_const_type 1 ; 
 * regs_type_dd hh_dd_test_unconst_type 0 ; 
 
-* rgen_dd_full ;
 
-* regs_dd_full hh_dd_full ; 
 
 
 * rgen_dd_cc ;
 * regs_dd_cc hh_dd_cc ;
+
+
+
+* areg own $regressors  y1996, a(LL) r cluster(cluster_joined)
+* areg house $regressors  y1996, a(LL) r cluster(cluster_joined)
+
+* areg house_bkyd $regressors  y1996, a(LL) r cluster(cluster_joined)
+* areg shack_bkyd $regressors  y1996, a(LL) r cluster(cluster_joined)
+* areg shack_non_bkyd $regressors  y1996, a(LL) r cluster(cluster_joined)
+
+
+* if $spatial == 1 {;
+
+* regs_spatial ch_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
+
+* regs_type_spatial ch_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
+
+* };
+
+
+
+/*
+*** these are the same... 
+ols_spatial_HAC toilet_flush post proj, lat(Y) lon(X) t(post) p(sp_1) dist(1) lag(1) bartlett disp
+reg  toilet_flush post proj, nocons
+
+
+*** these are the same...
+areg toilet_flush post proj, a(sp_1)
+reg2hdfe toilet_flush proj, id1(sp_1) id2(post)
+
+
+*** these are also the same
+areg toilet_flush proj, a(LL)
+reg2hdfe toilet_flush proj, id1(LL) id2(post)
+
+
+areg toilet_flush $regressors, a(LL)
+reg2hdfe toilet_flush $regressors, id1(LL) id2(post)
+
+
+reg2hdfespatial toilet_flush $regressors , timevar(post) panelvar(LL) lat(Y) lon(X) distcutoff(5) lagcutoff(1)
+
+
+
+areg toilet_flush $regressors, a(LL) r cluster(cluster_joined) 
+
+
+
+
+
+reg toilet_flush post proj
+matrix regtab = r(table)
+matrix regtab = regtab[2,1...]
+matrix rbse = regtab
+
+
+reg toilet_flush post proj, r
+est sto testing
+estadd matrix rbse=rbse
+
+esttab, cells(b se rbse)
+
+
+
+
+areg toilet_flush post proj, a(sp_1)
+
+
+
+
+
+/*
+
+
+egen m_tf = mean(toilet_flush), by(sp_1 post)
+egen m_prof = mean(proj), by(sp_1 post)
+
+g tf_fe = toilet_flush - m_tf
+g proj_fe = proj - m_prof
+
+reg tf_fe proj_fe if post==0
+
+areg toilet_flush proj if post==0, a(sp_1)
+
+
+g constant=1 ;
+
+
+
+
+reg toilet_flush proj, r cluster(cluster_joined)
+
+
+
+reg2hdfespatial toilet_flush $regressors , timevar(post) panelvar(LL) lat(Y) lon(X) distcutoff(1) lagcutoff(1)
+
+reg2hdfespatial toilet_flush $regressors , timevar(post) panelvar(sp_1) lat(Y) lon(X) distcutoff(1) lagcutoff(1)
+
+
+
+
+
 

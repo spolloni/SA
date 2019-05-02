@@ -68,6 +68,9 @@ global countour = 0;
 * load data; 
 cd ../..;
 cd Generated/GAUTENG;
+
+
+
 use "gradplot_admin${V}.dta", clear;
 
 * go to working dir;
@@ -116,6 +119,19 @@ cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
+
+if $many_spill == 1 { ;
+egen cj1 = group(cluster_joined proj spill1 spill2) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+if $many_spill == 0 {;
+egen cj1 = group(cluster_joined proj spill1) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+
+
 g post = (mo2con_rdp>0 & mo2con_rdp<.) |  (mo2con_placebo>0 & mo2con_placebo<.) ;
 
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
@@ -147,6 +163,8 @@ save "price_regs${V}.dta", replace;
 
 
 
+
+
 use "price_regs${V}.dta", clear ;
 
 keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
@@ -175,13 +193,13 @@ global a_ll = "a(LL)";
 global reg_1 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
-price_regs price_fe_${k} ;
+price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
 global reg_1 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
+price_regs_type p_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
-price_regs_type price_type_fe_${k} ;
 
 * global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(LL) cl(cluster_joined)  "; 
 

@@ -55,10 +55,22 @@ cap prog drop regression
 prog define regression
 	
 	if "${k}"=="none" {
-		reg `1' `2' , cl(cluster_joined)
+		reg `1' `2' `3', cl(cluster_joined) r
 	}
 	else {
-	areg `1' `2' , cl(cluster_joined) a(LL)
+	areg `1' `2' `3', cl(cluster_joined) a(LL) r
+	}
+end
+
+
+cap prog drop regression_spatial
+prog define regression_spatial
+	
+	if "${k}"=="none" {
+		ols_spatial_HAC  `1' `2' , lat(Y) lon(X) t(post) p(sp_1) dist(1) lag(1) bartlett disp
+	}
+	else {
+	reg2hdfespatial `1' `2' , timevar(post) panelvar(LL) lat(Y) lon(X) distcutoff(1) lagcutoff(1)
 	}
 end
 
@@ -80,7 +92,7 @@ cap prog drop rgen
 	g `var'_post = `var'*post
 	}
 
-	if $one_spill == 1 {
+	if $many_spill == 0 {
 		global regressors_type_prep " proj_con_post spill1_con_post proj_post spill1_post con_post proj_con spill1_con post proj spill1  con "
 		if "`1'"=="no_post" {
 			global regressors " proj_con_post spill1_con_post proj_post spill1_post  con_post proj_con spill1_con proj spill1  con "
@@ -96,7 +108,7 @@ cap prog drop rgen
 		}
 	}
 
-	if $one_spill == 0 {
+	if $many_spill == 1 {
 
 		cap drop spill2_con
 		g spill2_con = spill2*con 
@@ -104,7 +116,7 @@ cap prog drop rgen
 		cap drop `var'_post 
 		g `var'_post = `var'*post
 		}
-		
+
 		global regressors_type_prep " proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post con_post proj_con spill1_con spill2_con post proj spill1 spill2  con "
 		if "`1'"=="no_post" {
 			global regressors " proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post con_post proj_con spill1_con spill2_con proj spill1 spill2 con "
@@ -147,19 +159,21 @@ prog define lab_var
 
 	lab var proj "inside"
 	lab var spill1 "0-${dist_break_reg1}m away"
-	lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m away"
 	lab var con "constr"
 	lab var proj_con "inside $\times$ constr"
 	lab var spill1_con "0-${dist_break_reg1}m away $\times$ constr"
-	lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr"
-
 	lab var proj_post "inside $\times$ post"
 	lab var spill1_post "0-${dist_break_reg1}m away $\times$ post"
-	lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ post"
 	lab var con_post "constr $\times$ post"
 	lab var proj_con_post "inside $\times$ constr $\times$ post"
 	lab var spill1_con_post "0-${dist_break_reg1}m away $\times$ constr $\times$ post"
-	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr $\times$ post"
+
+	if $many_spill == 1 {
+		lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m away"
+		lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr"
+		lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ post"
+		lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr $\times$ post"
+	}
 end
 
 cap prog drop lab_var_top
@@ -167,7 +181,9 @@ prog define lab_var_top
 
 	lab var proj_con_post "inside project"
 	lab var spill1_con_post "0-${dist_break_reg1}m outside project "
-	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	if $many_spill == 1 {
+		lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	}
 end
 
 cap prog drop lab_var_type 
@@ -178,15 +194,16 @@ prog define lab_var_type
 
 	lab var proj_con_post_t1 "inside project  "
 	lab var spill1_con_post_t1 "0-${dist_break_reg1}m outside project "
-	lab var spill2_con_post_t1 "${dist_break_reg1}-${dist_break_reg2}m outside project"
-
 	lab var proj_con_post_t2 "inside project "
 	lab var spill1_con_post_t2 "0-${dist_break_reg1}m outside project "
-	lab var spill2_con_post_t2 "${dist_break_reg1}-${dist_break_reg2}m outside project "
-
 	lab var proj_con_post_t3 "inside project "
 	lab var spill1_con_post_t3 "0-${dist_break_reg1}m outside project "
-	lab var spill2_con_post_t3 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+
+	if $many_spill == 1 {
+		lab var spill2_con_post_t1 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+		lab var spill2_con_post_t2 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+		lab var spill2_con_post_t3 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	}
 end
 
 
@@ -201,7 +218,7 @@ prog define regs
 	foreach var of varlist $outcomes {
 	  *reg `var' $regressors , cl(cluster_joined)
 
-	  regression `var' "$regressors"
+	  regression `var' "$regressors" `2'
 
 	  sum `var' if e(sample)==1 & post ==0 , detail
 	  estadd scalar Mean2001 = `=r(mean)'
@@ -231,51 +248,250 @@ prog define regs
 
 	lab_var
 
-	estout using "`1'.tex", replace  style(tex) ///
-	keep(  proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post ///
-	    con_post proj_con spill1_con spill2_con proj spill1 spill2 con $add_post  )  ///
-	varlabels(,  el(     proj_con_post "[0.01em]" spill1_con_post "[0.01em]" spill2_con_post "[0.5em]" ///
-	   proj_post "[0.01em]"  spill1_post "[0.01em]" spill2_post  "[0.1em]" ///
-	    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.01em]" spill2_con "[0.5em]" ///
-	     proj "[0.01em]" spill1 "[0.01em]" spill2 "[0.01em]" con "[0.1em]" $add_post  ))  label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
-	lab_var_top
+	if $many_spill == 0 {
+		estout using "`1'.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post  proj_post spill1_post  ///
+		    con_post proj_con spill1_con  proj spill1  con $add_post  )  ///
+		varlabels(,  el(     proj_con_post "[0.01em]" spill1_con_post "[0.05em]"  ///
+		   proj_post "[0.01em]"  spill1_post "[0.05em]"  ///
+		    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.05em]"  ///
+		     proj "[0.01em]" spill1 "[0.01em]"  con "[0.1em]" $add_post  ))  label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_con_post spill1_con_post spill2_con_post )  ///
-	varlabels(, el( proj_con_post "[0.55em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+		lab_var_top
+
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post )  ///
+		varlabels(, el( proj_con_post "[0.55em]" spill1_con_post "[0.5em]"  )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
 
-	estout using "`1'_top_lonely.tex", replace  style(tex) ///
-	keep(  proj_con_post spill1_con_post spill2_con_post )  ///
-	varlabels(,bl( proj_con_post "${all_label}") el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post )  ///
+		varlabels(,bl( proj_con_post "${all_label}") el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]"  )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
 
+	if $many_spill == 1 {
+		estout using "`1'.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post ///
+		    con_post proj_con spill1_con spill2_con proj spill1 spill2 con $add_post  )  ///
+		varlabels(,  el(     proj_con_post "[0.01em]" spill1_con_post "[0.01em]" spill2_con_post "[0.5em]" ///
+		   proj_post "[0.01em]"  spill1_post "[0.01em]" spill2_post  "[0.1em]" ///
+		    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.01em]" spill2_con "[0.5em]" ///
+		     proj "[0.01em]" spill1 "[0.01em]" spill2 "[0.01em]" con "[0.1em]" $add_post  ))  label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		lab_var_top
+
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post spill2_con_post )  ///
+		varlabels(, el( proj_con_post "[0.55em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post spill2_con_post )  ///
+		varlabels(,bl( proj_con_post "${all_label}") el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
 
 end
+
+
+
+
+
+
+
+
+
+
+cap prog drop regs_spatial
+
+prog define regs_spatial
+	eststo clear
+
+	foreach var of varlist $outcomes {
+	  *reg `var' $regressors , cl(cluster_joined)
+
+	  regression `var' "$regressors" `2'
+	  matrix regtab = r(table)
+	  matrix regtab = regtab[2,1...]
+	  matrix rbse = regtab
+
+	  g temp_sample_var = e(sample)==1 
+
+	  regression_spatial `var' "$regressors"
+	  
+	  estadd matrix rbse=rbse
+
+	  sum `var' if temp_sample_var==1 & post ==0 , detail
+	  estadd scalar Mean2001 = `=r(mean)'
+	  sum `var' if temp_sample_var==1 & post ==1, detail
+	  estadd scalar Mean2011 = `=r(mean)'
+	  count if temp_sample_var==1 & (spill1==1 | spill2==1) & !proj==1
+	  estadd scalar hhspill = `=r(N)'
+	  count if temp_sample_var==1 & proj==1
+	  estadd scalar hhproj = `=r(N)'
+	  preserve
+	    keep if temp_sample_var==1
+	    quietly tab cluster_rdp
+	    global projectcount = `=r(r)'
+	    quietly tab cluster_placebo
+	    global projectcount = $projectcount + `=r(r)'
+	  restore
+
+	  estadd scalar projcount = $projectcount
+	  eststo  `var'
+
+	  drop temp_sample_var
+
+	}
+	
+
+
+	global X "{\tim}"
+
+
+	lab_var
+
+
+	if $many_spill == 0 {
+		estout using "`1'.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post  proj_post spill1_post  ///
+		    con_post proj_con spill1_con  proj spill1  con $add_post  )  ///
+		varlabels(,  el(     proj_con_post "[0.01em]" spill1_con_post "[0.05em]"  ///
+		   proj_post "[0.01em]"  spill1_post "[0.05em]"  ///
+		    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.05em]"  ///
+		     proj "[0.01em]" spill1 "[0.01em]"  con "[0.1em]" $add_post  ))  label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) rbse(fmt(3) par([ ])) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		lab_var_top
+
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post )  ///
+		varlabels(, el( proj_con_post "[0.55em]" spill1_con_post "[0.5em]"  )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) rbse(fmt(3) par([ ]))) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post )  ///
+		varlabels(,bl( proj_con_post "${all_label}") el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]"  )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) rbse(fmt(3) par([ ]))) ///
+		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
+
+	if $many_spill == 1 {
+		estout using "`1'.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post spill2_con_post proj_post spill1_post spill2_post ///
+		    con_post proj_con spill1_con spill2_con proj spill1 spill2 con $add_post  )  ///
+		varlabels(,  el(     proj_con_post "[0.01em]" spill1_con_post "[0.01em]" spill2_con_post "[0.5em]" ///
+		   proj_post "[0.01em]"  spill1_post "[0.01em]" spill2_post  "[0.1em]" ///
+		    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.01em]" spill2_con "[0.5em]" ///
+		     proj "[0.01em]" spill1 "[0.01em]" spill2 "[0.01em]" con "[0.1em]" $add_post  ))  label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) rbse(fmt(3) par([ ]))) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		lab_var_top
+
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post spill2_con_post )  ///
+		varlabels(, el( proj_con_post "[0.55em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) rbse(fmt(3) par([ ]))) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post spill1_con_post spill2_con_post )  ///
+		varlabels(,bl( proj_con_post "${all_label}") el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) rbse(fmt(3) par([ ]))) ///
+		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
+
+end
+
 
 
 
@@ -291,7 +507,7 @@ prog define regs_type
 	foreach var of varlist $outcomes {
 	  *reg `var' $regressors2 , cl(cluster_joined)
 
-	  regression `var' "$regressors2"
+	  regression `var' "$regressors2" `2'
 
 	  sum `var' if e(sample)==1 & post ==0 , detail
 	  estadd scalar Mean2001 = `=r(mean)'
@@ -318,44 +534,217 @@ prog define regs_type
 
 	lab_var_type
 
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
-    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
-    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
-	varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
-	el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em] " ///
-    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
-    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	if $many_spill == 0  {
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1   ///
+	    proj_con_post_t2 spill1_con_post_t2          ///
+	    proj_con_post_t3 spill1_con_post_t3  )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2  "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3  "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
-	estout using "`1'_top_lonely.tex", replace  style(tex) ///
-	keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
-    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
-    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
-	varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
-	el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em] " ///
-    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
-    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2  N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"    "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc   )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1   ///
+	    proj_con_post_t2 spill1_con_post_t2          ///
+	    proj_con_post_t3 spill1_con_post_t3  )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1  "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2  "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3  "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2  N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"    "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc   )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
 
+
+	if $many_spill == 1  {
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
+	    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
+	    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
+	    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
+	    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2  N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"    "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc   )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
 
  end
+
+
+
+
+
+cap prog drop regs_type_spatial
+
+prog define regs_type_spatial
+
+	eststo clear
+
+	foreach var of varlist $outcomes {
+	  *reg `var' $regressors2 , cl(cluster_joined)
+	  *regression `var' "$regressors2"
+
+	  regression `var' "$regressors2" `2'
+	  matrix regtab = r(table)
+	  matrix regtab = regtab[2,1...]
+	  matrix rbse = regtab
+
+	  g temp_sample_var = e(sample)==1 
+
+	  regression_spatial `var' "$regressors2"
+	  
+	  estadd matrix rbse=rbse
+
+	  sum `var' if temp_sample_var==1 & post ==0 , detail
+	  estadd scalar Mean2001 = `=r(mean)'
+	  sum `var' if temp_sample_var==1 & post ==1, detail
+	  estadd scalar Mean2011 = `=r(mean)'
+	  count if temp_sample_var==1 & (spill1==1 | spill2==1) & !proj==1
+	  estadd scalar hhspill = `=r(N)'
+	  count if temp_sample_var==1 & proj==1
+	  estadd scalar hhproj = `=r(N)'
+	  preserve
+	    keep if temp_sample_var==1
+	    quietly tab cluster_rdp
+	    global projectcount = `=r(r)'
+	    quietly tab cluster_placebo
+	    global projectcount = $projectcount + `=r(r)'
+	  restore
+
+	  estadd scalar projcount = $projectcount
+	  eststo  `var'
+
+	  drop temp_sample_var
+	}
+
+	global X "{\tim}"
+
+	lab_var_type
+
+	if $many_spill == 0  {
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1   ///
+	    proj_con_post_t2 spill1_con_post_t2          ///
+	    proj_con_post_t3 spill1_con_post_t3  )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2  "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3  "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3))  rbse(fmt(3) par([ ]))) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1   ///
+	    proj_con_post_t2 spill1_con_post_t2          ///
+	    proj_con_post_t3 spill1_con_post_t3  )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1  "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2  "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3  "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3))  rbse(fmt(3) par([ ])) ) ///
+		  stats( Mean2001 Mean2011 r2  N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"    "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc   )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
+
+
+	if $many_spill == 1  {
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
+	    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
+	    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3))  rbse(fmt(3) par([ ])) ) ///
+		  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
+	    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
+	    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
+		varlabels(, bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )  ///
+		el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em] " ///
+	    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
+	    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3))  rbse(fmt(3) par([ ])) ) ///
+		  stats( Mean2001 Mean2011 r2  N ,  ///
+	 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"    "N"  ) ///
+		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc   )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+	}
+
+ end
+
+
+
 
 
 
@@ -417,6 +806,22 @@ global X "{\tim}"
 
 lab_var_top
 
+if $many_spill == 0 {
+	estout using "`1'_top.tex", replace  style(tex) ///
+	keep(  proj_con_post spill1_con_post  )  ///
+	varlabels(, el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]"  )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+}
+
+if $many_spill == 1 {
 	estout using "`1'_top.tex", replace  style(tex) ///
 	keep(  proj_con_post spill1_con_post spill2_con_post )  ///
 	varlabels(, el( proj_con_post "[0.55em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]" )) ///
@@ -429,9 +834,87 @@ lab_var_top
  	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
 	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
 	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
+}
 
 end
+
+
+
+cap prog drop price_regs_type
+
+prog define price_regs_type
+
+	eststo clear
+
+$reg_1
+price_add  1
+
+$reg_2
+if length("$reg_2")>0 {
+	price_add  2
+}
+
+$reg_3
+if length("$reg_3")>0 {
+	price_add 3
+}
+
+$reg_4
+if length("$reg_4")>0 {
+	price_add 4
+}
+
+
+global X "{\tim}"
+
+lab_var_type
+
+if $many_spill == 0 {
+	estout using "`1'_top.tex", replace  style(tex) ///
+	keep(  proj_con_post_t1 spill1_con_post_t1  ///
+    proj_con_post_t2 spill1_con_post_t2         ///
+    proj_con_post_t3 spill1_con_post_t3  )       ///
+	varlabels(,  bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )   ///
+	el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1  "[0.8em]" ///
+    proj_con_post_t2 "[0.01em]" spill1_con_post_t2  "[0.8em]" ///
+    proj_con_post_t3 "[0.01em]" spill1_con_post_t3  "[0.8em]" )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+}
+
+if $many_spill == 1 {
+	estout using "`1'_top.tex", replace  style(tex) ///
+	keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
+    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
+    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
+	varlabels(,  bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )   ///
+	el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em]" ///
+    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
+    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+}
+
+end
+
+
+
+
+
 
 
 
@@ -537,424 +1020,6 @@ prog define time_reg
 
 end
 
-
-
-
-
-
-
-cap prog drop price_regs_type
-
-prog define price_regs_type
-
-	eststo clear
-
-$reg_1
-price_add  1
-
-$reg_2
-if length("$reg_2")>0 {
-	price_add  2
-}
-
-$reg_3
-if length("$reg_3")>0 {
-	price_add 3
-}
-
-$reg_4
-if length("$reg_4")>0 {
-	price_add 4
-}
-
-
-global X "{\tim}"
-
-lab_var_type
-
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_con_post_t1 spill1_con_post_t1 spill2_con_post_t1  ///
-    proj_con_post_t2 spill1_con_post_t2 spill2_con_post_t2         ///
-    proj_con_post_t3 spill1_con_post_t3 spill2_con_post_t3 )       ///
-	varlabels(,  bl(proj_con_post_t1 "${type1_label}  " proj_con_post_t2 "${type2_label}  " proj_con_post_t3  "${type3_label}  " )   ///
-	el( proj_con_post_t1 "[0.01em]" spill1_con_post_t1 "[0.01em]" spill2_con_post_t1 "[0.8em]" ///
-    proj_con_post_t2 "[0.01em]" spill1_con_post_t2 "[0.01em]" spill2_con_post_t2 "[0.8em]" ///
-    proj_con_post_t3 "[0.01em]" spill1_con_post_t3 "[0.01em]" spill2_con_post_t3 "[0.8em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( $ctrl_list r2 N ,  ///
- 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
-	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-end
-
-
-
-
-
-cap prog drop rgen_dd_cc
-	prog define rgen_dd_cc
-
-	*cap drop outside
-	g outside = proj==0 & spill1==0 & spill2==0
-
-	*cap drop outside_con
-	g outside_con = outside*con
-
-	cap drop proj_con
-	g proj_con = proj*con 
-	cap drop spill1_con
-	g spill1_con = spill1*con 
-	cap drop spill2_con
-	g spill2_con = spill2*con 
-
-
-	foreach var of varlist proj_con spill1_con spill2_con outside_con proj spill1 spill2 outside   {
-	cap drop `var'_post 
-	g `var'_post = `var'*post
-	}
-	global regressors_dd_cc " proj_con_post spill1_con_post spill2_con_post outside_con_post proj_post spill1_post spill2_post outside_post proj_con spill1_con spill2_con outside_con proj spill1 spill2 "
-end
-
-
-
-
-
-
-
-cap prog drop rgen_dd_full
-	prog define rgen_dd_full
-
-	cap drop uncon
-	g uncon = con==0
-
-	cap drop proj_con
-	g proj_con = proj*con 
-	cap drop spill1_con
-	g spill1_con = spill1*con 
-	cap drop spill2_con
-	g spill2_con = spill2*con 
-
-	cap drop proj_uncon
-	g proj_uncon = proj*uncon 
-	cap drop spill1_uncon
-	g spill1_uncon = spill1*uncon 
-	cap drop spill2_uncon
-	g spill2_uncon = spill2*uncon 
-
-
-	foreach var of varlist proj_con spill1_con spill2_con proj_uncon spill1_uncon spill2_uncon con uncon {
-	cap drop `var'_post 
-	g `var'_post = `var'*post
-	}
-	global regressors_dd_full " proj_con_post spill1_con_post spill2_con_post proj_uncon_post spill1_uncon_post spill2_uncon_post con_post proj_con spill1_con spill2_con uncon_post proj_uncon spill1_uncon spill2_uncon con "
-end
-
-
-
-cap prog drop lab_var_top_dd
-prog define lab_var_top_dd
-
-	lab var proj_post "inside project"
-	lab var spill1_post "0-${dist_break_reg1}m outside project "
-	lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
-end
-
-
-cap prog drop lab_var_top_cc
-prog define lab_var_top_cc
-
-	lab var proj_con_post "inside project"
-	lab var spill1_con_post "0-${dist_break_reg1}m outside project "
-	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
-	lab var outside_con_post "${dist_break_reg2}-${dist_max_reg}m outside project"
-end
-
-
-cap prog drop lab_var_top_dd_full
-prog define lab_var_top_dd_full
-
-	lab var proj_con_post "inside project"
-	lab var spill1_con_post "0-${dist_break_reg1}m outside project "
-	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
-
-	lab var proj_uncon_post "inside project"
-	lab var spill1_uncon_post "0-${dist_break_reg1}m outside project "
-	lab var spill2_uncon_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
-end
-
-
-cap prog drop lab_var_type_dd
-prog define lab_var_type_dd
-	global type1_label = "\textbf{Greenfield} \\ "
-	global type2_label = "\textbf{In-Situ Upgrading} \\ "
-	global type3_label = "\textbf{Other} \\ "
-
-	lab var proj_post_t1 "inside project  "
-	lab var spill1_post_t1 "0-${dist_break_reg1}m outside project "
-	lab var spill2_post_t1 "${dist_break_reg1}-${dist_break_reg2}m outside project"
-
-	lab var proj_post_t2 "inside project "
-	lab var spill1_post_t2 "0-${dist_break_reg1}m outside project "
-	lab var spill2_post_t2 "${dist_break_reg1}-${dist_break_reg2}m outside project "
-
-	lab var proj_post_t3 "inside project "
-	lab var spill1_post_t3 "0-${dist_break_reg1}m outside project "
-	lab var spill2_post_t3 "${dist_break_reg1}-${dist_break_reg2}m outside project "
-end
-
-
-
-
-
-
-
-
-cap prog drop regs_dd_full
-
-prog define regs_dd_full
-	eststo clear
-
-	foreach var of varlist $outcomes {
-	 *  reg `var' $regressors_dd_full  , cl(cluster_joined)
-	 regression `var' "$regressors_dd_full"
-	  sum `var' if e(sample)==1 & post ==0 , detail
-	  estadd scalar Mean2001 = `=r(mean)'
-	  sum `var' if e(sample)==1 & post ==1, detail
-	  estadd scalar Mean2011 = `=r(mean)'
-	  count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1
-	  estadd scalar hhspill = `=r(N)'
-	  count if e(sample)==1 & proj==1
-	  estadd scalar hhproj = `=r(N)'
-	  preserve
-	    keep if e(sample)==1
-	    quietly tab cluster_rdp
-	    global projectcount = `=r(r)'
-	    quietly tab cluster_placebo
-	    global projectcount = $projectcount + `=r(r)'
-	  restore
-
-	  estadd scalar projcount = $projectcount
-
-	  eststo  `var'
-	}
-	
-
-	global X "{\tim}"
-
-
-
-	lab_var_top_dd_full
-
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_con_post spill1_con_post spill2_con_post proj_uncon_post spill1_uncon_post spill2_uncon_post )  ///
-	varlabels(,  bl( proj_con_post "\textbf{Constructed} \\ "  proj_uncon_post "\textbf{Unconstructed} \\ " ) ///
-	 el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]"  proj_uncon_post "[0.5em]" spill1_uncon_post "[0.5em]" spill2_uncon_post "[0.5em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-end
-
-
-
-cap prog drop regs_dd_cc
-
-prog define regs_dd_cc
-	eststo clear
-
-	foreach var of varlist $outcomes {
-
-	 * reg `var' $regressors_dd_cc  , cl(cluster_joined)  
-
-	 regression `var' "$regressors_dd_cc"
-
-	  sum `var' if e(sample)==1 & post ==0 , detail
-	  estadd scalar Mean2001 = `=r(mean)'
-	  sum `var' if e(sample)==1 & post ==1, detail
-	  estadd scalar Mean2011 = `=r(mean)'
-	  count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1
-	  estadd scalar hhspill = `=r(N)'
-	  count if e(sample)==1 & proj==1
-	  estadd scalar hhproj = `=r(N)'
-	  preserve
-	    keep if e(sample)==1
-	    quietly tab cluster_rdp
-	    global projectcount = `=r(r)'
-	    quietly tab cluster_placebo
-	    global projectcount = $projectcount + `=r(r)'
-	  restore
-
-	  estadd scalar projcount = $projectcount
-
-	  eststo  `var'
-	}
-	
-
-	global X "{\tim}"
-
-
-
-	lab_var_top_cc
-
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_con_post spill1_con_post spill2_con_post outside_con_post  )  ///
-	varlabels(,  bl( proj_con_post "\textbf{Treatment} \\ "  outside_con_post "\textbf{Control} \\ " ) ///
-	 el( proj_con_post "[0.5em]" spill1_con_post "[0.5em]" spill2_con_post "[0.5em]"  outside_con_post "[0.5em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-end
-
-
-
-
-
-cap prog drop regs_dd
-
-prog define regs_dd
-	eststo clear
-
-	foreach var of varlist $outcomes {
-	 * reg `var' $regressors_dd if con==`2' , cl(cluster_joined)
-	 
-	 	regression `var' "$regressors_dd_full  if con == `2' "
-
-	  sum `var' if e(sample)==1 & post ==0 , detail
-	  estadd scalar Mean2001 = `=r(mean)'
-	  sum `var' if e(sample)==1 & post ==1, detail
-	  estadd scalar Mean2011 = `=r(mean)'
-	  count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1
-	  estadd scalar hhspill = `=r(N)'
-	  count if e(sample)==1 & proj==1
-	  estadd scalar hhproj = `=r(N)'
-	  preserve
-	    keep if e(sample)==1
-	    quietly tab cluster_rdp
-	    global projectcount = `=r(r)'
-	    quietly tab cluster_placebo
-	    global projectcount = $projectcount + `=r(r)'
-	  restore
-
-	  estadd scalar projcount = $projectcount
-
-	  eststo  `var'
-	}
-	
-
-
-	global X "{\tim}"
-
-
-	lab_var
-
-	estout using "`1'.tex", replace  style(tex) ///
-	keep(   proj_post spill1_post spill2_post ///
-	      proj spill1 spill2 $add_post  )  ///
-	varlabels(,  el(     ///
-	   proj_post "[0.01em]"  spill1_post "[0.01em]" spill2_post  "[0.1em]" ///
-	     proj "[0.01em]" spill1 "[0.01em]" spill2 "[0.01em]" $add_post  ))  label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-
-	lab_var_top_dd
-
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_post spill1_post spill2_post )  ///
-	varlabels(, el( proj_post "[0.55em]" spill1_post "[0.5em]" spill2_post "[0.5em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-end
-
-
-
-
-
-cap prog drop regs_type_dd
-
-prog define regs_type_dd
-
-	eststo clear
-
-	foreach var of varlist $outcomes {
-	  reg `var' $regressors2_dd if con==`2' , cl(cluster_joined)
-
-	  sum `var' if e(sample)==1 & post ==0 , detail
-	  estadd scalar Mean2001 = `=r(mean)'
-	  sum `var' if e(sample)==1 & post ==1, detail
-	  estadd scalar Mean2011 = `=r(mean)'
-	  count if e(sample)==1 & (spill1==1 | spill2==1) & !proj==1
-	  estadd scalar hhspill = `=r(N)'
-	  count if e(sample)==1 & proj==1
-	  estadd scalar hhproj = `=r(N)'
-	  preserve
-	    keep if e(sample)==1
-	    quietly tab cluster_rdp
-	    global projectcount = `=r(r)'
-	    quietly tab cluster_placebo
-	    global projectcount = $projectcount + `=r(r)'
-	  restore
-
-	  estadd scalar projcount = $projectcount
-
-	  eststo  `var'
-	}
-
-	global X "{\tim}"
-
-	lab_var_type_dd
-
-	estout using "`1'_top.tex", replace  style(tex) ///
-	keep(  proj_post_t1 spill1_post_t1 spill2_post_t1  ///
-    proj_post_t2 spill1_post_t2 spill2_post_t2         ///
-    proj_post_t3 spill1_post_t3 spill2_post_t3 )       ///
-	varlabels(, bl(proj_post_t1 "${type1_label}  " proj_post_t2 "${type2_label}  " proj_post_t3  "${type3_label}  " )  ///
-	el( proj_post_t1 "[0.01em]" spill1_post_t1 "[0.01em]" spill2_post_t1 "[0.8em] " ///
-    proj_post_t2 "[0.01em]" spill1_post_t2 "[0.01em]" spill2_post_t2 "[0.8em]" ///
-    proj_post_t3 "[0.01em]" spill1_post_t3 "[0.01em]" spill2_post_t3 "[0.8em]" )) ///
-	label ///
-	  noomitted ///
-	  mlabels(,none)  ///
-	  collabels(none) ///
-	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-	  stats( Mean2001 Mean2011 r2 projcount hhproj hhspill N ,  ///
- 	labels(  "Mean Outcome 2001"    "Mean Outcome 2011" "R$^2$"   "\# projects"  `"N project areas"'    `"N spillover areas"'     "N"  ) ///
-	    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  %12.0fc  %12.0fc  %12.0fc  )   ) ///
-	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
- end
 
 
 

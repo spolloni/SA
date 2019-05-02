@@ -42,11 +42,10 @@ global dist_min = -400
 global dist_max     = 1500
 global dist_max_reg = 1500
 
-global dist_break_reg = 500 /* determines spillover vs control outside of project for regDDD */
+* global dist_break_reg = 500 /* determines spillover vs control outside of project for regDDD */
 
-global dist_break_reg1 = 300 
-global dist_break_reg2 = 600 
-global dist_break_reg3 = 800 
+
+* global dist_break_reg3 = 800 
 
 
 
@@ -56,9 +55,9 @@ global dist_break_reg3 = 800
 
 
 * CENSUS PARAMETERS
-global drop_others= 1    /* everything relative to unconstructed */
-global tresh_area = 0.3  /* Area ratio for "inside" vs spillover */
-global tresh_dist = 1500 /* Area ratio inside vs spillover */
+global drop_others= 1     /* everything relative to unconstructed */
+global tresh_area = 0.3   /* Area ratio for "inside" vs spillover */
+global tresh_dist = 1500  /* Area ratio inside vs spillover */
 global tresh_area_DDD = 0.75     
 global tresh_dist_DDD = 400      
 global tresh_dist_max_DDD = 1200 
@@ -98,17 +97,22 @@ global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1
 
 
 
-global analysis_now = 1
+global many_spill = 1
+global spatial = 0
 
-
-forvalues v = 1/2 {
-
-if `v'==1 {
-global k = "sp_post"   /* determines fixed effect size */
+if $many_spill == 0 {
+	global dist_break_reg1 = 500 
+	global dist_break_reg2 = 500
 }
-if `v'==2 {
-global k = "none"
+if $many_spill == 1 {
+	global dist_break_reg1 = 250 
+	global dist_break_reg2 = 500
 }
+
+global analysis_now = 0
+global k = "sp"   /* determines fixed effect size */
+* global k = "none"
+* global k = "sp_post"
 
 global post_control=""
 global post_control_price=""
@@ -138,8 +142,6 @@ do plot_prices_paper_NODCt.do
 	cd ../..
 	cd subcode
 	
-}
-
 }
 
 

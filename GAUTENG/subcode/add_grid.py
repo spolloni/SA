@@ -13,7 +13,7 @@ add_grid.py
 import os, subprocess, shutil, multiprocessing, re, glob
 from pysqlite2 import dbapi2 as sql
 import subprocess, ntpath, glob, pandas, csv
-
+from itertools import product
 
 project = os.getcwd()[:os.getcwd().rfind('Code')]
 gendata = project + 'Generated/GAUTENG/'
@@ -21,6 +21,113 @@ gendata = project + 'Generated/GAUTENG/'
 figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
+
+def buffer_area_int(db,buffer1,buffer2):
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    # ST_AREA(A.GEOMETRY) as census_area, 
+    # ST_AREA(G.GEOMETRY,{}) as b1_area,
+    #for name,fid in product(['ea_1996','sal_2001','sal_2011'],['OGC_FID','sal_code','sal_code']):
+    for name,fid in zip(['ea_1996','sal_2001','sal_2011'],['OGC_FID','sal_code','sal_code']):
+        table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer2)+'_rdp'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                CREATE TABLE {} AS
+                SELECT A.{},
+                        ST_AREA(G.GEOMETRY) as census_area, 
+                        ST_AREA(ST_INTERSECTION(A.GEOMETRY,G.GEOMETRY))  as  census_cluster_int,
+                        ST_AREA(ST_INTERSECTION(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{})))  as  census_b1_int,
+                        ST_AREA(ST_INTERSECTION(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{})))  as  census_b2_int
+                FROM {} AS A, 
+                gcro_publichousing AS G JOIN (SELECT cluster FROM rdp_cluster) AS J ON J.cluster=G.OGC_FID
+                        WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=ST_BUFFER(G.GEOMETRY,{}))
+                                            AND st_intersects(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{}))
+                                            GROUP BY A.{} ;
+                '''.format(table,fid,buffer1,buffer2,name,name,buffer2,buffer2,fid))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+
+        table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer2)+'_placebo'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                CREATE TABLE {} AS
+                SELECT A.{},
+                        ST_AREA(A.GEOMETRY) as census_area, 
+                        ST_AREA(ST_INTERSECTION(A.GEOMETRY,G.GEOMETRY))  as  census_cluster_int,
+                        ST_AREA(ST_INTERSECTION(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{})))  as  census_b1_int,
+                        ST_AREA(ST_INTERSECTION(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{})))  as  census_b2_int
+                FROM {} AS A, 
+                gcro_publichousing AS G JOIN (SELECT cluster FROM placebo_cluster) AS J ON J.cluster=G.OGC_FID
+                        WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=ST_BUFFER(G.GEOMETRY,{}))
+                                            AND st_intersects(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{}))
+                                            GROUP BY A.{} ;
+                '''.format(table,fid,buffer1,buffer2,name,name,buffer2,buffer2,fid))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+ 
+    table='buffer_area_'+str(buffer1)+'_'+str(buffer2)
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT J.cluster, 
+                        ST_AREA(G.GEOMETRY) as cluster_area, 
+                        ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b1_area,
+                        ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b2_area
+                FROM gcro_publichousing AS G JOIN (SELECT cluster FROM placebo_cluster UNION SELECT cluster FROM rdp_cluster) AS J ON J.cluster=G.OGC_FID
+                         ;
+                '''.format(table,buffer1,buffer2))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'cluster'))
+
+
+buffer_area_int(db,250,500)
+
+
+
+
+def area_ea_1996(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    for name in ['ea_1996']:
+        table=name+'_area'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                CREATE TABLE {} AS
+                SELECT OGC_FID, ST_AREA(GEOMETRY) as area
+                FROM {};
+                '''.format(table,name))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'OGC_FID'))
+
+# area_ea_1996(db)
+
+
+### CALCULATE AREA OF 250m BUFFER
+
+def buffer_250(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    table='buffer_area'
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT AVG(ST_AREA(ST_BUFFER(G.GEOMETRY,250))) AS mean_buffer_area, AVG(ST_AREA(G.GEOMETRY)) AS mean_area
+                FROM gcro_publichousing AS G 
+                JOIN (SELECT cluster FROM placebo_cluster UNION SELECT cluster FROM rdp_cluster) AS J ON J.cluster=G.OGC_FID 
+                ;
+                '''.format(table))
+    #cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'sal_code'))
+
+#buffer_250(db)
 
 
 ### CREATES BBLU XY COORDINATE TABLE
@@ -42,6 +149,26 @@ def census_xy(db):
         cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'sal_code'))
 
 # census_xy(db)
+
+def census_1996_xy(db):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    for name in ['ea_1996']:
+        table=name+'_xy'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                CREATE TABLE {} AS
+                SELECT OGC_FID, ST_X(ST_CENTROID(GEOMETRY)) AS X, ST_Y(ST_CENTROID(GEOMETRY)) AS Y
+                FROM {};
+                '''.format(table,name))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'OGC_FID'))
+
+# census_1996_xy(db)
+
 
 #### FIX THIS !! 
 def grid_sal(db,table,input_file,idvar):
@@ -65,6 +192,8 @@ def grid_sal(db,table,input_file,idvar):
 
 # grid_sal(db,'grid_s2001','grid_temp_3','grid_id')
 # grid_sal(db,'sal_2011_s2001','sal_2011','sal_code')
+# grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
+
 
 def grid_sal_point(db,table,input_file,idvar):
 

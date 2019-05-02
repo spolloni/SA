@@ -31,8 +31,9 @@ end;
 global LOCAL = 1;
 
 * DOFILE SECTIONS;
-global data_load = 0;
-global data_prep = 1;
+global data_load_1996 = 0;
+global data_load      = 0;
+global data_prep      = 1;
 
 
 if $LOCAL==1 {;
@@ -43,13 +44,54 @@ if $LOCAL==1 {;
 cd ../..;
 cd Generated/Gauteng;
 
+* "DDcensus_1996_admin${V}.dta" ; 
+
+
+if $data_load_1996 == 1 {;
+
+
+  local qry = " 
+
+      SELECT 
+
+        A.SEX AS sex, A.AGE AS age,
+        A.MARSTATU AS marit_stat, 
+        A.RACE AS race, A.LANGUAG1 AS language, 
+        A.INCOME AS income, A.DEDUCODE AS education,
+        A.ECONACTT AS employment, 
+        A.INDUSTR2 AS industry, A.OCCUPAT3 AS occupation, A.EACODE
+
+      FROM census_pers_1996 AS A 
+
+    ";
+
+
+  odbc query "gauteng";
+  odbc load, exec("`qry'") clear;
+
+
+  set seed 1;
+  sample 60 ; 
+
+  merge m:1 EACODE using "DDcensus_1996_admin${V}.dta" ;
+  keep if _merge==3;
+  drop _merge;
+
+  destring area_int_placebo area_int_rdp cbd_dist_rdp cbd_dist_placebo, replace force;   /* throw out clusters that were too early in the process */
+
+  save "DDcensus_pers_1996_temp${V}.dta", replace;
+
+
+};
+
+
 *****************************************************************;
 ************************ LOAD DATA ******************************;
 *****************************************************************;
 if $data_load==1 {;
 
-*         cast(BP.input_id AS TEXT) as sal_code_placebo, ;
-*         cast(B.input_id AS TEXT) as sal_code_rdp, ;
+*         cast(BP.input_id AS TEXT) as sal_code_placebo,  ;
+*         cast(B.input_id AS TEXT) as sal_code_rdp,       ;
 
 
   local qry = " 
@@ -285,9 +327,15 @@ if $data_prep==1 {;
 
 use "DDcensus_pers_admin_het${V}.dta", clear;
 
+append using "DDcensus_pers_1996_temp${V}.dta"; 
+
+replace area_code = EACODE if year==1996;
+
+
 * go to working dir;
 cd ../..;
 cd $output ;
+
 
 destring cbd_dist_rdp, replace force;
 g cbd_dist = cbd_dist_rdp;
@@ -305,7 +353,7 @@ lab var unemployed "Unemployed";
 
 * schooling;
 gen educ_yrs = education + 1  if education<=12 & !missing(education);
-replace educ_yrs = 0 if ((education==99 & year ==2001)|(education==98 & year ==2011)) & !missing(education);
+replace educ_yrs = 0 if ((education==99 & (year ==2001 | year==1996))|(education==98 & year ==2011)) & !missing(education);
 replace educ_yrs = 10 if (education==13) & !missing(education);
 replace educ_yrs = 11 if (education==14) & !missing(education);
 replace educ_yrs = 12 if (education==15) & !missing(education);
@@ -322,7 +370,7 @@ replace educ_yrs = 16 if (education==25) & !missing(education);
 replace educ_yrs = 17 if (education==26) & !missing(education);
 replace educ_yrs = 17 if (education==27) & !missing(education);
 replace educ_yrs = 18 if (education==28) & !missing(education);
-gen schooling_noeduc  = (education==99 & year ==2001)|(education==98 & year ==2011) if !missing(education);
+gen schooling_noeduc  = (education==99 & (year ==2001 | year==1996))|((education==98 | education==0) & year ==2011) if !missing(education);
 gen schooling_postsec = (education>=12 & education<=30) if !missing(education) & age>=18;
 
 * race;
@@ -333,18 +381,34 @@ gen outside_gp = (birth_prov!=7) if !missing(birth_prov);
 
 * income;
 gen inc_value = . ;
-replace inc_value = 0      if income ==1;
-replace inc_value = 200    if income ==2;
-replace inc_value = 600    if income ==3;
-replace inc_value = 1200   if income ==4;
-replace inc_value = 2400   if income ==5;
-replace inc_value = 4800   if income ==6;
-replace inc_value = 9600   if income ==7;
-replace inc_value = 19200  if income ==8;
-replace inc_value = 38400  if income ==9;
-replace inc_value = 76800  if income ==10;
-replace inc_value = 153600 if income ==11;
-replace inc_value = 307200 if income ==12;
+replace inc_value = 0      if income ==1 & year!=1996;
+replace inc_value = 200    if income ==2 & year!=1996;
+replace inc_value = 600    if income ==3 & year!=1996;
+replace inc_value = 1200   if income ==4 & year!=1996;
+replace inc_value = 2400   if income ==5 & year!=1996;
+replace inc_value = 4800   if income ==6 & year!=1996;
+replace inc_value = 9600   if income ==7 & year!=1996;
+replace inc_value = 19200  if income ==8 & year!=1996;
+replace inc_value = 38400  if income ==9 & year!=1996;
+replace inc_value = 76800  if income ==10 & year!=1996;
+replace inc_value = 153600 if income ==11 & year!=1996;
+replace inc_value = 307200 if income ==12 & year!=1996;
+
+replace inc_value = 0      if income ==1 & year==1996;
+replace inc_value = 100    if income ==2 & year==1996;
+replace inc_value = 350    if income ==3 & year==1996;
+replace inc_value = 750    if income ==4 & year==1996;
+replace inc_value = 1250   if income ==5 & year==1996;
+replace inc_value = 2000   if income ==6 & year==1996;
+replace inc_value = 3000   if income ==7 & year==1996;
+replace inc_value = 4000   if income ==8 & year==1996;
+replace inc_value = 5250   if income ==9 & year==1996;
+replace inc_value = 7000   if income ==10 & year==1996;
+replace inc_value = 9500   if income ==11 & year==1996;
+replace inc_value = 13500  if income ==12 & year==1996;
+replace inc_value = 23000  if income ==13 & year==1996;
+replace inc_value = 50000  if income ==14 & year==1996;
+
 gen inc_value_earners = inc_value ;
 replace inc_value_earners = . if inc_value==0;
 lab var inc_value_earners "HH Income";

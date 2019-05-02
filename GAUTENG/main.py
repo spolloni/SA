@@ -11,7 +11,7 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.placebofuns import make_gcro_all, make_gcro_full, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
-from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid
+from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid, intersGEOM1996
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 #from subcode.add_grid import bblu_xy, grid_to_erven
@@ -69,8 +69,8 @@ _4_a_DISTS_ = 0  # buffers and hull creation
 _4_b_DISTS_ = 0  # ERVEN distance
 _4_c_DISTS_ = 0  # BBLU distance
 _4_d_DISTS_ = 0  # EA distance
-_4_e_DISTS_ = 0  # create x y table for BBLU
-_4_f_DISTS_ = 1  # GRID DISTANCE!
+_4_e_DISTS_ = 1  # EA distance for 1996
+_4_f_DISTS_ = 0  # GRID DISTANCE!
 
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
@@ -286,6 +286,20 @@ if _4_d_DISTS_ ==1:
         print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
         intersGEOM(db,geom,hull,yr) 
         print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+
+
+if _4_e_DISTS_ ==1:
+    print '\n'," Distance part E: distances for EAs for 1996!... ",'\n'        
+    for hull,geom,yr in product(hulls,['ea'],['1996']):
+        import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.OGC_FID
+                                FROM  ea_1996  AS  p'''
+        #dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
+        print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+        intersGEOM1996(db,geom,hull,yr) 
+        print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+
+
 
 # if _4_e_DISTS_ == 1:
 #     print '\n'," Making BBLU xy table...",'\n'

@@ -78,6 +78,17 @@ cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
+if $many_spill == 1 { ;
+egen cj1 = group(cluster_joined proj spill1 spill2) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+if $many_spill == 0 {;
+egen cj1 = group(cluster_joined proj spill1) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+
 
 
 global outcomes "
@@ -94,9 +105,41 @@ rgen_type  ;
 
 gen_LL ;
 
+g y1996= year==1996;
 
-regs census_pers_test_${k}k ;
-regs_type census_pers_test_${k}k_type ;
+* if $spatial == 0 {;
+
+regs cp_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  y1996;
+
+regs_type cp_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996;
+
+* };
+
+rgen_dd_full ;
+rgen_dd_cc ;
+
+regs_dd_full cp_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ; 
+
+regs_dd_cc cp_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ;
+
+
+
+
+
+* if $spatial == 1 {;
+
+* regs_spatial cp_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
+
+* regs_type_spatial cp_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
+
+* };
+
+
+
+
+
+* regs cp_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2};
+* regs_type cp_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
 
 

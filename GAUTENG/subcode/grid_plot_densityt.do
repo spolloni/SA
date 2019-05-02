@@ -41,12 +41,13 @@ end;
 
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 1;
+global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
 global reg_triplediff2        = 1; /* Two spillover bins */
-global reg_triplediff2_type   = 1; /* Two spillover bins */
+global reg_triplediff2_type   = 0; /* Two spillover bins */
+
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
 
@@ -168,6 +169,18 @@ g con    = distance_rdp_reg!=. ;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
+if $many_spill == 1 { ;
+egen cj1 = group(cluster_joined proj spill1 spill2) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+if $many_spill == 0 {;
+egen cj1 = group(cluster_joined proj spill1) ;
+drop cluster_joined ;
+ren cj1 cluster_joined ;
+};
+
+
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
@@ -218,7 +231,32 @@ g `v'_fe=`v' ;
 
 if $reg_triplediff2 == 1 {;
 
-regs bblu_test_${k}fe ;
+* regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+* if $spatial == 1 {;
+
+* regs_spatial b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
+
+* };
+
+
+
+* if $spatial == 0 {;
+
+regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+* };
+
+rgen_dd_full ;
+rgen_dd_cc ;
+
+regs_dd_full b_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ; 
+
+regs_dd_cc b_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
+
+
+
+
 
 * rgen_dd_full ;
 
@@ -233,7 +271,21 @@ regs bblu_test_${k}fe ;
 
 if $reg_triplediff2_type == 1 {;
 
-regs_type bblu_test_${k}fe_type ;
+* regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+if $spatial == 1 {;
+
+regs_type_spatial b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
+
+};
+
+
+
+if $spatial == 0 {;
+
+regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+};
+
 
 };
 
