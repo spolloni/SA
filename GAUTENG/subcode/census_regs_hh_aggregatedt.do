@@ -195,27 +195,88 @@ keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 
+replace census_cluster_int_rdp=0 if census_cluster_int_rdp==. ;
+replace census_cluster_int_placebo=0 if census_cluster_int_placebo==. ;
 
 drop area_int_rdp area_int_placebo ;
-g area_int_rdp  =  census_cluster_int_rdp/cluster_area_rdp ; 
-g area_int_placebo = census_cluster_int_placebo/cluster_area_placebo ; 
+
+g area_2 = area*area;
+g area_3 = area*area_2;
+
+global area_levels = 0 ;
+
+global extra_controls = " y1996 area area_2 area_3 ";
+
+g area_int_rdp  =  census_cluster_int_rdp ; 
+g area_int_placebo = census_cluster_int_placebo ; 
+
+g area_b1_rdp = (census_b1_int_rdp - census_cluster_int_rdp);
+g area_b1_placebo = (census_b1_int_placebo - census_cluster_int_placebo);
+
+g area_b2_rdp = (census_b2_int_rdp - census_b1_int_rdp);
+g area_b2_placebo = (census_b2_int_placebo - census_b1_int_placebo);
+
+if $area_levels == 0 {;
+foreach var of varlist area_int_rdp area_int_placebo area_b1_rdp area_b1_placebo area_b2_rdp area_b2_placebo {;
+replace `var' = `var'/area ;
+};
+};
+
+if $area_levels == 1 {;
+foreach var of varlist area area_2 area_int_rdp area_int_placebo area_b1_rdp area_b1_placebo area_b2_rdp area_b2_placebo {;
+replace `var' = `var'/(1000*1000);
+};
+};
+
 
 replace area_int_rdp =0 if area_int_rdp==.;
 replace area_int_placebo =0 if area_int_placebo==.;
+
+
+replace area_b1_rdp = 0 if area_b1_rdp == .;
+replace area_b1_placebo = 0 if area_b1_placebo == .;
+
+
+replace area_b2_rdp = 0 if area_b2_rdp == .;
+replace area_b2_placebo = 0 if area_b2_placebo == .;
+
+
+g con = 0;
+replace con=1 if area_int_rdp>0 & area_int_rdp>area_int_placebo  &  area_int_rdp<. & area_int_placebo<.;
+replace con=1 if distance_rdp<=distance_placebo & con==0 & distance_rdp<.;
+
+g proj = area_int_rdp  if con==1 ;
+replace proj = area_int_placebo if con==0 ;
+replace proj = 0 if proj==.;
+
+g spill1 = area_b1_rdp if con==1;
+replace spill1 = area_b1_placebo if con==0;
+replace spill1 = 0 if spill1==.;
+
+g spill2 = area_b2_rdp if con==1;
+replace spill2 = area_b2_placebo if con==0;
+replace spill2 = 0 if spill2 ==. ;
+
+
+
+
+
+* g area_b2_rdp = (census_b2_int_rdp - census_b1_int_rdp)/(cluster_b2_area_rdp-cluster_b1_area_rdp);
+* g area_b2_placebo = (census_b2_int_placebo - census_b1_int_placebo)/(cluster_b2_area_placebo-cluster_b1_area_placebo);
+
+
+* g area_b1_rdp = (census_b1_int_rdp - census_cluster_int_rdp)/census_area_rdp;
+* g area_b1_placebo = (census_b1_int_placebo - census_cluster_int_placebo)/(census_b1_area_placebo-cluster_area_placebo);
 
 
 
 * g proj = (area_int_rdp_alt>.01 & area_int_rdp_alt<.) | (area_int_placebo_alt>.01 & area_int_placebo_alt<.) ;
 * g proj     = (area_int_rdp     > $tresh_area ) | (area_int_placebo > $tresh_area);
 
-g con = distance_rdp<=distance_placebo;
-
-g proj = area_int_rdp  if con==1
-
-g spill1      = proj==0 & ( distance_rdp<=$dist_break_reg1 | 
-                            distance_placebo<=$dist_break_reg1 );
-g spill2      = proj==0 & ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
-                              | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
+* g spill1      = proj==0 & ( distance_rdp<=$dist_break_reg1 | 
+*                             distance_placebo<=$dist_break_reg1 );
+* g spill2      = proj==0 & ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
+*                               | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
 
 * browse area_int_rdp area_int_placebo distance_rdp distance_placebo census_area_placebo census_cluster_int_placebo census_b1_int_placebo census_b2_int_placebo census_area_rdp census_cluster_int_rdp census_b1_int_rdp census_b2_int_rdp cluster_area_placebo cluster_b1_area_placebo cluster_b2_area_placebo cluster_area_rdp cluster_b1_area_rdp cluster_b2_area_rdp
 * browse area_int_rdp census_cluster_int_rdp;
@@ -268,9 +329,9 @@ global outcomes "
   ";
 
 
-regs ch_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+regs ch_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
-regs_type ch_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+regs_type ch_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
 
 
@@ -280,9 +341,9 @@ global outcomes "
   owner
   ";
 
-regs chouse_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+regs chouse_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
-regs_type chouse_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996 ;
+regs_type chouse_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
 
 
@@ -300,12 +361,12 @@ global outcomes "
   ";
 
 
-rgen_dd_full ;
-rgen_dd_cc ;
+ rgen_dd_full  ;
+ rgen_dd_cc   ;
 
-regs_dd_full ch_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ; 
+ regs_dd_full ch_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ; 
 
-regs_dd_cc ch_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ;
+regs_dd_cc ch_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
 
 global outcomes "
@@ -314,9 +375,11 @@ global outcomes "
   owner
   ";
 
-regs_dd_full chouse_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ; 
+regs_dd_full chouse_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ; 
 
-regs_dd_cc chouse_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996  ;
+regs_dd_cc chouse_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
+
+
 
 
 * foreach var of varlist house_dens  house_bkyd_dens  shack_non_bkyd_dens  shack_bkyd_dens  {;

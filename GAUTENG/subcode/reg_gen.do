@@ -55,10 +55,10 @@ cap prog drop regression
 prog define regression
 	
 	if "${k}"=="none" {
-		reg `1' `2' `3', cl(cluster_joined) r
+		reg `1' `2' $extra_controls `3', cl(cluster_joined) r
 	}
 	else {
-	areg `1' `2' `3', cl(cluster_joined) a(LL) r
+	areg `1' `2' $extra_controls `3', cl(cluster_joined) a(LL) r
 	}
 end
 

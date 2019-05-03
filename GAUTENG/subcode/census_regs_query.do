@@ -36,7 +36,7 @@ end;
 global full_data_1996 = 0;
 global data_load_1996 = 0;
 global data_load      = 0;
-global aggregate      = 0;
+global aggregate      = 1;
 
 if $LOCAL==1 {;
 	cd .. ;
@@ -470,7 +470,7 @@ collapse
   electricity electric_cooking electric_heating electric_lighting
   owner house house_bkyd shack_bkyd shack_non_bkyd house_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens tot_rooms hh_size
   (firstnm) hh_pop person_pop hh_density pop_density area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo  X Y sp_1
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo  X Y sp_1 area
   , by(area_code year);
 
 
