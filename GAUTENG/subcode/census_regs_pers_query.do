@@ -31,7 +31,7 @@ end;
 global LOCAL = 1;
 
 * DOFILE SECTIONS;
-global data_load_1996 = 0;
+global data_load_1996 = 1;
 global data_load      = 0;
 global data_prep      = 1;
 
@@ -432,7 +432,7 @@ collapse
   (mean) unemployed educ_yrs black outside_gp age
   inc_value inc_value_earners schooling_noeduc schooling_postsec
   (firstnm) person_pop area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo X Y sp_1 
+  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo X Y sp_1 area
   , by(area_code year);
 
 save "temp_censuspers_agg_het${V}.dta", replace;

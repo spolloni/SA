@@ -31,6 +31,18 @@ prog outcome_gen;
 end;
 
 
+local qry = " 
+SELECT * FROM grid_temp_3_buffer_area_int_250_500
+";
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force ; 
+
+save "buffer_grid_${dist_break_reg1}_${dist_break_reg2}.dta", replace;
+
+
+
 cap prog drop grid_query;
 
 prog define grid_query;
@@ -131,9 +143,17 @@ g post=0;
 append using bbluplot_grid_post;
 replace post=1 if post==.;
 
+ren id grid_id ;
+merge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}.dta" ;
+drop if _merge==2;
+drop _merge;
+ren grid_id id;
+
+
 save bbluplot_grid, replace;
+
 
 erase  bbluplot_grid_pre.dta;
 erase  bbluplot_grid_post.dta;
 
-
+erase "buffer_grid_${dist_break_reg1}_${dist_break_reg2}.dta";

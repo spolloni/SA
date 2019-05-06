@@ -5,6 +5,10 @@ est clear
 
 do reg_gen.do
 
+global extra_controls = "  "
+
+
+
 
 set more off
 set scheme s1mono
@@ -41,12 +45,12 @@ end;
 
 global bblu_do_analysis = 1; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 1;
+global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2        = 0; /* Two spillover bins */
-global reg_triplediff2_type   = 0; /* Two spillover bins */
+global reg_triplediff2        = 1; /* Two spillover bins */
+global reg_triplediff2_type   = 1; /* Two spillover bins */
 
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
@@ -96,29 +100,16 @@ use bbluplot_grid.dta, clear;
 cd ../..;
 cd $output ;
 
-
-* foreach var of varlist name_rdp desc_rdp name_placebo desc_placebo {;
-*   replace `var'=lower(`var');
-*   };
-* drop type_rdp type_placebo;
-
-
-* foreach v in rdp placebo { ; 
-* g type_`v'= 1 if regexm(desc_`v',"mixed")==1  | regexm(desc_`v',"people")==1 | regexm(desc_`v',"flag")==1 ; 
-* replace type_`v' = 2 if regexm(desc_`v',"essential")==1   ;
-* * g drop_`v' = (regexm(desc_`v',"hostel")==1 | regexm(name_`v',"hostel")==1) ; 
-* } ;
-
-* drop desc_rdp desc_placebo name_rdp name_placebo ; 
-
+g area = 50*50;
 
 ren rdp_cluster cluster_rdp;
 ren placebo_cluster cluster_placebo;
 ren rdp_distance distance_rdp;
 ren placebo_distance distance_placebo;
 
-replace distance_placebo=-distance_placebo if area_int_placebo>$tresh_area & area_int_placebo<. ;
-replace distance_rdp=-distance_rdp if area_int_rdp>$tresh_area & area_int_rdp<. ;
+replace distance_placebo=-distance_placebo if area_int_placebo>.5 & area_int_placebo<. ;
+replace distance_rdp=-distance_rdp if area_int_rdp>.5 & area_int_rdp<. ;
+drop area_int_rdp area_int_placebo;
 
 
 replace distance_placebo = . if distance_rdp<0 ;
@@ -127,15 +118,8 @@ replace distance_rdp     = . if distance_placebo<0;
 replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 
-
-g distance_placebo_reg = distance_placebo if distance_placebo<${dist_max_reg};
-g distance_rdp_reg = distance_rdp if distance_rdp<${dist_max_reg};
-
 replace distance_placebo=. if distance_placebo>${dist_max} ;
 replace distance_rdp=. if distance_rdp>${dist_max} ;
-
-
-* drop if cluster_rdp == . & cluster_placebo == .;  
 
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
@@ -143,28 +127,30 @@ global max = round(ceil(`r(max)'),$bin);
 egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
 g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
-replace dists_rdp = dists_rdp+`=abs($dist_min)';
+* replace dists_rdp = dists_rdp+`=abs($dist_min)';
 
 egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
-replace dists_placebo = dists_placebo+`=abs($dist_min)';
+* replace dists_placebo = dists_placebo+`=abs($dist_min)';
 
 
-* create a cluster variable for the regression (quick fix!);
-* g cluster_reg = cluster_rdp;
-* replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
-* g cluster_joined = cluster_rdp if distance_rdp_reg<distance_placebo_reg;
-* replace cluster_joined = cluster_placebo if distance_placebo_reg<=distance_rdp_reg;
+drop if distance_rdp==. & distance_placebo==. ; 
 
 
-drop if distance_rdp_reg==. & distance_placebo_reg==. ; 
+if $type_area == 0 {;
+  g proj   = distance_rdp<=0 | distance_placebo<=0 ;
+  g spill1  = ( distance_rdp>0 & distance_rdp<$dist_break_reg1 ) | ( distance_placebo>0 & distance_placebo<$dist_break_reg1 ) ;
+  g spill2  = ( distance_rdp>=$dist_break_reg1 & distance_rdp<=$dist_break_reg2 ) | ( distance_placebo>=$dist_break_reg1 & distance_placebo<=$dist_break_reg2 ) ;
+  g con    = distance_rdp!=. ;
+};
 
-g proj   = distance_rdp_reg<=0 | distance_placebo_reg<=0 ;
-g spill1  = ( distance_rdp_reg>0 & distance_rdp_reg<$dist_break_reg1 ) | ( distance_placebo_reg>0 & distance_placebo_reg<$dist_break_reg1 ) ;
-g spill2  = ( distance_rdp_reg>=$dist_break_reg1 & distance_rdp_reg<=$dist_break_reg2 ) | ( distance_placebo_reg>=$dist_break_reg1 & distance_placebo_reg<=$dist_break_reg2 ) ;
+if $type_area==1 {;
+  rgen_area ;
+};
 
-g con    = distance_rdp_reg!=. ;
+rgen ${no_post};
+
 
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
@@ -185,15 +171,14 @@ g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
-* drop if ( con==1 & drop_rdp==1 ) | (con==0 & drop_placebo==1) ;
 
+if $type_area == 0 {;
+  rgen_type ;
+};
 
-
-* cap drop Xsn;
-*  bys Xs Ys: g Xsn=_n;
-*  count if Xsn==1;
-* global CC=r(N) ;
-
+if $type_area==1 {;
+  rgen_type_area;
+};
 
 global outcomes="";
 foreach v in $outcomes_pre {;
@@ -201,19 +186,12 @@ foreach v in $outcomes_pre {;
    global outcomes = " $outcomes `v'_new " ;
 };
 
-*** ADD POST ! ***;
-rgen ${no_post};
-rgen_type ;
-
-
 gen_LL ;
-
 
 foreach v in for inf {;
 if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
   egen `v'_m = mean(`v'),  by( LL post ) ;
-*  replace `v'_fe=`v'-`v'_m ;
-g `v'_fe_pre=`v'-`v'_m ;
+  g `v'_fe_pre=`v'-`v'_m ;
   drop `v'_m ;
   };
 else {;
@@ -226,7 +204,6 @@ g `v'_fe_pre=`v' ;
 foreach v in for inf {;
 if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
   egen `v'_m = mean(`v'),  by( LL  ) ;
-*  replace `v'_fe=`v'-`v'_m ;
 g `v'_fe=`v'-`v'_m ;
   drop `v'_m ;
   };
@@ -234,23 +211,6 @@ else {;
 g `v'_fe=`v' ;
 };
 };
-
-
-* foreach v in rdp placebo {;
-* if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
-*   egen distance_`v'_m = mean(distance_`v'),  by( LL  ) ;
-*   g distance_`v'_fe = distance_`v'-distance_`v'_m;
-*   drop distance_`v'_m;
-
-* egen dists_`v'_fe = cut(distance_`v'_fe),at($dist_min($bin)$max);
-* g d`v'_fe=dists_`v'_fe;
-* replace d`v'_fe=. if d`v'_fe>$max-$bin; 
-
-*   };
-* else {;
-* g d`v'_fe=d`v' ;
-* };
-* };
 
 
 
@@ -262,21 +222,8 @@ g `v'_fe=`v' ;
 
 if $reg_triplediff2 == 1 {;
 
-* regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
-
-* if $spatial == 1 {;
-
-* regs_spatial b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
-
-* };
-
-
-
-* if $spatial == 0 {;
 
 regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
-
-* };
 
 rgen_dd_full ;
 rgen_dd_cc ;
@@ -287,36 +234,12 @@ regs_dd_cc b_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
 
 
-
-
-* rgen_dd_full ;
-
-* regs_dd_full build_dd_full ; 
-
-* rgen_dd_cc ;
-
-* regs_dd_cc   build_dd_cc ;
-
 };
 
 
 if $reg_triplediff2_type == 1 {;
 
-* regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
-if $spatial == 1 {;
-
-regs_type_spatial b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_spatial ;
-
-};
-
-
-
-if $spatial == 0 {;
-
 regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
-
-};
-
 
 };
 
@@ -686,11 +609,11 @@ foreach v in $outcomes {;
 };
 
 
-g proj   = distance_rdp_reg<=0 | distance_placebo_reg<=0 ;
-g spill1  = ( distance_rdp_reg>0 & distance_rdp_reg<$dist_break_reg1 ) | ( distance_placebo_reg>0 & distance_placebo_reg<$dist_break_reg1 ) ;
-g spill2  = ( distance_rdp_reg>=$dist_break_reg1 & distance_rdp_reg<=$dist_break_reg2 ) | ( distance_placebo_reg>=$dist_break_reg1 & distance_placebo_reg<=$dist_break_reg2 ) ;
+g proj   = distance_rdp<=0 | distance_placebo<=0 ;
+g spill1  = ( distance_rdp>0 & distance_rdp<$dist_break_reg1 ) | ( distance_placebo>0 & distance_placebo<$dist_break_reg1 ) ;
+g spill2  = ( distance_rdp>=$dist_break_reg1 & distance_rdp<=$dist_break_reg2 ) | ( distance_placebo>=$dist_break_reg1 & distance_placebo<=$dist_break_reg2 ) ;
 
-g con    = distance_rdp_reg!=. ;
+g con    = distance_rdp!=. ;
 
 g proj_con = proj*con ;
 g spill1_con = spill1*con ;
@@ -764,11 +687,11 @@ reg for_new $regressors post, cl(cluster_joined)
 
 reg for_new $regressors post if con==1, cl(cluster_joined) 
 
-* sum for if post==0 & con==1 & distance_rdp_reg>0 & distance_rdp_reg<300 
-* sum for if post==1 & con==1 & distance_rdp_reg>0 & distance_rdp_reg<300 
+* sum for if post==0 & con==1 & distance_rdp>0 & distance_rdp<300 
+* sum for if post==1 & con==1 & distance_rdp>0 & distance_rdp<300 
 
-* sum for if post==0 & con==0 & distance_placebo_reg>0 & distance_placebo_reg<300 
-* sum for if post==1 & con==0 & distance_placebo_reg>0 & distance_placebo_reg<300      ;
+* sum for if post==0 & con==0 & distance_placebo>0 & distance_placebo<300 
+* sum for if post==1 & con==0 & distance_placebo>0 & distance_placebo<300      ;
   
 
 cap drop for_m
@@ -800,8 +723,8 @@ sum for if post==0 & con==1 & spill1==0 & spill2==0 & proj==0
 sum for if post==1 & con==1 & spill1==0 & spill2==0 & proj==0
 
 
-sum for if post==0 & con==0 & distance_placebo_reg>0 & distance_placebo_reg<300 
-sum for if post==1 & con==0 & distance_placebo_reg>0 & distance_placebo_reg<300      ;
+sum for if post==0 & con==0 & distance_placebo>0 & distance_placebo<300 
+sum for if post==1 & con==0 & distance_placebo>0 & distance_placebo<300      ;
 
 reg for_fe $regressors post if con==1
 * reg for_fe $regressors post if con==0     */ 

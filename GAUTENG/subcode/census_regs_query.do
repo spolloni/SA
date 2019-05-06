@@ -32,11 +32,24 @@ prog gen_het;
   g het = cbd_dist>= `=r(p50)' & cbd_dist<.;
 end;
 
+global data_load_place = 0;
 
 global full_data_1996 = 0;
-global data_load_1996 = 0;
-global data_load      = 0;
-global aggregate      = 1;
+global full_data_2001 = 0;
+global full_data_2011 = 0;
+global aggregate      = 0;
+
+
+
+global full_data_pers_1996 = 0;
+global full_data_pers_2001 = 0;
+global full_data_pers_2011 = 0;
+global aggregate_pers      = 0;
+
+
+global merge_place    = 1;
+
+
 
 if $LOCAL==1 {;
 	cd .. ;
@@ -62,29 +75,7 @@ cd Generated/Gauteng;
 
 
 
-
-if $full_data_1996 == 1 {;
-
-local qry = " 
-
-    SELECT   A.EACODE, 
-      A.DWELLING AS dwelling_typ,
-      A.ROOMS AS tot_rooms, A.OWNED AS tenure, A.WATER AS water_piped,
-       A.TOILET AS toilet_typ, 
-      A.FUELCOOK AS enrgy_cooking, A.FUELHEAT AS enrgy_heating,
-      A.FUELLIGH AS enrgy_lighting, A.REFUSE AS refuse_typ, A.HHSIZE AS hh_size
-    FROM census_hh_1996 AS A  " ;
-
-odbc query "gauteng" ;
-odbc load, exec("`qry'") clear ; 
-
-save "DDcensus_hh_full_1996_admin${V}.dta", replace ; 
-
-};
-
-
-
-if $data_load_1996 == 1 {;
+if $data_load_place == 1 {;
 
 
 local qry = " 
@@ -104,11 +95,11 @@ local qry = "
       B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
        BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
-      IR.area_int_rdp, IP.area_int_placebo, 
+      IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      1996 AS year, EA.polygonid AS area_code,  XY.X, XY.Y, 
+      1996 AS year, EA.OGC_FID AS area_code,  XY.X, XY.Y, 
 
-      SP.sp_1, QQ.area
+      SP.sp_1
 
     FROM ea_1996 AS EA
 
@@ -151,88 +142,22 @@ local qry = "
     LEFT JOIN ea_1996_xy AS XY ON EA.OGC_FID = XY.OGC_FID
 
     LEFT JOIN  (SELECT * FROM ea_1996_s2001 AS G GROUP BY G.OGC_FID HAVING G.area_int==max(G.area_int)) AS SP ON EA.OGC_FID = SP.OGC_FID
+ 
+  /* *** */
+    UNION ALL
+  /* *** */
 
-  ) AS AA
-
-  LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
-
-  LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
-
-  LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
-
-  LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
-
-  ";
-
-
-
-odbc query "gauteng";
-odbc load, exec("`qry'") clear; 
-
-
-destring area_code, replace force ; 
-ren area_code EACODE;
-
-save  "DDcensus_1996_admin${V}.dta", replace ;
-merge 1:m EACODE using "DDcensus_hh_full_1996_admin${V}.dta" ;
-ren EACODE area_code ;
-
-keep if _merge==3;
-drop _merge;
-
-destring area_int_placebo area_int_rdp, replace force;  
-
-drop if distance_rdp==. & distance_placebo==.;
-
-destring cbd_dist_rdp cbd_dist_placebo, replace force;
-g cbd_dist = cbd_dist_rdp ;
-replace cbd_dist = cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ;
-drop cbd_dist_rdp cbd_dist_placebo ; 
-
-save "DDcensus_hh_1996_admin${V}.dta", replace;
-
-};
-
-
-
-
-if $data_load == 1 {;
-
-*  cast(B.input_id AS TEXT) as sal_code_rdp, ; 
-* cast(BP.input_id AS TEXT) as sal_code_placebo,;
-
-
-
-local qry = " 
-
-  SELECT 
-
-  AA.*,
-
-  CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo,
-
-  GT.type AS type_rdp, GTP.type AS type_placebo
-
-  FROM (
-
-    SELECT 
-
-      A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
-      A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
-      A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
-      A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
-      A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size,
-
+  SELECT
       B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-       BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
+      BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      2001 AS year, A.SAL AS area_code,  XY.X, XY.Y, 
+      2001 AS year, SP.OGC_FID AS area_code,  XY.X, XY.Y, 
 
       SP.sp_code AS sp_1
 
-    FROM census_hh_2001 AS A  
+    FROM (SELECT sal_code AS SAL FROM sal_2001) AS A  
 
     LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
@@ -278,81 +203,76 @@ local qry = "
     UNION ALL 
     /* *** */
 
-    SELECT 
-
-      A.H01_QUARTERS AS quarters_typ, A.H02_MAINDWELLING AS dwelling_typ, 
-      A.H03_TOTROOMS AS tot_rooms, A.H04_TENURE AS tenure, A.H07_WATERPIPED AS water_piped,
-      A.H08_WATERSOURCE AS water_source, A.H10_TOILET AS toilet_typ, 
-      A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
-      A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size,
+   SELECT 
 
       B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
       BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
       
       IR.area_int_rdp, IP.area_int_placebo, QQ.area,
 
-      2011 AS year, A.SAL_CODE AS area_code,  XY.X, XY.Y, 
+      2011 AS year, A.OGC_FID AS area_code,  XY.X, XY.Y, 
 
       SP.sp_1
 
-    FROM census_hh_2011 AS A  
+    FROM (SELECT OGC_FID FROM sal_ea_2011) AS A  
 
       LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_sal_2011_gcro${flink} AS D
+          FROM distance_sal_ea_2011_gcro${flink} AS D
           JOIN rdp_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=4000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
-        ) AS B ON A.SAL_CODE=B.input_id
+        ) AS B ON A.OGC_FID=B.input_id
 
       LEFT JOIN 
         (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-          FROM distance_sal_2011_gcro${flink} AS D
+          FROM distance_sal_ea_2011_gcro${flink} AS D
           JOIN placebo_cluster AS R ON R.cluster = D.target_id
           WHERE D.distance<=4000
           GROUP BY D.input_id HAVING COUNT(D.input_id)<=50 AND D.distance == MIN(D.distance)
-        ) AS BP ON A.SAL_CODE=BP.input_id
+        ) AS BP ON A.OGC_FID=BP.input_id
 
     LEFT JOIN  
-    (SELECT IT.sal_code, IT.area_int AS area_int_rdp, IT.cluster  
-    FROM  int_gcro${flink}_sal_2011 
+    (SELECT IT.OGC_FID, IT.area_int AS area_int_rdp, IT.cluster  
+    FROM  int_gcro${flink}_sal_ea_2011 
     AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster
-    GROUP BY IT.sal_code
+    GROUP BY IT.OGC_FID
         HAVING IT.area_int = MAX(IT.area_int)
       )  
-    AS IR ON IR.sal_code = A.SAL_CODE
+    AS IR ON IR.OGC_FID = A.OGC_FID
 
     LEFT JOIN     
-    (SELECT IT.sal_code, IT.area_int AS area_int_placebo, IT.cluster  
-    FROM  int_gcro${flink}_sal_2011 
+    (SELECT IT.OGC_FID, IT.area_int AS area_int_placebo, IT.cluster  
+    FROM  int_gcro${flink}_sal_ea_2011 
     AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster
-    GROUP BY IT.sal_code
+    GROUP BY IT.OGC_FID
         HAVING IT.area_int = MAX(IT.area_int)
      )  
-    AS IP ON IP.sal_code = A.SAL_CODE
+    AS IP ON IP.OGC_FID = A.OGC_FID
 
-    LEFT JOIN  (SELECT * FROM sal_2011_s2001 AS G GROUP BY G.sal_code HAVING G.area_int==max(G.area_int)) AS SP ON A.SAL_CODE = SP.sal_code
+    LEFT JOIN  (SELECT * FROM sal_ea_2011_s2001 AS G GROUP BY G.OGC_FID HAVING G.area_int==max(G.area_int)) AS SP ON A.OGC_FID = SP.OGC_FID
 
-    LEFT JOIN area_sal_2011 AS QQ ON QQ.sal_code = A.SAL_CODE
+    LEFT JOIN sal_ea_2011_area AS QQ ON QQ.OGC_FID = A.OGC_FID
 
-    LEFT JOIN sal_2011_xy AS XY ON A.SAL_CODE = XY.sal_code
+    LEFT JOIN sal_ea_2011_xy AS XY ON A.OGC_FID = XY.OGC_FID ) 
 
-  ) AS AA
+     AS AA
 
-  LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
+    LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
 
-  LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
+    LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
 
-  LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
+    LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
 
-  LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
+    LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
 
   ";
 
-odbc query "gauteng";
-odbc load, exec("`qry'") clear;	
 
-destring area_int_placebo area_int_rdp, replace force;  
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force;  
 
 drop if distance_rdp==. & distance_placebo==.;
 
@@ -361,7 +281,106 @@ g cbd_dist = cbd_dist_rdp ;
 replace cbd_dist = cbd_dist_placebo if cbd_dist==. & cbd_dist_placebo!=. ;
 drop cbd_dist_rdp cbd_dist_placebo ; 
 
-save "DDcensus_hh_admin${V}.dta", replace;
+save "DDcensus_hh_place_admin${V}.dta", replace;
+
+
+};
+
+
+if $full_data_1996 == 1 {;
+
+local qry = " 
+
+    SELECT   B.OGC_FID AS area_code, A.EACODE, 
+      A.DWELLING AS dwelling_typ,
+      A.ROOMS AS tot_rooms, A.OWNED AS tenure, A.WATER AS water_piped,
+       A.TOILET AS toilet_typ, 
+      A.FUELCOOK AS enrgy_cooking, A.FUELHEAT AS enrgy_heating,
+      A.FUELLIGH AS enrgy_lighting, A.REFUSE AS refuse_typ, A.HHSIZE AS hh_size
+    FROM census_hh_1996 AS A  
+
+        JOIN ea_1996 AS B ON A.EACODE = B.polygonid " ;
+
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
+
+destring area_code, replace force;
+g year = 1996;
+
+merge m:1 year area_code using "DDcensus_hh_place_admin${V}.dta"; 
+keep if _merge==3; 
+drop _merge; 
+
+drop distance_rdp-type_placebo;
+
+
+
+save "DDcensus_hh_full_1996_admin${V}.dta", replace ; 
+
+};
+
+
+
+if $full_data_2001 == 1 {;
+
+local qry = " 
+
+    SELECT   B.OGC_FID AS area_code,   A.SAL,    A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
+      A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
+      A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
+      A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
+      A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size
+
+      FROM census_hh_2001 AS A
+
+        JOIN sal_2001 AS B ON A.SAL = B.sal_code " ;
+
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
+
+destring area_code, replace force;
+g year = 2001;
+
+merge m:1 year area_code using "DDcensus_hh_place_admin${V}.dta"; 
+keep if _merge==3; 
+drop _merge; 
+
+drop distance_rdp-type_placebo;
+
+save "DDcensus_hh_full_2001_admin${V}.dta", replace ; 
+
+};
+
+if $full_data_2011 == 1 {;
+
+local qry = " 
+
+    SELECT   B.OGC_FID AS area_code,   A.SAL_CODE,
+      A.H01_QUARTERS AS quarters_typ, A.H02_MAINDWELLING AS dwelling_typ, 
+      A.H03_TOTROOMS AS tot_rooms, A.H04_TENURE AS tenure, A.H07_WATERPIPED AS water_piped,
+      A.H08_WATERSOURCE AS water_source, A.H10_TOILET AS toilet_typ, 
+      A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
+      A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size
+
+
+      FROM census_hh_2011 AS A
+
+        JOIN sal_2011 AS B ON A.SAL_CODE = B.sal_code " ;
+
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
+
+destring area_code, replace force;
+g year = 2011;
+
+merge m:1 year area_code using "DDcensus_hh_place_admin${V}.dta"; 
+keep if _merge==3; 
+drop _merge; 
+
+drop distance_rdp-type_placebo;
+
+
+save "DDcensus_hh_full_2011_admin${V}.dta", replace ; 
 
 };
 
@@ -369,13 +388,11 @@ save "DDcensus_hh_admin${V}.dta", replace;
 
 if $aggregate == 1 {;
 
-use "DDcensus_hh_admin${V}.dta", clear;
+use "DDcensus_hh_full_1996_admin${V}.dta", clear ;
 
-append using "DDcensus_hh_1996_admin${V}.dta" ;
+append  using  "DDcensus_hh_full_2001_admin${V}.dta" ;
+append  using  "DDcensus_hh_full_2011_admin${V}.dta" ;
 
-
-g het =1 if  cbd_dist<=$het ;
-replace het = 0 if cbd_dist>$het & cbd_dist<. ;  /* NOTE! cbd_dist is only measured for treated/placebo clusters!!  careful! */
 
 * flush toilet?;
 gen toilet_flush = ((toilet_typ==1|toilet_typ==2) & year>=2001) | (toilet_typ==1 & year==1996) if !missing(toilet_typ);
@@ -443,41 +460,42 @@ lab var hh_size "Household Size";
 
 * household density;
 g o = 1;
-egen hh_pop = sum(o), by(area_code year);
-g hh_density = (hh_pop/area)*1000000;
-lab var hh_density "Households per km2";
+egen  hh_pop = sum(o), by(area_code year);
+*g hh_density = (hh_pop/area)*1000000;
+*lab var hh_density "Households per km2";
 drop o;
 
 * pop density;
-egen person_pop = sum(hh_size), by(area_code year);
-g pop_density = (person_pop/area)*1000000;
-lab var pop_density "People per km2";
+egen  person_pop = sum(hh_size), by(area_code year);
+*g pop_density = (person_pop/area)*1000000;
+*lab var pop_density "People per km2";
+
+g formal = house==1 | house_bkyd==1;
+g informal = shack_bkyd==1 | shack_non_bkyd==1;
 
 
-
-* cluster for SEs;
-replace area_int_rdp =0 if area_int_rdp ==.;
-replace area_int_placebo =0 if area_int_placebo ==.;
-gen placebo = (distance_placebo < distance_rdp);
-gen placebo2 = (area_int_placebo> area_int_rdp);
-replace placebo = 1 if placebo2==1;
-drop placebo2;
-gen distance_joined = cond(placebo==1, distance_placebo, distance_rdp);
-gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
-
-collapse 
-  (mean) toilet_flush water_inside water_yard water_utility
+foreach v in toilet_flush water_inside water_yard water_utility
   electricity electric_cooking electric_heating electric_lighting
-  owner house house_bkyd shack_bkyd shack_non_bkyd house_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens tot_rooms hh_size
-  (firstnm) hh_pop person_pop hh_density pop_density area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo  X Y sp_1 area
+  owner  { ;
+  foreach ht in formal informal {;
+  g `v'_`ht' = `v'*`ht';
+  };
+  }; 
+
+fcollapse 
+  (mean) toilet_flush* water_inside* water_yard* water_utility*
+  electricity* electric_cooking* electric_heating* electric_lighting*
+  owner*  formal informal  house house_bkyd shack_bkyd shack_non_bkyd house_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens tot_rooms hh_size
+  (firstnm) hh_pop person_pop
   , by(area_code year);
 
 
-cd ../..;
-cd $output;
+save "temp_censushh_agg_no_place${V}.dta", replace;
 
-save "temp_censushh_agg${V}.dta", replace;
+erase "DDcensus_hh_full_1996_admin${V}.dta";
+erase "DDcensus_hh_full_2001_admin${V}.dta";
+erase "DDcensus_hh_full_2011_admin${V}.dta";
+
 
 };
 *****************************************************************;
@@ -488,87 +506,242 @@ save "temp_censushh_agg${V}.dta", replace;
 
 
 
-* local qry = " 
 
-*   SELECT 
 
-*   AA.*,
 
-*   CR.cbd_dist AS cbd_dist_rdp, CP.cbd_dist AS cbd_dist_placebo,
 
-*   GT.type AS type_rdp, GTP.type AS type_placebo
+if $full_data_pers_1996 == 1 {;
 
-*   FROM (
+local qry = " 
 
-*     SELECT 
+    SELECT   B.OGC_FID AS area_code, A.EACODE, 
+          A.SEX AS sex, A.AGE AS age,
+        A.MARSTATU AS marit_stat, 
+        A.RACE AS race, A.LANGUAG1 AS language, 
+        A.INCOME AS income, A.DEDUCODE AS education,
+        A.ECONACTT AS employment, 
+        A.INDUSTR2 AS industry, A.OCCUPAT3 AS occupation
 
-*       A.DWELLING AS dwelling_typ,
-*       A.ROOMS AS tot_rooms, A.OWNED AS tenure, A.WATER AS water_piped,
-*        A.TOILET AS toilet_typ, 
-*       A.FUELCOOK AS enrgy_cooking, A.FUELHEAT AS enrgy_heating,
-*       A.FUELLIGH AS enrgy_lighting, A.REFUSE AS refuse_typ, A.HHSIZE AS hh_size,
+          FROM census_pers_1996 AS A 
 
-*       B.distance AS distance_rdp, B.target_id AS cluster_rdp, 
-*        BP.distance AS distance_placebo, BP.target_id AS cluster_placebo, 
-      
-*       IR.area_int_rdp, IP.area_int_placebo, 
+        JOIN ea_1996 AS B ON A.EACODE = B.polygonid " ;
 
-*       2001 AS year, EA.polygonid AS area_code,  XY.X, XY.Y, 
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
 
-*       SP.sp_1
+destring area_code, replace force;
+g year = 1996;
 
-*     FROM census_hh_1996 AS A  
+fmerge m:1 year area_code using "DDcensus_hh_place_admin${V}.dta"; 
+keep if _merge==3; 
+drop _merge; 
 
-*     LEFT JOIN ea_1996 AS EA ON EA.polygonid = A.EACODE
+drop distance_rdp-type_placebo;
 
-*     LEFT JOIN 
-*         (SELECT D.input_id, D.distance, D.target_id
-*           FROM distance_ea_1996_gcro${flink} AS D
-*           JOIN rdp_cluster AS R ON R.cluster = D.target_id
-*           WHERE D.distance<=4000
-*           GROUP BY D.input_id HAVING D.distance == MIN(D.distance)
-*         ) AS B ON EA.OGC_FID=B.input_id
+save "DDcensus_pers_full_1996_admin${V}.dta", replace ; 
 
-*     LEFT JOIN 
-*         (SELECT D.input_id, D.distance, D.target_id
-*           FROM distance_ea_1996_gcro${flink} AS D
-*           JOIN placebo_cluster AS R ON R.cluster = D.target_id
-*           WHERE D.distance<=4000
-*           GROUP BY D.input_id HAVING D.distance == MIN(D.distance)
-*         ) AS BP ON EA.OGC_FID=BP.input_id
+};
 
-*     LEFT JOIN  
-*     (SELECT IT.OGC_FID, IT.area_int AS area_int_rdp
-*     FROM  int_gcro${flink}_ea_1996
-*     AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster
-*     GROUP BY IT.OGC_FID
-*         HAVING IT.area_int = MAX(IT.area_int)
-*       )  
-*     AS IR ON IR.OGC_FID = EA.OGC_FID
 
-*     LEFT JOIN     
-*     (SELECT IT.OGC_FID, IT.area_int AS area_int_placebo 
-*     FROM  int_gcro${flink}_ea_1996 
-*     AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster
-*     GROUP BY IT.OGC_FID
-*         HAVING IT.area_int = MAX(IT.area_int)
-*      )  
-*     AS IP ON IP.OGC_FID = EA.OGC_FID
 
-*     LEFT JOIN ea_1996_xy AS XY ON EA.OGC_FID = XY.OGC_FID
+if $full_data_pers_2001 == 1 {;
 
-*     LEFT JOIN  (SELECT * FROM ea_1996_s2001 AS G GROUP BY G.OGC_FID HAVING G.area_int==max(G.area_int)) AS SP ON EA.OGC_FID = SP.OGC_FID
+local qry = " 
 
-*   ) AS AA
+    SELECT   B.OGC_FID AS area_code,   A.SAL,     A.P03_Sex AS sex, A.P02_Age AS age, A.P04_Rel AS relation, 
+        A.P02_Yr AS birth_yr, A.P05_Mar AS marit_stat, A.P06_Race AS race, 
+        A.P07_lng AS language, A.P09a_Prv AS birth_prov, A.P22_Incm AS income, 
+        A.P17_Educ AS education, A.DER10_EMPL_ST1 AS employment, 
+        A.P19b_Ind AS industry, A.P19c_Occ as occupation
 
-*   LEFT JOIN cbd_dist${flink} AS CP ON CP.cluster = AA.cluster_placebo
+      FROM census_pers_2001 AS A
 
-*   LEFT JOIN cbd_dist${flink} AS CR ON CR.cluster = AA.cluster_rdp
+        JOIN sal_2001 AS B ON A.SAL = B.sal_code " ;
 
-*   LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = CP.cluster
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
 
-*   LEFT JOIN gcro_type AS GT ON GT.OGC_FID = CR.cluster
+destring area_code, replace force;
+g year = 2001;
 
-*   ";
+fmerge m:1 year area_code using "DDcensus_hh_place_admin${V}.dta"; 
+keep if _merge==3; 
+drop _merge; 
+
+drop distance_rdp-type_placebo;
+
+save "DDcensus_pers_full_2001_admin${V}.dta", replace ; 
+
+};
+
+if $full_data_pers_2011 == 1 {;
+
+local qry = " 
+
+    SELECT   B.OGC_FID AS area_code,   A.SAL_CODE,
+      A.F03_SEX AS sex, A.F02_AGE AS age, A.P02_RELATION AS relation, 
+        A.P01_YEAR AS birth_yr, A.P03_MARITAL_ST AS marit_stat, 
+        A.P05_POP_GROUP AS race, A.P06A_LANGUAGE AS language, 
+        A.P07_PROV_POB AS birth_prov, 
+        A.P16_INCOME AS income, A.P20_EDULEVEL AS education,
+        A.DERP_EMPLOY_STATUS_OFFICIAL AS employment, 
+        A.DERP_INDUSTRY AS industry, A.DERP_OCCUPATION AS occupation
+
+      FROM census_pers_2011 AS A
+
+        JOIN sal_2011 AS B ON A.SAL_CODE = B.sal_code " ;
+
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
+
+destring area_code, replace force;
+g year = 2011;
+
+fmerge m:1 year area_code using "DDcensus_hh_place_admin${V}.dta"; 
+* keep if _merge==3;
+g merge_place = _merge; 
+drop _merge; 
+
+drop distance_rdp-type_placebo;
+
+
+save "DDcensus_pers_full_2011_admin${V}.dta", replace ; 
+
+};
+
+
+
+if $aggregate_pers == 1 {;
+
+use "DDcensus_pers_full_1996_admin${V}.dta", clear ;
+
+append  using  "DDcensus_pers_full_2001_admin${V}.dta"  ;
+append  using  "DDcensus_pers_full_2011_admin${V}.dta"  ;
+
+
+* employment;
+gen unemployed = .;
+replace unemployed = 1 if employment ==2;
+replace unemployed = 0 if employment ==1;
+
+lab var unemployed "Unemployed";
+
+* schooling;
+gen educ_yrs = education + 1  if education<=12 & !missing(education);
+replace educ_yrs = 0 if ((education==99 & (year ==2001 | year==1996))|(education==98 & year ==2011)) & !missing(education);
+replace educ_yrs = 10 if (education==13) & !missing(education);
+replace educ_yrs = 11 if (education== 14) & !missing(education);
+replace educ_yrs = 12 if (education== 15) & !missing(education);
+replace educ_yrs = 12.5 if (education==16) & !missing(education);
+replace educ_yrs = 13 if (education==17) & !missing(education);
+replace educ_yrs = 13.5 if (education==18) & !missing(education);
+replace educ_yrs = 14 if (education==19) & !missing(education);
+replace educ_yrs = 14 if (education==20) & !missing(education);
+replace educ_yrs = 14 if (education==21) & !missing(education);
+replace educ_yrs = 14 if (education==22) & !missing(education);
+replace educ_yrs = 15 if (education==23) & !missing(education);
+replace educ_yrs = 16 if (education==24) & !missing(education);
+replace educ_yrs = 16 if (education==25) & !missing(education);
+replace educ_yrs = 17 if (education==26) & !missing(education);
+replace educ_yrs = 17 if (education==27) & !missing(education);
+replace educ_yrs = 18 if (education==28) & !missing(education);
+gen schooling_noeduc  = (education==99 & (year ==2001 | year==1996))|((education==98 | education==0) & year ==2011) if !missing(education);
+gen schooling_postsec = (education>=12 & education<=30) if !missing(education) & age>=18;
+
+* race;
+gen black = (race==1) if !missing(race);
+
+* born outside Gauteng;
+gen outside_gp = (birth_prov!=7) if !missing(birth_prov);
+
+* income;
+gen inc_value = . ;
+replace inc_value = 0      if income ==1 & year!=1996;
+replace inc_value = 200    if income ==2 & year!=1996;
+replace inc_value = 600    if income ==3 & year!=1996;
+replace inc_value = 1200   if income ==4 & year!=1996;
+replace inc_value = 2400   if income ==5 & year!=1996;
+replace inc_value = 4800   if income ==6 & year!=1996;
+replace inc_value = 9600   if income ==7 & year!=1996;
+replace inc_value = 19200  if income ==8 & year!=1996;
+replace inc_value = 38400  if income ==9 & year!=1996;
+replace inc_value = 76800  if income ==10 & year!=1996;
+replace inc_value = 153600 if income ==11 & year!=1996;
+replace inc_value = 307200 if income ==12 & year!=1996;
+
+replace inc_value = 0      if income ==1 & year==1996;
+replace inc_value = 100    if income ==2 & year==1996;
+replace inc_value = 350    if income ==3 & year==1996;
+replace inc_value = 750    if income ==4 & year==1996;
+replace inc_value = 1250   if income ==5 & year==1996;
+replace inc_value = 2000   if income ==6 & year==1996;
+replace inc_value = 3000   if income ==7 & year==1996;
+replace inc_value = 4000   if income ==8 & year==1996;
+replace inc_value = 5250   if income ==9 & year==1996;
+replace inc_value = 7000   if income ==10 & year==1996;
+replace inc_value = 9500   if income ==11 & year==1996;
+replace inc_value = 13500  if income ==12 & year==1996;
+replace inc_value = 23000  if income ==13 & year==1996;
+replace inc_value = 50000  if income ==14 & year==1996;
+
+gen inc_value_earners = inc_value ;
+replace inc_value_earners = . if inc_value==0;
+lab var inc_value_earners "HH Income";
+
+* population;
+g o = 1;
+egen person_pop = sum(o), by(area_code year);
+drop o;
+
+fcollapse 
+  (mean) unemployed educ_yrs black outside_gp age
+  inc_value inc_value_earners schooling_noeduc schooling_postsec
+  (firstnm) person_pop
+  , by(area_code year);
+
+save "temp_censuspers_agg_no_place${V}.dta", replace;
+
+erase "DDcensus_pers_full_1996_admin${V}.dta";
+erase "DDcensus_pers_full_2001_admin${V}.dta";
+erase "DDcensus_pers_full_2011_admin${V}.dta";
+
+};
+
+
+
+
+if $merge_place == 1 {;
+
+use "temp_censuspers_agg_no_place${V}.dta", clear;
+
+fmerge 1:1 area_code year using "DDcensus_hh_place_admin${V}.dta";
+* keep if _merge==3;
+g merge_place = _merge;
+drop _merge;
+
+cd ../..;
+cd $output;
+save "temp_censuspers_agg${V}.dta", replace;
+
+
+cd ../../../..;
+cd Generated/GAUTENG;
+
+use "temp_censushh_agg_no_place${V}.dta", clear;
+
+merge 1:1 area_code year using "DDcensus_hh_place_admin${V}.dta";
+* drop if _merge==1;
+g merge_place = _merge;
+drop _merge;
+
+replace hh_pop=0 if hh_pop==.;
+replace person_pop=0 if person_pop==.;
+cd ../..;
+cd $output;
+save "temp_censushh_agg${V}.dta", replace;
+
+};
+
+
 
 

@@ -13,6 +13,58 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+
+
+def full_2011_sp(db):
+
+    def drop_full_table(name):
+        chec_qry = '''
+                   SELECT type,name from SQLite_Master
+                   WHERE type="table" AND name ="{}";
+                   '''.format(name)
+        drop_qry = '''
+                   SELECT DisableSpatialIndex('{}','GEOMETRY');
+                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
+                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+                   DROP TABLE IF EXISTS {};
+                   '''.format(name,name,name,name)
+        cur.execute(chec_qry)
+        result = cur.fetchall()
+        if result:
+            cur.executescript(drop_qry)
+
+    def add_index(name,index_var):
+        cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(name))
+        cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+        if index_var!='none':
+            cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
+
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    table='sal_ea_2011'
+    drop_full_table(table)
+
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT OGC_FID, sal_code, GEOMETRY
+                FROM sal_2011
+                UNION 
+                SELECT G.OGC_FID+100000 AS OGC_FID, G.ea_code AS sal_code, G.GEOMETRY 
+                FROM ea_2011 AS G LEFT JOIN sal_2011 AS H ON G.sal_code = H.sal_code 
+                WHERE H.sal_code IS NULL
+                ;
+                '''.format(table))
+    add_index(table,'OGC_FID')
+
+    return
+# full_2011_sp(db)
+
+
+
 def gp2shp(db,qrys,geocol,out,espg):
 
     con = sql.connect(db)
@@ -62,7 +114,7 @@ def intersGEOM(db,geom,hull,year):
 
     return
 
-def intersGEOM1996(db,geom,hull,year):
+def intersGEOMogc(db,geom,hull,year):
 
     # connect to DB
     con = sql.connect(db)

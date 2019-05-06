@@ -53,12 +53,23 @@ end
 
 cap prog drop regression 
 prog define regression
-	
+
+	if `3'==0 {
 	if "${k}"=="none" {
-		reg `1' `2' $extra_controls `3', cl(cluster_joined) r
+		reg `1' `2' $extra_controls , cl(cluster_joined) r
 	}
 	else {
-	areg `1' `2' $extra_controls `3', cl(cluster_joined) a(LL) r
+	areg `1' `2' $extra_controls , cl(cluster_joined) a(LL) r
+	}
+	}
+
+	if `3'==1 {
+	if "${k}"=="none" {
+		reg `1' `2' $extra_controls_2 , cl(cluster_joined) r
+	}
+	else {
+	areg `1' `2' $extra_controls_2 , cl(cluster_joined) a(LL) r
+	}
 	}
 end
 
@@ -136,6 +147,96 @@ end
 
 
 
+cap prog drop rgen_area
+prog define rgen_area 
+
+	g area_2 = area*area
+	g area_3 = area*area_2
+
+	global area_list " area_int_rdp area_int_placebo area_b1_rdp area_b1_placebo area_b2_rdp area_b2_placebo  "
+
+	foreach var of varlist cluster_int_rdp cluster_int_placebo b1_int_rdp b1_int_placebo b2_int_rdp b2_int_placebo {
+		replace `var'=0 if `var'==.
+	}
+
+	g area_int_rdp  =  cluster_int_rdp 
+	g area_int_placebo = cluster_int_placebo 
+
+	if $many_spill == 1 {
+	g area_b1_rdp = (b1_int_rdp - cluster_int_rdp)
+	g area_b1_placebo = (b1_int_placebo - cluster_int_placebo)
+	}
+
+	if $many_spill == 0 {
+	g area_b1_rdp = (b2_int_rdp - cluster_int_rdp)
+	g area_b1_placebo = (b2_int_placebo - cluster_int_placebo)
+	}
+
+	g area_b2_rdp = (b2_int_rdp - b1_int_rdp)
+	g area_b2_placebo = (b2_int_placebo - b1_int_placebo)
+
+	forvalues t = 1/3 {
+
+		foreach var of varlist cluster_int_rdp_`t' cluster_int_placebo_`t' b1_int_rdp_`t' b1_int_placebo_`t' b2_int_rdp_`t' b2_int_placebo_`t' {
+				replace `var'=0 if `var'==.
+		}
+
+	  g area_int_rdp_`t'  =  cluster_int_rdp_`t' 
+	  g area_int_placebo_`t' = cluster_int_placebo_`t' 
+
+	if $many_spill == 1 {
+	g area_b1_rdp_`t' = (b1_int_rdp_`t' - cluster_int_rdp_`t')
+	g area_b1_placebo_`t' = (b1_int_placebo_`t' - cluster_int_placebo_`t')
+	}
+
+	if $many_spill == 0 {
+	g area_b1_rdp_`t' = (b2_int_rdp_`t' - cluster_int_rdp_`t')
+	g area_b1_placebo_`t' = (b2_int_placebo_`t' - cluster_int_placebo_`t')
+	}
+
+	  g area_b2_rdp_`t' = (b2_int_rdp_`t' - b1_int_rdp_`t')
+	  g area_b2_placebo_`t' = (b2_int_placebo_`t' - b1_int_placebo_`t')
+
+	  global area_list = " $area_list  area_int_rdp_`t' area_int_placebo_`t' area_b1_rdp_`t' area_b1_placebo_`t' area_b2_rdp_`t' area_b2_placebo_`t' " 
+	}
+
+
+	if $area_levels == 0 {
+	foreach var of varlist $area_list  {
+	replace `var' = `var'/area 
+	}
+	}
+
+	if $area_levels == 1 {
+	foreach var of varlist area area_2 area_3 $area_list {
+	replace `var' = `var'/(1000*1000)
+	}
+	}
+
+	foreach var of varlist $area_list {
+	  replace `var' = 0 if `var'==. 
+	}
+
+
+	g con = 0
+	replace con=1 if area_int_rdp>0 & area_int_rdp>area_int_placebo  &  area_int_rdp<. & area_int_placebo<.
+	replace con=1 if distance_rdp<=distance_placebo & con==0 & distance_rdp<.
+
+	g proj = area_int_rdp  if con==1 
+	replace proj = area_int_placebo if con==0 
+	replace proj = 0 if proj==.
+
+	g spill1 = area_b1_rdp if con==1
+	replace spill1 = area_b1_placebo if con==0
+	replace spill1 = 0 if spill1==.
+
+	g spill2 = area_b2_rdp if con==1
+	replace spill2 = area_b2_placebo if con==0
+	replace spill2 = 0 if spill2 ==. 
+
+end
+
+
 
 cap prog drop rgen_type
 prog define rgen_type
@@ -152,27 +253,93 @@ foreach v in $regressors_type_prep {
 end
 
 
+cap prog drop rgen_type_area
+prog define rgen_type_area
+
+global regressors2 ""
+  forvalues t = 1/3 {
+  g proj_t`t' = area_int_rdp_`t'  if con==1 
+  replace proj_t`t' = area_int_placebo_`t' if con==0 
+  replace proj_t`t' = 0 if proj_t`t'==.
+
+  g spill1_t`t' = area_b1_rdp_`t' if con==1
+  replace spill1_t`t' = area_b1_placebo_`t' if con==0
+  replace spill1_t`t' = 0 if spill1_t`t'==.
+
+  g con_t`t' = con*t`t'
+  g post_t`t' = post*t`t'
+  g proj_con_t`t' = proj_t`t'*con_t`t'
+  g spill1_con_t`t' = spill1_t`t'*con_t`t'
+
+  global regressors2 " $regressors2 post_t`t' proj_con_t`t' spill1_con_t`t' proj_t`t' spill1_t`t' con_t`t' "
+
+	if $many_spill == 1 {
+	  g spill2_t`t' = area_b2_rdp_`t' if con==1
+	  replace spill2_t`t' = area_b2_placebo_`t' if con==0
+	  replace spill2_t`t' = 0 if spill2_t`t' ==. 
+  		g spill2_con_t`t' = spill2_t`t'*con_t`t'
+  	  global regressors2 " $regressors2  spill2_con_t`t'  spill2_t`t' "
+	}
+
+    foreach var of varlist  proj_t`t' spill1_t`t' con_t`t' {
+    cap drop `var'_post_t`t' 
+    g `var'_post_t`t' = `var'*post_t`t'
+    global regressors2 " $regressors2  `var'_post_t`t' "
+    }
+
+    if $many_spill == 1 {
+    foreach var of varlist  spill2_t`t' {
+    cap drop `var'_post_t`t' 
+    g `var'_post_t`t' = `var'*post_t`t'
+    global regressors2 " $regressors2  `var'_post_t`t' "
+    }
+    }
+
+    g proj_con_post_t`t' = proj_con_t`t'*post_t`t'
+    g spill1_con_post_t`t' = spill1_con_t`t'*post_t`t'
+    global regressors2 " $regressors2  proj_con_post_t`t'  spill1_con_post_t`t' "
+
+    if $many_spill == 1 {
+    g spill2_con_post_t`t' = spill2_con_t`t'*post_t`t'
+    global regressors2 " $regressors2 spill2_con_post_t`t' "
+	}	
+
+  }
+end
+
+
+
 cap prog drop lab_var
 prog define lab_var
 
 	global all_label = "\textbf{All Projects} \\"
 
 	lab var proj "inside"
-	lab var spill1 "0-${dist_break_reg1}m away"
+
 	lab var con "constr"
 	lab var proj_con "inside $\times$ constr"
-	lab var spill1_con "0-${dist_break_reg1}m away $\times$ constr"
 	lab var proj_post "inside $\times$ post"
-	lab var spill1_post "0-${dist_break_reg1}m away $\times$ post"
+
 	lab var con_post "constr $\times$ post"
 	lab var proj_con_post "inside $\times$ constr $\times$ post"
-	lab var spill1_con_post "0-${dist_break_reg1}m away $\times$ constr $\times$ post"
+
+	if $many_spill == 0 {
+	lab var spill1_con "0-${dist_break_reg2}m away $\times$ constr"
+	lab var spill1 "0-${dist_break_reg2}m away"
+	lab var spill1_post "0-${dist_break_reg2}m away $\times$ post"
+	lab var spill1_con_post "0-${dist_break_reg2}m away $\times$ constr $\times$ post"
+	}
 
 	if $many_spill == 1 {
-		lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m away"
-		lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr"
-		lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ post"
-		lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr $\times$ post"
+	lab var spill1_con "0-${dist_break_reg1}m away $\times$ constr"
+	lab var spill1 "0-${dist_break_reg1}m away"
+	lab var spill1_post "0-${dist_break_reg1}m away $\times$ post"
+	lab var spill1_con_post "0-${dist_break_reg1}m away $\times$ constr $\times$ post"
+
+	lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m away"
+	lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr"
+	lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ post"
+	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr $\times$ post"
 	}
 end
 
@@ -180,9 +347,12 @@ cap prog drop lab_var_top
 prog define lab_var_top
 
 	lab var proj_con_post "inside project"
-	lab var spill1_con_post "0-${dist_break_reg1}m outside project "
+	if $many_spill == 0 {
+	lab var spill1_con_post "0-${dist_break_reg2}m outside project "
+	}
 	if $many_spill == 1 {
-		lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	lab var spill1_con_post "0-${dist_break_reg1}m outside project "
+	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m outside project "
 	}
 end
 
@@ -193,16 +363,23 @@ prog define lab_var_type
 	global type3_label = "\textbf{Other} \\ "
 
 	lab var proj_con_post_t1 "inside project  "
-	lab var spill1_con_post_t1 "0-${dist_break_reg1}m outside project "
 	lab var proj_con_post_t2 "inside project "
-	lab var spill1_con_post_t2 "0-${dist_break_reg1}m outside project "
 	lab var proj_con_post_t3 "inside project "
-	lab var spill1_con_post_t3 "0-${dist_break_reg1}m outside project "
+
+	if $many_spill == 0 {
+	lab var spill1_con_post_t1 "0-${dist_break_reg2}m outside project "
+	lab var spill1_con_post_t2 "0-${dist_break_reg2}m outside project "
+	lab var spill1_con_post_t3 "0-${dist_break_reg2}m outside project "
+	}
 
 	if $many_spill == 1 {
-		lab var spill2_con_post_t1 "${dist_break_reg1}-${dist_break_reg2}m outside project "
-		lab var spill2_con_post_t2 "${dist_break_reg1}-${dist_break_reg2}m outside project "
-		lab var spill2_con_post_t3 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	lab var spill1_con_post_t1 "0-${dist_break_reg1}m outside project "
+	lab var spill1_con_post_t2 "0-${dist_break_reg1}m outside project "
+	lab var spill1_con_post_t3 "0-${dist_break_reg1}m outside project "
+
+	lab var spill2_con_post_t1 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	lab var spill2_con_post_t2 "${dist_break_reg1}-${dist_break_reg2}m outside project "
+	lab var spill2_con_post_t3 "${dist_break_reg1}-${dist_break_reg2}m outside project "
 	}
 end
 
@@ -218,7 +395,7 @@ prog define regs
 	foreach var of varlist $outcomes {
 	  *reg `var' $regressors , cl(cluster_joined)
 
-	  regression `var' "$regressors" `2'
+	  regression `var' "$regressors" 0
 
 	  sum `var' if e(sample)==1 & post ==0 , detail
 	  estadd scalar Mean2001 = `=r(mean)'
@@ -507,7 +684,7 @@ prog define regs_type
 	foreach var of varlist $outcomes {
 	  *reg `var' $regressors2 , cl(cluster_joined)
 
-	  regression `var' "$regressors2" `2'
+	  regression `var' "$regressors2" 1
 
 	  sum `var' if e(sample)==1 & post ==0 , detail
 	  estadd scalar Mean2001 = `=r(mean)'

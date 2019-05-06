@@ -79,6 +79,15 @@ global ifregs   = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<8
 global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1800000 & purch_yr > 2000 & distance_rdp>0 & distance_placebo>0"
 
 
+*** KEY CENSUS OPTIONS! *** ;
+
+global type_area   = 1   /* use the areas of overlap separately for the types */
+global area_levels = 0   /* use the unit of exposure equal to km of overlap (instead of %) */
+global extra_controls = " y1996 area area_2 area_3  "
+
+
+
+
 
 
 ****** ANALYSIS NOW *******
@@ -97,16 +106,20 @@ global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1
 
 
 
-global many_spill = 1
-global spatial = 0
+global many_spill 	= 0
+global spatial  	= 0
+global other_print 	= 0
+
 
 if $many_spill == 0 {
-	global dist_break_reg1 = 500 
+	global dist_break_reg1 = 250 
 	global dist_break_reg2 = 500
 }
 if $many_spill == 1 {
 	global dist_break_reg1 = 250 
 	global dist_break_reg2 = 500
+	* global dist_break_reg1 = 400 
+	* global dist_break_reg2 = 800
 }
 
 global analysis_now = 0
@@ -115,7 +128,7 @@ global k = "sp"   /* determines fixed effect size */
 * global k = "sp_post"
 
 global post_control=""
-global post_control_price=""
+global post_control_price="purch_yr"
 global no_post=""
 if substr("${k}",-4,4)=="post" {
 	global post_control = "post"

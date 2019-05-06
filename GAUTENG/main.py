@@ -11,12 +11,12 @@ from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.placebofuns import make_gcro_all, make_gcro_full, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
-from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid, intersGEOM1996
+from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid, intersGEOMogc, full_2011_sp
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
-#from subcode.add_grid import bblu_xy, grid_to_erven
-#  add_grid, add_grid_counts, 
-#from paper.descriptive_statistics import cbd_gen
+from subcode.add_grid import buffer_area_int, buffer_area_int, census_xy, census_1996_xy, grid_xy, grid_sal, grid_sal_point
+
+
 from subcode.distfuns_admin import dist, intersPOINT, areaGEOM
 
 import os, subprocess, shutil, multiprocessing, re, glob
@@ -65,12 +65,19 @@ _2_FLAGRDP_ = 0 # DON"T NEED
 _3_GCRO_a_  = 0
 _3_GCRO_b_  = 0 # DON"T NEED
 
+_3_grid_define_ = 0
+
 _4_a_DISTS_ = 0  # buffers and hull creation
 _4_b_DISTS_ = 0  # ERVEN distance
 _4_c_DISTS_ = 0  # BBLU distance
 _4_d_DISTS_ = 0  # EA distance
-_4_e_DISTS_ = 1  # EA distance for 1996
-_4_f_DISTS_ = 0  # GRID DISTANCE!
+_4_e_DISTS_ = 0  # EA distance for 1996
+_4_f_DISTS_ = 0  # small area distance for 2011 with holes plugged 
+_4_g_DISTS_ = 0  # GRID DISTANCE!
+
+_4_xy_          = 0  # make xy coordinate tables for all the fixed effects
+_4_buffer_area_ = 0  # calculate areas of intersection with a bunch of buffers
+_4_subplace_fe_ = 0  # create unified subplace fixed effects
 
 
 _5_PLOTS_erven_ = 0  # distance plots:  prices and transaction frequencies
@@ -192,6 +199,7 @@ if _1_e_IMPORT ==1:
     print '\n'," - GHS data: done! "'\n'
 
 
+
 #############################################
 # STEP 2:  flag RDP properties              #
 #############################################
@@ -218,10 +226,8 @@ if _3_GCRO_a_ == 1:
     # import_budget(rawgcro)
     # make_gcro(db)
 
-    
     make_gcro_all(db)
     make_gcro_full(db)
-    
 
     # for hull in hulls:
     #     make_gcro_conhulls(db,hull)
@@ -238,7 +244,12 @@ if _3_GCRO_b_ == 1:
     print '\n', " linking : DONE! ", '\n'
 
 
+if _3_grid_define_ == 1:
 
+    print '\n', " make grid (takes a while) ", '\n'
+    add_grid(db,50)
+
+    print '\n', "finished the grid!", '\n'
 
 #############################################
 # STEP 4:  Distance to RDP for non-RDP      #
@@ -278,7 +289,7 @@ if _4_c_DISTS_ ==1:
 
 if _4_d_DISTS_ ==1:
     print '\n'," Distance part D: distances for EAs and SALs... ",'\n'        
-    for hull,geom,yr in product(hulls,['ea','sal'],['2001','2011']):
+    for hull,geom,yr in product(hulls,['ea','sal'],['2001']):
         import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
                                 st_y(st_centroid(p.GEOMETRY)) AS y, p.{}_code
                                 FROM  {}_{}  AS  p'''.format(geom,geom,yr)
@@ -296,19 +307,26 @@ if _4_e_DISTS_ ==1:
                                 FROM  ea_1996  AS  p'''
         #dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
         print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
-        intersGEOM1996(db,geom,hull,yr) 
+        intersGEOMogc(db,geom,hull,yr) 
         print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
 
 
-
-# if _4_e_DISTS_ == 1:
-#     print '\n'," Making BBLU xy table...",'\n'
-#     bblu_xy(db)
-#     print '\n'," Done BBLU XY ! ",'\n'
-
-
-
 if _4_f_DISTS_ ==1:
+    print '\n', " fill in holes in 2011 small areas with enumerator areas ", '\n'
+    full_2011_sp(db)
+
+    print '\n'," Distance part F: 2011 SAL with holes filled... ",'\n'        
+    for hull,geom,yr in product(hulls,['sal_ea'],['2011']):
+        import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.OGC_FID
+                                FROM  {}_{}  AS  p'''.format(geom,yr)
+        dist(db,hull,geom + '_' + yr,import_script,dist_threshold)
+        print '\n'," -- EA/SAL distance, Populate table / push to DB: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+        intersGEOMogc(db,geom,hull,yr) 
+        print '\n'," -- Area of Intersection: done! ({} {} {}) ".format(geom,hull,yr), '\n'
+
+
+if _4_g_DISTS_ ==1:
     print '\n'," Distance part F: distances for grids... ",'\n'        
     for hull in hulls:
         import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
@@ -318,6 +336,42 @@ if _4_f_DISTS_ ==1:
         print '\n'," -- Grid Distance ", '\n'
         intersGEOMgrid(db,hull,'grid_temp_3') 
         print '\n'," -- grid: done!", '\n'
+
+
+# if _4_e_DISTS_ == 1:
+#     print '\n'," Making BBLU xy table...",'\n'
+#     bblu_xy(db)
+#     print '\n'," Done BBLU XY ! ",'\n'
+
+
+
+if _4_buffer_area_ == 1:
+    print '\n',' calculate buffer intersections for all shapes','\n'
+    buffer_area_int(db,250,500)
+    buffer_area_int(db,400,800)
+    print '\n'," -- buffer area: done!", '\n'
+
+
+if _4_xy_ == 1:
+    print '\n', 'x,y coordinates for centroids of shapes '
+    census_xy(db)
+    census_1996_xy(db)
+    grid_xy(db)
+    print '\n'," -- x,y coordinates: done!", '\n'
+
+
+if _4_subplace_fe_ == 1:
+    print '\n',' create 2001 subplace unified fixed effects ','\n'
+    grid_sal(db,'grid_s2001','grid_temp_3','grid_id')
+    grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
+    grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
+    print '\n'," -- shape fe : done!", '\n'
+
+    grid_sal_point(db,'erven_s2001','erven','property_id')
+    print '\n'," -- erven fe : done!", '\n'    
+
+
+
 
 
 #############################################
@@ -382,7 +436,6 @@ if _7_DD_REGS_ == 1:
     #subprocess.call(cmd)
 
     print '\n'," -- DD census regs: done! ",'\n'
-
 
 
 
