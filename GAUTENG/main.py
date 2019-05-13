@@ -327,14 +327,15 @@ if _4_f_DISTS_ ==1:
 
 
 if _4_g_DISTS_ ==1:
+    grid_name = 'grid_temp_25'
     print '\n'," Distance part F: distances for grids... ",'\n'        
     for hull in hulls:
         import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
                                 st_y(st_centroid(p.GEOMETRY)) AS y, p.grid_id
-                                FROM  grid_temp_3  AS  p '''
+                                FROM  {} AS  p '''.format(grid_name)
         dist(db,hull,'grid_temp_3',import_script,dist_threshold)
         print '\n'," -- Grid Distance ", '\n'
-        intersGEOMgrid(db,hull,'grid_temp_3') 
+        intersGEOMgrid(db,hull,grid_name) 
         print '\n'," -- grid: done!", '\n'
 
 

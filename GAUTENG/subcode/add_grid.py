@@ -25,8 +25,52 @@ db = gendata+'gauteng.db'
 
 
 
+def buffer_tester(db):
+    print 'buffer time starting ...'
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
 
 
+    def drop_full_table(name):
+        chec_qry = '''
+                   SELECT type,name from SQLite_Master
+                   WHERE type="table" AND name ="{}";
+                   '''.format(name)
+        drop_qry = '''
+                   SELECT DisableSpatialIndex('{}','GEOMETRY');
+                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
+                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+                   DROP TABLE IF EXISTS {};
+                   '''.format(name,name,name,name)
+        cur.execute(chec_qry)
+        result = cur.fetchall()
+        if result:
+            cur.executescript(drop_qry)
+
+    def add_index(name,index_var):
+        cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(name))
+        cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+        if index_var!='none':
+            cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
+
+
+
+    table = 'buffer_test'
+    drop_full_table(table)
+
+    con.execute('''
+                        CREATE TABLE {} AS
+                        SELECT G.OGC_FID, CastToMultiPolygon(ST_DIFFERENCE(ST_BUFFER(G.GEOMETRY,500),G.GEOMETRY)) AS GEOMETRY
+                        FROM gcro_publichousing AS G
+                                                ;
+                        '''.format(table))
+    add_index(table,'OGC_FID')
+
+    print 'done'
+
+# buffer_tester(db)
 
 
 def buffer_area_int(db,buffer1,buffer2):
@@ -85,19 +129,21 @@ def buffer_area_int(db,buffer1,buffer2):
 
     print 'gcro type tables done .'
 
-    for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id']):
+    # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id']):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
-    # for name,fid in zip(['ea_1996','ea_2011','sal_2001','sal_2011'],['OGC_FID','OGC_FID','OGC_FID','OGC_FID']):
+    # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
     # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
-        table= name + '_area'
-        con.execute("DROP TABLE IF EXISTS {};".format(table))
-        con.execute('''
-                    CREATE TABLE {} AS
-                    SELECT A.OGC_FID, ST_AREA(A.GEOMETRY) AS area
-                    FROM {} AS A ;
-                    '''.format(table,name))
-        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
-
+    #for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
+    for name,fid in zip(['grid_temp_25'],['grid_id']):
+        # table= name + '_area'
+        # con.execute("DROP TABLE IF EXISTS {};".format(table))
+        # con.execute('''
+        #             CREATE TABLE {} AS
+        #             SELECT A.{}, ST_AREA(A.GEOMETRY) AS area
+        #             FROM {} AS A ;
+        #             '''.format(table,fid,name))
+        # cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+        # print 'generate area table '+name
 
         for tag in ['rdp','placebo']:
             table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer2)+'_'+tag
@@ -116,6 +162,7 @@ def buffer_area_int(db,buffer1,buffer2):
                                                 GROUP BY A.{} ;
                     '''.format(table,   fid,  tag,   buffer1,tag,  buffer2,tag, name, tag, name,buffer2,buffer2,fid))
             cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+            print 'done all '+tag+' '+name
 
             for t in [1,2,3]:
                 table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer2)+'_'+tag+'_'+str(t)
@@ -135,7 +182,7 @@ def buffer_area_int(db,buffer1,buffer2):
                         '''.format(table,   fid,  tag,str(t),   buffer1,tag,str(t),  buffer2,tag,str(t),  name, str(t),tag,  name,buffer2,buffer2,fid))
                 cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
 
-            print 'done ' + tag + ' ' + name 
+            print 'done types ' + tag + ' ' + name 
 
         table_full=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer2)
         con.execute("DROP TABLE IF EXISTS {};".format(table_full))
@@ -281,10 +328,81 @@ def grid_sal(db,table,input_file,idvar):
     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
     print 'all set with sp_1 !'
 
-# grid_sal(db,'grid_s2001','grid_temp_3','grid_id')
+# grid_sal(db,'grid_25_s2001','grid_temp_25','grid_id')
 # grid_sal(db,'sal_2011_s2001','sal_2011','sal_code')
 # grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
 # grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
+
+def bblu_pre_in_range(db):
+    print 'starting bblu pre within .. '
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    def drop_full_table(name):
+        chec_qry = '''
+                   SELECT type,name from SQLite_Master
+                   WHERE type="table" AND name ="{}";
+                   '''.format(name)
+        drop_qry = '''
+                   SELECT DisableSpatialIndex('{}','GEOMETRY');
+                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
+                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+                   DROP TABLE IF EXISTS {};
+                   '''.format(name,name,name,name)
+        cur.execute(chec_qry)
+        result = cur.fetchall()
+        if result:
+            cur.executescript(drop_qry)
+
+    def add_index(name,index_var):
+        cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'POINT','XY');".format(name))
+        cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+        if index_var!='none':
+            cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
+
+    table_bpre='bblu_pre_in_range'
+
+    drop_full_table(table_bpre)
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT A.OGC_FID, ST_makevalid(A.GEOMETRY) AS GEOMETRY
+                FROM bblu_pre AS A ;
+                '''.format(table_bpre))
+    add_index(table_bpre,'OGC_FID')
+
+    print 'bblu pre in range done'
+
+# bblu_pre_in_range(db)
+
+
+def bblu_pre_within(db,table,input_file,idvar):
+    print 'starting bblu pre within .. '
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT A.OGC_FID AS OGC_FID_bblu_pre, G.{}
+                FROM {} AS A, {} AS G
+                            WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY);
+                '''.format(table,idvar,'bblu_pre_in_range',input_file,'bblu_pre_in_range'))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+
+    print 'all set with bblu pre within!'
+
+
+# bblu_pre_within(db,'bblu_pre_in_ea_1996','ea_1996','OGC_FID')
+# bblu_pre_within(db,'bblu_pre_in_sal_2001','sal_2001','OGC_FID')
+# bblu_pre_within(db,'bblu_pre_in_sal_ea_2011','sal_ea_2011','OGC_FID')
+
 
 
 def grid_sal_point(db,table,input_file,idvar):
@@ -387,7 +505,9 @@ def grid_sal_point(db,table,input_file,idvar):
 
 def add_grid(db,grid_size):
     
+    print ' running grid '+str(grid_size)
     name = 'grid_new'
+    name_grid = 'grid_temp_'+str(grid_size)
 
     con = sql.connect(db)
     cur = con.cursor()
@@ -418,7 +538,7 @@ def add_grid(db,grid_size):
 
     drop_full_table(name)
     drop_full_table('grid_temp')
-    drop_full_table('grid_temp_3')    
+    drop_full_table(name_grid)    
     drop_full_table('buffer_union')
 
     cur.execute('DROP TABLE IF EXISTS {};'.format('grid_bblu_pre'))
@@ -427,7 +547,7 @@ def add_grid(db,grid_size):
     ## create normal buffer for intersection
     con.execute('''
             CREATE TABLE buffer_union AS
-            SELECT CastToMultiPolygon(ST_UNION(ST_BUFFER(GEOMETRY,4000))) AS GEOMETRY
+            SELECT CastToMultiPolygon(ST_UNION(ST_BUFFER(GEOMETRY,3000))) AS GEOMETRY
             FROM (
                 SELECT GEOMETRY FROM 
                     (SELECT G.GEOMETRY FROM gcro_publichousing AS G JOIN 
@@ -435,6 +555,7 @@ def add_grid(db,grid_size):
                  );
             ''')
     add_index('buffer_union','none')
+    print 'made normal buffer for intersection'
 
     ## create initial grid
     qry_grid_temp = '''
@@ -444,63 +565,72 @@ def add_grid(db,grid_size):
             '''.format(grid_size)
     con.execute(qry_grid_temp)
     add_index('grid_temp','none')
+    print 'made initial grid'
 
     qry_grid_temp_3 = '''
-                SELECT ElementaryGeometries('grid_temp', 'GEOMETRY','grid_temp_3', 'grid_id', 'parent');
-                      '''
+                SELECT ElementaryGeometries('grid_temp', 'GEOMETRY','{}', 'grid_id', 'parent');
+                      '''.format(name_grid)
     con.execute(qry_grid_temp_3)
 
-    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format('grid_temp_3'))
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format('grid_temp_3_id','grid_temp_3','grid_id'))
+    cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name_grid))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(name_grid+'id',name_grid,'grid_id'))
+    print 'made new grid'
 
 
     qry = '''
             CREATE TABLE {} AS
             SELECT A.grid_id, G.OGC_FID
-            FROM grid_temp_3 AS A, {} AS G
+            FROM {} AS A, {} AS G
             WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
                                             WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
                                             AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
             GROUP BY G.OGC_FID
-            '''.format('grid_bblu_pre','bblu_pre','bblu_pre')
+            '''.format('grid_bblu_pre'+name_grid,name_grid,'bblu_pre','bblu_pre')
     
     con.execute(qry)
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format('grid_bblu_pre_grid','grid_bblu_pre','grid_id'))
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format('grid_bblu_pre_ogc','grid_bblu_pre','OGC_FID'))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format('gbblu_pre_grid'+name_grid,'grid_bblu_pre'+name_grid,'grid_id'))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format('gbblu_pre_ogc'+name_grid,'grid_bblu_pre'+name_grid,'OGC_FID'))
+    print 'made bblu pre int'
+
 
 
     qry = '''
             CREATE TABLE {} AS
             SELECT A.grid_id, G.OGC_FID
-            FROM grid_temp_3 AS A, {} AS G
+            FROM {} AS A, {} AS G
             WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
                                             WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
                                             AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
             GROUP BY G.OGC_FID
-            '''.format('grid_bblu_post','bblu_post','bblu_post')
+            '''.format('grid_bblu_post'+name_grid,name_grid,'bblu_post','bblu_post')
     
     con.execute(qry)
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format('grid_bblu_post_grid','grid_bblu_post','grid_id'))
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format('grid_bblu_post_ogc','grid_bblu_post','OGC_FID'))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format('gbblu_post_grid'+name_grid,'grid_bblu_post'+name_grid,'grid_id'))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format('gbblu_post_ogc'+name_grid,'grid_bblu_post'+name_grid,'OGC_FID'))
+
+    drop_full_table('grid_temp')
+    drop_full_table('buffer_union')
 
     con.commit()
     con.close()    
 
+    print 'done !! :)'
     return
 
 
+# add_grid(db,25)
 # add_grid(db,50)
 
 
 
 
-def grid_xy(db):
+def grid_xy(db,gridtype):
 
     con = sql.connect(db)
     cur = con.cursor()
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
-    name ='grid_temp_3'
+    name =gridtype
     table='grid_xy'
     con.execute("DROP TABLE IF EXISTS {};".format(table))
     con.execute('''
@@ -511,7 +641,7 @@ def grid_xy(db):
     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'grid_id'))
 
 
-# grid_xy(db)
+# grid_xy(db,'grid_temp_25')
 
 
 

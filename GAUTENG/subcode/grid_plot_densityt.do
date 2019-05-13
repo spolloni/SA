@@ -6,6 +6,8 @@ est clear
 do reg_gen.do
 
 global extra_controls = "  "
+global extra_controls_2 = "  "
+
 
 
 
@@ -49,7 +51,7 @@ global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same g
 global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2        = 1; /* Two spillover bins */
+global reg_triplediff2        = 0; /* Two spillover bins */
 global reg_triplediff2_type   = 1; /* Two spillover bins */
 
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
@@ -94,13 +96,15 @@ cd Generated/Gauteng;
 ************************************************;
 if $bblu_do_analysis==1 {;
 
-use bbluplot_grid.dta, clear;
+use bbluplot_grid_${grid}.dta, clear;
 
 * go to working dir;
 cd ../..;
 cd $output ;
 
-g area = 50*50;
+g area = $grid*$grid;
+
+global grid_mult = 1000000/($grid*$grid);
 
 ren rdp_cluster cluster_rdp;
 ren placebo_cluster cluster_placebo;
@@ -145,7 +149,7 @@ if $type_area == 0 {;
   g con    = distance_rdp!=. ;
 };
 
-if $type_area==1 {;
+if $type_area>=1 {;
   rgen_area ;
 };
 
@@ -176,13 +180,13 @@ if $type_area == 0 {;
   rgen_type ;
 };
 
-if $type_area==1 {;
+if $type_area>=1 {;
   rgen_type_area;
 };
 
 global outcomes="";
 foreach v in $outcomes_pre {;
-   g `v'_new=`v'*400;
+   g `v'_new=`v'*$grid_mult;
    global outcomes = " $outcomes `v'_new " ;
 };
 
@@ -225,12 +229,12 @@ if $reg_triplediff2 == 1 {;
 
 regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
-rgen_dd_full ;
-rgen_dd_cc ;
+* rgen_dd_full ;
+* rgen_dd_cc ;
 
-regs_dd_full b_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ; 
+* regs_dd_full b_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ; 
 
-regs_dd_cc b_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
+* regs_dd_cc b_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
 
 

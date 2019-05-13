@@ -12,14 +12,22 @@ set max_memory 8g, permanently
 
 
 if $many_spill == 0 {;
+* global extra_controls = 
+* " area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3 
+*   y1996 y1996_con y1996_proj y1996_spill1 y1996_proj_con y1996_spill1_con  [pweight = buildings]  ";
+* global extra_controls_2 = 
+* "  area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3 
+*   y1996_t3 y1996_con_t3 y1996_proj_t3 y1996_spill1_t3 y1996_proj_con_t3 y1996_spill1_con_t3  
+*   y1996_t2 y1996_con_t2 y1996_proj_t2 y1996_spill1_t2 y1996_proj_con_t2 y1996_spill1_con_t2 
+*   y1996_t1 y1996_con_t1 y1996_proj_t1 y1996_spill1_t1 y1996_proj_con_t1 y1996_spill1_con_t1 [pweight = buildings] ";
+
 global extra_controls = 
-" area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3 
-  y1996 y1996_con y1996_proj y1996_spill1 y1996_proj_con y1996_spill1_con   ";
+" area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3   [pweight = buildings]  ";
 global extra_controls_2 = 
-"  area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3 
-  y1996_t3 y1996_con_t3 y1996_proj_t3 y1996_spill1_t3 y1996_proj_con_t3 y1996_spill1_con_t3  
-  y1996_t2 y1996_con_t2 y1996_proj_t2 y1996_spill1_t2 y1996_proj_con_t2 y1996_spill1_con_t2 
-  y1996_t1 y1996_con_t1 y1996_proj_t1 y1996_spill1_t1 y1996_proj_con_t1 y1996_spill1_con_t1  ";
+" area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3   [pweight = buildings] ";
+
+
+  
 };
 
 
@@ -61,7 +69,13 @@ if $LOCAL==1 {;
 cd ../..;
 cd $output;
 
-use "temp_censuspers_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", replace;
+if $type_area == 2 {;
+use "temp_censuspers_agg_buffer_bblu_${dist_break_reg1}_${dist_break_reg2}${V}.dta", clear;
+* g area = buildings;
+};
+else {;
+use "temp_censuspers_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", clear;
+};
 
 
 * replace person_pop = 0 if person_pop==.;
@@ -72,14 +86,22 @@ keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
 
+if $type_area!=2 {;
 replace cluster_int_rdp=0 if cluster_int_rdp==. ;
 replace cluster_int_placebo=0 if cluster_int_placebo==. ;
+};
 
 drop area_int_rdp area_int_placebo ;
 
 g post = year==2011;
 
+if $type_area == 1 {;
 rgen_area ;
+};
+if $type_area == 2 {;
+rgen_area_buildings ;
+};
+
 
 cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
@@ -102,7 +124,7 @@ g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
 
 
-if $type_area == 1 {; 
+if $type_area >= 1 {; 
   rgen_type_area;
 };
 
@@ -151,9 +173,9 @@ global outcomes "
 
 * if $spatial == 0 {;
 
-regs cp_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  y1996;
+regs cp_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
-regs_type cp_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} y1996;
+regs_type cp_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
 * };
 

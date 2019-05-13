@@ -12,6 +12,8 @@ if $LOCAL==1 {;
 	cd ..;
 };
 
+global grid = "25";
+
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
 
@@ -32,7 +34,7 @@ end;
 
 
 local qry = " 
-SELECT * FROM grid_temp_3_buffer_area_int_250_500
+SELECT * FROM grid_temp_${grid}_buffer_area_int_250_500
 ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
@@ -65,9 +67,9 @@ clear;
 
  	GT.type AS type_rdp, GTP.type AS type_placebo, SA.sal_1, SA.sp_1
 
-	FROM grid_temp_3 AS AA 
+	FROM grid_temp_${grid} AS AA 
 
-	LEFT JOIN grid_bblu_`1' AS A  ON A.grid_id=AA.grid_id
+	LEFT JOIN grid_bblu_`1'grid_temp_${grid} AS A  ON A.grid_id=AA.grid_id
 
 	      LEFT JOIN 
 	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
@@ -88,17 +90,17 @@ clear;
 
 	      LEFT JOIN grid_xy AS XY ON XY.grid_id = AA.grid_id
 
-	    LEFT JOIN (SELECT IT.* FROM  int_gcro_full_grid_temp_3 AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
+	    LEFT JOIN (SELECT IT.* FROM  int_gcro_full_grid_temp_${grid} AS IT JOIN rdp_cluster AS PC ON PC.cluster = IT.cluster ) 
 	      AS IR ON IR.grid_id = AA.grid_id
 
-	    LEFT JOIN (SELECT IT.* FROM  int_gcro_full_grid_temp_3 AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster ) 
+	    LEFT JOIN (SELECT IT.* FROM  int_gcro_full_grid_temp_${grid} AS IT JOIN placebo_cluster AS PC ON PC.cluster = IT.cluster ) 
 	      AS IP ON IP.grid_id = AA.grid_id
 
 	    LEFT JOIN gcro_type AS GT ON GT.OGC_FID = B.target_id
 		LEFT JOIN gcro_type AS GTP ON GTP.OGC_FID = BP.target_id
 
 		LEFT JOIN 
-		(SELECT * FROM grid_s2001 AS G GROUP BY G.grid_id HAVING G.area_int==max(G.area_int))  
+		(SELECT * FROM grid_${grid}_s2001 AS G GROUP BY G.grid_id HAVING G.area_int==max(G.area_int))  
 		AS SA ON SA.grid_id = AA.grid_id
 
 	";
@@ -150,7 +152,7 @@ drop _merge;
 ren grid_id id;
 
 
-save bbluplot_grid, replace;
+save bbluplot_grid_${grid}, replace;
 
 
 erase  bbluplot_grid_pre.dta;

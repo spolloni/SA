@@ -1,4 +1,6 @@
 
+clear all
+
 * SET OUTPUT
 global output = "Code/GAUTENG/paper/figures"
 
@@ -81,9 +83,10 @@ global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1
 
 *** KEY CENSUS OPTIONS! *** ;
 
-global type_area   = 1   /* use the areas of overlap separately for the types */
+global type_area   = 1   /* use the areas of overlap separately for the types, 2 is with buildings! */
 global area_levels = 0   /* use the unit of exposure equal to km of overlap (instead of %) */
 global extra_controls = " y1996 area area_2 area_3  "
+
 
 
 
@@ -109,7 +112,6 @@ global extra_controls = " y1996 area area_2 area_3  "
 global many_spill 	= 0
 global spatial  	= 0
 global other_print 	= 0
-
 
 if $many_spill == 0 {
 	global dist_break_reg1 = 250 

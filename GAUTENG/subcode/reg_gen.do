@@ -93,6 +93,7 @@ end
 cap prog drop rgen
 	prog define rgen
 
+
 	cap drop proj_con
 	g proj_con = proj*con 
 	cap drop spill1_con
@@ -150,7 +151,9 @@ end
 cap prog drop rgen_area
 prog define rgen_area 
 
+	cap drop area_2
 	g area_2 = area*area
+	cap drop area_3
 	g area_3 = area*area_2
 
 	global area_list " area_int_rdp area_int_placebo area_b1_rdp area_b1_placebo area_b2_rdp area_b2_placebo  "
@@ -211,6 +214,90 @@ prog define rgen_area
 	foreach var of varlist area area_2 area_3 $area_list {
 	replace `var' = `var'/(1000*1000)
 	}
+	}
+
+	foreach var of varlist $area_list {
+	  replace `var' = 0 if `var'==. 
+	}
+
+
+	g con = 0
+	replace con=1 if area_int_rdp>0 & area_int_rdp>area_int_placebo  &  area_int_rdp<. & area_int_placebo<.
+	replace con=1 if distance_rdp<=distance_placebo & con==0 & distance_rdp<.
+
+	g proj = area_int_rdp  if con==1 
+	replace proj = area_int_placebo if con==0 
+	replace proj = 0 if proj==.
+
+	g spill1 = area_b1_rdp if con==1
+	replace spill1 = area_b1_placebo if con==0
+	replace spill1 = 0 if spill1==.
+
+	g spill2 = area_b2_rdp if con==1
+	replace spill2 = area_b2_placebo if con==0
+	replace spill2 = 0 if spill2 ==. 
+
+end
+
+
+cap prog drop rgen_area_buildings
+prog define rgen_area_buildings
+
+	cap drop area_2
+	g area_2 = area*area
+	cap drop area_3
+	g area_3 = area*area_2
+
+	global area_list " area_int_rdp area_int_placebo area_b1_rdp area_b1_placebo area_b2_rdp area_b2_placebo  "
+
+	foreach var of varlist buildings proj_rdp buffer_rdp_1 buffer_rdp_2 proj_placebo buffer_placebo_1 buffer_placebo_2 {
+		replace `var'=0 if `var'==.
+	}
+
+	g area_int_rdp  =  proj_rdp 
+	g area_int_placebo = proj_placebo
+
+	if $many_spill == 1 {
+	g area_b1_rdp = buffer_rdp_1
+	g area_b1_placebo =buffer_placebo_1
+	}
+
+	if $many_spill == 0 {
+	g area_b1_rdp     = buffer_rdp_1     + buffer_rdp_2
+	g area_b1_placebo = buffer_placebo_1 + buffer_placebo_2
+	}
+
+	g area_b2_rdp     = buffer_rdp_2
+	g area_b2_placebo = buffer_placebo_2
+
+	forvalues t = 1/3 {
+
+		foreach var of varlist proj_rdp_t`t' buffer_rdp_1_t`t' buffer_rdp_2_t`t' proj_placebo_t`t' buffer_placebo_1_t`t' buffer_placebo_2_t`t' {
+				replace `var'=0 if `var'==.
+		}
+
+	  g area_int_rdp_`t'  =  proj_rdp_t`t' 
+	  g area_int_placebo_`t' = proj_placebo_t`t' 
+
+	if $many_spill == 1 {
+	g area_b1_rdp_`t' = buffer_rdp_1_t`t'
+	g area_b1_placebo_`t' = buffer_placebo_1_t`t'
+	}
+
+	if $many_spill == 0 {
+	g area_b1_rdp_`t' = buffer_rdp_1_t`t'     + buffer_rdp_2_t`t'
+	g area_b1_placebo_`t' = buffer_placebo_1_t`t'     + buffer_placebo_2_t`t'
+	}
+
+	  g area_b2_rdp_`t' = buffer_rdp_2_t`t'
+	  g area_b2_placebo_`t' = buffer_placebo_2_t`t'
+
+	  global area_list = " $area_list  area_int_rdp_`t' area_int_placebo_`t' area_b1_rdp_`t' area_b1_placebo_`t' area_b2_rdp_`t' area_b2_placebo_`t' " 
+	}
+
+
+	foreach var of varlist $area_list  {
+	replace `var' = `var'/buildings
 	}
 
 	foreach var of varlist $area_list {
