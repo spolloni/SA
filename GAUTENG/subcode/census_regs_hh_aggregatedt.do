@@ -27,10 +27,10 @@ global extra_controls_2 =
 
 if $type_area == 1 {;
 * [pweight = area]  ;
-* global extra_controls = " $extra_controls  [pweight = area]  if area<500000 " ;
-* global extra_controls_2 = " $extra_controls_2   [pweight = area] if area<500000" ;
-global extra_controls = " $extra_controls   " ;
-global extra_controls_2 = " $extra_controls_2  " ;
+global extra_controls = " $extra_controls  [pweight = area]   " ;
+global extra_controls_2 = " $extra_controls_2   [pweight = area]  " ;
+* global extra_controls = " $extra_controls   " ;
+* global extra_controls_2 = " $extra_controls_2  " ;
 };
 
 if $type_area == 2 {;
@@ -356,12 +356,15 @@ regs_type ch_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${t
 global outcomes "
   formal
   informal
-  owner
+  house_bkyd
   ";
+
+ *   owner; 
 
 regs chouse_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
 
 regs_type chouse_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
 
 
 global outcomes "

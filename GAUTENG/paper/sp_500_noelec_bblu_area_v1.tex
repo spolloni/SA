@@ -45,46 +45,46 @@
 
 
 
-% \begin{itemize}
+\begin{itemize}
 
-% \item raw pre-period building density means show (1) differences between project areas and spillover areas and (2) differences between constructed and unconstructed projects
-% \item we are going to use two strategies: 
-% \begin{enumerate}
-% \item our high-res spatial data provides a unique opportunity to control for spatially precise fixed effects (2001 census subplaces) which erase mean differences between constructed and unconstructed projects in the pre-period and;
-% \item after controlling for 2001 census subplace fixed effects, constructed and unconstructed projects have the same pattern in the preperiod: both have higher informal building density in project areas, which means it is important to include unconstructed projects as counterfactuals in a DDD setting
-% \end{enumerate}
-% 	\begin{itemize}
-% 		\item by project type, greenfield and in-situ have perfect pre-trends, while unlabeled projects have a few differences
-% 	\end{itemize}
-% \item raw building changes over time suggest some crowd-in close to project boundaries, especially for in-situ upgrading projects\footnote{I don't want to show ``demeaned'' changes over time because that is not exactly what the regression is picking up, in fact the regression results are more consistent with the raw changes than the demeaned changes}
+\item raw pre-period building density means show (1) differences between project areas and spillover areas and (2) differences between constructed and unconstructed projects
+\item we are going to use two strategies: 
+\begin{enumerate}
+\item our high-res spatial data provides a unique opportunity to control for spatially precise fixed effects (2001 census subplaces) which erase mean differences between constructed and unconstructed projects in the pre-period and;
+\item after controlling for 2001 census subplace fixed effects, constructed and unconstructed projects have the same pattern in the preperiod: both have higher informal building density in project areas, which means it is important to include unconstructed projects as counterfactuals in a DDD setting
+\end{enumerate}
+	\begin{itemize}
+		\item by project type, greenfield and in-situ have perfect pre-trends, while unlabeled projects have a few differences
+	\end{itemize}
+\item raw building changes over time suggest some crowd-in close to project boundaries, especially for in-situ upgrading projects\footnote{I don't want to show ``demeaned'' changes over time because that is not exactly what the regression is picking up, in fact the regression results are more consistent with the raw changes than the demeaned changes}
 
-% \item empirical strategy is a DDD with each observation linked to its closest project and controlling for 2001 census subplace fixed effects
-% 	\begin{itemize}
-% 		\item there are around 1000 sub-places in 2001
-% 		\item using 2001 subplaces is a nice way to tie our hands on geography, and subplaces are likely to be drawn in more thoughtful ways than simply imposing arbitrary 3km grid cells
-% 		% \item the fixed effects results have some differences with the results without fixed effects (in none\_250.pdf), which are consistent with where the identification is coming from (ie. subplaces on the edge of projects so that they are exposed to two treatment conditions, which is probably important to discuss)
-% 		\item specifications define spillover areas as 0-250m and 250-500m distances away from projects
-% 			\begin{itemize}
-% 				\item why 250m?  because the average area of the 250m buffers is just about equal to the average area of the projects themselves (which is 1.2 km2), which is consistent with some rough assumption that spatial effects might be proportional to size of footprint; also, the effects mostly dissipate at further distances
-% 				\footnote{one concern is that there is error in drawing the project boundaries so what we are calling spillover may actually just be mislabeled project areas: three responses
-% 					\begin{itemize}
-% 						\item the raw data show seriously sharp breaks in densities at boundaries
-% 						% \item we find opposite informal density substitution patterns: we find substitution toward bkyd shacks inside projects, but away from bkyd shacks just outside projects 
-% 						\item casual observation suggests that boundaries are often drawn generously (ie. in many cases, houses do not fill the total shapes)
-% 					\end{itemize}}
-% 			\end{itemize}
-% 	\end{itemize}
+\item empirical strategy is a DDD with each observation linked to its closest project and controlling for 2001 census subplace fixed effects
+	\begin{itemize}
+		\item there are around 1000 sub-places in 2001
+		\item using 2001 subplaces is a nice way to tie our hands on geography, and subplaces are likely to be drawn in more thoughtful ways than simply imposing arbitrary 3km grid cells
+		% \item the fixed effects results have some differences with the results without fixed effects (in none\_250.pdf), which are consistent with where the identification is coming from (ie. subplaces on the edge of projects so that they are exposed to two treatment conditions, which is probably important to discuss)
+		\item specifications define spillover areas as 0-250m and 250-500m distances away from projects
+			\begin{itemize}
+				\item why 250m?  because the average area of the 250m buffers is just about equal to the average area of the projects themselves (which is 1.2 km2), which is consistent with some rough assumption that spatial effects might be proportional to size of footprint; also, the effects mostly dissipate at further distances
+				\footnote{one concern is that there is error in drawing the project boundaries so what we are calling spillover may actually just be mislabeled project areas: three responses
+					\begin{itemize}
+						\item the raw data show seriously sharp breaks in densities at boundaries
+						% \item we find opposite informal density substitution patterns: we find substitution toward bkyd shacks inside projects, but away from bkyd shacks just outside projects 
+						\item casual observation suggests that boundaries are often drawn generously (ie. in many cases, houses do not fill the total shapes)
+					\end{itemize}}
+			\end{itemize}
+	\end{itemize}
 
-% \item Standard errors are clustered at the project/treatment level (ie. about 300 projects by inside, spillover, and control areas for about 900 groups total).  This approach follows from recommendations from Imbens and Athey's recent paper.  I also tried spatially auto-correlated Conley errors, which are actually a lot smaller than the clustered errors (I don't think you can do these errors on top of clustering), but might be worth reporting also
+\item Standard errors are clustered at the project/treatment level (ie. about 300 projects by inside, spillover, and control areas for about 900 groups total).  This approach follows from recommendations from Imbens and Athey's recent paper.  I also tried spatially auto-correlated Conley errors, which are actually a lot smaller than the clustered errors (I don't think you can do these errors on top of clustering), but might be worth reporting also
 
-% \item \textbf{My headline takeaways:}
-% \begin{itemize}
-% 	\item Greenfield projects are characterized by increases in formal housing (with improved services) and backyard informal housing, and small decreases in informal non-bkyd housing.  These new houses slightly crowd-in new formal development (with better services) around their footprints.  New and improved greenfield houses act as a positive amenity, noisily increasing house prices
-% 	\item In-situ projects knock down a lot of informal non-bkyd housing (which is totally offset by new bkyd housing) and replace this informal housing with new formal housing (with improved services).  This big shift in housing quality noisily crowds-in new development of both formal and informal housing (with no strong net effect on services) nearby.  This massive increase in nearby formal housing supply offsets the gain to local amenities and drives down local formal housing prices 
-% \end{itemize}
+\item \textbf{My headline takeaways:}
+\begin{itemize}
+	\item Greenfield projects are characterized by increases in formal housing (with improved services) and backyard informal housing, and small decreases in informal non-bkyd housing.  These new houses slightly crowd-in new formal development (with better services) around their footprints.  New and improved greenfield houses act as a positive amenity, noisily increasing house prices
+	\item In-situ projects knock down a lot of informal non-bkyd housing (which is totally offset by new bkyd housing) and replace this informal housing with new formal housing (with improved services).  This big shift in housing quality noisily crowds-in new development of both formal and informal housing (with no strong net effect on services) nearby.  This massive increase in nearby formal housing supply offsets the gain to local amenities and drives down local formal housing prices 
+\end{itemize}
 
 
-% \end{itemize}
+\end{itemize}
 
 
 
@@ -109,30 +109,6 @@
 %\multicolumn{7}{l}{\scriptsize Suburb includes projects whose centroids are further than 30.4 km from their nearest CBD.}
 \end{tabular}
 \end{table} 
-
-
-
-\vspace{0mm}
-\begin{table}[h!]
-\centering
-\caption{Matching Administrative Project Names to Budget Reports}\label{table:scoredescriptives}
-\vspace{0mm}
-\begin{tabular}{l*{1}{cccc}}
-\toprule
-  & \multicolumn{2}{c}{\textbf{Matched}}& \multicolumn{2}{c}{\textbf{Unmatched}}    \\
-  & Const. & Unconst. & Const. & Unconst.   \\
-\midrule
-\input{figures/score_tablet_4}
-\bottomrule
-\multicolumn{5}{l}{\scriptsize Const. refers to constructed projects and unconst. refers to unconstructed projects.}\\[-.5em]
-\multicolumn{5}{l}{\scriptsize $^*$Calculated from {\it expected} completion dates using Gauteng National Treasury budget reports.}\\[-.5em]
-\multicolumn{5}{l}{\scriptsize $^\dagger$ The USD averaged to about 7.70 Rands during the 2001-2011 period.}\\[-.5em]
-\multicolumn{5}{l}{\scriptsize $^\ddagger$Measured as the average minimum distance with respect to Johannesburg and Pretoria CBDs. } \\[-.5em]
-%\multicolumn{7}{l}{\scriptsize City includes projects whose centroids are within 30.4 km of their nearest CBD.} \\[-.5em]
-%\multicolumn{7}{l}{\scriptsize Suburb includes projects whose centroids are further than 30.4 km from their nearest CBD.}
-\end{tabular}
-\end{table} 
-
 
 
 
@@ -551,9 +527,9 @@
 \toprule
  & \small (1) & \small (2)  & \small (3)  \\
 & \small Formal & \small Informal & \small Own Dwelling \\ \midrule 
-\input{figures/chouse_ksp_o0_d250_500_bb1_top_lonely}
+\input{figures/chouse_ksp_o0_d250_500_top_lonely}
 \midrule
-\input{figures/chouse_t_ksp_o0_d250_500_bb1_top_lonely}
+\input{figures/chouse_t_ksp_o0_d250_500_top_lonely}
 \bottomrule
 \multicolumn{4}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
 \end{tabular}
@@ -600,9 +576,9 @@
 \toprule
  & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  & \small (6) \\
  & \small Flush Toilet & \small Water Indoors  & \small Electricity Cooking & \small Number of Rooms  & \small Household Size & \small Population Density \\ \midrule 
-\input{figures/ch_ksp_o0_d250_500_bb1_top_lonely}
+\input{figures/ch_ksp_o0_d250_500_top_lonely}
 \midrule
-\input{figures/ch_t_ksp_o0_d250_500_bb1_top_lonely}
+\input{figures/ch_t_ksp_o0_d250_500_top_lonely}
 \bottomrule
 \multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
 \end{tabular}
@@ -720,9 +696,9 @@
 \toprule
 & \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
 & \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
-\input{figures/cp_ksp_o0_d250_500_bb2_top_lonely}
+\input{figures/cp_ksp_o0_d250_500_top_lonely}
 \midrule
-\input{figures/cp_t_ksp_o0_d250_500_bb2_top_lonely}
+\input{figures/cp_t_ksp_o0_d250_500_top_lonely}
 \bottomrule
 \multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
 \multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}

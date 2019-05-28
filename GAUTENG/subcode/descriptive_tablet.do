@@ -5,6 +5,19 @@ est clear
 set more off
 set scheme s1mono
 
+
+cap prog drop write
+prog define write
+	file open newfile using "`1'", write replace
+	file write newfile "`=string(round(`2',`3'),"`4'")'"
+	file close newfile
+end
+
+cap prog drop write_line
+prog define write_line
+	file write newfile "`1'  & `=string(round(`2',`3'),"`4'")' \\"
+end
+
 cap prog drop in_stat
 program in_stat 
     preserve 
@@ -76,9 +89,21 @@ end;
 cd ../..;
 cd $output ;
 
+global gcro_terms = 0;
+
+global full_table = 1;
+
+
+
+
+
+
+
+if $full_table == 1 {;
+
 
 use  "price_regs${V}.dta", clear  ;
-	egen rdp_count = sum(rdp_property), by(cluster_rdp) ;
+	* egen rdp_count = sum(rdp_property), by(cluster_rdp) ;
 
 	duplicates drop cluster_rdp, force;
 	g rdp = 1  ;
@@ -87,12 +112,20 @@ use  "price_regs${V}.dta", clear  ;
 	ren mode_yr_rdp mode_yr;
 	ren cluster_rdp cluster;
 
-	keep cluster rdp rdp_count mo mode_yr ;
+	keep cluster rdp mo mode_yr ;
 save "temp_rdp.dta", replace ;
 
 
+
+odbc load, exec(" SELECT cluster, RDP_N FROM rdp_count;") clear dsn(gauteng) ;
+ren RDP_N rdp_count ;
+save "rdp_counting.dta", replace;
+
+
 use  "price_regs${V}.dta", clear  ;
-	g rdp_count = 0 ;
+	* g rdp_count = 0 ;
+
+	* egen rdp_count = sum(rdp_property), by(cluster_placebo) ;
 
 	duplicates drop cluster_placebo, force;
 	g rdp = 0 ;
@@ -101,7 +134,7 @@ use  "price_regs${V}.dta", clear  ;
 	ren mode_yr_placebo mode_yr;
 	ren cluster_placebo cluster;
 
-	keep cluster  rdp rdp_count mo mode_yr ;
+	keep cluster  rdp mo mode_yr ;
 save "temp_placebo.dta", replace ;
 
 use "temp_rdp.dta", clear ;
@@ -175,13 +208,17 @@ save dtable_rdp_count.dta , replace ;
 		erase dtable_pre_price_rdp.dta;
 
 
+odbc load, exec("select G.* FROM gcro_full_temp_year AS G ;") clear dsn(gauteng) ;
+save temp_year.dta, replace;
 
 
-
-use dtable.dta, clear; 
+use dtable_rdp_count.dta, clear;
+*use dtable.dta, clear; 
 drop if cluster==.;
 
-	merge 1:1 cluster using dtable_rdp_count.dta ;
+	merge 1:m cluster using dtable.dta ;
+	drop if cluster==.;
+*	merge 1:1 cluster using dtable_rdp_count.dta ;
 	drop if _merge==2;
 	drop _merge;
 
@@ -189,10 +226,15 @@ drop if cluster==.;
 	drop if _merge==2;
 	drop _merge;
 
-replace rdp_count = 0 if rdp_count==.;
+	merge 1:1 cluster using rdp_counting.dta;
+	drop if _merge==2;
+	drop _merge;
 
+replace rdp_count=0 if rdp_count==. ;
 
-
+	merge 1:1 cluster using temp_year.dta; 
+	drop if _merge==2;
+	drop _merge;
 
 * go to working dir;
 
@@ -208,6 +250,18 @@ egen proj_count_het = sum(o), by(rdp het);
 egen proj_count = sum(o), by(rdp);
 
 #delimit cr;
+
+
+preserve
+	keep if type==1
+	write "total_greenfield.tex" `=_N' 1 "%12.0fc"
+restore
+
+preserve
+	keep if type==2
+	write "total_insitu.tex" `=_N' 1 "%12.0fc"
+restore
+
 
 **** TABLE GENERATION ****
 
@@ -261,3 +315,26 @@ egen proj_count = sum(o), by(rdp);
       print_1 "House Price in 1 km (R$^\dagger$)" price "mean" "%10.0fc"
       print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
     file close newfile
+
+
+
+**** SCORE COMPARISON ****
+
+
+ global cat1="keep if rdp == 1 & score!=. "
+ global cat2="keep if rdp == 0 & score!=.  "
+ global cat3="keep if rdp == 1 & score==. "
+ global cat4="keep if rdp == 0 & score==.  "
+ global cat_num=4
+
+    file open newfile using "score_tablet${V}.tex", write replace
+      print_1 "Number of Projects" o  "N" "%10.0fc"
+      print_1 "Area (km2)" area "mean" "%10.2fc"
+    *  print_1 "Median Construction Yr." mode_yr  "p50" "%10.0f"
+      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
+      print_1 "House Price in 1 km (R$^\dagger$)" price "mean" "%10.0fc"
+      print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+    file close newfile
+
+
+}

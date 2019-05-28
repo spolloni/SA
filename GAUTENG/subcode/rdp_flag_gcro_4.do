@@ -1,5 +1,8 @@
 clear all
 set more off
+
+do project_description_table.do 
+
 #delimit;
 
 
@@ -26,6 +29,15 @@ odbc load, exec("`qry'");
 ren objectid cluster_new;
 
 replace desc = lower(desc)  ;
+
+cd ../..;
+cd $output ;
+write_project_description_table ;
+cd ../../../..;
+cd Generated/Gauteng;
+
+replace desc="under implementation" if regexm(desc,"under implementaion")==1;
+
 
 
 global word_list = " current complete new implementation planning uncertain proposed investigating future ";
@@ -85,6 +97,7 @@ keep cluster area ;
 odbc exec("DROP TABLE IF EXISTS gcro_full ;"), dsn("gauteng");
 odbc insert, table("gcro_full") create;
 odbc exec("CREATE INDEX gcro_full_id ON gcro_full (cluster);"), dsn("gauteng");
+
 
 
 
@@ -217,7 +230,21 @@ drop N maxN NN;
 *keep if   area > .5  ;                             /* KEY DISTINCTION RIGHT HERE */
 *drop      area       ; 
 
+
+preserve; 
+   keep cluster rdp_proj_status;
+   bys cluster rdp_proj_status: g RDP_N=_N;
+   duplicates drop cluster rdp_proj_status, force;
+   odbc exec("DROP TABLE IF EXISTS rdp_count;"), dsn("gauteng");
+   odbc insert, table("rdp_count") create;
+   odbc exec("CREATE INDEX rdp_count_id ON rdp_count (RDP_N);"), dsn("gauteng");
+restore;
+
+
+
 keep if rdp_proj_status==1;
+
+
 
 *** CREATE FILE WITH EARLY DROPPED PROJECTS !! ;
 preserve; 

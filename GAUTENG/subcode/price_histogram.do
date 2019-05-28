@@ -116,17 +116,18 @@ drop if sum_nrdp < 50;
 
 hist lprice if rdp_property==1 & purch_price < 600000 & lprice > 5, 
   bin(200) col(gs0) name(a) xlabel(5(5)15,tp(c)) yla(,tp(c)) plotr(ls(none))
-  xtitle("")  ytitle("") title("Subsidized Housing");
+  xtitle("")  ytitle("") title("Project Housing");
 
 hist lprice if rdp_property==0, 
   bin(200) col(gs0)  name(b) xlabel(5(5)15,tp(c)) plotr(ls(none))
-  xtitle("") yla(none,tp(c)) ytitle("") title("Non-Subsidized Housing");
+  xtitle("") yla(none,tp(c)) ytitle("") title("Non-Project Housing");
 
 graph combine a b, rows(1) ycommon 
 l1(" Transaction Density",size(medsmall)) 
 b1("Log House Price",size(medsmall))
 xsize(13) ysize(8.5) imargin(0 0 -2 -2) ;
-graphexportpdf summary_pricedist${V}, dropeps replace;
+* graphexportpdf summary_pricedist${V}, dropeps replace;
+graph export "summary_pricedist${V}.pdf", as(pdf) replace;
 graph drop _all;
 
 hist mo2con_rdp if abs(mo2con_rdp)<37 & rdp_property==1, 
@@ -141,13 +142,22 @@ graph combine a b, cols(1) xcommon
 l1(" transaction density",size(medsmall)) 
 b1("months to project modal transaction month",size(medsmall))
 xsize(13) ysize(8.5) imargin(0 0 -2 -2);
-graphexportpdf summary_densitytime${V}, dropeps replace;
+* graphexportpdf summary_densitytime${V}, dropeps replace;
+graph export "summary_densitytime${V}.pdf", as(pdf) replace;
+
 graph drop _all;
 
 restore;
 
 
 
+
+
+format con_mo_rdp %tm ; 
+
+bys cluster_rdp: g cn=_n ;
+
+hist con_mo_rdp if cn==1, bin(25);
 
 
 

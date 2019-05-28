@@ -209,6 +209,10 @@ import delimited using "temp/tab_08_09.csv", clear delimiter(",") colrange(2:) v
 save "temp/tab_08_09${flink}.dta", replace;
 
 
+
+
+
+
 ** MERGE THEM ALL TOGETHER ;
 global count_budget=0;
 foreach year in 04_05 05_06 06_07 08_09 {;
@@ -240,6 +244,7 @@ save "temp/gcro_merge${flink}.dta", replace;
 
 *** HERE IS WHERE I MERGE BACK IN THE GCRO DATA TO CALCULATE THE YEAR;
 use "temp/gcro_merge${flink}.dta", clear;
+
 
 
 			* egen max_score=max(score), by(ID_gcro);
@@ -276,6 +281,24 @@ use "temp/gcro_merge${flink}.dta", clear;
 	*disp $count_budget ;
 	*disp ($score_04_05 + $score_05_06 + $score_06_07 + $score_08_09)/4;
 
+
+/*
+
+** tab score: 37 match exactly ; 
+
+use "temp/tab_04_05${flink}.dta", clear;
+foreach year in 05_06 06_07 08_09 {;
+	append using "temp/tab_`year'${flink}.dta";
+	};
+
+duplicates drop name, force;
+* get 422 names ; 
+
+*** PLACEBO MATCHES: ;
+* select G.* FROM gcro_full_temp_year AS G JOIN placebo_cluster AS R ON G.cluster=R.cluster;
+
+*** RDP MATCHES: ;
+* select G.* FROM gcro_full_temp_year AS G JOIN rdp_cluster AS R ON G.cluster=R.cluster;
 
 
 *	shell rm -r "temp";
