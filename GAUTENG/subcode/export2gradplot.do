@@ -90,6 +90,8 @@ odbc query "gauteng";
 odbc load, exec("`qry'") clear;
 
 
+
+
 destring rdp_property, replace force       ;
 replace rdp_property=0 if rdp_property==.  ;
 
@@ -97,6 +99,11 @@ replace rdp_property=0 if rdp_property==.  ;
 destring purch_yr purch_mo purch_day mun_code, replace       ;
 gen trans_num = substr(trans_id,strpos(trans_id, "_")+1,.)   ;
 destring trans_num, replace                                  ;
+
+* preserve; /** GET AVERAGE purch_price EVERYWHERE ELSE FOR THE PAPER !*/ 
+*   bys seller_name: g sN=_N;
+*   sum purch_price if sN<30 &  purch_price<800000 & purch_yr > 2000 & distance_rdp>1000 & distance_placebo>1000;
+* restore;
 
 * get rid of missing distances;
 drop if distance_placebo==. & distance_rdp==.                 ;
@@ -160,5 +167,6 @@ gen erf_size3 = erf_size^3;
       
 * save data;
 save "gradplot_admin${V}.dta", replace;
+
 
 

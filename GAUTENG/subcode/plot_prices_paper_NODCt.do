@@ -57,13 +57,15 @@ end;
 
 * what to run?;
 
-global ddd_regs_d = 1;
+global ddd_regs_d = 0;
 global ddd_regs_t = 0;
 global ddd_table  = 0;
 
 global ddd_regs_t_alt  = 0; /* these aren't working right now */
 global ddd_regs_t2_alt = 0;
 global countour = 0;
+
+global graph_plotmeans = 1;
 
 * load data; 
 cd ../..;
@@ -163,8 +165,6 @@ save "price_regs${V}.dta", replace;
 
 
 
-
-
 use "price_regs${V}.dta", clear ;
 
 keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
@@ -193,12 +193,181 @@ global a_ll = "a(LL)";
 global reg_1 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
-price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+* price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
 global reg_1 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
-price_regs_type p_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+* price_regs_type p_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+
+************************************************;
+* 1.2 * MAKE MEAN GRAPHS HERE PRE rdp/placebo **;
+************************************************;
+if $graph_plotmeans == 1 {;
+
+
+
+egen dists_rdp = cut(distance_rdp),at(0($price_bin)$max);
+g drdp=dists_rdp;
+replace drdp=. if drdp>$max-$price_bin; 
+
+egen dists_placebo = cut(distance_placebo),at(0($price_bin)$max); 
+g dplacebo = dists_placebo;
+replace dplacebo=. if dplacebo>$max-$price_bin;
+
+* drop if drdp<0;
+* drop if dplacebo>0;
+
+  cap program drop plotmeans_pre;
+  program plotmeans_pre;
+
+  preserve;
+
+    keep if post==0;
+    egen `2'_`3' = mean(`2'), by(d`3');
+    keep `2'_`3' d`3';
+    duplicates drop d`3', force;
+    ren d`3' D;
+    save "${temp}pmeans_`3'_temp.dta", replace;
+  restore;
+
+  preserve; 
+
+    keep if post==0;
+    egen `2'_`4' = mean(`2'), by(d`4');
+    keep `2'_`4' d`4';
+    duplicates drop d`4', force;
+    ren d`4' D;
+    save "${temp}pmeans_`4'_temp.dta", replace;
+  restore;
+
+  preserve; 
+    use "${temp}pmeans_`3'_temp.dta", clear;
+    merge 1:1 D using "${temp}pmeans_`4'_temp.dta";
+    keep if _merge==3;
+    drop _merge;
+
+    replace D = D + $price_bin/2;
+
+    twoway 
+    (connected `2'_`4' D, ms(Oh) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
+    (connected `2'_`3' D, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
+    ,
+    xtitle("Distance from project border (meters)",height(5))
+    ytitle("Average log purchase price (Pre Project)",height(3)si(medsmall))
+    xline(0,lw(medthin)lp(shortdash))
+    xlabel(`7' , tp(c) labs(small)  )
+    ylabel(`8' , tp(c) labs(small)  )
+    plotr(lw(medthick ))
+    legend(order(2 "`5'" 1 "`6'"  ) symx(6)
+    ring(0) position(`9') bm(medium) rowgap(small) col(1)
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(.7);
+    *graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace  ;
+    erase "${temp}pmeans_`3'_temp.dta";
+    erase "${temp}pmeans_`4'_temp.dta";
+  restore;
+
+  end;
+
+  global yl = "2(1)7";
+
+  plotmeans_pre 
+    price_pre_means${V} lprice rdp placebo
+    "Constructed" "Unconstructed"
+    "0(500)${max}" "11.5(.25)12.25"
+    11;
+* `"0 "10" 1 "15" 2 "20" 3 "25" 4 "30" "';
+
+************************************************;
+************************************************;
+************************************************;
+
+************************************************;
+* 1.3 * MAKE RAW CHANGE GRAPHS HERE           **;
+************************************************;
+
+
+
+  cap program drop plotchanges;
+  program plotchanges;
+
+  preserve;
+    keep `2' d`3' post;
+    egen `2'm = mean(`2'), by(d`3' post);
+    drop `2';
+    ren `2'm `2';
+    duplicates drop d`3' post, force;
+    reshape wide `2', i(d`3') j(post);
+    gen d`2' = `2'1 - `2'0;
+    egen `2'_`3' = mean(d`2'), by(d`3');
+    keep `2'_`3' d`3';
+    duplicates drop d`3', force;
+    ren d`3' D;
+    save "${temp}pmeans_`3'_temp.dta", replace;
+  restore;
+
+  preserve;
+    keep `2' d`4' post;
+    egen `2'm = mean(`2'), by(d`4' post);
+    drop `2';
+    ren `2'm `2';
+    duplicates drop d`4' post, force;
+    reshape wide `2', i(d`4') j(post);
+    gen d`2' = `2'1 - `2'0;
+    egen `2'_`4' = mean(d`2'), by(d`4');
+    keep `2'_`4' d`4';
+    duplicates drop d`4', force;
+    ren d`4' D;
+    save "${temp}pmeans_`4'_temp.dta", replace;
+  restore;
+
+   preserve; 
+     use "${temp}pmeans_`3'_temp.dta", clear;
+     merge 1:1 D using "${temp}pmeans_`4'_temp.dta";
+     keep if _merge==3;
+     drop _merge;
+
+    replace D = D + $price_bin/2;
+    gen D`4' = D+7;
+    gen D`3' = D-7;
+
+    twoway 
+    (dropline `2'_`4' D`4',  col(maroon) lw(medthick) msiz(medium) m(o) mfc(white))
+    (dropline `2'_`3' D`3',  col(gs0) lw(medthick) msiz(small) m(d))
+    ,
+    xtitle("Distance from project border (meters)",height(5))
+    ytitle("Change in log purchase price (Pre/Post Project)",height(5) si(medsmall))
+    xline(0,lw(medthin)lp(shortdash))
+    xlabel(`7' , tp(c) labs(small)  )
+    ylabel(`8' , tp(c) labs(small)  )
+    plotr(lw(medthick ))
+    legend(order(2 "`5'" 1 "`6'"  ) symx(6) col(1)
+    ring(0) position(`9') bm(medium) rowgap(small) 
+    colgap(small) size(medsmall) region(lwidth(none)))
+    aspect(.7);
+    *graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace  ;
+    erase "${temp}pmeans_`3'_temp.dta";
+    erase "${temp}pmeans_`4'_temp.dta";
+  restore;
+
+  end;
+
+  global outcomes  " total_buildings for inf inf_backyard inf_non_backyard ";
+  global yl = "1(1)7";
+
+  plotchanges 
+    price_rawchanges${V} lprice rdp placebo
+    "Constructed" "Unconstructed"
+    "0(500)${max}" "0(.25).75"
+    1;
+
+
+
+};
 
 
 * global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(LL) cl(cluster_joined)  "; 

@@ -30,17 +30,21 @@ if "${V}" == "_4" | "${V}" == "_5" {
 global LOCAL = 1
 
 global het      = 30.396 /* km cbd_dist threshold (mean distance) ; closer is var het = 1  */
-global bin      = 50   /* distance bin width for dist regs   */
+global bin      = 25   /* distance bin width for dist regs   */
 global bin_het  = 200
+global price_bin = 100
+
 
 global near = "City"
 global far = "Suburb"
 
 * DENSITY PARAMETERS
-global size     = 50
-global sizesq   = $size*$size
-global dist_min = -400
 
+
+global grid = 25
+* global size     = 50
+* global sizesq   = $size*$size
+global dist_min = -500
 global dist_max     = 1500
 global dist_max_reg = 1500
 
@@ -57,12 +61,12 @@ global dist_max_reg = 1500
 
 
 * CENSUS PARAMETERS
-global drop_others= 1     /* everything relative to unconstructed */
-global tresh_area = 0.3   /* Area ratio for "inside" vs spillover */
+* global drop_others= 1      everything relative to unconstructed 
+global tresh_area = .5   /* Area ratio for "inside" vs spillover */
 global tresh_dist = 1500  /* Area ratio inside vs spillover */
-global tresh_area_DDD = 0.75     
-global tresh_dist_DDD = 400      
-global tresh_dist_max_DDD = 1200 
+* global tresh_area_DDD = 0.75     
+* global tresh_dist_DDD = 400      
+* global tresh_dist_max_DDD = 1200 
 
 * OUTCOMES
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard "
@@ -71,7 +75,7 @@ global outcomes = " total_buildings for inf inf_backyard inf_non_backyard "
 global twl   = "3"   /* look at twl years before construction */
 global twu   = "3"   /* look at twu years after construction */
 global bin_price = 200
-global max   = 1200  /* distance maximum for distance bins */
+global max   = 1500  /* distance maximum for distance bins */
 global mbin  = 12   /* months bin width for time-series   */
 global msiz  = 20    /* minimum obs per cluster            */
 global treat = 700   /* distance to be considered treated  */

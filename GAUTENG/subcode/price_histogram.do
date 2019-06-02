@@ -153,11 +153,11 @@ restore;
 
 
 
-format con_mo_rdp %tm ; 
+* format con_mo_rdp %tm ; 
 
-bys cluster_rdp: g cn=_n ;
+* bys cluster_rdp: g cn=_n ;
 
-hist con_mo_rdp if cn==1, bin(25);
+* hist con_mo_rdp if cn==1, bin(25);
 
 
 

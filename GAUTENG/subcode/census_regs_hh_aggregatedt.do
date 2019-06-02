@@ -31,6 +31,9 @@ global extra_controls = " $extra_controls  [pweight = area]   " ;
 global extra_controls_2 = " $extra_controls_2   [pweight = area]  " ;
 * global extra_controls = " $extra_controls   " ;
 * global extra_controls_2 = " $extra_controls_2  " ;
+* WEIGHTS?? ;
+global ww = " [aweight = area] "; /// alternatively [aweight=hh_pop]; 
+
 };
 
 if $type_area == 2 {;
@@ -71,8 +74,6 @@ end;
 * DOFILE SECTIONS ;
 
 
-* WEIGHTS?? ;
-global ww = ""; /// alternatively [aweight=hh_pop]; 
 
 if $LOCAL==1 {;
 	cd ..;
@@ -106,78 +107,89 @@ use "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", cl
     ***** SUMMARY STATS REGS **** ;
 
 
-mat SUM = J(9, 3,.);
-keep if year ==2001;
-g project_rdp     = (area_int_rdp     > $tresh_area & area_int_rdp    >=area_int_placebo);
-g project_placebo = (area_int_placebo > $tresh_area & area_int_placebo> area_int_rdp);
+
+mat SUM = J(8, 3,.);
+keep if year ==2001 | year==1996;
+replace area_int_rdp=0 if area_int_rdp==.;
+replace area_int_placebo=0 if area_int_placebo==.;
+
+g project_rdp     = (area_int_rdp     >= $tresh_area & area_int_rdp<. & area_int_rdp    >area_int_placebo);
+g project_placebo = (area_int_placebo >= $tresh_area & area_int_placebo<.  & area_int_placebo>= area_int_rdp);
+
+g area_int_tot = area_int_rdp if area_int_rdp<. & area_int_rdp    >=area_int_placebo;
+replace area_int_tot = area_int_placebo if area_int_placebo<.  & area_int_placebo> area_int_rdp;
+replace area_int_tot = 0 if area_int_tot==.;
 
 * g project_rdp = (area_int_rdp > $tresh_area & distance_rdp<= $tresh_dist);
 * g project_placebo = (area_int_placebo > $tresh_area & distance_placebo<= $tresh_dist);
 
+global CC = 1;
+
+
+* toilet_flush means;
+sum formal if project_rdp ==1 $ww;
+matrix SUM[$CC,1] = round(r(mean),.01);
+sum formal if project_placebo ==1 $ww;
+matrix SUM[$CC,2] = round(r(mean),.01);
+sum formal $ww; 
+matrix SUM[$CC,3] = round(r(mean),.01);
+  global CC = $CC + 1;
+
+
 * toilet_flush means;
 sum toilet_flush if project_rdp ==1 $ww;
-matrix SUM[1,1] = round(r(mean),.01);
+matrix SUM[$CC,1] = round(r(mean),.01);
 sum toilet_flush if project_placebo ==1 $ww;
-matrix SUM[1,2] = round(r(mean),.01);
+matrix SUM[$CC,2] = round(r(mean),.01);
 sum toilet_flush $ww; 
-matrix SUM[1,3] = round(r(mean),.01);
+matrix SUM[$CC,3] = round(r(mean),.01);
+  global CC = $CC + 1;
 
 * water_inside means;
 sum water_inside if project_rdp ==1 $ww;
-matrix SUM[2,1] = round(r(mean),.01);
+matrix SUM[$CC,1] = round(r(mean),.01);
 sum water_inside if project_placebo ==1 $ww;
-matrix SUM[2,2] = round(r(mean),.01);
+matrix SUM[$CC,2] = round(r(mean),.01);
 sum water_inside $ww;
-matrix SUM[2,3] = round(r(mean),.01);
+matrix SUM[$CC,3] = round(r(mean),.01);
+  global CC = $CC + 1;
 
 * electric_cooking means;
-sum electric_cooking if project_rdp ==1 $ww;
-matrix SUM[3,1] = round(r(mean),.01);
-sum electric_cooking if project_placebo ==1 $ww;
-matrix SUM[3,2] = round(r(mean),.01);
-sum electric_cooking $ww;
-matrix SUM[3,3] = round(r(mean),.01);
-
-* electric_heating means;
-sum electric_heating if project_rdp ==1 $ww;
-matrix SUM[4,1] = round(r(mean),.01);
-sum electric_heating if project_placebo ==1 $ww;
-matrix SUM[4,2] = round(r(mean),.01);
-sum electric_heating $ww;
-matrix SUM[4,3] = round(r(mean),.01);
-
-* electric_lighting means;
-sum electric_lighting if project_rdp ==1 $ww;
-matrix SUM[5,1] = round(r(mean),.01);
-sum electric_lighting if project_placebo ==1 $ww;
-matrix SUM[5,2] = round(r(mean),.01);
-sum electric_lighting $ww; 
-matrix SUM[5,3] = round(r(mean),.01);
+sum electricity if project_rdp ==1 $ww;
+matrix SUM[$CC,1] = round(r(mean),.01);
+sum electricity if project_placebo ==1 $ww;
+matrix SUM[$CC,2] = round(r(mean),.01);
+sum electricity $ww;
+matrix SUM[$CC,3] = round(r(mean),.01);
+  global CC = $CC + 1;
 
 * tot_rooms means;
 sum tot_rooms if project_rdp ==1 $ww;
-matrix SUM[6,1] = round(r(mean),.01);
+matrix SUM[$CC,1] = round(r(mean),.01);
 sum tot_rooms if project_placebo ==1 $ww;
-matrix SUM[6,2] = round(r(mean),.01);
+matrix SUM[$CC,2] = round(r(mean),.01);
 sum tot_rooms $ww;
-matrix SUM[6,3] = round(r(mean),.01);
+matrix SUM[$CC,3] = round(r(mean),.01);
+  global CC = $CC + 1;
 
 * hh_size means;
 sum hh_size if project_rdp ==1 $ww;
-matrix SUM[7,1] = round(r(mean),.01);
+matrix SUM[$CC,1] = round(r(mean),.01);
 sum hh_size if project_placebo ==1 $ww;
-matrix SUM[7,2] = round(r(mean),.01);
+matrix SUM[$CC,2] = round(r(mean),.01);
 sum hh_size $ww;
-matrix SUM[7,3] = round(r(mean),.01);
+matrix SUM[$CC,3] = round(r(mean),.01);
+  global CC = $CC + 1;
 
 * area_int means;
-g asum = area_int_rdp + area_int_placebo;
-sum asum if project_rdp ==1 $ww;
-matrix SUM[8,1] = round(r(mean),.01);
-sum asum if project_placebo ==1 $ww;
-matrix SUM[8,2] = round(r(mean),.01);
-sum asum $ww;
-matrix SUM[8,3] = round(r(mean),.01);
+* g asum = area_int_rdp + area_int_placebo;
+
+sum area_int_tot if project_rdp ==1 $ww;
+matrix SUM[$CC,1] = round(r(mean),.01);
+sum area_int_tot if project_placebo ==1 $ww;
+matrix SUM[$CC,2] = round(r(mean),.01);
+sum area_int_tot $ww;
+matrix SUM[$CC,3] = round(r(mean),.01);
 
 
 
@@ -197,19 +209,25 @@ svmat SUM;
 tostring * , replace force format(%9.2f);
 gen names = "";
 order names, first;
-replace names = "Flush Toilet" in 1;
-replace names = "Piped Water in Home" in 2;
-replace names = "Electricity for Cooking" in 3;
-replace names = "Electricity for Heating" in 4;
-replace names = "Electricity for Lighting" in 5;
-replace names = "Number of Rooms" in 6;
-replace names = "Household Size" in 7;
-replace names = "\% Area Overlap with Projects" in 8;
-
-replace names = "N" in 9;
-replace SUM1 = "$cons" in 9;
-replace SUM2 = "$uncons" in 9;
-replace SUM3 = "$all" in 9;
+global CC = 1;
+replace names = "Formal House" in $CC ;
+  global CC = $CC + 1;
+replace names = "Flush Toilet" in $CC ;
+  global CC = $CC + 1;
+replace names = "Piped Water in Home" in $CC;
+  global CC = $CC + 1;
+replace names = "Electricity" in $CC;
+  global CC = $CC + 1;
+replace names = "Number of Rooms" in $CC;
+  global CC = $CC + 1;
+replace names = "Household Size" in $CC;
+  global CC = $CC + 1;
+replace names = "\% Area Overlap with Projects" in $CC;
+  global CC = $CC + 1;
+replace names = "N" in $CC;
+replace SUM1 = "$cons" in $CC;
+replace SUM2 = "$uncons" in $CC;
+replace SUM3 = "$all" in $CC;
 
 replace SUM3 = SUM3 + " \\";
 
@@ -217,6 +235,14 @@ export delimited using "census_at_baseline_AGG${V}.tex", novar delimiter("&") re
 
 restore;
 
+
+svyset [pw=area];
+foreach var of varlist formal toilet_flush water_inside electricity tot_rooms hh_size {;
+disp "`var'";
+svy: mean `var' if project_rdp==1 | project_placebo==1, over(project_rdp);
+test [`var']0 = [`var']1 ;
+svy: regress `var' project_rdp if project_rdp==1 | project_placebo==1;
+};
 
 
     ***** DD REGS **** ;
@@ -361,10 +387,37 @@ global outcomes "
 
  *   owner; 
 
+
 regs chouse_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
 
 regs_type chouse_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
 
+
+
+global outcomes "
+  formal 
+  toilet_flush 
+  water_inside 
+  electricity
+  ";
+
+
+regs ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+regs_type ch1_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+
+global outcomes "
+  tot_rooms
+  owner
+  hh_size
+  pop_density
+  ";
+
+
+regs ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+regs_type ch2_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
 
 global outcomes "

@@ -270,12 +270,17 @@ restore
  global cat_num=2
 
     file open newfile using "descriptives_tablet${V}.tex", write replace
-      print_1 "Number of Projects" proj_count  "mean" "%10.0fc"
-      print_1 "Area (km2)" area "mean" "%10.2fc"
+                print_1 "Deeds Project Houses" rdp_count "mean" "%10.0fc"
+
       print_1 "Median Construction Year" mode_yr  "p50" "%10.0f"
-      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
+
+      print_1 "Area (km2)" area "mean" "%10.2fc"
+
+
       print_1 "House Price within 1km (Rands$^\dagger$)" price "mean" "%10.0fc"
       print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+
+      print_1 "Number of Projects" proj_count  "mean" "%10.0fc"
     file close newfile
 
 
@@ -286,12 +291,17 @@ restore
  global cat_num=4
 
     file open newfile using "descriptives_tablet_het${V}.tex", write replace
-      print_1 "Number of Projects" proj_count_het  "mean" "%10.0fc"
-      print_1 "Area (km2)" area "mean" "%10.2fc"
+                print_1 "Deeds Project Houses" rdp_count "mean" "%10.0fc"
+
       print_1 "Median Construction Year" mode_yr  "p50" "%10.0f"
-      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
+
+      print_1 "Area (km2)" area "mean" "%10.2fc"
+
+
       print_1 "House Price within 1km (Rands$^\dagger$)" price "mean" "%10.0fc"
       print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+      
+      print_1 "Number of Projects" proj_count  "mean" "%10.0fc"
     file close newfile
 
 
@@ -308,12 +318,17 @@ restore
  global cat_num=6
 
     file open newfile using "descriptives_tablet_all${V}.tex", write replace
-      print_1 "Number of Projects" o  "N" "%10.0fc"
+                print_1 "Deeds Project Houses" rdp_count "mean" "%10.0fc"
+
+      print_1 "Median Construction Year" mode_yr  "p50" "%10.0f"
+
       print_1 "Area (km2)" area "mean" "%10.2fc"
-      print_1 "Median Construction Yr." mode_yr  "p50" "%10.0f"
-      print_1 "Delivered Houses" rdp_count "mean" "%10.0fc"
-      print_1 "House Price in 1 km (R$^\dagger$)" price "mean" "%10.0fc"
+
+
+      print_1 "House Price within 1km (Rands$^\dagger$)" price "mean" "%10.0fc"
       print_1 "Distance to CBD$^\ddagger$ (km)" cbd_dist  "mean" "%10.1fc"
+      
+      print_1 "Number of Projects" proj_count  "mean" "%10.0fc"
     file close newfile
 
 

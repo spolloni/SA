@@ -4,6 +4,15 @@ set more off
 set scheme s1mono
 set matsize 11000
 set maxvar 32767
+
+
+cap prog drop write
+prog define write
+	file open newfile using "`1'", write replace
+	file write newfile "`=string(round(`2',`3'),"`4'")'"
+	file close newfile
+end
+
 #delimit;
 
 global LOCAL = 1;
@@ -282,7 +291,9 @@ use "temp/gcro_merge${flink}.dta", clear;
 	*disp ($score_04_05 + $score_05_06 + $score_06_07 + $score_08_09)/4;
 
 
-/*
+
+
+
 
 ** tab score: 37 match exactly ; 
 
@@ -291,7 +302,15 @@ foreach year in 05_06 06_07 08_09 {;
 	append using "temp/tab_`year'${flink}.dta";
 	};
 
+* g cost_50 = cost/50000;
+
 duplicates drop name, force;
+
+cd ../../../.. ;
+cd $output ;
+
+write "unique_budget_report_names.tex" `=_N' 1 "%12.0fc" ;
+
 * get 422 names ; 
 
 *** PLACEBO MATCHES: ;
