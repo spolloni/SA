@@ -34,9 +34,9 @@ end;
 
 global data_load_place = 0;
 
-global full_data_1996 = 0;
-global full_data_2001 = 0;
-global full_data_2011 = 0;
+global full_data_1996 = 1;
+global full_data_2001 = 1;
+global full_data_2011 = 1;
 global aggregate      = 0;
 
 
@@ -492,9 +492,9 @@ fcollapse
 
 save "temp_censushh_agg_no_place${V}.dta", replace;
 
-erase "DDcensus_hh_full_1996_admin${V}.dta";
-erase "DDcensus_hh_full_2001_admin${V}.dta";
-erase "DDcensus_hh_full_2011_admin${V}.dta";
+* erase "DDcensus_hh_full_1996_admin${V}.dta";
+* erase "DDcensus_hh_full_2001_admin${V}.dta";
+* erase "DDcensus_hh_full_2011_admin${V}.dta";
 
 
 };
@@ -729,7 +729,7 @@ cd Generated/GAUTENG;
 
 use "temp_censushh_agg_no_place${V}.dta", clear;
 
-merge 1:1 area_code year using "DDcensus_hh_place_admin${V}.dta";
+fmerge 1:1 area_code year using "DDcensus_hh_place_admin${V}.dta";
 * drop if _merge==1;
 g merge_place = _merge;
 drop _merge;

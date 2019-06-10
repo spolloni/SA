@@ -12,7 +12,7 @@ global bin  = 100;
 global bw   = 1000;
 
 
-global DATA_PREP = 1;
+global DATA_PREP = 0;
 global temp_file="Generated/Gauteng/temp/plot_ghs_temp.dta";
 
 if $LOCAL==1 {;
@@ -23,7 +23,7 @@ cd ../..;
 
 * if $DATA_PREP==1 {;
   
-
+if $DATA_PREP == 1 {;
 
 global qry = " 
     SELECT 
@@ -79,85 +79,568 @@ global qry = "
 odbc query "gauteng";
 odbc load, exec("$qry ") clear; 
 
-
 destring *, replace force;  
 
 
 save $temp_file, replace;
 
+};
 
+
+
+* local qry = " 
+*   SELECT GP.*, GH.* FROM ghs_pers AS GP JOIN ghs AS GH ON GP.uqnr =GH.uqnr AND GP.year = GH.year
+*   ";
 
 
 local qry = " 
-
-  SELECT * FROM ghs
+  SELECT GH.*, GP.personnr, GP.gender, GP.age, GP.race,  GP.injury, GP.flu, GP.diar, GP.fetch, GP.fetch_hrs, GP.med 
+  FROM ghs_pers  AS GP JOIN ghs AS GH ON GP.uqnr =GH.uqnr AND GP.year = GH.year
   ";
+
 
 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
 
-destring ea_code, replace force;
-
-merge m:1 ea_code using $temp_file ;
-keep if _merge==3;
-drop _merge;
 
 
+destring ea_code, replace force
 
-g post = year>=mode_yr_rdp & mode_yr_rdp<.;
+merge m:1 ea_code using $temp_file 
+keep if _merge==3
+drop _merge
 
+cap drop proj
+g proj = area_int_rdp>$temp_thresh & area_int_rdp<.
 
-g pa = post*area_int_rdp  ;   
-
-
-g rdp_house = rdp==1;
-
-g house = dwell==1  ;  
-
-g low_rent = rent_cat==1  ;
-
-g shack = dwell==7;
-g bkyd = dwell==6;
-
-g inf = dwell==8;
-
-g bkydfor = dwell==9 ;
-
-g own = owner==1 ;
-
-g piped = water_source==1;
-
-g toi_shr = toilet_shr==1 ;
-
-g har_id = 1 if harass==1 ; 
-replace har_id = 0 if harass>1 & harass<9;
-
-
-g hurt_id = 1 if hurt==1 ; 
-replace hurt_id = 0 if hurt>1 & hurt<.;
-
-g piped_dist = 0 if water_distance!=8 & water_distance!=. ;
-replace piped_dist =1 if water_distance==8 ;
-
-
-g toi_home = 0 if toilet_dist!=1 & toilet_dist!=. ;
-replace toi_home =1 if toilet_dist==8 ;
-
-g toi_dist = toilet_dist if toilet_dist<=3;
-
-
-g elec = 0 if electricity!=1 & electricity!=. ;
-replace elec =1 if electricity==1 ;
+cap drop spill
+g spill = proj==0 & distance_rdp<1000
 
 
 
+sort uqnr year 
+by uqnr year: g un=_n
 
-*** REPORT AS INFORMAL!~! PUSHED TO THE MARGINS.... ; 
+g unid=un==1
+egen fc = sum(unid), by(uqnr)
 
-duplicates drop uqnr year, force;
+
+sort person uqnr year 
+by person uqnr : g unp=_n
+
+g wave = 1 if year>=2005 & year<=2007
+replace wave = 2 if year>=2008 & year<=2011
+replace wave = 3 if year>=2012 & year<=2014
+
+egen uw = group(uqnr wave)
+
+g flu_id = flu==1
+g diar_id = diar==1
+
+g rdp_house = rdp==1
+
+g kid = age<=16
+egen kids=sum(kid), by(uqnr year)
+replace kids = . if kids>6
+
+g stole = 1 if stolen==1
+replace stole=0 if stolen>1 & stolen<9
+
+g har = 1 if harass==1
+replace  har=0 if harass>1 & harass<9
+
+g hur = 1 if hurt==1
+replace  hur=0 if hurt>1 & hurt<9
+
+g toi_share = 1 if toilet_shr==1
+replace toi_share=0 if toilet_shr==2
+
+g toi_home = 1 if toilet_dist==8
+replace toi_home=0 if toilet_dist>=1 & toilet_dist<=3
+
+cap drop O
+g O=0
+replace O  =1 if owner ==1 & year<=2008
+replace O = 1 if owner==4 & year>=2009 & year<=2012
+replace O = 1 if owner==5 & year>=2013
 
 
+cap drop RF
+g RF = 0
+replace RF =1 if owner>=4 & owner<=5 & year<=2008
+replace RF =1 if owner==5 & year>=2009 & year<=2012
+replace RF =1 if owner==6 & year>=2013
+
+replace tot_rooms=. if tot_rooms>12 /* this measure is messed up */  
+
+*** SPILL OVERS 
+
+g move = dwell!=dwell_5 
+replace move=. if dwell_5==. | year>2010
+
+
+g toi_inside= 0 if year<=2008
+replace toi_inside=1 if toilet==11 & year<=2008
+
+g toi_near =0 if year<=2008
+replace toi_near=1 if  toilet==12 & year<=2008
+
+
+g toi = 0 if toilet!=.
+replace toi =1 if (toilet == 11 | toilet==12) & year<=2008
+replace toi =1 if toilet==1 & year>2008
+
+
+g rdp_o = 1 if rdp_orig==1
+replace rdp_o=0 if rdp_orig==2
+
+g rdp_w = 1 if rdp_wt==1
+replace rdp_w = 0 if rdp_wt==2
+
+g rdp_w1=0 if year>=2009 & year<=2013
+replace rdp_w1=1 if rdp_wt==1
+
+g rdp_y = rdp_yr1 if rdp_yr1<=2013
+
+g house = dwell==1
+
+g rc = rent if rent>0 & rent<5000
+
+bys uqnr year: g hhsize=_N
+
+replace hhsize=. if hhsize>12
+
+cap drop inj
+g inj=0 if injury!=.
+replace inj=1 if injury==1
+
+cap drop inf
+g inf =0
+replace inf = 1 if  (dwell==7 | dwell==8) & year<=2008
+replace inf = 1 if  (dwell==8 | dwell==9) & year>2008
+
+cap drop inf_b
+g inf_b =0
+replace inf_b = 1 if  (dwell==7) & year<=2008
+replace inf_b = 1 if  (dwell==8) & year>2008
+
+cap drop inf_nb
+g inf_nb =0
+replace inf_nb = 1 if  (dwell==8) & year<=2008
+replace inf_nb = 1 if  (dwell==9) & year>2008
+
+g sick = med==1
+
+egen rdp_hh = max(rdp_house), by(uqnr)
+egen inf_hh = min(inf), by(uqnr)
+
+g piped=0 if water_source!=.
+replace piped=1 if water_source==1
+
+g good_wall=0 if wall!=.
+replace good_wall =1 if wall==1
+g good_roof=0 if roof!=.
+replace good_roof =1 if roof==3
+
+
+forvalues y = 2005(1)2014 {
+  if `y'!=2005 {
+     cap drop Y_`y'_raw
+     g Y_`y'_raw=year==`y'
+  }
+  cap drop Y_`y'_proj
+  g Y_`y'_proj= proj==1 & year==`y'
+  cap drop Y_`y'_spill
+  g Y_`y'_spill= spill==1 & year==`y'
+}
+order Y_*_raw Y_*_spill Y_*_proj
+
+
+
+forvalues y = 2005(1)2014 {
+
+  if `y'!=2005 & `y'!=2008 & `y'!=2012 {    
+  * if `y'!=2005 {
+      cap drop YF_`y'_raw
+      g YF_`y'_raw=year==`y'
+  * }
+
+  cap drop YF_`y'_proj
+  g YF_`y'_proj= proj==1 & year==`y'
+  cap drop YF_`y'_spill
+  g YF_`y'_spill= spill==1 & year==`y'
+  }
+}
+
+order YF_*_raw YF_*_spill YF_*_proj
+
+
+
+forvalues y = 1(1)3 {
+  if `y'!=1 {
+     cap drop W_`y'_raw
+     g W_`y'_raw=wave==`y'
+  }
+  cap drop W_`y'_proj
+  g W_`y'_proj= proj==1 & wave==`y'
+  cap drop W_`y'_spill
+  g W_`y'_spill= spill==1 & wave==`y'
+}
+order W_*_raw W_*_spill W_*_proj
+
+
+
+
+* 05 06 07
+* 08 09 10 11
+* 12 13 14
+
+cap prog drop rhh
+prog define rhh
+  if `2'!=1 & length("`3'")>0 {
+    local add "& un==1 "
+  }
+  if `2'!=1 & length("`3'")==0 {
+    local add "if un==1 "
+  }
+  
+  xi: reg `1' Y_* `3' `add'  ,  robust cluster(cluster_rdp)
+  coefplot, vertical keep(Y_*) xlabel(, angle(vertical))
+end
+
+
+cap prog drop rwa
+prog define rwa
+  if `2'!=1 & length("`3'")>0 {
+    local add "& un==1 "
+  }
+  if `2'!=1 & length("`3'")==0 {
+    local add "if un==1 "
+  }
+  
+  xi: reg `1' W_*  `3' `add'  ,  robust cluster(cluster_rdp)
+  coefplot, vertical keep(W_*) xlabel(, angle(vertical))
+end
+
+cap prog drop ahh
+prog define ahh
+  if `2'!=1 & length("`3'")>0 {
+    local add "& un==1 "
+  }
+  if `2'!=1 & length("`3'")==0 {
+    local add "if un==1 "
+  }
+  xi: areg `1' YF_*  `3' `add', a(uw) robust cluster(cluster_rdp)
+  coefplot, vertical keep(YF_*) xlabel(, angle(vertical))
+end
+
+
+
+** BIG MOVES **
+rwa rdp_house 0
+rwa house 0
+
+rwa inf 0
+rwa inf_nb 0
+rwa inf_b 0
+
+rwa toi 0
+
+
+rwa age 1
+rwa gender 1
+
+
+rwa stole 0
+rwa har 0
+rwa hur 0
+
+rwa toi_share 0
+
+
+
+
+rhh inf 0
+rhh inf_nb 0
+rhh inf_b 0
+
+rhh toi_share 0
+
+rhh piped 0
+
+rhh O 0
+rhh RF 0
+
+rhh rc 0
+
+rhh stole 0
+rhh har 0
+rhh hur 0
+
+
+ahh rdp_house 0
+
+
+ahh rdp_house 0
+ahh toi_share 0
+
+
+ahh flu_id 1
+ahh diar_id 1
+
+
+** BIG COMPOSITIONAL CHANGE! 
+rhh age 1 
+rhh kids 1 
+
+rhh move 1  /* to get close by! */
+rhh inj 0
+*** THIS LOOKS WEIRD DUDE
+rhh hhsize 0 
+
+
+
+* (1) locals are getting houses? yes?? (because fe and cross-section match!)
+* (2) coming from slums almost entirely * at least the ones that stayed
+* (3) get RDP = don't share toilets as much
+* (4) similar trends for rdp_hh == 0 meaning that maybe rdp is mismeasured
+* (5) not a huge amount for sickness
+
+areg inf rdp_house i.year, absorb(uqnr) cluster(cluster_rdp) r
+
+xi: areg elec   i.rdp_house*i.proj i.year, absorb(uqnr) cluster(cluster_rdp) r
+xi: areg piped  i.rdp_house*i.proj i.year, absorb(uqnr) cluster(cluster_rdp) r
+xi: areg toi    i.rdp_house*i.proj i.year, absorb(uqnr) cluster(cluster_rdp) r
+
+*** generated in project! 
+
+
+*** THIS WORKS WELL ! *
+
+ahh rdp_house 0 "if wave==2 & fc>=3 & fc<=4 & year>2008"
+
+  xi: areg rdp_house YF_*  if wave==2 & year>2008 & fc==1 , a(ea_code) robust cluster(cluster_rdp)
+    coefplot, vertical keep(YF_*) xlabel(, angle(vertical))
+
+
+
+
+
+
+
+
+
+
+
+
+**** MISMEASUREMENT BETWEEN 08 AND 09-11!!!!
+
+ahh house 0 "if wave==2"
+ahh house 0 "if wave==2 & rdp_hh==0"
+
+ahh inf 0 "if wave==2"
+ahh inf 0 "if wave==2 & rdp_hh==0"
+
+ahh inf_nb 0 "if wave==2"
+ahh inf_b 0 "if wave==2"
+
+ahh good_wall 0 "if wave==2"
+ahh good_roof 0 "if wave==2"
+
+ahh O 0 "if wave==2"
+ahh RF 0 "if wave==2"
+
+
+ahh elec 0 "if wave==2"
+ahh elec 0 "if wave==2 & rdp_hh==0"
+
+ahh piped 0 "if wave==2"
+ahh piped 0 "if wave==2 & rdp_hh==0"
+
+ahh toi 0 "if wave==2"
+ahh toi 0 "if wave==2 & rdp_hh==0"
+
+ahh toi_share 0 "if wave==2"
+ahh toi_share 0 "if wave==2 & rdp_hh==0" /* no toilet share! */
+ahh toi_share 0 "if wave==2 & inf_hh==1" /* no toilet share! */
+
+
+
+
+ahh flu_id 0 "if wave==2"
+ahh diar_id 0 "if wave==2"
+
+
+ahh kids 1 "if wave==2"
+ahh age 1 "if wave==2"
+
+
+
+* ahh sick 0 "if wave==2"
+
+
+
+xi: reg rdp_house Y_* if un==1 ,  robust cluster(cluster_rdp)
+coefplot, vertical keep(Y_*) xlabel(, angle(vertical))
+
+
+xi: reg toi Y_* if un==1 ,  robust cluster(cluster_rdp)
+coefplot, vertical keep(Y_*) xlabel(, angle(vertical))
+
+
+xi: reg toi_share Y_* if un==1 ,  robust cluster(cluster_rdp)
+coefplot, vertical keep(Y_*) xlabel(, angle(vertical))
+
+
+
+
+xi: reg house Y_* if un==1 ,  robust cluster(cluster_rdp)
+coefplot, vertical keep(Y_*) xlabel(, angle(vertical))
+
+
+
+
+
+
+
+
+
+
+
+
+xi: areg toi i.year*i.proj i.year*i.spill if un==1,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg toi_share i.year*i.proj i.year*i.spill if un==1,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+xi: areg toi_inside i.year*i.proj i.year*i.spill if un==1 & rdp_house==0,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg toi_near i.year*i.proj i.year*i.spill if un==1 & rdp_house==0,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+* xi: areg toi_home i.year*i.proj i.year*i.spill if un==1,  robust cluster(cluster_rdp) a(ea_code)
+* coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+xi: areg rdp_o i.year*i.proj i.year*i.spill,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg rdp_y i.year*i.proj i.year*i.spill if rdp_y>2000,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+
+xi: areg rdp_w i.year*i.proj i.year*i.spill,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+xi: areg rent i.year*i.proj i.year*i.spill if rdp_house==0  &  rent>0 & rent<=5000,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg rent_cat i.year*i.proj i.year*i.spill if rdp_house==0  &  rent_cat>=1 & rent_cat<8,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+
+xi: areg age i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+xi: areg kids i.year*i.proj i.year*i.spill if un==1 ,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+
+
+xi: reg age i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) 
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: reg age i.year*i.proj i.year*i.spill if rdp_house==0 ,  robust cluster(cluster_rdp) 
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: reg age i.year*i.proj i.year*i.spill if rdp_house==1 ,  robust cluster(cluster_rdp) 
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg age i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+xi: areg flu_id i.year*i.proj i.year*i.spill age i.gender i.race if age<=16 ,  robust cluster(cluster_rdp) a(uqnr)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg diar_id i.year*i.proj i.year*i.spill age i.gender i.race if age<=16,  robust cluster(cluster_rdp) a(uqnr)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+xi: areg flu_id i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg diar_id i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg diar_id i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) a(uqnr)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+*** NEIGHBORHOOD QUALITY MEASURES?!
+
+xi: areg stole i.year*i.proj i.year*i.spill if rdp_house==0,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg har i.year*i.proj i.year*i.spill if rdp_house==0,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg hur i.year*i.proj i.year*i.spill if rdp_house==0,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+
+*** HARD TO INTERPRET BECAUSE DIFFERENT MEASURES 
+
+xi: reg O i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) 
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+xi: reg RF i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) 
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+xi: areg O i.year*i.proj i.year*i.spill ,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+xi: areg O i.year*i.proj i.year*i.spill if rdp_house==1,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+xi: areg RF i.year*i.proj i.year*i.spill if rdp_house==1,  robust cluster(cluster_rdp)  a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+xi: areg RF i.year*i.proj i.year*i.spill if rdp_house==0,  robust cluster(cluster_rdp)  a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+
+
+
+xi: areg move i.year*i.proj i.year*i.spill if dwell_5!=1,  robust cluster(cluster_rdp) a(ea_code)
+coefplot, vertical keep(_Iy*) xlabel(, angle(vertical))
+
+
+/*
 sort uqnr year
 by uqnr: g cn=_n
 egen fp = max(cn), by(uqnr)
@@ -171,11 +654,8 @@ g first_yr = year if cn==1
 
 g fy_dev = first_yr-min_yr_ea
 
-
 tab fy_dev
 tab fp if cn==1
-
-/*
 
 tab fy_dev if fp==3
 
@@ -715,6 +1195,67 @@ reg  old_house TREAT post TREAT_post if TREAT==1 |  PLACEBO==1, cluster(cluster_
 
 
 
+* 05-08
+*  Owned and fully paid off |     19,235       68.45       68.45
+* Owned, but not yet fully paid off (e.g. |      1,663        5.92       74.36
+*                                  Rented |      4,306       15.32       89.69
+* Occupied rent-free as part of employmen |      1,924        6.85       96.53
+* Occupied rent-free not as part of emplo |        870        3.10       99.63
+*                                   Other |         87        0.31       99.94
+*                             Unspecified
+
+* 09-12
+*  Rented |      3,993       15.78       15.78
+* Owned, but not yet paid off to bank/fin |      1,538        6.08       21.86
+* Owned, but not yet paid off to private  |        270        1.07       22.93
+*                Owned and fully paid off |     16,224       64.12       87.05
+*                      Occupied rent-free |      3,078       12.16       99.21
+*                                   Other |         96        0.38       99.59
+*                             Do not know |         29        0.11       99.70
+*                             Unspecified |         75        0.30      100.00
+
+
+* 13-14
+* Rented |      4,122       15.99       15.99
+* Owned, but not yet paid off to bank/fin |        395        1.53       17.52
+* Rented from other (incl municipality an |      1,803        6.99       24.51
+* Owned, but not yet paid off to private  |        395        1.53       26.04
+*                Owned and fully paid off |     15,967       61.92       87.96
+* Occupied rent-free                      |      2,854       11.07       99.03
+*                                   Other |        222        0.86       99.89
+*                             Do not know |         28        0.11      100.00
+
+
+
+* 05-08
+* Flush toilet with offsite disposal (in  |      9,295       31.79       31.79
+* Flush toilet with offsite disposal (on  |      4,647       15.89       47.69
+* Flush toilet with offsite disposal (off |        261        0.89       48.58
+* Flush toilet with on site disposal (in  |        517        1.77       50.35
+* Flush toilet with on site disposal (on  |        727        2.49       52.84
+* Flush toilet with on site disposal (off |         29        0.10       52.93
+*               Chemical toilet (on site) |        158        0.54       53.48
+*              Chemical toilet (off site) |         43        0.15       53.62
+* Pit latrine with ventilation pipe (on s |      3,352       11.47       65.09
+*       Pit latrine with ventilation pipe |        152        0.52       65.61
+* Pit latrine without ventilation pipe (o |      6,693       22.89       88.50
+* Pit latrine without ventilation pipe (o |        429        1.47       89.97
+*                 Bucket toilet (on site) |        579        1.98       91.95
+*                Bucket toilet (off site) |         79        0.27       92.22
+*                                    None |      2,072        7.09       99.31
+*                             Unspecified |        203        0.69      100.00
+
+
+* 09-on
+* Flush toilet connected to a public sewe |     13,635       53.43       53.43
+* Flush toilet connected to a septic tank |        710        2.78       56.21
+*                         Chemical toilet |        100        0.39       56.60
+* Pit latrine/toilet with ventilation pip |      3,345       13.11       69.71
+* Pit latrine/toilet without ventilation  |      5,269       20.65       90.36
+*                           Bucket toilet |        211        0.83       91.19
+*                                    None |      1,375        5.39       96.58
+*                         Other (specify) |         34        0.13       96.71
+*                             Unspecified 
 
 
 

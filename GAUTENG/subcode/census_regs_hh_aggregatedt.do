@@ -355,6 +355,22 @@ g informal_house = shack_bkyd + shack_non_bkyd ;
 
 * if $spatial == 0 {;
 
+g total_inf = informal*pop_density;
+g total_for = formal*pop_density;
+
+* total_for total_inf ;
+
+global outcomes "
+total_inf total_for
+  ";
+
+regs chd_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+regs_type chd_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+
+/*
+
 global outcomes "
   toilet_flush 
   water_inside 

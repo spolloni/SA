@@ -133,17 +133,19 @@ def buffer_area_int(db,buffer1,buffer2):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
     # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
     # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
-    #for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
-    for name,fid in zip(['grid_temp_25'],['grid_id']):
-        # table= name + '_area'
-        # con.execute("DROP TABLE IF EXISTS {};".format(table))
-        # con.execute('''
-        #             CREATE TABLE {} AS
-        #             SELECT A.{}, ST_AREA(A.GEOMETRY) AS area
-        #             FROM {} AS A ;
-        #             '''.format(table,fid,name))
-        # cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
-        # print 'generate area table '+name
+    # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
+    # for name,fid in zip(['grid_temp_25'],['grid_id']):
+    # for name,fid in zip(['ea_2001'],['OGC_FID']):
+
+        table= name + '_area'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                    CREATE TABLE {} AS
+                    SELECT A.{}, ST_AREA(A.GEOMETRY) AS area
+                    FROM {} AS A ;
+                    '''.format(table,fid,name))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+        print 'generate area table '+name
 
         for tag in ['rdp','placebo']:
             table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer2)+'_'+tag

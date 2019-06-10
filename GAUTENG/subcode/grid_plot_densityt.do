@@ -41,13 +41,13 @@ end;
 *  PLOT DENSITY  *;
 ******************;
 
-global load_data = 0;
+global load_data = 1;
 
 global bblu_do_analysis = $load_data ; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 0;
-global graph_plotmeans_cntproj  = 1;
+global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 1;
+global graph_plotmeans_cntproj  = 0;
 
 global reg_triplediff2        = 0; /* Two spillover bins */
 global reg_triplediff2_type   = 0; /* Two spillover bins */
@@ -123,18 +123,6 @@ replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_plac
 replace distance_placebo=. if distance_placebo>${dist_max} ;
 replace distance_rdp=. if distance_rdp>${dist_max} ;
 
-sum distance_rdp;
-global max = round(ceil(`r(max)'),$bin);
-
-egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
-g drdp=dists_rdp;
-replace drdp=. if drdp>$max-$bin; 
-* replace dists_rdp = dists_rdp+`=abs($dist_min)';
-
-egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
-g dplacebo = dists_placebo;
-replace dplacebo=. if dplacebo>$max-$bin;
-* replace dists_placebo = dists_placebo+`=abs($dist_min)';
 
 
 drop if distance_rdp==. & distance_placebo==. ; 
@@ -150,6 +138,32 @@ if $type_area == 0 {;
 if $type_area>=1 {;
   rgen_area ;
 };
+
+g dist_temp = distance_rdp if distance_rdp<distance_placebo ;
+replace dist_temp = distance_placebo if distance_placebo<=distance_rdp ;
+
+drop distance_rdp;
+g distance_rdp = dist_temp if con==1;
+drop distance_placebo;
+g distance_placebo = dist_temp if con==0;
+drop dist_temp;
+
+
+sum distance_rdp;
+global max = round(ceil(`r(max)'),$bin);
+
+egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
+g drdp=dists_rdp;
+replace drdp=. if drdp>$max-$bin; 
+* replace dists_rdp = dists_rdp+`=abs($dist_min)';
+
+egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
+g dplacebo = dists_placebo;
+replace dplacebo=. if dplacebo>$max-$bin;
+* replace dists_placebo = dists_placebo+`=abs($dist_min)';
+
+
+
 
 rgen ${no_post};
 
@@ -378,9 +392,11 @@ prog define plotmeans_pre_prog;
     plotmeans_pre 
     bblu_`1'_pre_means${V}_`2'_${k}k `1' rdp placebo
     "Constructed" "Unconstructed"
-    "-500(500)${dist_max_reg}" `"-.3125 "-500" 0 "0"  .3125 "500"  "'
+    "-500(500)${dist_max_reg}" `" -.15625 "-250" 0 "0" .15625 "250"  "'
     2  $load_data "`3'" "`4'";
 end;
+
+* `"-.3125 "-500" 0 "0"  .3125 "500"  "';
 
 * `"-.3125 "-500" -.15625 "-250" 0 "0" .15625 "250" .3125 "500"  "';
 * `"-1 "-400" -.5 "200" 0 "0" .5 "200" 1 "400"  "'; 
@@ -388,7 +404,7 @@ end;
     plotmeans_pre 
     bblu_for_fe_pre_means${V}_${k}k for_fe_pre rdp placebo
     "Constructed" "Unconstructed"
-    "-500(500)${dist_max_reg}" `"-.3125 "-500" 0 "0"  .3125 "500"  "'
+    "-500(500)${dist_max_reg}" `" -.15625 "-250" 0 "0" .15625 "250"  "'
     2  $load_data;
 
 
@@ -397,7 +413,7 @@ end;
     plotmeans_pre 
     bblu_inf_fe_pre_means${V}_${k}k inf_fe_pre rdp placebo
     "Constructed" "Unconstructed"
-    "-500(500)${dist_max_reg}" `"-.3125 "-500" 0 "0"  .3125 "500"  "'
+    "-500(500)${dist_max_reg}" `" -.15625 "-250" 0 "0" .15625 "250"  "'
     2  $load_data;
 
 

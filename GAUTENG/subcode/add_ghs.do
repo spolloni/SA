@@ -2,6 +2,10 @@
 clear all
 set more off
 
+if $LOCAL == 1 {
+	cd ..
+}
+
 cd ../../
 
 local p02 "Raw/GHS/2002/ghs-2002-v1.2-stata/ghs-2002-person-v1.2-20150127.dta"
@@ -49,11 +53,15 @@ local h15 "Raw/GHS/2015/stata/ghs_2015_house_v1.1_20160608.dta"
 local p16 "Raw/GHS/2016/ghs-2016-v1-stata/ghs-2016-person-stata11.dta"
 local h16 "Raw/GHS/2016/ghs-2016-v1-stata/ghs-2016-house-stata11.dta"
 
+local p17 "Raw/GHS/2017/Stata11/GHS 2017 Person v1.0 Stata11.dta"
+local h17 "Raw/GHS/2017/Stata11/GHS 2017 Household v1.0 Stata11.dta"
 
-local years "02 03 04 05 06 07 08 09 10 11 12 13 14 15 16"
-local years_append "09 02 03 04 05 06 07 08 10 11 12 13 14 15 16" // to get the labels right
 
-local varlist "uqnr prov dwell owner rdp rent rent_cat price price_cat rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 build_yr"
+local years "02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17"
+local years_append "09 02 03 04 05 06 07 08 10 11 12 13 14 15 16 17" // to get the labels right
+
+local varlist "uqnr prov owner rdp rent rent_cat price_cat price rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 build_yr dwell_5 dwell_other_5 dwell dwell_other  electricity toilet_shr toilet_dist toilet_dwell toilet   tot_rooms water_source water_distance roof wall roof_q wall_q  stolen  harass  harass_hh hurt  hurt_hh   "
+  
 
 program define var_gen
 	foreach v in `1' {
@@ -92,16 +100,108 @@ local yr "03"
 		save "`temp_h`yr''"  
 
 
-local yr_list "04 05 06 07 08"
+
+local yr "10"
+	use `h`yr'', clear
+	ren *, lower
+	
+
+local yr_list "04"
 foreach yr in `yr_list' {
 *	local yr "05"
 	use `h`yr'', clear
 	ren *, lower
 	ren q41maind  dwell
+	ren q41othrd  dwell_other
+	ren q42maind  dwell_5
+	ren q42othrd  dwell_other_5
+
+
+	ren q43roof roof
+	ren q43walls wall
+	ren q44roofc roof_q
+	ren q44wallc wall_q
+
+	ren q45totrm tot_rooms
+
 	ren q46owner  owner	
 	ren q418hous  rdp
 	ren q416*     rent
 	ren q417mark  price
+
+	var_gen "`varlist'"
+	    g year = "`yr'"
+		tempfile temp_h`yr'
+		save "`temp_h`yr''" 
+}
+
+
+local yr_list "05 06 07 08"
+foreach yr in `yr_list' {
+*	local yr "05"
+	use `h`yr'', clear
+	ren *, lower
+	ren q41maind  dwell
+	ren q41othrd  dwell_other
+	ren q42maind  dwell_5
+	ren q42othrd  dwell_other_5
+
+	ren q43roof roof
+	ren q43walls wall
+	ren q44roofc roof_q
+	ren q44wallc wall_q
+
+	ren q45totrm tot_rooms
+
+	ren q46owner  owner	
+	ren q418hous  rdp
+	ren q416*     rent
+	ren q417mark  price
+
+	if "`yr'"=="05" {
+	ren q439typt toilet
+	ren q440toil toilet_shr
+	ren q441dist toilet_dist
+	}
+	else {
+		ren q430typt toilet
+		ren q431dist toilet_dist
+		ren q432toil toilet_shr
+	}
+
+	if "`yr'"=="05" {
+		ren q443main electricity 
+	}
+	else {
+	ren q434main electricity
+	}
+
+	ren q419drin water_source
+	if "`yr'"=="05" {
+		ren q420drin water_distance
+	}
+	else {
+		ren q420dist water_distance
+	}
+	
+	if "`yr'"=="05" {
+		ren q481athe stolen
+		ren q481binh harass_hh
+		ren q481cnot harass
+		ren q481fhit hurt_hh
+		ren q481ghit hurt
+	}
+	else {
+		ren q471athe stolen
+		ren q471binh harass_hh
+		ren q471cnot harass
+		ren q471fhit hurt_hh
+		ren q471ghit hurt
+	}
+
+	* ren q414repa rep
+	* ren q415amai rep_v
+
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
@@ -110,8 +210,11 @@ foreach yr in `yr_list' {
 
 
 
+	
 local yr_list "09 10"
 foreach yr in `yr_list' {
+	local `yr' 
+	* local yr "09"
 	use `h`yr'', clear
 	ren *, lower
 	ren q31maind  dwell
@@ -127,6 +230,38 @@ foreach yr in `yr_list' {
 	ren q312cpersa rdp_yr1
 	ren q312cpersb rdp_yr2
 	ren q312cpersc rdp_yr3	
+
+
+	ren q31othrd  dwell_other
+	ren q32maind  dwell_5
+	ren q32othrd  dwell_other_5
+	ren q33roof roof
+	ren q33walls wall
+	ren q34roofc roof_q
+	ren q34wallc wall_q
+	ren q35totrm tot_rooms
+
+	ren q324toil toilet
+	ren q326sha toilet_shr
+	ren q328near toilet_dist
+
+	if "`yr'"=="09" {
+		ren q330mains electricity
+	}
+	else {
+		ren q330amains electricity
+	}
+	
+	ren q313drin water_source
+	ren q314dist water_distance
+
+		* ren q471athe stolen
+		* ren q471binh harass_hh
+		* ren q471cnot harass
+		* ren q471fhit hurt_hh
+		* ren q471ghit hurt
+
+
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
@@ -134,24 +269,49 @@ foreach yr in `yr_list' {
 }
 
 
-
 local yr_list "11"
 foreach yr in `yr_list' {
+	
+	* local yr "11"
 	use `h`yr'', clear
+
 	ren *, lower
 	ren q31maind  dwell
 	ren q35owner  owner	
 	ren q36rent  rent_cat
-	ren q37val price_cat	
+	ren q37val   price_cat	
 	ren q38built build_yr
 	ren q39ardp  rdp	
 	ren q39borig rdp_orig
 	ren q310subs rdp_subs
 	ren q311wl  rdp_wt
-	*ren q312bwt  rdp_wt_mem
-	*ren q312cpersa rdp_yr1
-	*ren q312cpersb rdp_yr2
-	*ren q312cpersc rdp_yr3	
+
+
+	ren q31othrd  dwell_other
+	* ren q32maind  dwell_5
+	* ren q32othrd  dwell_other_5
+	ren q32roof roof
+	ren q32walls wall
+	ren q33roofc roof_q
+	ren q33wallc wall_q
+	ren q34totrm tot_rooms
+
+	ren q322toil toilet
+	ren q324sha toilet_shr
+	ren q326near toilet_dist
+
+	ren q327amains electricity
+
+	ren q312drin water_source
+	ren q313adist water_distance
+
+		* ren q471athe stolen
+		* ren q471binh harass_hh
+		* ren q471cnot harass
+		* ren q471fhit hurt_hh
+		* ren q471ghit hurt
+
+
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
@@ -162,6 +322,7 @@ foreach yr in `yr_list' {
 
 local yr_list "12 13"
 foreach yr in `yr_list' {
+	* local yr "12"
 	use `h`yr'', clear
 	ren *, lower
 	if "`yr'"=="12" {
@@ -172,9 +333,14 @@ foreach yr in `yr_list' {
 	}
 	if "`yr'"=="13" {
 		ren q`j'1amaind  dwell	
+		ren q`j'1aothrd	 dwell_other
+
+		ren q`j'1bmaind  dwell_5
+		ren q`j'1bothrd dwell_other_5
 	}
 	else {
-		ren q`j'1maind  dwell		
+		ren q`j'1maind  dwell
+		ren q`j'1othrd	dwell_other	
 	}
 	ren q`j'5owner  owner	
 	ren q`j'6rent  rent_cat
@@ -188,6 +354,41 @@ foreach yr in `yr_list' {
 	ren q`j'11cpers1 rdp_yr1
 	ren q`j'11cpers2 rdp_yr2
 	ren q`j'11cpers3 rdp_yr3	
+
+
+
+	* ren q31othrd  dwell_other
+	* ren q32maind  dwell_5
+	* ren q32othrd  dwell_other_5
+	ren q`j'2roof roof
+	ren q`j'2walls wall
+	ren q`j'3roofc roof_q
+	ren q`j'3wallc wall_q
+	ren q`j'4totrm tot_rooms
+
+	ren q`j'22toil toilet
+	ren q`j'24sha toilet_shr
+	if "`yr'"=="12" {
+	ren q`j'26near toilet_dist
+	}
+	else {
+		ren q`j'25bnear toilet_dist
+	}
+
+	ren q`j'28amains electricity
+
+	ren q`j'12drin water_source
+	ren q`j'13adist water_distance
+
+		* ren q471athe stolen
+		* ren q471binh harass_hh
+		* ren q471cnot harass
+		* ren q471fhit hurt_hh
+		* ren q471ghit hurt
+
+
+
+
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
@@ -195,10 +396,19 @@ foreach yr in `yr_list' {
 }
 
 
-local yr_list "14 15 16"
+local yr_list "14 15 16 17"
 foreach yr in `yr_list' {
-	use `h`yr'', clear
+	*local yr "14"
+	if "`yr'"=="17" {
+		use "Raw/GHS/2017/Stata11/GHS 2017 Household v1.0 Stata11.dta", clear
+	}
+	else {
+		use `h`yr'', clear
+	}
+	
+
 	ren *, lower
+	
 	local j "5"	
 	ren q`j'1maind  dwell		
 	ren q`j'6owner  owner	
@@ -207,6 +417,40 @@ foreach yr in `yr_list' {
 	ren q`j'9built	build_yr
 	ren q`j'10ardp  rdp	
 	ren q`j'10borig rdp_orig
+
+
+	* ren q31othrd  dwell_other
+	* ren q32maind  dwell_5
+	* ren q32othrd  dwell_other_5
+	ren q`j'2roof roof
+	ren q`j'2walls wall
+	ren q`j'4roofc roof_q
+	ren q`j'4wallc wall_q
+	ren q`j'5totrm tot_rooms
+
+	ren q`j'22toil toilet
+	ren q`j'24sha toilet_shr
+	if "`yr'"=="16" | "`yr'"=="17" {
+		ren q`j'25aoy toilet_dwell
+	}
+	else {
+		ren q`j'25ayo toilet_dwell
+	}
+
+		ren q`j'25bnear toilet_dist
+
+	ren q`j'28amains electricity
+
+	ren q`j'12drin water_source
+	ren q`j'13adist water_distance
+
+		* ren q471athe stolen
+		* ren q471binh harass_hh
+		* ren q471cnot harass
+		* ren q471fhit hurt_hh
+		* ren q471ghit hurt
+
+
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
@@ -215,6 +459,18 @@ foreach yr in `yr_list' {
 
 
 *** PUT TEMPORARY FILES TOGETHER ***
+
+* use `temp_h05', clear
+
+
+* global lab_list = "dwell owner rent_cat price_cat build_yr rdp rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 dwell_5 dwell_other_5 electricity toilet_shr toilet_dist toilet tot_rooms water_source water_distance roof wall roof_q wall_q stole harass harass_hh hurt hurt_hh year"
+*  foreach var in $lab_list {
+* 	 levelsof `var', local(`var'_levels)       
+* 	 foreach val of local `var'_levels  {       
+*       	 local `var'vl`val' : label `var' `val'    
+*        }
+*  }
+
 
 clear
 foreach r in `years_append' {
@@ -232,12 +488,18 @@ g ea_code = substr(uqnr,1,8)
 replace year="20"+year
 destring uqnr year, replace force
 
+* foreach var in $lab_list{                 /* loop over list "inc answer" */
+* 	 levelsof `var', local(`var'_levels)       
+* 	 foreach val of local `var'_levels{             /* loop over list "80 81 82" */
+* 		 label variable `variable'`val' "`var'vl`val': `yearvl`value''"
+* 	 }
+* }
 
 save "Generated/GAUTENG/temp/ghs_full.dta", replace
 odbc exec("DROP TABLE IF EXISTS ghs;"), dsn("gauteng")
 odbc insert, table("ghs") create
 odbc exec("CREATE INDEX ea_code_index ON ghs (ea_code);"), dsn("gauteng")
-exit, STATA clear
+* exit, STATA clear
 
 
 

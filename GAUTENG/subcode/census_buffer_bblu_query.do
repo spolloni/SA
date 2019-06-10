@@ -1,4 +1,4 @@
-
+sum 
 clear 
 
 set more off
