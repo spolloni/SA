@@ -60,8 +60,8 @@ local h17 "Raw/GHS/2017/Stata11/GHS 2017 Household v1.0 Stata11.dta"
 local years "02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17"
 local years_append "09 02 03 04 05 06 07 08 10 11 12 13 14 15 16 17" // to get the labels right
 
-local varlist "uqnr prov owner rdp rent rent_cat price_cat price rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 build_yr dwell_5 dwell_other_5 dwell dwell_other  electricity toilet_shr toilet_dist toilet_dwell toilet   tot_rooms water_source water_distance roof wall roof_q wall_q  stolen  harass  harass_hh hurt  hurt_hh   "
-  
+local varlist "uqnr prov owner rdp rent rent_cat price_cat price rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 build_yr dwell_5 dwell_other_5 dwell dwell_other  electricity toilet_shr toilet_dist toilet_dwell toilet   tot_rooms water_source water_distance roof wall roof_q wall_q  stolen  harass  harass_hh hurt  hurt_hh water_source piped other_water pipe_breaks pipe_cause cook_elec rubbish poll_water poll_air poll_land poll_noise "
+
 
 program define var_gen
 	foreach v in `1' {
@@ -169,14 +169,46 @@ foreach yr in `yr_list' {
 		ren q432toil toilet_shr
 	}
 
-	if "`yr'"=="05" {
-		ren q443main electricity 
-	}
-	else {
-	ren q434main electricity
-	}
+
 
 	ren q419drin water_source
+	* ren q423pipe piped 
+	ren q419othr other_water
+	ren q427inte pipe_breaks
+	* ren q428causs pipe_cause
+
+	* ren q437cook cook_elec
+	* ren q439rubb rubbish 
+
+	* ren q451bwat poll_water
+	* ren q451cair poll_air
+	* ren q451dlan poll_land
+	* ren q451enoi poll_noise
+
+	if "`yr'"=="05" {
+		ren q443main electricity 
+		ren q422pipe piped
+		ren q446cook cook_elec
+		ren q448rubb rubbish
+		ren q460bwat poll_water
+		ren q460cair poll_air
+		ren q460dlan poll_land
+		ren q460enoi poll_noise
+	}
+	else {
+		ren q434main electricity
+		ren q423pipe piped 
+		ren q428causs pipe_cause
+		ren q437cook cook_elec
+		ren q439rubb rubbish
+		ren q451bwat poll_water
+		ren q451cair poll_air
+		ren q451dlan poll_land
+		ren q451enoi poll_noise
+	}
+
+* 	water_source piped other_water pipe_breaks pipe_cause cook_elec rubbish poll_water poll_air poll_land poll_noise
+
 	if "`yr'"=="05" {
 		ren q420drin water_distance
 	}
@@ -245,6 +277,22 @@ foreach yr in `yr_list' {
 	ren q326sha toilet_shr
 	ren q328near toilet_dist
 
+
+	* ren q313drin water_source
+	* ren q423pipe piped 
+	* ren q419othr other_water
+	ren q321ainte pipe_breaks
+	ren q321bcaus pipe_cause
+
+	* ren q437cook cook_elec
+	ren q335rubb rubbish 
+
+	ren q339wat poll_water
+	ren q339air poll_air
+	ren q339lan poll_land
+	ren q339noi poll_noise
+
+
 	if "`yr'"=="09" {
 		ren q330mains electricity
 	}
@@ -267,6 +315,8 @@ foreach yr in `yr_list' {
 		tempfile temp_h`yr'
 		save "`temp_h`yr''" 
 }
+
+
 
 
 local yr_list "11"
@@ -304,6 +354,22 @@ foreach yr in `yr_list' {
 
 	ren q312drin water_source
 	ren q313adist water_distance
+
+
+	* ren q313drin water_source
+	* ren q423pipe piped 
+	* ren q419othr other_water
+	ren q319ainte pipe_breaks
+	ren q319bcaus pipe_cause
+
+	ren q331cook cook_elec
+	ren q332rub rubbish 
+
+	ren q336wat poll_water
+	ren q336air poll_air
+	ren q336lan poll_land
+	ren q336noi poll_noise
+
 
 		* ren q471athe stolen
 		* ren q471binh harass_hh
@@ -370,9 +436,21 @@ foreach yr in `yr_list' {
 	ren q`j'24sha toilet_shr
 	if "`yr'"=="12" {
 	ren q`j'26near toilet_dist
+	ren q`j'34acook cook_elec
+	ren q`j'36rub rubbish 
+	ren q`j'39wat poll_water
+	ren q`j'39air poll_air
+	ren q`j'39lan poll_land
+	ren q`j'39noi poll_noise
 	}
 	else {
 		ren q`j'25bnear toilet_dist
+		ren q`j'31cook cook_elec
+		ren q`j'32rub rubbish 
+		ren q`j'35wat poll_water
+		ren q`j'35air poll_air
+		ren q`j'35lan poll_land
+		ren q`j'35noi poll_noise
 	}
 
 	ren q`j'28amains electricity
@@ -386,14 +464,26 @@ foreach yr in `yr_list' {
 		* ren q471fhit hurt_hh
 		* ren q471ghit hurt
 
+	* ren q313drin water_source
+	* ren q423pipe piped 
+	* ren q419othr other_water
+	ren q`j'19ainte pipe_breaks
+	ren q`j'19bcaus pipe_cause
 
+	* ren q`j'34acook cook_elec
+	* ren q`j'36rub rubbish 
 
+	* ren q`j'39wat poll_water
+	* ren q`j'39air poll_air
+	* ren q`j'39lan poll_land
+	* ren q`j'39noi poll_noise
 
 	var_gen "`varlist'"
 	    g year = "`yr'"
 		tempfile temp_h`yr'
 		save "`temp_h`yr''" 
 }
+
 
 
 local yr_list "14 15 16 17"
@@ -450,6 +540,27 @@ foreach yr in `yr_list' {
 		* ren q471fhit hurt_hh
 		* ren q471ghit hurt
 
+	* ren q313drin water_source
+	* ren q423pipe piped 
+	* ren q419othr other_water
+	ren q`j'19ainte pipe_breaks
+	ren q`j'19bcaus pipe_cause
+
+	ren q`j'31cook cook_elec
+	ren q`j'32rub rubbish 
+
+	if "`yr'"=="16" | "`yr'"=="17" {
+		ren q`j'36wat poll_water
+		ren q`j'36air poll_air
+		ren q`j'36lan poll_land
+		ren q`j'36noi poll_noise
+	}
+	else {
+		ren q`j'37wat poll_water
+		ren q`j'37air poll_air
+		ren q`j'37lan poll_land
+		ren q`j'37noi poll_noise	
+	}
 
 	var_gen "`varlist'"
 	    g year = "`yr'"

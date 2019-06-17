@@ -1,0 +1,252 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+\section{Setup}
+\begin{itemize}
+\item Sampling: GHS picked a set of 2001 census EAs, then sampled HHs and followed these HHs for 3 (or 4) years, then repeated the process with new EAs.  Here are counts for EAs in each round within 4km of projects
+\begin{enumerate}
+\item 2005-2007: 214 EAs
+\item 2008-2012: 236 EAs
+\item 2012-2014: 333 EAs
+\item 2015-2017: 538 EAs
+\end{enumerate}
+
+\item Empirical strategy: 
+\begin{itemize}
+    \item $y_{ite} = \beta_0 +\beta_1 post_{t} + \beta_2 proj_{e} + \beta_3 post_{t} X proj_{e} + \beta_4 spill_{e} + \beta_5 post_{t} X spill_{e} + \delta_p \epsilon$
+    \item $e$ is EA,\,\, $t$ is year,\,\, $i$ is HH,\,\, $post$ is year$\geq 2008$
+    \item $\delta_p$ is a project by location (either spill, proj, or outside) fixed effect
+\end{itemize}
+\item Notes:
+\begin{itemize}
+    \item We're essentially picking up the second half of the constructed project effects.  Table 1 finds that in project areas, there's about 20\% more subsidized housing in 2005-2007, which jumps by 24\% in 2008-2017
+    \item I don't do the triple-difference because many of the planned but unconstructed projects may be getting finished over this period (I tried it and got weird results consistent with this theory)
+    \item the \textbf{Non-RDP} results limit the sample to \textbf{Non-RDP} houses only so we can see what happens to non-project housing quality ! 
+    \item errors are clustered at project level, also results are weighted by EA area and control for EA area cubic in pre and post periods
+\end{itemize}
+
+\end{itemize}
+
+
+\section{Results}
+\begin{table}[]
+\small
+\centering
+\caption{GHS RDP House }\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lD}
+\toprule
+ & \small (1)  \\
+& \small Project House \\ \midrule 
+\input{figures/ghs_rdp_house}
+\bottomrule
+\multicolumn{2}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+
+\end{table}
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Type of Houses}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDDDDDDDDD}
+\toprule
+& Own  & Rent-free & For. & Inf. (non-bkyd) & Inf. bkyd  & Brick Walls & Wall Qual. (1 to 5) & Tile Roof & Roof Qual. (1 to 5)  \\ \midrule 
+\textbf{All Houses} \\[.5em]
+\input{figures/ghs_house_q} \\[1em] \midrule
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_q}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_house_q}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Services}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDDDDDDDD}
+\toprule
+        & Toilet on site & Share toilet & Piped water & Water Interruptions & B/c of pipe breaks &  Connected to elec. util. & Elec. for cooking & Town picks up trash \\ \midrule 
+\textbf{All Houses} \\[.5em]
+\input{figures/ghs_house_s} \\[1em]\midrule
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_s}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_house_s}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Demographics}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDDDDDDDDD}
+\toprule
+        & Move dwell-type & HH size & Kids & African & Age  & Emp & Inc & HHinc & Rent \\ \midrule 
+\textbf{All Houses} \\[.5em]
+\input{figures/ghs_demo} \\[1em]\midrule
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_demo}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_demo}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Kids outcomes}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDDDDD}
+\toprule
+        & Edu. level  & time to school (1 to 5) & flu & diarrhea  \\ \midrule 
+\textbf{All Houses} \\[.5em]
+\input{figures/ghs_kids} \\[1em]\midrule
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_demo}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_kids}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\
+\multicolumn{5}{l}{\footnotesize controlling for age}
+
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Neighborhood Quality}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDDDDDD}
+\toprule
+        & Water Pollution & Air Pollution & Land Pollution & Noise Pollution & Been harassed & Been physically hurt \\ \midrule 
+\textbf{All Houses} \\[.5em]
+\input{figures/ghs_poll} \\[1em]\midrule
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_demo}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_poll}
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\
+\multicolumn{5}{l}{\footnotesize controlling for age}
+
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+
+\end{document}
+
+

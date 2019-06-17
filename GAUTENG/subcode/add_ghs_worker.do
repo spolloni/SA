@@ -10,22 +10,16 @@ cd ../../
 
 
 local w05 "Raw/GHS/2005/ghs-2005-v1.3-stata/ghs-2005-worker-v1.3-20150127.dta"
-
 local w06 "Raw/GHS/2006/ghs-2006-v1.3-stata/ghs-2006-worker-v1.3-20150127.dta"
-
 local w07 "Raw/GHS/2007/ghs-2007-v1.3-stata/ghs-2007-worker-v1.3-20150127.dta"
-
 local w08 "Raw/GHS/2008/ghs-2008-v1.3-stata/ghs-2008-worker-v1.3-20150127.dta"
-
-local w09 "Raw/GHS/2009/ghs-2009-v1.2-stata/ghs-2009-worker-v1.2-20150127.dta"
-
+* local w09 "Raw/GHS/2009/ghs-2009-v1.2-stata/ghs-2009-worker-v1.2-20150127.dta"
 
 
+local years "05 06 07 08  "
+local years_append "05 06 07 08 " // to get the labels right
 
-local years "05 06 07 08 09 10 11 12 13 14 15 16 17"
-local years_append "09 05 06 07 08 10 11 12 13 14 15 16 17" // to get the labels right
-
-local varlist "uqnr personnr prov gender age race fetch fetch_hrs med injury flu diar edu_time edu rel_hh"
+local varlist "uqnr personnr emp sal_period sal "
   
 
 program define var_gen
@@ -42,54 +36,39 @@ end
 local yr_list "05 06 07 08"
 foreach yr in `yr_list' {
 	* local yr "05"
-	use `p`yr'', clear
+	use "`w`yr''", clear
 	ren *, lower
+	destring personnr, replace force
 
-	ren q15afetw fetch
-	ren q15bhrsw fetch_hrs
+	ren q21wrkls emp 
+	ren q29salto sal
+	ren q210salp sal_period
 
-	ren q118medi med
-	ren q119inju injury
-	ren q120flu flu
-	ren q120diar diar
-
-	ren q11relshh rel_hh
-	ren q19hiedu edu
-	ren q113time edu_time
+	tab emp
 
 	var_gen "`varlist'"
 	    g year = "`yr'"
-		tempfile temp_p`yr'
-		save "`temp_w`yr''" 
+		tempfile temp_w`yr'
+		save "`temp_w`yr''", replace
 }
 
 
-local yr_list "09"
-foreach yr in `yr_list' {
-	* local yr "09"
-	use `p`yr'', clear
-	ren *, lower
+* local yr_list "09"
+* foreach yr in `yr_list' {
+* 	* local yr "09"
+* 	use `w`yr'', clear
+* 	ren *, lower
 
-	ren q130ainju injury
-	ren q130bflu  flu
-	ren q130bdiar diar
+* 	ren q21wrkls emp 
+* 	ren q29salto sal
+* 	ren q210salp sal_period
 
-	ren q11relsh rel_hh
-	ren q16hiedu edu
-	ren q117btim edu_time
 
-	* if "`yr'"=="09" {
-	* 	ren q330mains electricity
-	* }
-	* else {
-	* 	ren q330amains electricity
-	* }
-
-	var_gen "`varlist'"
-	    g year = "`yr'"
-		tempfile temp_p`yr'
-		save "`temp_w`yr''" 
-}
+* 	var_gen "`varlist'"
+* 	    g year = "`yr'"
+* 		tempfile temp_w`yr'
+* 		save "`temp_w`yr''" 
+* }
 
 
 

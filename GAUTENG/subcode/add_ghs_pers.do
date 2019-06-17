@@ -194,7 +194,7 @@ local yr_list "13 14"
 foreach yr in `yr_list' {
 	use `p`yr'', clear
 	ren *, lower
-
+	destring personnr, replace force
 	if "`yr'"=="13" {
 	ren q16hiedu edu
 	ren q21medi med
@@ -228,7 +228,7 @@ local yr_list "15 16 17"
 foreach yr in `yr_list' {
 	use "`p`yr''", clear
 	ren *, lower
-
+	destring personnr, replace force
 
 	ren q21medi med
 	* ren q126ainju injury
@@ -279,6 +279,7 @@ foreach r in `years_append' {
 g ea_code = substr(uqnr,1,8)
 replace year="20"+year
 destring uqnr personnr year, replace force
+
 
 duplicates drop uqnr personnr year, force
 

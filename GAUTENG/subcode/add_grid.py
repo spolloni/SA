@@ -136,7 +136,7 @@ def buffer_area_int(db,buffer1,buffer2):
     # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
     # for name,fid in zip(['grid_temp_25'],['grid_id']):
     # for name,fid in zip(['ea_2001'],['OGC_FID']):
-
+    for name,fid in zip(['ea_2011'],['OGC_FID']):
         table= name + '_area'
         con.execute("DROP TABLE IF EXISTS {};".format(table))
         con.execute('''
