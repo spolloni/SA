@@ -60,7 +60,7 @@ local h17 "Raw/GHS/2017/Stata11/GHS 2017 Household v1.0 Stata11.dta"
 local years "02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17"
 local years_append "09 02 03 04 05 06 07 08 10 11 12 13 14 15 16 17" // to get the labels right
 
-local varlist "uqnr prov owner rdp rent rent_cat price_cat price rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 build_yr dwell_5 dwell_other_5 dwell dwell_other  electricity toilet_shr toilet_dist toilet_dwell toilet   tot_rooms water_source water_distance roof wall roof_q wall_q  stolen  harass  harass_hh hurt  hurt_hh water_source piped other_water pipe_breaks pipe_cause cook_elec rubbish poll_water poll_air poll_land poll_noise "
+local varlist "uqnr prov owner rdp rent rent_cat price_cat price true_rent rdp_orig rdp_subs rdp_wt rdp_wt_mem rdp_yr1 rdp_yr2 rdp_yr3 build_yr dwell_5 dwell_other_5 dwell dwell_other  electricity toilet_shr toilet_dist toilet_dwell toilet   tot_rooms water_source water_distance roof wall roof_q wall_q  stolen  harass  harass_hh hurt  hurt_hh water_source piped other_water pipe_breaks pipe_cause cook_elec rubbish poll_water poll_air poll_land poll_noise "
 
 
 program define var_gen
@@ -101,7 +101,7 @@ local yr "03"
 
 
 
-local yr "10"
+local yr "05"
 	use `h`yr'', clear
 	ren *, lower
 	
@@ -158,6 +158,7 @@ foreach yr in `yr_list' {
 	ren q416*     rent
 	ren q417mark  price
 
+
 	if "`yr'"=="05" {
 	ren q439typt toilet
 	ren q440toil toilet_shr
@@ -194,6 +195,7 @@ foreach yr in `yr_list' {
 		ren q460cair poll_air
 		ren q460dlan poll_land
 		ren q460enoi poll_noise
+		ren q47brent true_rent
 	}
 	else {
 		ren q434main electricity
@@ -205,6 +207,7 @@ foreach yr in `yr_list' {
 		ren q451cair poll_air
 		ren q451dlan poll_land
 		ren q451enoi poll_noise
+		ren q47a14to true_rent
 	}
 
 * 	water_source piped other_water pipe_breaks pipe_cause cook_elec rubbish poll_water poll_air poll_land poll_noise
@@ -277,6 +280,7 @@ foreach yr in `yr_list' {
 	ren q326sha toilet_shr
 	ren q328near toilet_dist
 
+	* ren q47a14to true_rent
 
 	* ren q313drin water_source
 	* ren q423pipe piped 

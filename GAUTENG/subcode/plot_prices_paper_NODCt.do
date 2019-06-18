@@ -65,7 +65,7 @@ global ddd_regs_t_alt  = 0; /* these aren't working right now */
 global ddd_regs_t2_alt = 0;
 global countour = 0;
 
-global graph_plotmeans = 1;
+global graph_plotmeans = 0;
 
 * load data; 
 cd ../..;
@@ -111,10 +111,10 @@ replace mo2con_rdp = . if distance_rdp==. | distance_placebo<0;
 
 
 g proj        = (distance_rdp<0 | distance_placebo<0) ;
-g spill1      = proj==0 &  ( distance_rdp<=$dist_break_reg1 | 
-                            distance_placebo<=$dist_break_reg1 );
-g spill2      = proj==0 &  ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
-                              | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
+g spill1      = proj==0 &  ( distance_rdp<=$dist_break_reg2 | 
+                            distance_placebo<=$dist_break_reg2 );
+* g spill2      = proj==0 &  ( (distance_rdp>$dist_break_reg1 & distance_rdp<=$dist_break_reg2) 
+*                               | (distance_placebo>$dist_break_reg1 & distance_placebo<=$dist_break_reg2) );
 g con = distance_rdp<=distance_placebo ;
 
 cap drop cluster_joined;
@@ -135,6 +135,9 @@ ren cj1 cluster_joined ;
 
 
 g post = (mo2con_rdp>0 & mo2con_rdp<.) |  (mo2con_placebo>0 & mo2con_placebo<.) ;
+
+* g post = purch_yr>2005 ;
+
 
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
@@ -164,6 +167,98 @@ save "price_regs${V}.dta", replace;
 *****************************************************************;
 
 
+*** PRETRENDS *** ;
+
+use "price_regs${V}.dta", clear ;
+
+keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
+
+global outcomes="lprice";
+
+g mrdp = mo2con_rdp if con==1;
+g mplacebo = mo2con_placebo if con==0;
+
+
+global time_range = 24;
+
+replace mrdp=. if mrdp<-$time_range | mrdp>$time_range;
+replace mplacebo=. if mplacebo<-$time_range | mplacebo>$time_range;
+
+replace mrdp = round(mrdp,6);
+replace mplacebo = round(mplacebo,6);
+
+
+  cap program drop plotpretrends;
+  program plotpretrends;
+
+  preserve;
+
+    keep if distance_`3'<=`11' & distance_`3'>=`10';
+    egen `2'_`3' = mean(`2'), by(m`3');
+    keep `2'_`3' m`3';
+    duplicates drop m`3', force;
+    ren m`3' D;
+    save "${temp}pretrends_`3'_temp.dta", replace;
+  restore;
+
+  preserve; 
+
+    keep if distance_`4'<=`11' & distance_`4'>=`10';
+    egen `2'_`4' = mean(`2'), by(m`4');
+    keep `2'_`4' m`4';
+    duplicates drop m`4', force;
+    ren m`4' D;
+    save "${temp}pretrends_`4'_temp.dta", replace;
+  restore;
+
+  preserve; 
+    use "${temp}pretrends_`3'_temp.dta", clear;
+    merge 1:1 D using "${temp}pretrends_`4'_temp.dta";
+    keep if _merge==3;
+    drop _merge;
+
+    *replace D = D ;
+
+    twoway 
+    (connected `2'_`4' D, ms(Oh) msiz(medium) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
+    (connected `2'_`3' D, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
+    ,
+    xtitle("Months to (expected) project construction",height(5))
+    ytitle("Avg log-price from `10' to `11'm",height(3)si(medium))
+    xline(0,lw(medthin)lp(shortdash))
+    xlabel(`7' , tp(c) labs(medium)  )
+    ylabel(`8' , tp(c) labs(medium)  )
+    plotr(lw(medthick ))
+    legend(order(2 "`5'" 1 "`6'"  ) symx(6)
+    ring(0) position(`9') bm(medium) rowgap(small) col(1)
+    colgap(small) size(medium) region(lwidth(none)))
+    aspect(.7);
+    *graphexportpdf `1', dropeps;
+    graph export "`1'.pdf", as(pdf) replace  ;
+    erase "${temp}pretrends_`3'_temp.dta";
+    erase "${temp}pretrends_`4'_temp.dta";
+  restore;
+
+  end;
+
+  global yl = "2(1)7";
+
+  plotpretrends 
+    price_pretrends_close_${V} lprice rdp placebo
+    "Constructed" "Unconstructed"
+    "-${time_range}(12)${time_range}" ""
+    11  0 500;
+
+  plotpretrends 
+    price_pretrends_far_${V} lprice rdp placebo
+    "Constructed" "Unconstructed"
+    "-${time_range}(12)${time_range}" ""
+    11  500 1500;
+
+
+
+/*
+
 
 use "price_regs${V}.dta", clear ;
 
@@ -178,7 +273,7 @@ egen latlonyr = group(purch_yr latlongroup);
 * global fecount = 3 ;
 global fecount = 1 ;
 
-global rl1 = "Lot Size Controls";
+global rl1 = "Lot Size/Year-Month";
 
 mat define F = (0,1);
 
@@ -190,15 +285,27 @@ global a_pre = "a";
 global a_ll = "a(LL)";
 };
 
-global reg_1 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
+
+* reg lprice post proj proj_post spill1 spill1_post if con==1, cl(cluster_joined) r
+* g after=purch_yr>=2005
+* g after_proj = after*proj
+* g after_spill = after*spill1
+* areg lprice post proj after_proj spill1 after_spill if con==1, cl(cluster_joined) r a(LL)
+
+* drop if proj==1; 
+* i.purch_yr#i.purch_mo ;
+* i.purch_yr#i.purch_mo ;
+
+global reg_1 = " ${a_pre}reg  lprice $regressors  , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
-* price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
 
-global reg_1 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo , cl(cluster_joined) ${a_ll}" ;
+global reg_1 = " ${a_pre}reg  lprice $regressors2 , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
-* price_regs_type p_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+price_regs_type p_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+
 
 
 ************************************************;
@@ -206,6 +313,10 @@ global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size
 ************************************************;
 if $graph_plotmeans == 1 {;
 
+
+* reg lprice i.purch_yr#i.purch_mo erf_size*;
+* predict lprice1, residuals;
+* replace lprice=lprice1;
 
 
 egen dists_rdp = cut(distance_rdp),at(0($price_bin)$max);
@@ -251,18 +362,18 @@ replace dplacebo=. if dplacebo>$max-$price_bin;
     replace D = D + $price_bin/2;
 
     twoway 
-    (connected `2'_`4' D, ms(Oh) msiz(small) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
-    (connected `2'_`3' D, ms(o) msiz(medsmall) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
+    (connected `2'_`4' D, ms(Oh) msiz(medium) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
+    (connected `2'_`3' D, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
     ,
     xtitle("Distance from project border (meters)",height(5))
-    ytitle("Average log purchase price (Pre Project)",height(3)si(medsmall))
+    ytitle("Average log purchase price (Pre Project)",height(3)si(medium))
     xline(0,lw(medthin)lp(shortdash))
-    xlabel(`7' , tp(c) labs(small)  )
-    ylabel(`8' , tp(c) labs(small)  )
+    xlabel(`7' , tp(c) labs(medium)  )
+    ylabel(`8' , tp(c) labs(medium)  )
     plotr(lw(medthick ))
     legend(order(2 "`5'" 1 "`6'"  ) symx(6)
     ring(0) position(`9') bm(medium) rowgap(small) col(1)
-    colgap(small) size(medsmall) region(lwidth(none)))
+    colgap(small) size(medium) region(lwidth(none)))
     aspect(.7);
     *graphexportpdf `1', dropeps;
     graph export "`1'.pdf", as(pdf) replace  ;
@@ -284,6 +395,8 @@ replace dplacebo=. if dplacebo>$max-$price_bin;
 ************************************************;
 ************************************************;
 ************************************************;
+
+
 
 ************************************************;
 * 1.3 * MAKE RAW CHANGE GRAPHS HERE           **;
@@ -336,17 +449,17 @@ replace dplacebo=. if dplacebo>$max-$price_bin;
 
     twoway 
     (dropline `2'_`4' D`4',  col(maroon) lw(medthick) msiz(medium) m(o) mfc(white))
-    (dropline `2'_`3' D`3',  col(gs0) lw(medthick) msiz(small) m(d))
+    (dropline `2'_`3' D`3',  col(gs0) lw(medthick) msiz(medium) m(d))
     ,
     xtitle("Distance from project border (meters)",height(5))
-    ytitle("Change in log purchase price (Pre/Post Project)",height(5) si(medsmall))
+    ytitle("Change in log purchase price (Pre/Post Project)",height(5) si(medium))
     xline(0,lw(medthin)lp(shortdash))
-    xlabel(`7' , tp(c) labs(small)  )
-    ylabel(`8' , tp(c) labs(small)  )
+    xlabel(`7' , tp(c) labs(medium)  )
+    ylabel(`8' , tp(c) labs(medium)  )
     plotr(lw(medthick ))
     legend(order(2 "`5'" 1 "`6'"  ) symx(6) col(1)
     ring(0) position(`9') bm(medium) rowgap(small) 
-    colgap(small) size(medsmall) region(lwidth(none)))
+    colgap(small) size(medium) region(lwidth(none)))
     aspect(.7);
     *graphexportpdf `1', dropeps;
     graph export "`1'.pdf", as(pdf) replace  ;
@@ -409,5 +522,87 @@ replace dplacebo=. if dplacebo>$max-$price_bin;
 * global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(latlonyr) cl(latlongroup)  "; 
 
 * time_reg price_to_event ;
+
+
+
+
+
+
+* cap program drop coeffgraph;
+* program define  coeffgraph;
+*   preserve;
+*    parmest, fast;
+   
+*       local contin = "mo2con";
+*       local group  = "treat";
+   
+*    keep if strpos(parm,"`contin'")>0 & strpos(parm,"`group'") >0;
+*    gen dot1 = strpos(parm,".");
+*    gen dot2 = strpos(subinstr(parm, ".", "-", 1), ".");
+*    gen hash = strpos(parm,"#");
+*    gen distalph = substr(parm,1,dot1-1);
+*    egen contin = sieve(distalph), keep(n);
+*    destring  contin, replace;
+*    gen postalph = substr(parm,hash +1,dot2-1-hash);
+*    egen group = sieve(postalph), keep(n);
+*    destring  group, replace;
+
+*       drop if contin > 9000;
+*       replace contin = -1*(contin - 1000) if contin>1000;
+*       replace contin = $mbin*contin;
+*       global bound = 12*$tw;
+*       *replace contin = contin + .25 if group==1;
+*       sort contin;
+*       g placebo = regexm(parm,"placebo")==1;
+
+*       replace contin = cond(placebo==1, contin - 0.25, contin + 0.25);
+
+*       tw
+*       (rcap max95 min95 contin if placebo==0, lc(gs0) lw(thin) )
+*       (rcap max95 min95 contin if placebo==1, lc(sienna) lw(thin) )
+*       (connected estimate contin if placebo==0, ms(o) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(thin)) 
+*       (connected estimate contin if placebo==1, ms(o) msiz(small) mlc(sienna) mfc(sienna) lc(sienna) lp(none) lw(thin)),
+*       xtitle("months to modal construction month",height(5))
+*       ytitle("log-price coefficients",height(5))
+*       xlabel(-$bound(12)$bound)
+*       ylabel(-.5(.25).5,labsize(small))
+*       xline(0,lw(thin)lp(shortdash))
+*       legend(order(3 "rdp" 4 "placebo") 
+*       ring(0) position(5) bm(tiny) rowgap(small) 
+*       colgap(small) size(medsmall) region(lwidth(none)))
+*        note("`3'");
+
+*      * graphexportpdf `1', dropeps;
+
+*    restore;
+* end;
+
+
+* * data subset for regs (1);
+* *        rdp_never ==1 &;
+
+* global tw = 3;
+* global bound=$tw*12;
+
+* foreach v in _rdp _placebo {;
+* * create distance dummies;
+* sum distance`v';
+* global max = round(ceil(`r(max)'),100);
+* egen dists`v' = cut(distance`v'),at(0($bin)$max); 
+* replace dists`v' = $max if distance`v' <0;
+* replace dists`v' = dists`v'+$bin;
+* * create date dummies;
+* gen mo2con_reg`v'= ceil(abs(mo2con`v')/$mbin) if abs(mo2con`v')<=12*$tw; 
+* replace mo2con_reg`v' = mo2con_reg`v' + 1000 if mo2con`v'<0;
+* replace mo2con_reg`v' = 9999 if mo2con_reg`v' ==.;
+* *replace mo2con_reg = 1 if mo2con_reg ==0;
+* };
+
+* g treat_rdp = distance_rdp<=500;
+* g treat_placebo = distance_placebo<=500;
+* * time regression;
+* reg lprice b1001.mo2con_reg_rdp b1001.mo2con_reg_rdp#1.treat_rdp b1001.mo2con_reg_placebo b1001.mo2con_reg_placebo#1.treat_placebo i.purch_yr#i.purch_mo i.cluster_rdp i.cluster_placebo , cl(cluster_joined) r;
+* coeffgraph timeplot ;
+* graph export "timeplot_new.pdf", replace;
 
 

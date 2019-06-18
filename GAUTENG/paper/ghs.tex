@@ -246,6 +246,149 @@
 
 
 
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Price}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDD}
+\toprule
+        & Log Price & Log Rent \\ \midrule 
+\textbf{All Houses} \\[.5em]
+\input{figures/ghs_rent} \\[1em]\midrule
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\
+\multicolumn{3}{l}{\footnotesize controlling for age}
+
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Price}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDD}
+\toprule
+        & Log Price & Log Rent \\ \midrule 
+% \textbf{All Houses} \\[.5em]
+% \input{figures/ghs_rent} \\[1em]\midrule
+%%%%
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_demo}
+%%%%
+% \textbf{Non-Project Houses} \\[.5em]
+% \input{figures/ghs_nrdp_rent}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_rent}\\[1em]\midrule
+\textbf{Non-Project Houses Formal} \\[.5em]
+\input{figures/ghs_nrdp_for_rent}\\[1em]\midrule
+\textbf{Non-Project Houses Informal} \\[.5em]
+\input{figures/ghs_nrdp_inf_rent}\\[1em]\midrule
+\bottomrule
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\
+\multicolumn{3}{l}{\footnotesize controlling for age}
+
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+\afterpage{%
+  \clearpage% 
+\begin{landscape}
+{\footnotesize
+\begin{table}[]
+\small
+\centering
+\caption{Price No Controls}\label{table:censusestimates}
+\vspace{-2mm}
+
+\begin{tabular}{lDD}
+\toprule
+        & Log Price & Log Rent \\ \midrule 
+% \textbf{All Houses} \\[.5em]
+% \input{figures/ghs_rent} \\[1em]\midrule
+%%%%
+% \textbf{RDP} \\[.5em]
+% \input{figures/ghs_rdp_house_demo}
+%%%%
+% \textbf{Non-Project Houses} \\[.5em]
+% \input{figures/ghs_nrdp_rent}
+\textbf{Non-Project Houses} \\[.5em]
+\input{figures/ghs_nrdp_rent_nctrls}\\[1em]\midrule
+\textbf{Non-Project Houses Formal} \\[.5em]
+\input{figures/ghs_nrdp_for_rent_nctrls}\\[1em]\midrule
+\textbf{Non-Project Houses Informal} \\[.5em]
+\input{figures/ghs_nrdp_inf_rent_nctrls}\\[1em]\midrule
+\bottomrule
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\
+\multicolumn{3}{l}{\footnotesize controlling for age}
+
+\end{tabular}
+
+\end{table}
+}
+\end{landscape}
+}
+
+
+
+\begin{table}
+\small
+\centering
+\caption{Triple Difference Estimates on Log-Prices (Old version)}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)  \\ \midrule 
+ \textbf{All Projects} \\
+ \input{figures/p_ksp_o0_d250_500_top.tex}
+ \midrule
+\input{figures/p_t_sp_o0_d250_500_top.tex}
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
+
+\begin{table}
+\small
+\centering
+\caption{Triple Difference Estimates on Log-Prices (New)}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)  \\ \midrule 
+ \textbf{All Projects} \\
+ \input{figures/p_ksp_o0_d250_500_p1_top.tex}
+ \midrule
+\input{figures/p_t_sp_o0_d250_500_p1_top.tex}
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
 
 \end{document}
 

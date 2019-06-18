@@ -525,6 +525,26 @@ foreach var of varlist poll_* {
   replace `var'=0 if `var'>1
 }
 
+g rent_total = rent if rent>0 & rent<10000
+replace rent_total = 250  if rent_cat==1
+replace rent_total = 750  if rent_cat==2
+replace rent_total = 2000  if rent_cat==3
+replace rent_total = 4000  if rent_cat==4
+replace rent_total = 6000  if rent_cat==5
+replace rent_total = 9000  if rent_cat==6
+
+
+g price_total = price if price>0 & price<=4000000
+replace price_total = 25000   if price_cat==1
+replace price_total = 150000   if price_cat==2
+replace price_total = 375000  if price_cat==3
+replace price_total = 750000  if price_cat==4
+replace price_total = 1250000  if price_cat==5
+replace price_total = 2500000  if price_cat==6
+replace price_total = 4000000  if price_cat==7
+
+g ln_price_total = log(price_total)
+g ln_rent_total = log(rent_total)
 
 
 global outcomes " rdp_house "
@@ -602,7 +622,7 @@ prog define regs_dd_ghs
     * regression `var' "$regressors_dd_ghs "
   areg `var'  $regressors_dd_ghs_pf `3' $extra_controls `2', cluster(cluster_joined) robust a(cluster_joined)
     eststo  `var'
-    sum `var', detail
+    sum `var' if e(sample)==1, detail
     estadd scalar avg = `=r(mean)'
   }
   
@@ -637,7 +657,36 @@ prog define regs_dd_ghs
 end
 
 
+/*
 
+
+
+global outcomes = " ln_price_total ln_rent_total  "
+
+regs_dd_ghs ghs_rent "" "" spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+regs_dd_ghs ghs_nrdp_rent "if rdp_house==0 " " i.dwell i.tot_rooms toi_home toi_share piped elec ELEC_cook i.wall i.roof " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+regs_dd_ghs ghs_nrdp_for_rent "if rdp_house==0 & dwell==1 " " i.dwell i.tot_rooms toi_home toi_share piped elec ELEC_cook i.wall i.roof " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+regs_dd_ghs ghs_nrdp_inf_rent "if rdp_house==0 & dwell!=1 " " i.dwell i.tot_rooms toi_home toi_share piped elec ELEC_cook i.wall i.roof " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+
+
+regs_dd_ghs ghs_rent "" "" spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+regs_dd_ghs ghs_nrdp_rent_nctrls "if rdp_house==0 " " i.dwell  " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+regs_dd_ghs ghs_nrdp_for_rent_nctrls "if rdp_house==0 & dwell==1 " " " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+regs_dd_ghs ghs_nrdp_inf_rent_nctrls "if rdp_house==0 & dwell!=1 " " " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+
+
+* regs_dd_ghs ghs_rent_pre2008 "" "" spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+* regs_dd_ghs ghs_nrdp_rent_pre2008 "if rdp_house==0 & year<=2008" " i.dwell i.tot_rooms toi_home toi_share piped elec ELEC_cook i.wall i.roof " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+* regs_dd_ghs ghs_nrdp_for_rent_pre2008 "if rdp_house==0 & dwell==1 & year<=2008" " i.dwell i.tot_rooms toi_home toi_share piped elec ELEC_cook i.wall i.roof " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+* regs_dd_ghs ghs_nrdp_inf_rent_pre2008 "if rdp_house==0 & dwell!=1 & year<=2008" " i.dwell i.tot_rooms toi_home toi_share piped elec ELEC_cook i.wall i.roof " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+
+* regs_dd_ghs ghs_rent_pre2008 "" "" spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+* regs_dd_ghs ghs_nrdp_rent_nctrls_pre2008 "if rdp_house==0 & year<=2008" " i.dwell  " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+* regs_dd_ghs ghs_nrdp_for_rent_nctrls_pre2008 "if rdp_house==0 & dwell==1 & year<=2008" " " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+* regs_dd_ghs ghs_nrdp_inf_rent_nctrls_pre2008 "if rdp_house==0 & dwell!=1 & year<=2008" " " spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+
+
+/*
 
 global outcomes = " poll_water poll_air poll_land poll_noise har hur"
 
@@ -649,6 +698,7 @@ regs_dd_ghs ghs_nrdp_poll "if rdp_house==0"
 global outcomes = "rdp_house "
 
 regs_dd_ghs ghs_rdp_house "" "" spill1_post  `"[0.5em]"' avg `"Mean"' `"%9.2fc"'
+
 
 
 global outcomes = " O RF house inf inf_b good_wall wall_q good_roof roof_q "
@@ -860,5 +910,37 @@ Not enough water in the system (demand  |        849        3.49       32.63
                                   Total |     24,333      100.00
 
 
+
+/*
+
+
+ Monthly rent or |
+        mortgage |      Freq.     Percent        Cum.
+-----------------+-----------------------------------
+  Less than R500 |      2,454        9.70        9.70
+   R501 - R1 000 |        715        2.83       12.52
+ R1 001 - R3 000 |      1,240        4.90       17.42
+ R3 001 - R5 000 |        648        2.56       19.99
+ R5 001 - R7 000 |        260        1.03       21.01
+More than R7 000 |        137        0.54       21.55
+     Do not know |         66        0.26       21.82
+  Not applicable |     19,427       76.78       98.59
+     Unspecified |        356        1.41      100.00
+
+
+         Market value of the |
+               property |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+      Less than R50 000 |     12,118       47.89       47.89
+     R50 001 - R250 000 |      5,796       22.91       70.80
+    R250 001 - R500 000 |      2,706       10.69       81.49
+  R500 001 - R1 000 000 |      1,705        6.74       88.23
+R1 000 001 - R1 500 000 |        563        2.23       90.46
+R1 500 001 - R2 000 000 |        319        1.26       91.72
+R2 000 001 - R3 000 000 |        240        0.95       92.66
+   More than R3 000 000 |        200        0.79       93.46
+            Do not know |      1,453        5.74       99.20
+            Unspecified |        203        0.80      100.00
+------------------------+-----------------------------------
 
 
