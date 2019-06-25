@@ -546,6 +546,11 @@ replace price_total = 4000000  if price_cat==7
 g ln_price_total = log(price_total)
 g ln_rent_total = log(rent_total)
 
+ 
+g for = dwell==1 |  dwell==3 | dwell==4
+g bkyd = ((dwell==6 | dwell==7) & year<=2008) | ((dwell==7 | dwell==8) & year>2008)
+g nbkyd = (dwell==8 & year<=2008) | ((dwell==9) & year>2008)
+
 
 global outcomes " rdp_house "
 
@@ -655,6 +660,19 @@ prog define regs_dd_ghs
     starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
 end
+
+
+sum rdp_house if year>=2012 & proj==1 & con==1
+
+tab for rdp_house if year>=2012 & proj==1 & con==1
+tab bkyd rdp_house if year>=2012 & proj==1 & con==1
+tab nbkyd rdp_house if year>=2012 & proj==1 & con==1
+
+
+tab dwell rdp_house if year>=2012 & proj==1 & con==1
+
+sum for if year>=2012 & proj==1 & con==1
+
 
 
 /*
@@ -942,5 +960,51 @@ R2 000 001 - R3 000 000 |        240        0.95       92.66
             Do not know |      1,453        5.74       99.20
             Unspecified |        203        0.80      100.00
 ------------------------+-----------------------------------
+
+/*
+
+for = dwell==1 |  dwell==3 | dwell==4
+bkyd = ((dwell==6 | dwell==7) & year<=2008) | ((dwell==7 | dwell==8) & year>2008)
+nbkyd = (dwell==8 & year<=2008) | ((dwell==9) & year>2008)
+
+/*
+
+2007
+
+1 Dwelling / House or brick structure on a separate stand or yard or on farm 7 549 2 315 2 754 2 481
+2 Traditional dwelling / Hut / Structure made of traditional materials 1 340 660 397 282
+3 Flat or apartment in a block of flats 651 371 245 35
+4 Town / Cluster / Semi-detached house (Simplex, Duplex or Triplex) 317 86 191 40
+5 Unit in retirement village 20 * * *
+6 Dwelling /House /Flat / room in backyard 586 508 37 41
+7 Informal dwelling / Shack in backyard 782 716 39 27
+8 Informal dwelling / Shack not in backyard, e.g. in an informal/squatter settlement or on farm 1 239 1 043 142 55
+9 Room / Flatlet 418 385 16 17
+10 Caravan / Tent 17 15 * *
+11 Other 246 222 13 11
+99 Unspecified 
+
+/*
+
+2012 
+
+Indicate the type of main dwelling and other
+dwelling that the household occupies?
+01 = Dwelling/house or brick/concrete block structure on a separate
+ stand or yard or on farm
+02 = Traditional dwelling/hut/structure made of traditional materials
+03 = Flat or apartment in a block of flats
+04 = Cluster house in complex
+05 = Town house (semi-detached house in complex)
+06 = Semi-detached house
+07 = Dwelling/house/flat/room in backyard
+08 = Informal dwelling/shack in backyard
+09 = Informal dwelling/shack not in backyard, e.g. in an
+ informal/squatter settlement or on farm
+10 = Room/flatlet on a property or a larger dwelling servants'
+ quarters/granny flat
+11 = Caravan/tent
+12 = Other (specify)
+
 
 

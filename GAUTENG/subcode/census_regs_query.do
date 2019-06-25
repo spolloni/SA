@@ -34,10 +34,10 @@ end;
 
 global data_load_place = 0;
 
-global full_data_1996 = 1;
-global full_data_2001 = 1;
-global full_data_2011 = 1;
-global aggregate      = 0;
+global full_data_1996 = 0;
+global full_data_2001 = 0;
+global full_data_2011 = 0;
+global aggregate      = 1;
 
 
 
@@ -296,7 +296,9 @@ local qry = "
       A.ROOMS AS tot_rooms, A.OWNED AS tenure, A.WATER AS water_piped,
        A.TOILET AS toilet_typ, 
       A.FUELCOOK AS enrgy_cooking, A.FUELHEAT AS enrgy_heating,
-      A.FUELLIGH AS enrgy_lighting, A.REFUSE AS refuse_typ, A.HHSIZE AS hh_size
+      A.FUELLIGH AS enrgy_lighting, A.REFUSE AS refuse_typ, A.HHSIZE AS hh_size, 
+
+      A.HOHSEX AS sex, A.HOHAGE AS age, A.HOHRACE as race, A.HOHECONA as emp, A.HHINCCAT as inc
     FROM census_hh_1996 AS A  
 
         JOIN ea_1996 AS B ON A.EACODE = B.polygonid " ;
@@ -325,14 +327,16 @@ if $full_data_2001 == 1 {;
 
 local qry = " 
 
-    SELECT   B.OGC_FID AS area_code,   A.SAL,    A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
+SELECT   B.OGC_FID AS area_code,   A.SAL,    A.H23_Quarters AS quarters_typ, A.H23a_HU AS dwelling_typ,
       A.H24_Room AS tot_rooms, A.H25_Tenure AS tenure, A.H26_Piped_Water AS water_piped,
       A.H26a_Sourc_Water AS water_source, A.H27_Toilet_Facil AS toilet_typ, 
       A.H28a_Cooking AS enrgy_cooking, A.H28b_Heating AS enrgy_heating,
-      A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size
+      A.H28c_Lghting AS enrgy_lighting, A.H30_Refuse AS refuse_typ, A.DER2_HHSIZE AS hh_size, 
+
+      P.sex, P.age, P.race, P.emp, P.inc 
 
       FROM census_hh_2001 AS A
-
+        LEFT JOIN (SELECT SN, P02_Age AS age, P03_Sex AS sex, P22_Incm AS inc, DER10_EMPL_ST1 AS emp, P06_Race AS race FROM census_pers_2001 WHERE P04_Rel==1)  AS P  ON P.SN = A.SN
         JOIN sal_2001 AS B ON A.SAL = B.sal_code " ;
 
 odbc query "gauteng" ;
@@ -360,8 +364,9 @@ local qry = "
       A.H03_TOTROOMS AS tot_rooms, A.H04_TENURE AS tenure, A.H07_WATERPIPED AS water_piped,
       A.H08_WATERSOURCE AS water_source, A.H10_TOILET AS toilet_typ, 
       A.H11_ENERGY_COOKING AS enrgy_cooking, A.H11_ENERGY_HEATING AS enrgy_heating,
-      A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size
+      A.H11_ENERGY_LIGHTING AS enrgy_lighting, A.H12_REFUSE AS refuse_typ, A.DERH_HSIZE AS hh_size, 
 
+      A.DERH_HHSEX AS sex, A.DERH_HHAGE AS age, A.DERH_HHPOP as race, A.DERH_HH_EMPLOY_STATUS as emp, A.DERH_INCOME_CLASS as inc
 
       FROM census_hh_2011 AS A
 
@@ -394,6 +399,53 @@ append  using  "DDcensus_hh_full_2001_admin${V}.dta" ;
 append  using  "DDcensus_hh_full_2011_admin${V}.dta" ;
 
 
+replace age=. if age<10 | age>80; 
+replace sex = 0 if sex == 1 | sex>=8 ;
+
+ren emp emp_id ;
+g emp = .;
+replace emp = 1 if emp_id ==1 ;
+replace emp = 0 if emp_id ==2 ;
+drop emp_id;
+
+g african = race==1;
+drop race;
+
+gen inc_value = . ;
+replace inc_value = 0      if inc ==1 & year!=1996;
+replace inc_value = 200    if inc ==2 & year!=1996;
+replace inc_value = 600    if inc ==3 & year!=1996;
+replace inc_value = 1200   if inc ==4 & year!=1996;
+replace inc_value = 2400   if inc ==5 & year!=1996;
+replace inc_value = 4800   if inc ==6 & year!=1996;
+replace inc_value = 9600   if inc ==7 & year!=1996;
+replace inc_value = 19200  if inc ==8 & year!=1996;
+replace inc_value = 38400  if inc ==9 & year!=1996;
+replace inc_value = 76800  if inc ==10 & year!=1996;
+replace inc_value = 153600 if inc ==11 & year!=1996;
+replace inc_value = 307200 if inc ==12 & year!=1996;
+
+replace inc_value = 0      if inc ==1 & year==1996;
+replace inc_value = 100    if inc ==2 & year==1996;
+replace inc_value = 350    if inc ==3 & year==1996;
+replace inc_value = 750    if inc ==4 & year==1996;
+replace inc_value = 1250   if inc ==5 & year==1996;
+replace inc_value = 2000   if inc ==6 & year==1996;
+replace inc_value = 3000   if inc ==7 & year==1996;
+replace inc_value = 4000   if inc ==8 & year==1996;
+replace inc_value = 5250   if inc ==9 & year==1996;
+replace inc_value = 7000   if inc ==10 & year==1996;
+replace inc_value = 9500   if inc ==11 & year==1996;
+replace inc_value = 13500  if inc ==12 & year==1996;
+replace inc_value = 23000  if inc ==13 & year==1996;
+replace inc_value = 50000  if inc ==14 & year==1996;
+drop inc;
+ren inc_value inc;
+
+g ln_inc = log(inc);
+
+replace inc = . if inc>100000; 
+
 * flush toilet?;
 gen toilet_flush = ((toilet_typ==1|toilet_typ==2) & year>=2001) | (toilet_typ==1 & year==1996) if !missing(toilet_typ);
 lab var toilet_flush "Flush Toilet";
@@ -421,33 +473,59 @@ lab var electric_lighting "Electric Lighting";
 * tenure?;
 gen owner = ((tenure==1) & year==1996)|((tenure==2 | tenure==4) & year==2011)|((tenure==1 | tenure==2) & year==2001) if !missing(tenure);
 lab var owner "Owns House";
+ 
+g ten_owned = 0 if year>=2001;
+replace ten_owned = 1 if (tenure==1 & year==2001) | (tenure==4 & year==2011) ;
+
+g ten_debt = 0 if year>=2001;
+replace ten_debt = 1 if (tenure==2 & year==2001) | (tenure==2 & year==2011) ;
+
+g ten_rented = 0 if year>=2001;
+replace ten_rented = 1 if (tenure==3 & year==2001) | (tenure==1 & year==2011) ;
+
+g ten_free = 0 if year>=2001;
+replace ten_free = 1 if (tenure==4 & year==2001) | (tenure==3 & year==2011) ;
 
 * house?;
 ren dwelling_typ dwelling_type;
+
 gen house = dwelling_type==1 if !missing(dwelling_type);
-lab var house "Single House";
-
-gen house_bkyd = (dwelling_type == 6 & year==1996)|(dwelling_type == 5 & year==2001)|(dwelling_type == 7 & year==2011)  if !missing(dwelling_type);
-lab var house_bkyd "House Backyard";
-
-gen shack_bkyd = (dwelling_type == 7 & year==1996)|(dwelling_type == 6 & year==2001)|(dwelling_type == 8 & year==2011)  if !missing(dwelling_type);
-lab var shack_bkyd "Shack Backyard";
-
-gen shack_non_bkyd = (dwelling_type == 8  & year==1996)|(dwelling_type == 7  & year==2001)|(dwelling_type == 9 & year==2011)  if !missing(dwelling_type);
-lab var shack_non_bkyd "Shack Non-Backyard";
+gen traditional =dwelling_type==2 if !missing(dwelling_type);
+gen flat = dwelling_type==3 if !missing(dwelling_type);
+gen duplex = (dwelling_type==4 & (year==1996 | year==2001))|((dwelling_type==4 | dwelling_type==5 | dwelling_type==6) & year==2011) if !missing(dwelling_type);
+gen house_bkyd =  (dwelling_type == 6 & year==1996)|(dwelling_type == 5 & year==2001)|(dwelling_type == 7 & year==2011)  if !missing(dwelling_type);
+gen shack_bkyd =  (dwelling_type == 7 & year==1996)|(dwelling_type == 6 & year==2001)|(dwelling_type == 8 & year==2011)  if !missing(dwelling_type);
+gen shack_non_bkyd =  (dwelling_type == 8 & year==1996)|(dwelling_type == 7 & year==2001)|(dwelling_type == 9 & year==2011)  if !missing(dwelling_type);
+gen room_on_shared_prop = (dwelling_type == 9 & year==1996)|(dwelling_type == 8 & year==2001)|(dwelling_type == 10 & year==2011)  if !missing(dwelling_type);
 
 
-egen house_dens = sum(house), by(area_code year) ;
-replace house_dens = (house_dens/area)*1000000 ;
+* gen house_bkyd = (dwelling_type == 6 & year==1996)|(dwelling_type == 5 & year==2001)|(dwelling_type == 7 & year==2011)  if !missing(dwelling_type);
+* lab var house_bkyd "House Backyard";
 
-egen house_bkyd_dens = sum(house_bkyd), by(area_code year) ;
-replace house_bkyd_dens = (house_bkyd_dens/area)*1000000 ;
+* gen shack_bkyd = (dwelling_type == 7 & year==1996)|(dwelling_type == 6 & year==2001)|(dwelling_type == 8 & year==2011)  if !missing(dwelling_type);
+* lab var shack_bkyd "Shack Backyard";
 
-egen shack_bkyd_dens = sum(shack_bkyd), by(area_code year) ;
-replace shack_bkyd_dens = (shack_bkyd_dens/area)*1000000 ;
+* gen shack_non_bkyd = (dwelling_type == 8  & year==1996)|(dwelling_type == 7  & year==2001)|(dwelling_type == 9 & year==2011)  if !missing(dwelling_type);
+* lab var shack_non_bkyd "Shack Non-Backyard";
 
-egen shack_non_bkyd_dens = sum(shack_non_bkyd), by(area_code year) ;
-replace shack_non_bkyd_dens = (shack_non_bkyd_dens/area)*1000000 ;
+foreach var of varlist house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop {;
+egen `var'_dens = sum(`var'), by(area_code year) ;
+g `var'_hh = `var'*hh_size ;
+egen `var'_dens_pers = sum(`var'_hh), by(area_code year) ;
+drop `var'_hh;
+};
+
+* egen house_dens = sum(house), by(area_code year) ;
+* * replace house_dens = (house_dens/area)*1000000 ;
+
+* egen house_bkyd_dens = sum(house_bkyd), by(area_code year) ;
+* * replace house_bkyd_dens = (house_bkyd_dens/area)*1000000 ;
+
+* egen shack_bkyd_dens = sum(shack_bkyd), by(area_code year) ;
+* * replace shack_bkyd_dens = (shack_bkyd_dens/area)*1000000 ;
+
+* egen shack_non_bkyd_dens = sum(shack_non_bkyd), by(area_code year) ;
+* * replace shack_non_bkyd_dens = (shack_non_bkyd_dens/area)*1000000 ;
 
 
 * total rooms;
@@ -473,21 +551,31 @@ egen  person_pop = sum(hh_size), by(area_code year);
 g formal = house==1 | house_bkyd==1;
 g informal = shack_bkyd==1 | shack_non_bkyd==1;
 
+g for_id = house==1 | flat==1 | duplex==1 | room_on_shared_prop==1;
+g inf_id = house==1 | shack_bkyd==1 | shack_non_bkyd==1 ;
+g bkyd_id = house_bkyd==1 | shack_bkyd==1 ;
+g n_bkyd_id = shack_non_bkyd==1;
+
 
 foreach v in toilet_flush water_inside water_yard water_utility
   electricity electric_cooking electric_heating electric_lighting
-  owner  { ;
-  foreach ht in formal informal {;
-  g `v'_`ht' = `v'*`ht';
+  owner tot_rooms hh_size age sex emp african inc ln_inc   ten_rented ten_owned ten_free ten_debt { ;
+  foreach ht in for_id inf_id bkyd_id n_bkyd_id {;
+  g `v'_`ht' = `v' if `ht'==1 ;
   };
   }; 
 
 fcollapse 
-  (mean) toilet_flush* water_inside* water_yard* water_utility*
-  electricity* electric_cooking* electric_heating* electric_lighting*
-  owner*  formal informal  house house_bkyd shack_bkyd shack_non_bkyd house_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens tot_rooms hh_size
-  (firstnm) hh_pop person_pop
-  , by(area_code year);
+  (mean) 
+      toilet_flush* water_inside* water_yard* water_utility*
+      electricity* electric_cooking* electric_heating* electric_lighting*
+      owner* tot_rooms* hh_size*  age* sex*  emp* african*  inc* ln_inc*    ten_rented* ten_owned* ten_free* ten_debt*
+      formal informal   house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop  
+  (firstnm) 
+      hh_pop person_pop  house_dens traditional_dens flat_dens duplex_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens room_on_shared_prop_dens
+      house_dens_pers traditional_dens_pers flat_dens_pers duplex_dens_pers house_bkyd_dens_pers shack_bkyd_dens_pers shack_non_bkyd_dens_pers room_on_shared_prop_dens_pers
+  , 
+    by(area_code year);
 
 
 save "temp_censushh_agg_no_place${V}.dta", replace;
@@ -741,6 +829,89 @@ cd $output;
 save "temp_censushh_agg${V}.dta", replace;
 
 };
+
+
+
+
+/*
+
+**** 1996 ****
+* 1.4 Which type of dwelling does this household occupy? (If this household lives in MORE THAN ONE dwelling, circle the main type of dwelling.)
+* House or brick structure on a separate stand or yard 1
+* Traditional dwelling/hut/structure made of traditional materials 2
+* Flat in block of flats 3
+* Town/cluster/semi-detached house (simplex, duplex or triplex) 4
+* Unit in retirement village 5
+* House/flat/room, in backyard 6
+* Informal dwelling/shack, in backyard 7
+* Informal dwelling/shack, NOT in backyard, e.g. in an informal/squatter settlement 8
+* Room/flatlet not in backyard but on a shared property 9
+* Caravan/tent 10
+* None/homeless 11
+* Other, specify .....................................................................................................................................................................................................................................
+
+**** 2001 ****
+* Which type of dwelling or housing unit does this household occupy?
+* If this household lives in MORE THAN ONE DWELLING, write the code of the MAIN
+* dwelling that the household occupies in the boxes.
+* 01 = House or brick structure on a separate stand or yard
+* 02 = Traditional dwelling/hut/structure made of traditional
+* materials
+* 03 = Flat in block of flats
+* 04 = Town/cluster/semi-detached house (simplex, duplex, triplex)
+* 05 = House/flat/room in back yard
+* 06 = Informal dwelling/shack in back yard
+* 07 = Informal dwelling/shack NOT in back yard, e.g. in an
+* informal/squatter settlement
+* 08 = Room/flatlet not in back yard but on a shared property
+* 09 = Caravan or tent
+* 10 = Private ship/boat
+* 11 = Other (specify
+
+**** 2011 ****
+* 1.4 Which type of dwelling does this household occupy? (If this household lives in MORE THAN ONE dwelling, circle the main type of dwelling.)
+* House or brick structure on a separate stand or yard 1
+* Traditional dwelling/hut/structure made of traditional materials 2
+* Flat in block of flats 3
+* CLUSTER HOUSE IN COMPLEX 4
+* Townhouse/cluster/ (simplex, duplex or triplex) 5
+* Semi-detached house 6
+* House/flat/room, in backyard 7
+* Informal dwelling/shack, in backyard 8
+* Informal dwelling/shack, NOT in backyard, e.g. in an informal/squatter settlement 9
+* Room/flatlet not in backyard but on a shared property 10
+* Caravan/tent 11
+* Other, specify .....................................................................................................................................................................................................................................
+
+
+
+
+* 1996
+* 1 Employed
+* 2 Unemployed, looking for work
+* 3 Not working - not looking for work
+* 4 Not working - housewife/home-maker
+* 6 Not working - scholar/full-time student
+* 7 Not working - pensioner/retired person
+* 8 Not working - disabled person
+* 9 Not working - not wishing to work
+* 10  Not working - none of the above
+* 99  Unspecified/Dummy
+
+* 2001 
+* 00 Not applicable, aged less than 15 or older than 65 years
+* 01 Employed
+* 02 Unemployed
+* 03 Not economically active
+
+* 2011
+* 1 = Employed
+* 2 = Unemployed
+* 3 = Discouraged work-seeker
+* 4 = Other not economically active
+*5=Household head out of working age scope i.e. 15-64
+
+;
 
 
 

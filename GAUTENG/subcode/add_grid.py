@@ -129,14 +129,14 @@ def buffer_area_int(db,buffer1,buffer2):
 
     print 'gcro type tables done .'
 
-    # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id']):
+    for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3','ea_2011','ea_2001','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id','OGC_FID','OGC_FID']):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
     # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
     # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
     # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
     # for name,fid in zip(['grid_temp_25'],['grid_id']):
     # for name,fid in zip(['ea_2001'],['OGC_FID']):
-    for name,fid in zip(['ea_2011'],['OGC_FID']):
+    # for name,fid in zip(['ea_2011'],['OGC_FID']):
         table= name + '_area'
         con.execute("DROP TABLE IF EXISTS {};".format(table))
         con.execute('''
@@ -244,7 +244,7 @@ def buffer_area_int(db,buffer1,buffer2):
 
     print ' all set ! :D '
 
-
+# buffer_area_int(db,100,200)
 # buffer_area_int(db,250,500)
 # buffer_area_int(db,400,800)
 
@@ -335,8 +335,8 @@ def grid_sal(db,table,input_file,idvar):
 # grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
 # grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
 
-def bblu_pre_in_range(db):
-    print 'starting bblu pre within .. '
+def bblu_in_range(db,time):
+    print 'starting bblu ' +time+' within .. '
     con = sql.connect(db)
     cur = con.cursor()
     con.enable_load_extension(True)
@@ -365,23 +365,25 @@ def bblu_pre_in_range(db):
         if index_var!='none':
             cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
 
-    table_bpre='bblu_pre_in_range'
+    table_bpre='bblu_'+time+'_in_range'
 
     drop_full_table(table_bpre)
     con.execute('''
                 CREATE TABLE {} AS
                 SELECT A.OGC_FID, ST_makevalid(A.GEOMETRY) AS GEOMETRY
-                FROM bblu_pre AS A ;
-                '''.format(table_bpre))
+                FROM bblu_{} AS A ;
+                '''.format(table_bpre,time))
     add_index(table_bpre,'OGC_FID')
 
     print 'bblu pre in range done'
 
-# bblu_pre_in_range(db)
+# bblu_in_range(db,'pre')
+# bblu_in_range(db,'post')
 
 
-def bblu_pre_within(db,table,input_file,idvar):
-    print 'starting bblu pre within .. '
+
+def bblu_within(db,table,input_file,idvar,time):
+    print 'starting bblu '+time+' within .. '
     con = sql.connect(db)
     cur = con.cursor()
     con.enable_load_extension(True)
@@ -390,20 +392,20 @@ def bblu_pre_within(db,table,input_file,idvar):
     con.execute("DROP TABLE IF EXISTS {};".format(table))
     con.execute('''
                 CREATE TABLE {} AS
-                SELECT A.OGC_FID AS OGC_FID_bblu_pre, G.{}
+                SELECT A.OGC_FID AS OGC_FID_bblu_{}, G.{}
                 FROM {} AS A, {} AS G
                             WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
                                             WHERE f_table_name='{}' AND search_frame=G.GEOMETRY)
                                             AND st_intersects(A.GEOMETRY,G.GEOMETRY);
-                '''.format(table,idvar,'bblu_pre_in_range',input_file,'bblu_pre_in_range'))
+                '''.format(table,time,idvar,'bblu_'+time+'_in_range',input_file,'bblu_'+time+'_in_range'))
     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
 
-    print 'all set with bblu pre within!'
+    print 'all set with bblu '+time+' within!'
 
 
-# bblu_pre_within(db,'bblu_pre_in_ea_1996','ea_1996','OGC_FID')
-# bblu_pre_within(db,'bblu_pre_in_sal_2001','sal_2001','OGC_FID')
-# bblu_pre_within(db,'bblu_pre_in_sal_ea_2011','sal_ea_2011','OGC_FID')
+# bblu_within(db,'bblu_pre_in_ea_1996','ea_1996','OGC_FID','pre')
+# bblu_within(db,'bblu_pre_in_sal_2001','sal_2001','OGC_FID','pre')
+# bblu_within(db,'bblu_post_in_sal_2011','sal_ea_2011','OGC_FID','post')
 
 
 

@@ -7,6 +7,10 @@ do reg_gen.do
 
 global extra_controls = "  "
 global extra_controls_2 = "  "
+global grid = 25
+global ww = " "
+* global many_spill = 0
+global load_data = 1
 
 
 set more off
@@ -41,22 +45,22 @@ end;
 *  PLOT DENSITY  *;
 ******************;
 
-global load_data = 1;
+
 
 global bblu_do_analysis = $load_data ; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 1;
+global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2        = 0; /* Two spillover bins */
+global reg_triplediff2        = 1; /* Two spillover bins */
 global reg_triplediff2_type   = 0; /* Two spillover bins */
 
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
 
 
-global outcomes_pre = " total_buildings for inf inf_backyard inf_non_backyard ";
+global outcomes_pre = " total_buildings for inf_backyard inf_non_backyard ";
 
 cap program drop outcome_gen;
 prog outcome_gen;
@@ -95,6 +99,10 @@ cd Generated/Gauteng;
 if $bblu_do_analysis==1 {;
 
 use bbluplot_grid_${grid}.dta, clear;
+
+merge m:1 sp_1 using "temp_2001_inc.dta";
+drop if _merge==2;
+drop _merge;
 
 * go to working dir;
 cd ../..;
@@ -171,16 +179,22 @@ rgen ${no_post};
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
+g proj_cluster = proj>.5 & proj<.;
+g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
+
 if $many_spill == 1 { ;
-egen cj1 = group(cluster_joined proj spill1 spill2) ;
+g spill2_cluster = proj_cluster==0 & spill1_cluster==0 & spill2>.5 & spill2<.;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
 if $many_spill == 0 {;
-egen cj1 = group(cluster_joined proj spill1) ;
+*replace spill1_cluster = 1 if spill2_cluster==1;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
+
 
 
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
@@ -229,6 +243,8 @@ g `v'_fe=`v' ;
 };
 
 
+* sum for_new if proj==1 & con==1 & post==0 ;
+* sum inf_new if proj==1 & con==1 & post==0 ;
 
 
 };
@@ -243,8 +259,27 @@ cd $output ;
 
 if $reg_triplediff2 == 1 {;
 
+egen inc_q = cut(inc), group(2);
 
 regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+g low_inc = inc_q == 0;
+g high_inc = inc_q == 1;
+
+rgen_inc_het ;
+
+regs_inc b_inc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+
+* preserve;
+* keep if inc_q==0;
+* regs b_i0_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+* restore;
+
+* preserve;
+* keep if inc_q==1;
+* regs b_i1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+* restore;
 
 * rgen_dd_full ;
 * rgen_dd_cc ;

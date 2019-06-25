@@ -6,7 +6,7 @@ set scheme s1mono
 
 #delimit;
 
-global buffer_bblu_query   = 1;
+global buffer_bblu_query   = 0;
 global buffer_bblu_add     = 1;
 
 

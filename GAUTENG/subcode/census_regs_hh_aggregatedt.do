@@ -10,7 +10,9 @@ do  reg_gen_dd.do
 
 #delimit;
 
-if $many_spill == 0 {;
+
+* global many_spill = 1;
+
 * global extra_controls = 
 * " area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3 
 *   y1996 y1996_con y1996_proj y1996_spill1 y1996_proj_con y1996_spill1_con  [pweight = buildings]  ";
@@ -24,6 +26,12 @@ global extra_controls =
 " area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3     ";
 global extra_controls_2 = 
 " area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3    ";
+
+* global extra_controls = 
+* "    ";
+* global extra_controls_2 = 
+* "    ";
+
 
 if $type_area == 1 {;
 * [pweight = area]  ;
@@ -43,7 +51,7 @@ global extra_controls_2 = " $extra_controls_2 [pweight = buildings]    " ;
 
   
 
-};
+
 
 
 
@@ -293,13 +301,23 @@ cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
+g inc_2001_id = inc if year==2001;
+egen inc_2001=mean(inc_2001_id), by(sp_1);
+egen inc_q = cut(inc_2001), group(2);
+
+
+g proj_cluster = proj>.5 & proj<.;
+g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
+g spill2_cluster = proj_cluster==0 & spill1_cluster==0 & spill2>.5 & spill2<.;
+
 if $many_spill == 1 { ;
-egen cj1 = group(cluster_joined proj spill1 spill2) ;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
 if $many_spill == 0 {;
-egen cj1 = group(cluster_joined proj spill1) ;
+replace spill1_cluster = 1 if spill2_cluster==1;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
@@ -335,7 +353,6 @@ g post_area =post*area;
 g post_area_2 = post*area_2;
 g post_area_3 = post*area_3;
 
-
 if $many_spill==0 {; 
 foreach var of varlist con proj spill1 proj_con spill1_con {;
   g y1996_`var' = `var'*y1996;
@@ -348,17 +365,229 @@ foreach var of varlist con proj spill1 proj_con spill1_con {;
     };  
 };
 
-g formal_house = house + house_bkyd ;
-g informal_house = shack_bkyd + shack_non_bkyd ;
+* g formal_house = house + house_bkyd ;
+* g informal_house = shack_bkyd + shack_non_bkyd ;
 
 * replace pop_density = . if pop_density >40000;
 
 * if $spatial == 0 {;
 
-g total_inf = informal*pop_density;
-g total_for = formal*pop_density;
+* keep if area<=2000000 ;
+
+* g total_inf = informal*pop_density;
+* g total_for = formal*pop_density;
 
 * total_for total_inf ;
+g area_km = area/1000000 ;
+* replace area_km= . if area_km>.5 ;
+
+g for_hh = house_dens + flat_dens + duplex_dens + room_on_shared_prop_dens;
+g inf_hh = house_bkyd_dens + shack_bkyd_dens + shack_non_bkyd_dens ;
+g inf_bkyd_hh = house_bkyd_dens + shack_bkyd_dens ;
+g inf_non_bkyd_hh = shack_non_bkyd_dens;
+g total_hh = hh_pop;
+
+
+g for_pers = house_dens_pers + flat_dens_pers + duplex_dens_pers + room_on_shared_prop_dens_pers;
+g inf_pers = house_bkyd_dens_pers + shack_bkyd_dens_pers + shack_non_bkyd_dens_pers ;
+g inf_bkyd_pers = house_bkyd_dens_pers + shack_bkyd_dens_pers ;
+g inf_non_bkyd_pers = shack_non_bkyd_dens_pers;
+g total_pers = person_pop;
+
+g total = inf+for;
+g inf_non_bkyd = inf-bkyd;
+g inf_bkyd = bkyd;
+
+foreach v in total for inf inf_bkyd inf_non_bkyd {;
+   replace `v' = 0 if `v'==.;
+   replace `v'_pers = 0 if `v'==.;
+   g `v'_area = `v'*1000000 / area ;
+   replace `v'_area = 0 if `v'_area==.;
+   g `v'_pers_area = `v'_pers*1000000 / area ;
+   replace `v'_pers_area=0 if `v'_pers_area==.;
+   g `v'_per_house = `v'_pers / `v'  ;
+   * replace `v'_per_house=0 if `v'_per_house==.;
+   * replace `v'_per_house = . if `v'_per_house==0;
+   sum `v'_per_house, detail;
+   replace `v'_per_house = . if `v'_per_house>=`=r(p99)';
+ };
+
+
+* mean toilet_flush $ww if proj>=.9 & proj<. & con==1 & post==1
+* mean toilet_flush $ww if spill1>=.9 & spill1<. & con==1 & post==1
+* mean electric_cooking $ww if proj>=.9 & proj<. & con==1 & post==1
+* mean electric_cooking $ww if spill1>=.9 & spill1<. & con==1 & post==1
+* mean water_inside $ww if proj>=.9 & proj<. & con==1 & post==1
+* mean water_inside $ww if spill1>=.9 & spill1<. & con==1 & post==1  ;
+
+**** our backyard classification is right!
+* reg house_dens for inf_bkyd inf_non_bkyd if year==2001
+* * reg flat_dens for inf_bkyd inf_non_bkyd if year==2001
+* * reg duplex_dens for inf_bkyd inf_non_bkyd if year==2001
+* * reg room_on_shared_prop_dens for inf_bkyd inf_non_bkyd if year==2001
+* reg house_bkyd_dens for inf_bkyd inf_non_bkyd if year==2001
+* reg shack_bkyd_dens for inf_bkyd inf_non_bkyd if year==2001
+* reg shack_non_bkyd_dens for inf_bkyd inf_non_bkyd if year==2001  ;
+
+g low_inc = inc_q == 0;
+g high_inc = inc_q == 1;
+
+rgen_inc_het ;
+
+global outcomes " toilet_flush toilet_flush_for_id toilet_flush_bkyd_id toilet_flush_n_bkyd_id "  ; 
+
+regs_inc toilet_flush_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_inc  ;
+
+
+
+
+/*
+
+
+cap prog drop  fullreg;
+prog define fullreg ;
+global outcomes " `1' `1'_for_id `1'_bkyd_id `1'_n_bkyd_id "  ; 
+  regs `2'_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+preserve; 
+  keep if inc_q==0;
+  regs `2'_q0_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+restore;
+preserve; 
+  keep if inc_q==1;
+  regs `2'_q1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+restore;
+
+end;
+
+fullreg ten_rented ten_rented  ;
+fullreg ten_owned ten_owned  ;
+fullreg ten_free ten_free  ;
+fullreg ten_debt ten_debt  ;
+
+
+global outcomes " total_area    for_area     inf_bkyd_area     inf_non_bkyd_area ";
+regs cht_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+global outcomes " total_pers_area    for_pers_area     inf_bkyd_pers_area     inf_non_bkyd_pers_area ";
+regs chtp_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+global outcomes " total_per_house    for_per_house     inf_bkyd_per_house      inf_non_bkyd_per_house ";
+regs chtper_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+preserve;
+keep if inc_q==0;
+global outcomes " total_area    for_area     inf_bkyd_area     inf_non_bkyd_area ";
+regs cht_q0_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+global outcomes " total_pers_area    for_pers_area     inf_bkyd_pers_area     inf_non_bkyd_pers_area ";
+regs chtp_q0_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+global outcomes " total_per_house    for_per_house     inf_bkyd_per_house      inf_non_bkyd_per_house ";
+regs chtper_q0_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+restore;
+
+preserve;
+keep if inc_q==1;
+global outcomes " total_area    for_area     inf_bkyd_area     inf_non_bkyd_area ";
+regs cht_q1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+global outcomes " total_pers_area    for_pers_area     inf_bkyd_pers_area     inf_non_bkyd_pers_area ";
+regs chtp_q1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+global outcomes " total_per_house    for_per_house     inf_bkyd_per_house      inf_non_bkyd_per_house ";
+regs chtper_q1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+restore;
+
+fullreg sex sex  ;
+fullreg age age  ;
+fullreg african african ;
+fullreg emp emp  ;
+fullreg inc inc  ;
+fullreg ln_inc ln_inc  ;
+
+
+fullreg toilet_flush toih  ;
+fullreg water_inside wath  ;
+fullreg electric_cooking elec ;
+fullreg tot_rooms room  ;
+fullreg hh_size hhs  ;
+
+
+
+
+global outcomes " toilet_flush toilet_flush_for_id toilet_flush_bkyd_id toilet_flush_n_bkyd_id "  ; 
+
+regs toih_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes " water_inside water_inside_for_id water_inside_bkyd_id water_inside_n_bkyd_id"  ; 
+
+regs wath_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes " water_inside water_inside_for_id water_inside_bkyd_id water_inside_n_bkyd_id"  ; 
+
+regs wath_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes " water_utility water_utility_for_id  water_utility_bkyd_id water_utility_n_bkyd_id " ;
+
+regs watu_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes " water_yard water_yard_for_id water_yard_bkyd_id water_yard_n_bkyd_id" ;
+
+regs waty_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes " electric_cooking electric_cooking_for_id electric_cooking_bkyd_id electric_cooking_n_bkyd_id " ;
+
+regs elec_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes " tot_rooms tot_rooms_for_id  tot_rooms_bkyd_id tot_rooms_n_bkyd_id " ;
+
+regs room_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+global outcomes "hh_size hh_size_for_id hh_size_bkyd_id hh_size_n_bkyd_id" ;
+
+regs hhs_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}  ;
+
+
+
+
+
+
+
+
+* foreach var of varlist hh_pop  house_dens traditional_dens flat_dens duplex_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens room_on_shared_prop_dens {;
+*    g `var'_area = `var'/area_km ;
+*  };
+
+* ren room_on_shared_prop_dens_area room_dens_area;
+
+* global outcomes "
+* hh_pop_area  house_dens_area traditional_dens_area flat_dens_area duplex_dens_area 
+*   ";
+
+* * global outcomes "
+* *   house_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens_area hh_pop
+* *   ";
+
+* regs cht1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+* global outcomes "
+* house_bkyd_dens_area shack_bkyd_dens_area shack_non_bkyd_dens_area room_dens_area
+* ";
+
+* regs cht2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
+
+
+
+/*
+
 
 global outcomes "
 total_inf total_for
@@ -369,7 +598,7 @@ regs chd_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_ar
 regs_type chd_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
 
-/*
+
 
 global outcomes "
   toilet_flush 

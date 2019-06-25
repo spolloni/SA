@@ -65,6 +65,9 @@ global ddd_regs_t_alt  = 0; /* these aren't working right now */
 global ddd_regs_t2_alt = 0;
 global countour = 0;
 
+
+global post_control_price = "";
+
 * load data; 
 cd ../..;
 cd Generated/GAUTENG;
@@ -73,9 +76,16 @@ cd Generated/GAUTENG;
 
 use "gradplot_admin${V}.dta", clear;
 
+merge m:1 sp_1 using "temp_2001_inc.dta";
+drop if _merge==2;
+drop _merge;
+
 * go to working dir;
 cd ../..;
 cd $output ;
+
+egen inc_q = cut(inc), group(2);
+
 
 * transaction count per seller;
 bys seller_name: g s_N=_N;
@@ -89,7 +99,7 @@ egen cell = group( latr lonr ) ;
 
 * wow this is a pain... ;
 
-global static_vars = "erf_size erf_size2 erf_size3 sp_1 cluster_rdp cluster_placebo distance_rdp distance_placebo latitude longitude cbd_dist type_rdp type_placebo con_mo_placebo con_mo_rdp" ;
+global static_vars = "erf_size erf_size2 erf_size3 sp_1 inc_q cluster_rdp cluster_placebo distance_rdp distance_placebo latitude longitude cbd_dist type_rdp type_placebo con_mo_placebo con_mo_rdp " ;
 
 keep cell mo_date $static_vars ;
 
@@ -147,14 +157,18 @@ cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
+g proj_cluster = proj>.5 & proj<.;
+g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
 
 if $many_spill == 1 { ;
-egen cj1 = group(cluster_joined proj spill1 spill2) ;
+g spill2_cluster = proj_cluster==0 & spill1_cluster==0 & spill2>.5 & spill2<.;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
 if $many_spill == 0 {;
-egen cj1 = group(cluster_joined proj spill1) ;
+*replace spill1_cluster = 1 if spill2_cluster==1;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
@@ -199,7 +213,7 @@ global outcomes="sales";
 * global fecount = 3 ;
 global fecount = 1 ;
 
-global rl1 = "Lot Size Controls";
+global rl1 = "Lot Size/Year-Month";
 
 mat define F = (0,1);
 
@@ -211,15 +225,34 @@ global a_pre = "a";
 global a_ll = "a(LL)";
 };
 
-global reg_1 = " ${a_pre}reg  sales $regressors  , cl(cluster_joined) ${a_ll}" ;
-global reg_2 = " ${a_pre}reg  sales $regressors  erf_size*, cl(cluster_joined) ${a_ll}" ;
+g sales1 = sales*12 ;
+
+global reg_1 = " ${a_pre}reg  sales1 $regressors  , cl(cluster_joined) ${a_ll}" ;
+global reg_2 = " ${a_pre}reg  sales1 $regressors  i.mo_date  erf_size*, cl(cluster_joined) ${a_ll}" ;
 
 price_regs s_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
-global reg_1 = " ${a_pre}reg  sales  $regressors2  , cl(cluster_joined) ${a_ll}" ;
-global reg_2 = " ${a_pre}reg  sales  $regressors2  erf_size*, cl(cluster_joined) ${a_ll}" ;
+preserve;
+keep if inc_q==0;
+price_regs s_k${k}_t0_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+restore;
 
-price_regs_type s_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+preserve;
+keep if inc_q==1;
+price_regs s_k${k}_t1_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+restore;
+
+
+
+
+* global reg_1 = " ${a_pre}reg  sales  $regressors2  , cl(cluster_joined) ${a_ll}" ;
+* global reg_2 = " ${a_pre}reg  sales  $regressors2 i.mo_date  erf_size*, cl(cluster_joined) ${a_ll}" ;
+
+* price_regs_type s_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+
+
 
 
 * global reg_t = " areg lprice $tregressors i.purch_yr#i.purch_mo erf_size*  if T_id==1 & D_id==1, a(LL) cl(cluster_joined)  "; 

@@ -331,6 +331,7 @@ append using "DDcensus_pers_1996_temp${V}.dta";
 
 replace area_code = EACODE if year==1996;
 
+merge 
 
 * go to working dir;
 cd ../..;

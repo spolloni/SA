@@ -68,16 +68,40 @@ global countour = 0;
 global graph_plotmeans = 0;
 
 * load data; 
+
 cd ../..;
+cd $output ;
+
+
+use "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", clear;
+keep if year==2001;
+
+
+keep sp_1 inc;
+
+ren inc inc1;
+egen inc= mean(inc1), by(sp_1);
+drop inc1;
+duplicates drop sp_1, force ;
+
+cd ../../../..;
 cd Generated/GAUTENG;
 
+save "temp_2001_inc.dta", replace;
 
 
 use "gradplot_admin${V}.dta", clear;
 
-* go to working dir;
+merge m:1 sp_1 using "temp_2001_inc.dta";
+drop if _merge==2;
+drop _merge;
+
 cd ../..;
 cd $output ;
+
+
+* go to working dir;
+
 
 * transaction count per seller;
 bys seller_name: g s_N=_N;
@@ -122,17 +146,21 @@ g cluster_joined = cluster_rdp if con==1 ;
 replace cluster_joined = cluster_placebo if con==0 ; 
 
 
+g proj_cluster = proj>.5 & proj<.;
+g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
+
 if $many_spill == 1 { ;
-egen cj1 = group(cluster_joined proj spill1 spill2) ;
+g spill2_cluster = proj_cluster==0 & spill1_cluster==0 & spill2>.5 & spill2<.;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
 if $many_spill == 0 {;
-egen cj1 = group(cluster_joined proj spill1) ;
+*replace spill1_cluster = 1 if spill2_cluster==1;
+egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
-
 
 g post = (mo2con_rdp>0 & mo2con_rdp<.) |  (mo2con_placebo>0 & mo2con_placebo<.) ;
 
@@ -162,10 +190,28 @@ gen_LL_price ;
 
 save "price_regs${V}.dta", replace;
 
+
+use "price_regs${V}.dta", clear ;
+
+keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
+
+global outcomes="lprice";
+
+* g T = mo2con_rdp if con==1;
+* replace T  = mo2con_placebo if con==0;
+* global  Tr = 24;
+* replace T  = . if T<-$Tr & T>$Tr ;
+* replace T  = round(T,3) ;
+
+* egen inc_q = cut(inc), group(2);
+
+
+
+
 *****************************************************************;
 *************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
 *****************************************************************;
-
+if $graph_plotmeans == 1 {;
 
 *** PRETRENDS *** ;
 
@@ -255,9 +301,9 @@ replace mplacebo = round(mplacebo,6);
     "-${time_range}(12)${time_range}" ""
     11  500 1500;
 
+};
 
 
-/*
 
 
 use "price_regs${V}.dta", clear ;
@@ -268,6 +314,12 @@ global outcomes="lprice";
 
 egen clyrgroup = group(purch_yr cluster_joined);
 egen latlonyr = group(purch_yr latlongroup);
+
+
+* areg lprice $regressors, a(property_id) cluster(cluster_joined) robust ;
+* g mrdp = mo2con_rdp if con==1   look at small window around construction, not much there ; 
+* g mplacebo = mo2con_placebo if con==0;
+* keep if (mrdp>=-24 & mrdp<=24) | (mplacebo>=-24 & mplacebo<=24)  ;
 
 
 * global fecount = 3 ;
@@ -296,15 +348,676 @@ global a_ll = "a(LL)";
 * i.purch_yr#i.purch_mo ;
 * i.purch_yr#i.purch_mo ;
 
+
+egen inc_q = cut(inc), group(2) ;
+
+
+g D = distance_rdp if con==1 ; 
+replace D = distance_placebo if con==0 ;
+
+keep if D>=-400 ;
+
+replace D = round(D,200) ;
+
+* keep if D>=0; 
+
+
+
+*** 1) distance plots ; 
+*** 2) time to event plots ;
+*** 3) post plots ; 
+
+
+cap prog drop pf
+prog define pf
+
+  cap drop D
+  cap drop treat
+  cap drop inside
+  cap drop DI_*
+
+  if "`2'"=="dist" {
+    g D = distance_rdp if con==1 
+    replace D = distance_placebo if con==0 
+    if `5'==0 {
+      g treat = post 
+    }
+    else {
+      g treat = purch_yr>=`5'
+    }
+    replace D = round(D,`3')
+    sum D, detail
+    global D_max = `=r(max)'
+    global D_adj = $D_max
+    replace D = D + $D_adj
+    local x_title "Distance to Project Footprint"
+    global D_drop = $D_max + $D_max
+    global x_lab = "meters"
+  }
+
+  if "`2'"=="time" {
+    g D = mo2con_rdp if con==1
+    replace D = mo2con_placebo if con==0 
+    g treat = (distance_rdp>=0 & distance_rdp<=500 & con==1) | (distance_placebo>=0 & distance_placebo<=500 & con==0)
+    if `9'==1 {
+      g inside = (distance_rdp<0 & con==1) | (distance_placebo<0 & con==0)
+    }
+    global T_thresh = `4'
+
+    replace D = . if D<-$T_thresh  | D>$T_thresh
+    replace D = round(D,`3')
+    sum D, detail
+    global D_max = `=r(max)'
+    global D_adj = $D_max
+    replace D = D + $D_adj
+    local x_title "Month to Construction"
+    global D_drop = $D_max - `3'
+    global x_lab = "months"
+  }
+
+
+  levelsof D
+  global D_lev = "`=r(levels)'"
+
+  forvalues r = 0/1 {
+  foreach v in $D_lev {
+    if "`v'"!="`=${D_drop}'" {
+
+      if `r'==0 {
+        local id "low"
+      }
+      if `r'==1 {
+        local id "high"
+      }
+      if `6'==1 {
+      g DI_`v'_`id' = D==`v' & inc_q==`r'
+      g DI_`v'_treat_`id' = D==`v' & treat==1 & inc_q==`r'
+        if `9'==1 {
+          g DI_`v'_inside_`id' = D==`v' & inside==1 & inc_q==`r'
+        }
+      }
+      g DI_`v'_con_`id' = D==`v' & con==1 & inc_q==`r'
+      g DI_`v'_con_treat_`id' = D==`v' & con==1 & treat==1 & inc_q==`r'
+      local t_lab "`=`v'-$D_adj'"
+      lab var DI_`v'_con_treat_`id' "`t_lab' ${x_lab} : `id' inc  "
+        if `9'==1 {
+          g DI_`v'_con_inside_`id' = D==`v' & con==1 & inside==1 & inc_q==`r'
+          lab var DI_`v'_con_inside_`id' "`t_lab' ${x_lab} : `id' inc  "
+        }
+    }  
+    }
+  }
+
+    forvalues r = 0/1 {
+      if `r'==0 {
+        local id "low"
+      }
+      if `r'==1 {
+        local id "high"
+      }
+      if `6'==1 {
+      *  g DI_`id'    = inc_q==`r'
+        g DI_treat_`id' = treat==1 & inc_q==`r'
+        if `9'==1 {
+          g DI_inside_`id' = inside==1 & inc_q==`r'
+        }
+      }
+      g DI_con_`id' = con==1 & inc_q==`r'
+      g DI_con_treat_`id' =con==1 & treat==1 & inc_q==`r'
+        if `9'==1 {
+          g DI_con_inside_`id' =con==1 & inside==1 & inc_q==`r'
+        }
+    }
+
+  preserve
+  drop if D==.
+  if `9'==0 & "`2'"=="time" {
+    drop if D<0
+  }
+
+    if `6'==0 {
+      drop if con==0 
+      * drop DI_0_con_low DI_0_con_high
+      * drop DI_`=${D_max}'_con_treat_low DI_`=${D_max}'_con_treat_high DI_`=${D_max}'_treat_low DI_`=${D_max}'_treat_high  DI_`=${D_max}'_con_low DI_`=${D_max}'_con_high
+    }
+    else {
+      * drop DI_0_low DI_0_high
+      * drop DI_`=${D_max}'_con_treat_low  DI_`=${D_max}'_con_treat_high
+      * drop DI_`=${D_max}'_con_treat_low DI_`=${D_max}'_con_treat_high DI_`=${D_max}'_treat_low DI_`=${D_max}'_treat_high  DI_`=${D_max}'_con_low DI_`=${D_max}'_con_high
+    }
+    
+    if `7'==1 {
+      areg lprice DI_*  i.purch_yr#i.purch_mo erf* , a(`8') cluster(cluster_joined) r  
+    }
+    else {
+      areg lprice DI_*  , a(`8') cluster(cluster_joined) r 
+    }
+    sum lprice, detail 
+    estadd scalar Mean = `=r(mean)'
+  restore
+
+
+
+    estout using "`1'.tex", replace  style(tex) ///
+    keep(  DI_*_con_treat_* )  ///
+    varlabels(, ) ///
+    label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+      stats( Mean ,  ///
+    labels(  "Mean"  ) ///
+        fmt( %9.2fc       )   ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+  preserve
+
+    parmest, fast 
+    keep if regexm(parm,"_con_treat")==1
+    g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+    g high = regexm(parm,"high")==1
+    destring D, replace force
+
+    global obs=`=_N'
+    expand 3 in $obs
+    replace estimate=0 if _n>$obs
+    replace min95 =0 if _n>$obs
+    replace max95 =0 if _n>$obs
+    replace high = 1 if _n==$obs+1
+    replace high = 0 if _n==$obs+2
+    replace D = $D_drop if _n>$obs
+
+    replace D = D-$D_adj 
+    
+
+    sort high D 
+
+    twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0 ///
+     || rcap min95 max95 D if high==1 || scatter estimate D if high==1 ,  /// 
+        legend(order(2 "Low Income" 4 "High Income" ) ring(0) position(10)) xline(0,lp(dot)) xtitle("`x_title'")
+        graph export "`1'.pdf", as(pdf) replace
+
+  restore
+
+  if `9'==1 {
+
+
+  estout using "`1'_inside.tex", replace  style(tex) ///
+    keep(   DI_*_con_inside_* )  ///
+    varlabels(, ) ///
+    label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+      stats( Mean ,  ///
+    labels(  "Mean"  ) ///
+        fmt( %9.2fc       )   ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+  estout using "`1'_inside_both.tex", replace  style(tex) ///
+    keep( DI_*_con_treat_*  DI_*_con_inside_*  )  ///
+    varlabels(, ) ///
+    label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+      stats( Mean ,  ///
+    labels(  "Mean"  ) ///
+        fmt( %9.2fc       )   ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+    preserve
+
+      parmest, fast 
+      keep if regexm(parm,"_con_inside")==1
+      g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+      g high = regexm(parm,"high")==1
+      destring D, replace force
+
+      global obs=`=_N'
+      expand 3 in $obs
+      replace estimate=0 if _n>$obs
+      replace min95 =0 if _n>$obs
+      replace max95 =0 if _n>$obs
+      replace high = 1 if _n==$obs+1
+      replace high = 0 if _n==$obs+2
+      replace D = $D_drop if _n>$obs
+
+      replace D = D-$D_adj 
+      
+
+      sort high D 
+
+      twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0 ///
+       || rcap min95 max95 D if high==1 || scatter estimate D if high==1 ,  /// 
+          legend(order(2 "Low Income" 4 "High Income" ) ring(0) position(10)) xline(0,lp(dot)) xtitle("`x_title'")
+          graph export "`1'_inside.pdf", as(pdf) replace
+
+    restore
+  }
+
+end
+
+
+
+*   (1) name                  (2) type    (3) round var   (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside
+pf "price_dist_3d_no_ctrl"   "dist"          200               ""              0              1         0             LL           0
+
+
+pf "price_dist_3d_ctrl"      "dist"          200               ""              0              1         1            LL           0
+pf "price_dist_2d_no_ctrl"   "dist"          200               ""              0              0         0             LL            0
+pf "price_dist_2d_ctrl"      "dist"          200               ""              0              0         1            LL           0
+
+pf "price_dist_3d_no_ctrl_pfe"   "dist"          200               ""              0              1         0         property_id           0
+pf "price_dist_3d_ctrl_pfe"      "dist"          200               ""              0              1         1          property_id           0
+pf "price_dist_2d_no_ctrl_pfe"   "dist"          200               ""              0              0         0           property_id           0
+pf "price_dist_2d_ctrl_pfe"      "dist"          200               ""              0              0         1        property_id           0
+
+
+
+pf "price_dist_3d_no_ctrl_2005"   "dist"     200               ""           2005              1         0           LL             0
+pf "price_dist_3d_no_ctrl_2006"   "dist"     200               ""           2006              1         0         LL           0
+pf "price_dist_3d_no_ctrl_2007"   "dist"     200               ""           2007              1         0           LL           0
+pf "price_dist_3d_no_ctrl_2008"   "dist"     200               ""           2008              1         0           LL             0
+pf "price_dist_3d_no_ctrl_2009"   "dist"     200               ""           2009              1         0           LL             0
+
+
+pf "price_time_3d_no_ctrl"   "time"          12                48               0             1         0       LL            1
+
+pf "price_time_3d_ctrl_inside"      "time"          12                48               0             1         1          LL           1  
+
+
+
+pf "price_time_3d_ctrl_outside"      "time"          12                48               0             1         1          LL           0  
+
+
+pf "price_time_2d_no_ctrl"   "time"          12                48               0             0         0          LL    
+pf "price_time_2d_ctrl"      "time"          12                48               0             0         1          LL    
+  
+  
+pf "price_time_3d_no_ctrl_pfe"   "time"          12                48               0             1         0       property_id
+pf "price_time_3d_ctrl_pfe"      "time"          12                48               0             1         1        property_id 
+pf "price_time_2d_no_ctrl_pfe"   "time"          12                48               0             0         0        property_id   
+pf "price_time_2d_ctrl_pfe"      "time"          12                48               0             0         1         property_id   
+  
+  
+
+
+
+
+
+* drop D_*
+
+levelsof D
+global D_lev = "`=r(levels)'"
+
+foreach v in $D_lev { 
+g D_`v' = D==`v'
+g D_`v'_con = D==`v' & con==1
+g D_`v'_post = D==`v' & post==1
+g D_`v'_con_post = D==`v' & con==1 & post==1
+}
+
+drop D_0
+
+areg lprice D_* i.purch_yr#i.purch_mo erf*  , a(LL) cluster(cluster_joined) r  
+
+preserve
+
+  parmest, fast 
+  keep if regexm(parm,"_con_post")==1
+  g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+  destring D, replace force
+  twoway rcap min95 max95 D || scatter estimate D 
+
+restore
+
+
+**** HETEROGENEOUS EFFECTS !! ****
+
+
+cap drop DI_* T post1
+
+g T = mo2con_rdp if con==1
+replace T = mo2con_placebo if con==0 
+
+levelsof D
+global D_lev = "`=r(levels)'"
+
+* g post1 = (con==1 & (mo2con_rdp>=0 & mo2con_rdp<.)) | (con==0 &  (mo2con_placebo>=0 & mo2con_placebo<.) )
+
+g post1=post
+
+foreach v in $D_lev { 
+g DI_`v'_low = D==`v' & inc_q==0
+g DI_`v'_con_low = D==`v' & con==1 & inc_q==0
+g DI_`v'_post_low = D==`v' & post1==1 & inc_q==0
+g DI_`v'_con_post_low = D==`v' & con==1 & post1==1 & inc_q==0
+
+g DI_`v'_high = D==`v' & inc_q==1
+g DI_`v'_con_high = D==`v' & con==1 & inc_q==1
+g DI_`v'_post_high = D==`v' & post1==1 & inc_q==1
+g DI_`v'_con_post_high = D==`v' & con==1 & post1==1 & inc_q==1
+}
+
+drop DI_0_low DI_0_high
+
+
+areg lprice DI_* i.purch_yr#i.purch_mo erf*  , a(LL) cluster(cluster_joined) r  
+
+preserve
+
+  parmest, fast 
+  keep if regexm(parm,"_con_post")==1
+  g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+  g high = regexm(parm,"high")==1
+  destring D, replace force
+  twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0  || rcap min95 max95 D if high==1 || scatter estimate D if high==1 
+
+restore
+
+
+
+
+**** HETEROGENEOUS EFFECTS  WITH TIME TO EVENT !! ****
+
+cap drop TI_* T
+
+g T = mo2con_rdp if con==1
+replace T = mo2con_placebo if con==0 
+
+g close = (distance_rdp>=0 & distance_rdp<=500 & con==1) | (distance_placebo>=0 & distance_placebo<=500 & con==0)
+
+global T_thresh = 36
+
+replace T = . if T<-$T_thresh  | T>$T_thresh
+replace T = round(T,12)
+sum T, detail
+global T_max = `=r(max)'
+replace T = T + $T_max
+
+levelsof T
+global T_lev = "`=r(levels)'"
+
+foreach v in $T_lev { 
+g TI_`v'_low = T==`v' & inc_q==0
+g TI_`v'_close_low = T==`v' & close==1 & inc_q==0
+g TI_`v'_high = T==`v' & inc_q==1
+g TI_`v'_close_high = T==`v' & close==1 & inc_q==1
+}
+
+drop TI_0_low TI_0_high
+
+areg lprice TI_* i.purch_yr#i.purch_mo erf* if D>0 &  con==1, a(LL) cluster(cluster_joined) r  
+
+
+preserve
+
+  parmest, fast 
+  keep if regexm(parm,"_close")==1
+  g T = regexs(1) if regexm(parm,"._([0-9]+)_.")
+  g high = regexm(parm,"high")==1
+  destring T, replace force
+  replace T = T-$T_max 
+  twoway rcap min95 max95 T if high==0 || scatter estimate T if high==0  || ///
+         rcap min95 max95 T if high==1 || scatter estimate T if high==1,  /// 
+   legend(order(2 "Low" 4 "High" )) xline(0,lp(dot))
+
+  graph export "price_to_event.pdf", as(pdf) replace
+restore
+
+
+
+
+**** TIME TO EVENT FULL 3 DIFF 
+
+cap drop TI_* T
+
+g T = mo2con_rdp if con==1
+replace T = mo2con_placebo if con==0 
+
+g close = (distance_rdp>=0 & distance_rdp<=500 & con==1) | (distance_placebo>=0 & distance_placebo<=500 & con==0)
+
+global T_thresh = 48
+
+replace T = . if T<-$T_thresh  | T>$T_thresh
+replace T = round(T,6)
+sum T, detail
+global T_max = `=r(max)'
+replace T = T + $T_max
+
+levelsof T
+global T_lev = "`=r(levels)'"
+
+foreach v in $T_lev { 
+g TI_`v'_low = T==`v' & inc_q==0
+g TI_`v'_close_low = T==`v' & close==1 & inc_q==0
+g TI_`v'_close_con_low = T==`v' & close==1 & con==1 &  inc_q==0
+g TI_`v'_high = T==`v' & inc_q==1
+g TI_`v'_close_high = T==`v' & close==1 & inc_q==1
+g TI_`v'_close_con_high = T==`v' & close==1 & con==1 & inc_q==1
+}
+
+drop TI_0_low TI_0_high
+
+areg lprice TI_* i.purch_yr#i.purch_mo erf* if   D>0 , a(LL) cluster(cluster_joined) r  
+
+
+preserve
+
+  parmest, fast 
+  keep if regexm(parm,"_close_con")==1
+  g T = regexs(1) if regexm(parm,"._([0-9]+)_.")
+  g high = regexm(parm,"high")==1
+  destring T, replace force
+  replace T = T-$T_max 
+  twoway rcap min95 max95 T if high==0 || scatter estimate T if high==0  || ///
+         rcap min95 max95 T if high==1 || scatter estimate T if high==1, /// 
+   legend(order(2 "Low" 4 "High" ))
+
+
+restore
+
+
+
+
+
+
+
+
+*** JUST DIFF IN DIFF WITH JUST CONSTRUCTED 
+
+cap drop DI_*
+
+levelsof D
+global D_lev = "`=r(levels)'"
+
+foreach v in $D_lev { 
+g DI_`v'_low = D==`v' & inc_q==0
+g DI_`v'_post_low = D==`v' & post==1 & inc_q==0
+g DI_`v'_high = D==`v' & inc_q==1
+g DI_`v'_post_high = D==`v' & post==1 & inc_q==1
+}
+
+drop DI_0_low DI_0_high
+
+areg lprice DI_* i.purch_yr#i.purch_mo erf* if con==1 , a(LL) cluster(cluster_joined) r  
+
+
+preserve
+
+  parmest, fast 
+  keep if regexm(parm,"_post")==1
+  g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+  g high = regexm(parm,"high")==1
+  destring D, replace force
+  twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0  || rcap min95 max95 D if high==1 || scatter estimate D if high==1 
+
+restore
+
+
+
+
+
+
+**** ALTERNATIVE POST DATE ****
+
+cap drop DA_* post_alt 
+
+g post_alt = purch_yr>=2007
+
+levelsof D
+global D_lev = "`=r(levels)'"
+
+foreach v in $D_lev { 
+g DA_`v'_low = D==`v' & inc_q==0
+g DA_`v'_con_low = D==`v' & con==1 & inc_q==0
+g DA_`v'_post_low = D==`v' & post_alt==1 & inc_q==0
+g DA_`v'_con_post_low = D==`v' & con==1 & post_alt==1 & inc_q==0
+
+g DA_`v'_high = D==`v' & inc_q==1
+g DA_`v'_con_high = D==`v' & con==1 & inc_q==1
+g DA_`v'_post_high = D==`v' & post_alt==1 & inc_q==1
+g DA_`v'_con_post_high = D==`v' & con==1 & post_alt==1 & inc_q==1
+}
+
+drop DA_0_low DA_0_high
+
+
+areg lprice DA_* erf* , a(LL) cluster(cluster_joined) r  
+
+preserve
+
+  parmest, fast 
+  keep if regexm(parm,"_con_post")==1
+  g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+  g high = regexm(parm,"high")==1
+  destring D, replace force
+  twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0 ///
+   || rcap min95 max95 D if high==1 || scatter estimate D if high==1, /// 
+   legend(order(2 "Low" 4 "High" ))
+
+restore
+
+
+
+
+
+
+
+/*
+
+preserve ;
+keep if inc_q==0 ;
+areg lprice i.post#i.con#i.D i.purch_yr#i.purch_mo erf*, a(LL) cluster(cluster_joined) r  ;
+restore ; 
+
+
+preserve ;
+keep if inc_q==1 ;
+areg lprice i.post#i.con#i.D i.purch_yr#i.purch_mo erf*, a(LL) cluster(cluster_joined) r  ;
+restore ; 
+
+
+preserve 
+keep if inc_q==0 
+areg lprice i.post#i.con#i.D i.purch_yr#i.purch_mo erf*, a(LL) cluster(cluster_joined) r  
+restore 
+
+
+areg lprice $regressors if D!=. & inc_q==0 , a(LL) cluster(cluster_joined) r  
+areg lprice $regressors if D!=. & inc_q==1 , a(LL) cluster(cluster_joined) r  
+
+
+areg lprice i.post#i.con#i.D i.purch_yr#i.purch_mo erf* if D!=. & inc_q==0 , a(LL) cluster(cluster_joined) r  
+areg lprice i.post#i.con#i.D i.purch_yr#i.purch_mo erf* if D!=. & inc_q==1 , a(LL) cluster(cluster_joined) r  
+
+
+
+
+
+preserve 
+keep if inc_q==1 
+areg lprice i.post#i.con#i.D i.purch_yr#i.purch_mo erf*, a(LL) cluster(cluster_joined) r  
+restore 
+
+
+
+/*
+
+areg  lprice $regressors if inc_q==0 , cl(cluster_joined) a(LL) r
+areg  lprice $regressors if inc_q==1 , cl(cluster_joined) a(LL) r
+
+
+areg  lprice $regressors i.purch_yr#i.purch_mo erf_size* if inc_q==0 & (distance_rdp<1000 | distance_placebo<1000), cl(cluster_joined) a(LL) r
+areg  lprice $regressors i.purch_yr#i.purch_mo erf_size* if inc_q==1 & (distance_rdp<1000 | distance_placebo<1000), cl(cluster_joined) a(LL) r
+
+
+areg  lprice $regressors if inc_q==0 & (distance_rdp<800 | distance_placebo<800), cl(cluster_joined) a(LL) r
+areg  lprice $regressors if inc_q==1 & (distance_rdp<800 | distance_placebo<800), cl(cluster_joined) a(LL) r
+
+
+/*
+
+
+
+
 global reg_1 = " ${a_pre}reg  lprice $regressors  , cl(cluster_joined) ${a_ll}" ;
 global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
 price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
 
-global reg_1 = " ${a_pre}reg  lprice $regressors2 , cl(cluster_joined) ${a_ll}" ;
-global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) ${a_ll}" ;
 
-price_regs_type p_t_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+forvalues r=0/1 {;
+
+global reg_1 = " ${a_pre}reg  lprice $regressors if inc_q==`r' , cl(cluster_joined) ${a_ll} r" ;
+global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size* if inc_q==`r', cl(cluster_joined) ${a_ll} r" ;
+
+price_regs p_i`r'_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+
+price_regs p_i`r'_pfe_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+
+
+global reg_1 = " ${a_pre}reg  lprice $regressors2 if inc_q==`r' , cl(cluster_joined) ${a_ll} r" ;
+global reg_2 = " ${a_pre}reg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size* if inc_q==`r', cl(cluster_joined) ${a_ll} r" ;
+
+
+* price_regs_type p_t_i`r'_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+
+* global reg_1 = " areg  lprice $regressors2 if inc_q==`r' , cl(cluster_joined) a(property_id) r" ;
+* global reg_2 = " areg  lprice $regressors2 i.purch_yr#i.purch_mo erf_size* if inc_q==`r', cl(cluster_joined) a(property_id) r" ;
+
+* price_regs_type p_t_i`r'_${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+
+
+};
+
+
+* forvalues r=0/2 {;
+
+* global reg_1 = " ${a_pre}reg  lprice $regressors if inc_q==`r' , cl(cluster_joined) ${a_ll}" ;
+* global reg_2 = " ${a_pre}reg  lprice $regressors i.purch_yr#i.purch_mo erf_size* if inc_q==`r', cl(cluster_joined) ${a_ll}" ;
+
+* price_regs p_i`r'_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1 ;
+
+* };
+
+
+/*
+global reg_1 = " reg  lprice $regressors  , cl(cluster_joined) " ;
+global reg_2 = " reg  lprice $regressors i.purch_yr#i.purch_mo erf_size*, cl(cluster_joined) " ;
+
+price_regs p_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_p1_nofe ;
+
+
+
+
+
+
 
 
 

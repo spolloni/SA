@@ -6,7 +6,7 @@ set scheme s1mono
 
 #delimit;
 
-global buffer_query   = 1;
+global buffer_query   = 0;
 global buffer_add     = 1;
 
 
@@ -197,6 +197,9 @@ drop shape_area;
 cd ../..;
 cd $output;
 
+merge m:1 area_code year using "census_building_query.dta" ; 
+drop if _merge==2;
+drop _merge;
 
 save "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", replace; 
 
