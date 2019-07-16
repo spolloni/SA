@@ -17,37 +17,7 @@ if $LOCAL==1{;
   cd ..;
 };
 
-***************************************;
-*  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
-***************************************;
-cap program drop omit;
-program define omit;
 
-  local original ${`1'};
-  local temp1 `0';
-  local temp2 `1';
-  local except: list temp1 - temp2;
-  local modified;
-  foreach e of local except{;
-   local modified = " `modified' o.`e'"; 
-  };
-  local new: list original - except;
-  local new " `modified' `new'";
-  global `1' `new';
-
-end;
-
-cap program drop takefromglobal;
-program define takefromglobal;
-
-  local original ${`1'};
-  local temp1 `0';
-  local temp2 `1';
-  local except: list temp1 - temp2;
-  local new: list original - except;
-  global `1' `new';
-
-end;
 
 *******************;
 *  PLOT GRADIENTS *;
@@ -76,7 +46,6 @@ cd $output ;
 use "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}.dta", clear;
 keep if year==2001;
 
-
 keep sp_1 inc;
 
 ren inc inc1;
@@ -104,7 +73,6 @@ cd $output ;
 
 * go to working dir;
 
-
 * transaction count per seller;
 bys seller_name: g s_N=_N;
 
@@ -123,8 +91,6 @@ replace cluster_reg = cluster_placebo if cluster_reg==. & cluster_placebo!=.;
 
 g het = 1 if cbd_dist<${het};
 replace het = 0 if cbd_dist>=${het} & cbd_dist<.;
-
-
 
 keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
 
@@ -158,7 +124,6 @@ drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
 if $many_spill == 0 {;
-*replace spill1_cluster = 1 if spill2_cluster==1;
 egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
@@ -166,20 +131,9 @@ ren cj1 cluster_joined ;
 
 g post = (mo2con_rdp>0 & mo2con_rdp<.) |  (mo2con_placebo>0 & mo2con_placebo<.) ;
 
-* g post = purch_yr>2005 ;
-
-
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
-
-
-* g Xs = round(latitude,${k}00);
-* g Ys = round(longitude,${k}00);
-
-* egen LL = group(Xs Ys purch_yr);
-
-
 
 rgen ${no_post} ;
 rgen_type ;
@@ -189,123 +143,7 @@ lab_var_type ;
 
 gen_LL_price ; 
 
-
 save "price_regs${V}.dta", replace;
-
-
-use "price_regs${V}.dta", clear ;
-
-keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
-
-global outcomes="lprice";
-
-* g T = mo2con_rdp if con==1;
-* replace T  = mo2con_placebo if con==0;
-* global  Tr = 24;
-* replace T  = . if T<-$Tr & T>$Tr ;
-* replace T  = round(T,3) ;
-
-* egen inc_q = cut(inc), group(2);
-
-
-
-
-*****************************************************************;
-*************   DDD REGRESSION JOINED PLACEBO-RDP   *************;
-*****************************************************************;
-if $graph_plotmeans == 1 {;
-
-*** PRETRENDS *** ;
-
-use "price_regs${V}.dta", clear ;
-
-keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
-
-global outcomes="lprice";
-
-g mrdp = mo2con_rdp if con==1;
-g mplacebo = mo2con_placebo if con==0;
-
-
-global time_range = 24;
-
-replace mrdp=. if mrdp<-$time_range | mrdp>$time_range;
-replace mplacebo=. if mplacebo<-$time_range | mplacebo>$time_range;
-
-replace mrdp = round(mrdp,6);
-replace mplacebo = round(mplacebo,6);
-
-
-  cap program drop plotpretrends;
-  program plotpretrends;
-
-  preserve;
-
-    keep if distance_`3'<=`11' & distance_`3'>=`10';
-    egen `2'_`3' = mean(`2'), by(m`3');
-    keep `2'_`3' m`3';
-    duplicates drop m`3', force;
-    ren m`3' D;
-    save "${temp}pretrends_`3'_temp.dta", replace;
-  restore;
-
-  preserve; 
-
-    keep if distance_`4'<=`11' & distance_`4'>=`10';
-    egen `2'_`4' = mean(`2'), by(m`4');
-    keep `2'_`4' m`4';
-    duplicates drop m`4', force;
-    ren m`4' D;
-    save "${temp}pretrends_`4'_temp.dta", replace;
-  restore;
-
-  preserve; 
-    use "${temp}pretrends_`3'_temp.dta", clear;
-    merge 1:1 D using "${temp}pretrends_`4'_temp.dta";
-    keep if _merge==3;
-    drop _merge;
-
-    *replace D = D ;
-
-    twoway 
-    (connected `2'_`4' D, ms(Oh) msiz(medium) lp(none)  mlc(maroon) mfc(maroon) lc(maroon) lw(medthin))
-    (connected `2'_`3' D, ms(o) msiz(medium) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin)) 
-    ,
-    xtitle("Months to (expected) project construction",height(5))
-    ytitle("Avg log-price from `10' to `11'm",height(3)si(medium))
-    xline(0,lw(medthin)lp(shortdash))
-    xlabel(`7' , tp(c) labs(medium)  )
-    ylabel(`8' , tp(c) labs(medium)  )
-    plotr(lw(medthick ))
-    legend(order(2 "`5'" 1 "`6'"  ) symx(6)
-    ring(0) position(`9') bm(medium) rowgap(small) col(1)
-    colgap(small) size(medium) region(lwidth(none)))
-    aspect(.7);
-    *graphexportpdf `1', dropeps;
-    graph export "`1'.pdf", as(pdf) replace  ;
-    erase "${temp}pretrends_`3'_temp.dta";
-    erase "${temp}pretrends_`4'_temp.dta";
-  restore;
-
-  end;
-
-  global yl = "2(1)7";
-
-  plotpretrends 
-    price_pretrends_close_${V} lprice rdp placebo
-    "Constructed" "Unconstructed"
-    "-${time_range}(12)${time_range}" ""
-    11  0 500;
-
-  plotpretrends 
-    price_pretrends_far_${V} lprice rdp placebo
-    "Constructed" "Unconstructed"
-    "-${time_range}(12)${time_range}" ""
-    11  500 1500;
-
-};
-
-
 
 
 use "price_regs${V}.dta", clear ;
@@ -317,20 +155,11 @@ global outcomes="lprice";
 egen clyrgroup = group(purch_yr cluster_joined);
 egen latlonyr = group(purch_yr latlongroup);
 
-
-* areg lprice $regressors, a(property_id) cluster(cluster_joined) robust ;
-* g mrdp = mo2con_rdp if con==1   look at small window around construction, not much there ; 
-* g mplacebo = mo2con_placebo if con==0;
-* keep if (mrdp>=-24 & mrdp<=24) | (mplacebo>=-24 & mplacebo<=24)  ;
-
-
-* global fecount = 3 ;
 global fecount = 1 ;
 
 global rl1 = "Lot Size/Year-Month";
 
 mat define F = (0,1);
-
 
 global a_pre = "";
 global a_ll = "";
@@ -339,37 +168,13 @@ global a_pre = "a";
 global a_ll = "a(LL)";
 };
 
-
-* reg lprice post proj proj_post spill1 spill1_post if con==1, cl(cluster_joined) r
-* g after=purch_yr>=2005
-* g after_proj = after*proj
-* g after_spill = after*spill1
-* areg lprice post proj after_proj spill1 after_spill if con==1, cl(cluster_joined) r a(LL)
-
-* drop if proj==1; 
-* i.purch_yr#i.purch_mo ;
-* i.purch_yr#i.purch_mo ;
-
-
 egen inc_q = cut(inc), group(2) ;
-
-
-* g D = distance_rdp if con==1 ; 
-* replace D = distance_placebo if con==0 ;
-* keep if D>=0 ;
 
 keep if distance_rdp>=0 & distance_placebo>=0 ; 
 
 #delimit cr;
-* keep if D>=0; 
-
-* replace distance_rdp =     -200 if distance_rdp<0
-* replace distance_placebo = -200 if distance_placebo<0
 
 
-*** 1) distance plots ; 
-*** 2) time to event plots ;
-*** 3) post plots ; 
 
 cap prog drop prep_dist
 prog define prep_dist
@@ -687,7 +492,7 @@ end
 
 *   (1) name                  (2) type    (3) round var   (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside  (10) D greater than zero
 
-pf "price_dist_3d_no_ctrl"   "dist"          200               ""              0              1         0             LL           0     1
+pf "price_dist_3d_no_ctrl"   "dist"          500               ""              0              1         0             LL           0     1
 
 
 pf "price_dist_3d_ctrl"      "dist"          200               ""              0              1         1            LL           0  1
