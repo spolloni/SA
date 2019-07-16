@@ -90,6 +90,8 @@ cd Generated/GAUTENG;
 save "temp_2001_inc.dta", replace;
 
 
+
+
 use "gradplot_admin${V}.dta", clear;
 
 merge m:1 sp_1 using "temp_2001_inc.dta";
@@ -308,7 +310,7 @@ replace mplacebo = round(mplacebo,6);
 
 use "price_regs${V}.dta", clear ;
 
-keep if s_N<30 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
+keep if s_N<5 &  purch_price > 2000 & purch_price<800000 & purch_yr > 2000 ;
 
 global outcomes="lprice";
 
@@ -359,6 +361,7 @@ keep if D>=-400 ;
 
 replace D = round(D,200) ;
 
+#delimit cr;
 * keep if D>=0; 
 
 
@@ -367,25 +370,18 @@ replace D = round(D,200) ;
 *** 2) time to event plots ;
 *** 3) post plots ; 
 
+cap prog drop prep_dist
+prog define prep_dist
 
-cap prog drop pf
-prog define pf
-
-  cap drop D
-  cap drop treat
-  cap drop inside
-  cap drop DI_*
-
-  if "`2'"=="dist" {
     g D = distance_rdp if con==1 
     replace D = distance_placebo if con==0 
-    if `5'==0 {
+    if `2'==0 {
       g treat = post 
     }
     else {
-      g treat = purch_yr>=`5'
+      g treat = purch_yr>=`2'
     }
-    replace D = round(D,`3')
+    replace D = round(D,`1')
     sum D, detail
     global D_max = `=r(max)'
     global D_adj = $D_max
@@ -393,29 +389,34 @@ prog define pf
     local x_title "Distance to Project Footprint"
     global D_drop = $D_max + $D_max
     global x_lab = "meters"
-  }
+end
 
-  if "`2'"=="time" {
+
+cap prog drop prep_time
+prog define prep_time
     g D = mo2con_rdp if con==1
     replace D = mo2con_placebo if con==0 
     g treat = (distance_rdp>=0 & distance_rdp<=500 & con==1) | (distance_placebo>=0 & distance_placebo<=500 & con==0)
-    if `9'==1 {
+    if `3'==1 {
       g inside = (distance_rdp<0 & con==1) | (distance_placebo<0 & con==0)
     }
-    global T_thresh = `4'
+    global T_thresh = `2'
 
     replace D = . if D<-$T_thresh  | D>$T_thresh
-    replace D = round(D,`3')
+    replace D = round(D,`1')
     sum D, detail
     global D_max = `=r(max)'
     global D_adj = $D_max
     replace D = D + $D_adj
     local x_title "Month to Construction"
-    global D_drop = $D_max - `3'
+    global D_drop = $D_max - `1'
     global x_lab = "months"
-  }
+end
 
 
+
+cap prog drop prep_reg
+prog define prep_reg
   levelsof D
   global D_lev = "`=r(levels)'"
 
@@ -429,20 +430,38 @@ prog define pf
       if `r'==1 {
         local id "high"
       }
-      if `6'==1 {
+      if `1'==1 {
+        if `r'==0 {
+        g DO_`v' = D==`v'
+        g DO_`v'_treat = D==`v' & treat==1
+        }
       g DI_`v'_`id' = D==`v' & inc_q==`r'
       g DI_`v'_treat_`id' = D==`v' & treat==1 & inc_q==`r'
-        if `9'==1 {
+        if `2'==1 {
           g DI_`v'_inside_`id' = D==`v' & inside==1 & inc_q==`r'
+            if `r'==0 {
+            g DO_`v'_inside = D==`v' & inside==1 
+            }
         }
       }
       g DI_`v'_con_`id' = D==`v' & con==1 & inc_q==`r'
       g DI_`v'_con_treat_`id' = D==`v' & con==1 & treat==1 & inc_q==`r'
+          if `r'==0 {
+            g DO_`v'_con = D==`v' & con==1 
+            g DO_`v'_con_treat = D==`v' & con==1 & treat==1 
+          }
       local t_lab "`=`v'-$D_adj'"
       lab var DI_`v'_con_treat_`id' "`t_lab' ${x_lab} : `id' inc  "
-        if `9'==1 {
+          if `r'==0 {
+            lab var DO_`v'_con_treat "`t_lab' ${x_lab} "
+          }
+        if `2'==1 {
           g DI_`v'_con_inside_`id' = D==`v' & con==1 & inside==1 & inc_q==`r'
           lab var DI_`v'_con_inside_`id' "`t_lab' ${x_lab} : `id' inc  "
+            if `r'==0 {
+              g DO_`v'_con_inside = D==`v' & con==1 & inside==1 
+              lab var DO_`v'_con_inside "`t_lab' ${x_lab} "
+            }
         }
     }  
     }
@@ -455,70 +474,36 @@ prog define pf
       if `r'==1 {
         local id "high"
       }
-      if `6'==1 {
+      if `1'==1 {
       *  g DI_`id'    = inc_q==`r'
         g DI_treat_`id' = treat==1 & inc_q==`r'
-        if `9'==1 {
+          if `r'==0 {
+            g DO_treat = treat==1 
+          }
+        if `2'==1 {
           g DI_inside_`id' = inside==1 & inc_q==`r'
+            if `r'==0 {
+              g DO_inside = inside==1 
+            }
         }
       }
       g DI_con_`id' = con==1 & inc_q==`r'
       g DI_con_treat_`id' =con==1 & treat==1 & inc_q==`r'
-        if `9'==1 {
+        if `r'==0 {
+          g DO_con = con==1
+          g DO_con_treat =con==1 & treat==1 
+        }
+        if `2'==1 {
           g DI_con_inside_`id' =con==1 & inside==1 & inc_q==`r'
+            if `r'==0 {
+              g DO_con_inside =con==1 & inside==1
+            }
         }
     }
+end
 
-  preserve
-  drop if D==.
-  if `9'==0 & "`2'"=="time" {
-    drop if D<0
-  }
-
-    if `6'==0 {
-      drop if con==0 
-      * drop DI_0_con_low DI_0_con_high
-      * drop DI_`=${D_max}'_con_treat_low DI_`=${D_max}'_con_treat_high DI_`=${D_max}'_treat_low DI_`=${D_max}'_treat_high  DI_`=${D_max}'_con_low DI_`=${D_max}'_con_high
-    }
-    else {
-      * drop DI_0_low DI_0_high
-      * drop DI_`=${D_max}'_con_treat_low  DI_`=${D_max}'_con_treat_high
-      * drop DI_`=${D_max}'_con_treat_low DI_`=${D_max}'_con_treat_high DI_`=${D_max}'_treat_low DI_`=${D_max}'_treat_high  DI_`=${D_max}'_con_low DI_`=${D_max}'_con_high
-    }
-    
-    if `7'==1 {
-      areg lprice DI_*  i.purch_yr#i.purch_mo erf* , a(`8') cluster(cluster_joined) r  
-    }
-    else {
-      areg lprice DI_*  , a(`8') cluster(cluster_joined) r 
-    }
-    sum lprice, detail 
-    estadd scalar Mean = `=r(mean)'
-  restore
-
-
-
-    estout using "`1'.tex", replace  style(tex) ///
-    keep(  DI_*_con_treat_* )  ///
-    varlabels(, ) ///
-    label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-      stats( Mean ,  ///
-    labels(  "Mean"  ) ///
-        fmt( %9.2fc       )   ) ///
-      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-  preserve
-
-    parmest, fast 
-    keep if regexm(parm,"_con_treat")==1
-    g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
-    g high = regexm(parm,"high")==1
-    destring D, replace force
-
+cap prog drop fill_obs
+prog define fill_obs
     global obs=`=_N'
     expand 3 in $obs
     replace estimate=0 if _n>$obs
@@ -529,46 +514,106 @@ prog define pf
     replace D = $D_drop if _n>$obs
 
     replace D = D-$D_adj 
-    
+end
 
-    sort high D 
+cap prog drop fill_obs_one
+prog define fill_obs_one
+    global obs=`=_N'
+    expand 2 in $obs
+    replace estimate=0 if _n>$obs
+    replace min95 =0 if _n>$obs
+    replace max95 =0 if _n>$obs
+    replace D = $D_drop if _n>$obs
 
+    replace D = D-$D_adj 
+end
+
+
+cap prog drop plotting
+prog define plotting
     twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0 ///
      || rcap min95 max95 D if high==1 || scatter estimate D if high==1 ,  /// 
-        legend(order(2 "Low Income" 4 "High Income" ) ring(0) position(10)) xline(0,lp(dot)) xtitle("`x_title'")
+        legend(order(2 "Low Income" 4 "High Income" ) ring(0) position(10)) xline(0,lp(dot)) xtitle("`2'")
         graph export "`1'.pdf", as(pdf) replace
+end
 
+cap prog drop plotting_one
+prog define plotting_one
+    twoway rcap min95 max95 D  || scatter estimate D  ,  /// 
+        legend(off) xtitle("`2'")
+        graph export "`1'.pdf", as(pdf) replace
+end
+
+
+cap prog drop regging
+prog define regging
+  preserve
+        drop if D==.
+        if `6'==0 & "`2'"=="time" {
+          drop if D<0
+        }
+
+        if `3'==0 {
+          drop if con==0 
+        }
+          if `4'==1 {
+            areg lprice D`1'_*  i.purch_yr#i.purch_mo erf* , a(`5') cluster(cluster_joined) r  
+          }
+          else {
+            areg lprice D`1'_*  , a(`5') cluster(cluster_joined) r 
+          }
+          sum lprice, detail 
+          estadd scalar Mean = `=r(mean)'
+    restore
+end
+
+
+
+
+
+cap prog drop pf
+prog define pf
+
+  cap drop D
+  cap drop treat
+  cap drop inside
+  cap drop DI_*
+  cap drop DO_*
+
+  if "`2'"=="dist" {
+    prep_dist `3' `5'
+  }
+
+  if "`2'"=="time" {
+    prep_time `3' `4' `9'
+  }
+
+ prep_reg `6' `9'
+
+    regging I `2' `6' `7' `8' `9'
+
+    estout using "`1'.tex", replace  style(tex)  keep(  DI_*_con_treat_* )  ///
+    varlabels(, )  label   noomitted   mlabels(,none)     collabels(none)   cells( b(fmt(3) star ) se(par fmt(3)) )   stats( Mean ,   labels(  "Mean"  )     fmt( %9.2fc       )   )   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+  preserve
+    parmest, fast 
+    keep if regexm(parm,"_con_treat")==1
+    g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+    g high = regexm(parm,"high")==1
+    destring D, replace force
+    fill_obs
+    sort high D 
+    plotting `1' "`x_title'"
   restore
+
 
   if `9'==1 {
 
+  estout using "`1'_inside.tex", replace  style(tex)   keep(   DI_*_con_inside_* )  ///
+    varlabels(, )  label   noomitted   mlabels(,none)     collabels(none)   cells( b(fmt(3) star ) se(par fmt(3)) )   stats( Mean ,   labels(  "Mean"  )     fmt( %9.2fc       )   )   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
-  estout using "`1'_inside.tex", replace  style(tex) ///
-    keep(   DI_*_con_inside_* )  ///
-    varlabels(, ) ///
-    label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-      stats( Mean ,  ///
-    labels(  "Mean"  ) ///
-        fmt( %9.2fc       )   ) ///
-      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-  estout using "`1'_inside_both.tex", replace  style(tex) ///
-    keep( DI_*_con_treat_*  DI_*_con_inside_*  )  ///
-    varlabels(, ) ///
-    label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
-      stats( Mean ,  ///
-    labels(  "Mean"  ) ///
-        fmt( %9.2fc       )   ) ///
-      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
+  estout using "`1'_inside_both.tex", replace  style(tex) keep( DI_*_con_treat_*  DI_*_con_inside_*  )  ///
+    varlabels(, )  label   noomitted   mlabels(,none)     collabels(none)   cells( b(fmt(3) star ) se(par fmt(3)) )   stats( Mean ,   labels(  "Mean"  )     fmt( %9.2fc       )   )   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
     preserve
 
@@ -577,25 +622,48 @@ prog define pf
       g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
       g high = regexm(parm,"high")==1
       destring D, replace force
-
-      global obs=`=_N'
-      expand 3 in $obs
-      replace estimate=0 if _n>$obs
-      replace min95 =0 if _n>$obs
-      replace max95 =0 if _n>$obs
-      replace high = 1 if _n==$obs+1
-      replace high = 0 if _n==$obs+2
-      replace D = $D_drop if _n>$obs
-
-      replace D = D-$D_adj 
-      
-
+      fill_obs 
       sort high D 
+      plotting "`1'_inside" "`x_title'"
 
-      twoway rcap min95 max95 D if high==0 || scatter estimate D if high==0 ///
-       || rcap min95 max95 D if high==1 || scatter estimate D if high==1 ,  /// 
-          legend(order(2 "Low Income" 4 "High Income" ) ring(0) position(10)) xline(0,lp(dot)) xtitle("`x_title'")
-          graph export "`1'_inside.pdf", as(pdf) replace
+    restore
+  }
+
+
+    regging O `2' `6' `7' `8' `9'
+
+      estout using "`1'_one.tex", replace  style(tex)  keep(  DO_*_con_treat )  ///
+      varlabels(, )  label   noomitted   mlabels(,none)     collabels(none)   cells( b(fmt(3) star ) se(par fmt(3)) )   stats( Mean ,   labels(  "Mean"  )     fmt( %9.2fc       )   )   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+    preserve
+      parmest, fast 
+      keep if regexm(parm,"_con_treat")==1
+      g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+      destring D, replace force
+      fill_obs_one
+      plotting_one "`1'_one" "`x_title'"
+    restore
+
+  if `9'==1 {
+
+  estout using "`1'_inside_one.tex", replace  style(tex)   keep(   DO_*_con_inside )  ///
+    varlabels(, )  label   noomitted   mlabels(,none)     collabels(none)   cells( b(fmt(3) star ) se(par fmt(3)) )   stats( Mean ,   labels(  "Mean"  )     fmt( %9.2fc       )   )   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+  estout using "`1'_inside_both_one.tex", replace  style(tex) keep( DO_*_con_treat  DO_*_con_inside  )  ///
+    varlabels(, )  label   noomitted   mlabels(,none)     collabels(none)   cells( b(fmt(3) star ) se(par fmt(3)) )   stats( Mean ,   labels(  "Mean"  )     fmt( %9.2fc       )   )   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+    preserve
+
+      parmest, fast 
+      keep if regexm(parm,"_con_inside")==1
+      g D = regexs(1) if regexm(parm,"._([0-9]+)_.")
+      destring D, replace force
+
+      fill_obs_one
+
+      sort D 
+
+      plotting_one "`1'_inside_one" "`x_title'"
 
     restore
   }
@@ -604,11 +672,16 @@ end
 
 
 
+
 *   (1) name                  (2) type    (3) round var   (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside
 pf "price_dist_3d_no_ctrl"   "dist"          200               ""              0              1         0             LL           0
 
 
 pf "price_dist_3d_ctrl"      "dist"          200               ""              0              1         1            LL           0
+
+
+/*
+
 pf "price_dist_2d_no_ctrl"   "dist"          200               ""              0              0         0             LL            0
 pf "price_dist_2d_ctrl"      "dist"          200               ""              0              0         1            LL           0
 
@@ -627,6 +700,7 @@ pf "price_dist_3d_no_ctrl_2009"   "dist"     200               ""           2009
 
 
 pf "price_time_3d_no_ctrl"   "time"          12                48               0             1         0       LL            1
+
 
 pf "price_time_3d_ctrl_inside"      "time"          12                48               0             1         1          LL           1  
 
