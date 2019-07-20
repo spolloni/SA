@@ -407,6 +407,19 @@ prog def rgen_inc_het
 end
 
 
+cap prog drop rgen_q_het
+prog def rgen_q_het	
+	global r_q_het = ""
+	levelsof inc_q
+  	global Q_lev = "`=r(levels)'"
+	foreach v in $Q_lev {
+		foreach r in $regressors  {
+			g `r'_q`v' = `r'==1 & inc_q==`v'
+			global r_q_het = " $r_q_het `r'_q`v' "
+		}
+	}
+end
+
 
 
 
@@ -474,6 +487,37 @@ prog define lab_var_inc
 end
 
 
+
+cap prog drop lab_var_q
+prog define lab_var_q
+
+	levelsof inc_q
+  	global Q_lev = "`=r(levels)'"
+
+	global all_label = "\textbf{All Projects} \\"
+
+
+	foreach v in $Q_lev {
+	global label_q`v' =  "\textbf{Q`v' Income Level} \\"
+
+	lab var proj_q`v' "inside"
+
+	lab var con_q`v' "constr"
+	lab var proj_con_q`v' "inside $\times$ constr"
+	lab var proj_post_q`v' "inside $\times$ post"
+
+	lab var con_post_q`v' "constr $\times$ post"
+	lab var proj_con_post_q`v' "inside $\times$ constr $\times$ post"
+
+	lab var spill1_con_q`v' "0-${dist_break_reg2}m away $\times$ constr"
+	lab var spill1_q`v' "0-${dist_break_reg2}m away"
+	lab var spill1_post_q`v' "0-${dist_break_reg2}m away $\times$ post"
+	lab var spill1_con_post_q`v' "0-${dist_break_reg2}m away $\times$ constr $\times$ post"
+	}
+end
+
+
+
 cap prog drop lab_var_top_inc
 prog define lab_var_top_inc
 	foreach v in low_inc high_inc {
@@ -482,6 +526,37 @@ prog define lab_var_top_inc
 	lab var spill1_con_post_`v' "0-${dist_break_reg2}m outside project "
 	}
 end
+
+
+
+
+
+cap prog drop lab_var_top_q
+prog define lab_var_top_q
+
+	levelsof inc_q
+  	global Q_lev = "`=r(levels)'"
+
+	foreach v in $Q_lev {
+
+	lab var proj_con_post_q`v' "Q`v': inside project"
+	lab var spill1_con_post_q`v' "Q`v': 0-${dist_break_reg2}m outside project "
+	}
+end
+
+
+cap prog drop lab_var_top_price_q
+prog define lab_var_top_price_q
+
+	levelsof inc_q
+  	global Q_lev = "`=r(levels)'"
+
+	foreach v in $Q_lev {
+	lab var spill1_con_post_q`v' "Q`v' "
+	}
+end
+
+
 
 
 cap prog drop lab_var_top
@@ -904,6 +979,120 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+cap prog drop regs_q
+
+prog define regs_q
+	eststo clear
+
+	foreach var of varlist $outcomes {
+
+	  regression `var' "$r_q_het" 0
+
+	  eststo  `var'
+
+	  g temp_var = e(sample)==1
+
+	  mean `var' $ww if temp_var==1 & post ==0 
+	  mat def E=e(b)
+	  estadd scalar Mean2001 = E[1,1] : `var'
+
+	  mean `var' $ww if temp_var==1 & post ==1
+	  mat def E=e(b)
+	  estadd scalar Mean2011 = E[1,1] : `var'
+
+	  mean `var' $ww if temp_var==1
+	  mat def E=e(b)
+	  estadd scalar Mean = E[1,1] : `var'
+
+	  drop temp_var
+	  
+	}
+	
+
+
+	global X "{\tim}"
+
+
+	* lab_var_q
+
+
+	if $many_spill == 0 {
+
+		lab_var_top_q
+
+		estout using "`1'_top.tex", replace  style(tex) ///
+		keep(  proj_con_post_q1 spill1_con_post_q1  proj_con_post_q2 spill1_con_post_q2  proj_con_post_q3 spill1_con_post_q3  proj_con_post_q4 spill1_con_post_q4 )  ///
+		varlabels(, bl(proj_con_post_low_inc "${label_low_inc}  " proj_con_post_high_inc "${label_high_inc}  " )  ///
+		el( proj_con_post_q1 "[.2em]" spill1_con_post_q1 "[.5em]" proj_con_post_q2 "[.2em]" spill1_con_post_q2 "[.5em]" ///
+		    proj_con_post_q3 "[.2em]" spill1_con_post_q3 "[.5em]" proj_con_post_q4 "[.2em]" spill1_con_post_q4 "[.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean2001 Mean2011 r2  N ,  ///
+	 	labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+		   fmt(  %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		estout using "`1'_top_one_mean.tex", replace  style(tex) ///
+		keep(  proj_con_post_q1 spill1_con_post_q1  proj_con_post_q2 spill1_con_post_q2  proj_con_post_q3 spill1_con_post_q3  proj_con_post_q4 spill1_con_post_q4 )  ///
+		varlabels(, bl(proj_con_post_low_inc "${label_low_inc}  " proj_con_post_high_inc "${label_high_inc}  " )  ///
+		el( proj_con_post_q1 "[.2em]" spill1_con_post_q1 "[.5em]" proj_con_post_q2 "[.2em]" spill1_con_post_q2 "[.5em]" ///
+		    proj_con_post_q3 "[.2em]" spill1_con_post_q3 "[.5em]" proj_con_post_q4 "[.2em]" spill1_con_post_q4 "[.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean   N ,  ///
+	 	labels(  "Mean"    "N"  ) ///
+		    fmt( %9.2fc     %12.0fc  )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+		estout using "`1'_top_mean.tex", replace  style(tex) ///
+		keep(  proj_con_post_q1 spill1_con_post_q1  proj_con_post_q2 spill1_con_post_q2  proj_con_post_q3 spill1_con_post_q3  proj_con_post_q4 spill1_con_post_q4 )  ///
+		varlabels(, bl(proj_con_post_low_inc "${label_low_inc}  " proj_con_post_high_inc "${label_high_inc}  " )  ///
+		el( proj_con_post_q1 "[.2em]" spill1_con_post_q1 "[.5em]" proj_con_post_q2 "[.2em]" spill1_con_post_q2 "[.5em]" ///
+		    proj_con_post_q3 "[.2em]" spill1_con_post_q3 "[.5em]" proj_con_post_q4 "[.2em]" spill1_con_post_q4 "[.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( Mean ,  ///
+	 	labels(  "Mean"  ) ///
+		    fmt( %9.2fc       )   ) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+		estout using "`1'_top_lonely.tex", replace  style(tex) ///
+		keep(  proj_con_post_q1 spill1_con_post_q1  proj_con_post_q2 spill1_con_post_q2  proj_con_post_q3 spill1_con_post_q3  proj_con_post_q4 spill1_con_post_q4 )  ///
+		varlabels(, bl(proj_con_post_low_inc "${label_low_inc}  " proj_con_post_high_inc "${label_high_inc}  " )  ///
+		el( proj_con_post_q1 "[.2em]" spill1_con_post_q1 "[.5em]" proj_con_post_q2 "[.2em]" spill1_con_post_q2 "[.5em]" ///
+		    proj_con_post_q3 "[.2em]" spill1_con_post_q3 "[.5em]" proj_con_post_q4 "[.2em]" spill1_con_post_q4 "[.5em]" )) ///
+		label ///
+		  noomitted ///
+		  mlabels(,none)  ///
+		  collabels(none) ///
+		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
+		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+	}
+
+
+end
 
 
 
@@ -1499,6 +1688,252 @@ end
 
 
 
+cap prog drop price_regs_o
+
+prog define price_regs_o
+
+	eststo clear
+
+$reg_1
+
+price_add  1
+
+$reg_2
+
+if length("$reg_2")>0 {
+	price_add  2
+}
+
+$reg_3
+
+if length("$reg_3")>0 {
+	price_add 3
+}
+
+$reg_4
+if length("$reg_4")>0 {
+	price_add 4
+}
+
+
+
+global X "{\tim}"
+
+lab_var_top
+
+	estout using "`1'_top.tex", replace  style(tex) ///
+	keep(   spill1_con_post  )  ///
+	varlabels(, el(  spill1_con_post "[0.5em]"  )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+	 estout using "`1'_spill_top.tex", replace  style(tex) ///
+	keep(   spill1_con_post  )  ///
+	varlabels(, el(  spill1_con_post "[0.5em]"  )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+	 estout using "`1'_spill_top_no_lab.tex", replace  style(tex) ///
+	keep(   spill1_con_post  )  ///
+	varlabels(, el(  spill1_con_post "[0.5em]"  )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats(  r2  ,  ///
+ 	labels(   "R2"    ) /// 
+	    fmt(   %12.2fc   )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+end
+
+
+
+
+
+
+
+cap prog drop price_regs_inc_o
+
+prog define price_regs_inc_o
+
+	eststo clear
+
+$reg_1
+
+price_add  1
+
+$reg_2
+
+if length("$reg_2")>0 {
+	price_add  2
+}
+
+$reg_3
+
+if length("$reg_3")>0 {
+	price_add 3
+}
+
+$reg_4
+if length("$reg_4")>0 {
+	price_add 4
+}
+
+
+
+global X "{\tim}"
+
+lab_var_top_inc
+
+	estout using "`1'_top.tex", replace  style(tex) ///
+	keep(   spill1_con_post_low_inc spill1_con_post_high_inc  )  ///
+		varlabels(, bl(spill1_con_post_low_inc "${label_low_inc}  " spill1_con_post_high_inc "${label_high_inc}  " )  ///
+		el( spill1_con_post_low_inc "[0.55em]" ///
+		spill1_con_post_high_inc "[0.55em]" )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+	 estout using "`1'_spill_top.tex", replace  style(tex) ///
+	keep(   spill1_con_post_low_inc spill1_con_post_high_inc  )  ///
+		varlabels(, bl(spill1_con_post_low_inc "${label_low_inc}  " spill1_con_post_high_inc "${label_high_inc}  " )  ///
+		el( spill1_con_post_low_inc "[0.55em]" ///
+		spill1_con_post_high_inc "[0.55em]" )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+
+end
+
+
+
+
+
+cap prog drop price_regs_q
+
+prog define price_regs_q
+
+	eststo clear
+
+$reg_1
+
+price_add  1
+
+$reg_2
+
+if length("$reg_2")>0 {
+	price_add  2
+}
+
+$reg_3
+
+if length("$reg_3")>0 {
+	price_add 3
+}
+
+$reg_4
+if length("$reg_4")>0 {
+	price_add 4
+}
+
+
+
+levelsof inc_q
+global Q_lev = "`=r(levels)'"
+
+global keep_list = ""
+foreach v in $Q_lev {
+	global keep_list = " $keep_list spill1_con_post_q`v' "
+}
+
+
+global X "{\tim}"
+
+lab_var_top_price_q
+
+* 		varlabels(, bl(spill1_con_post_low_inc "${label_low_inc}  " spill1_con_post_high_inc "${label_high_inc}  " )  ///
+*		el( spill1_con_post_low_inc "[0.55em]" 	spill1_con_post_high_inc "[0.55em]" )) ///
+
+	estout using "`1'_top.tex", replace  style(tex) ///
+	keep(   $keep_list  )  ///
+	varlabels(,   ///
+		el( spill1_con_post_q1 "[0.3em]" spill1_con_post_q2 "[0.3em]" spill1_con_post_q3 "[0.3em]" spill1_con_post_q4 "[0.3em]" ///
+		 )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+		* varlabels(, bl(spill1_con_post_low_inc "${label_low_inc}  " spill1_con_post_high_inc "${label_high_inc}  " )  ///
+		* el( spill1_con_post_low_inc "[0.55em]" ///
+		* spill1_con_post_high_inc "[0.55em]" )) ///
+
+	 estout using "`1'_spill_top.tex", replace  style(tex) ///
+	keep(   $keep_list  )  ///
+		varlabels(,   ///
+		el( spill1_con_post_q1 "[0.3em]" spill1_con_post_q2 "[0.3em]" spill1_con_post_q3 "[0.3em]" spill1_con_post_q4 "[0.3em]" ///
+		 )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( $ctrl_list r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "$rl3" "$rl4" "$rl5" "$rl6"  "R2"  "N"  ) /// 
+	    fmt( $ctrl_fmt  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+
+end
+
+
+
+
+
+
+
+
 
 
 cap prog drop time_reg
@@ -1602,6 +2037,8 @@ prog define time_reg
 
 
 end
+
+
 
 
 

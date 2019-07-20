@@ -1,0 +1,32 @@
+	(1)
+VARIABLES	lprice
+	
+DO_1500	0.0164
+	(0.0426)
+DO_1500_treat	-0.0415
+	(0.0643)
+DO_1500_con	-0.0513
+	(0.0548)
+DO_1500_con_treat	0.00758
+	(0.0843)
+DO_2250	0.0489
+	(0.0368)
+DO_2250_treat	-0.103*
+	(0.0585)
+DO_2250_con	-0.105**
+	(0.0444)
+DO_2250_con_treat	0.149**
+	(0.0725)
+DO_treat	0.0399
+	(0.0541)
+DO_con	0.00853
+	(0.0483)
+DO_con_treat	0.0231
+	(0.0704)
+Constant	12.00***
+	(0.0343)
+	
+Observations	56,072
+R-squared	0.503
+Robust standard errors in parentheses	
+*** p<0.01, ** p<0.05, * p<0.1	

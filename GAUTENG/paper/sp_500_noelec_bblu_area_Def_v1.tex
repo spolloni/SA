@@ -503,14 +503,29 @@
 \caption{Building Density}
 \begin{tabular}{lDDDD}
 \toprule
- & \small (1)  & \small (3) & \small (4) & \small (5) \\
+ & \small (1)  & \small (2) & \small (3) & \small (4) \\
  & Total & Formal   & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
-\input{figures/b_ksp_o0_d250_500_top_lonely}
+\input{figures/b_ksp_o0_d250_500_top}
 \midrule
-\input{figures/b_inc_ksp_o0_d250_500_top_one_mean.tex}
-\bottomrule
+% \input{figures/b_inc_ksp_o0_d250_500_top_one_mean.tex}
+% \bottomrule
 \end{tabular}
 \end{table}
+
+
+\begin{table}
+\caption{Building Density}
+\begin{tabular}{lDDDD}
+\toprule
+ & \small (1)  & \small (2) & \small (3) & \small (4) \\
+ & Total & Formal   & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
+\input{figures/b_q_ksp_o0_d250_500_top}
+\midrule
+% \input{figures/b_inc_ksp_o0_d250_500_top_one_mean.tex}
+% \bottomrule
+\end{tabular}
+\end{table}
+
 
 
 % \begin{table}
@@ -526,7 +541,7 @@
 % \input{figures/b_i1_ksp_o0_d250_500_top_lonely}
 % \bottomrule
 % \end{tabular}
-\end{table}
+% \end{table}
 
 
 % \begin{table}
@@ -535,9 +550,7 @@
 % \toprule
 %  & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5) \\
 %  & Total & Formal  & Informal & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
-% \input{figures/b_dd_full_ksp_o1_d250_500_top}
-% \midrule
-% \input{figures/b_cc_ksp_o1_d250_500_top}
+% \input{figures/b_q_ksp_o0_d250_500_top_mean.tex}
 % \bottomrule
 % \end{tabular}
 % \end{table}
@@ -700,9 +713,28 @@
 % \end{table}
 
 
+\begin{table}
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+% \resizebox{.95\linewidth}{!}{
+\begin{tabular}{lDDDDD}
+\toprule
+& \small (1) & \small (2)  & \small (3) & \small (4) & \small (5)  \\
+  & toilet flush &  water inside & electric cooking & rooms & hh size \\ 
+\input{figures/full_ksp_o0_d250_500_bb1_q_top_lonely}
+
+\end{tabular}
+% }
+\end{table}
 
 
-\begin{table}[]
+
+
+
+
+\begin{table}
 \small
 \centering
 \caption{Census Household-level Estimates }\label{table:censusestimates}
@@ -1386,26 +1418,26 @@
 \end{table} 
 
 
-\begin{table}
-\small
-\centering
-\caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD_het}
-\vspace{-2mm}
-\begin{tabular}{lCC}
-\toprule
- & \small (1) & \small (2)  \\ \midrule 
- \textbf{Low Income} \\
- \textbf{All Projects} \\
- \input{figures/p_i0_ksp_o0_d250_500_p1_top.tex}
- \midrule
-%  \input{figures/p_ksp_o0_d250_500_p1_nofe_top.tex}
-% \input{figures/s_ksp_o0_d250_500_top.tex}
-\input{figures/p_t_i0_sp_o0_d250_500_p1_top.tex}
-\bottomrule
-\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
-\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-\end{tabular}
-\end{table} 
+% \begin{table}
+% \small
+% \centering
+% \caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD_het}
+% \vspace{-2mm}
+% \begin{tabular}{lCC}
+% \toprule
+%  & \small (1) & \small (2)  \\ \midrule 
+%  \textbf{Low Income} \\
+%  \textbf{All Projects} \\
+%  \input{figures/p_i0_ksp_o0_d250_500_p1_top.tex}
+%  \midrule
+% %  \input{figures/p_ksp_o0_d250_500_p1_nofe_top.tex}
+% % \input{figures/s_ksp_o0_d250_500_top.tex}
+% \input{figures/p_t_i0_sp_o0_d250_500_p1_top.tex}
+% \bottomrule
+% \multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+% \multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table} 
 
 
 % \begin{table}

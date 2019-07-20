@@ -1,0 +1,54 @@
+	(1)
+VARIABLES	lprice
+	
+DI_1500_low	0.0229
+	(0.0772)
+DI_1500_treat_low	-0.0976
+	(0.107)
+DI_1500_con_low	-0.0440
+	(0.0902)
+DI_1500_con_treat_low	0.0927
+	(0.129)
+DI_2250_low	-0.00574
+	(0.0711)
+DI_2250_treat_low	-0.122
+	(0.101)
+DI_2250_con_low	-0.0241
+	(0.0799)
+DI_2250_con_treat_low	0.181
+	(0.117)
+DI_1500_high	-0.000437
+	(0.0486)
+DI_1500_treat_high	-0.00791
+	(0.0686)
+DI_1500_con_high	-0.0404
+	(0.0586)
+DI_1500_con_treat_high	-0.103
+	(0.0914)
+DI_2250_high	0.0736*
+	(0.0389)
+DI_2250_treat_high	-0.0844
+	(0.0567)
+DI_2250_con_high	-0.156***
+	(0.0487)
+DI_2250_con_treat_high	0.0869
+	(0.0746)
+DI_treat_low	0.0500
+	(0.0951)
+DI_con_low	-0.0669
+	(0.0853)
+DI_con_treat_low	-0.00392
+	(0.112)
+DI_treat_high	0.0267
+	(0.0547)
+DI_con_high	0.0575
+	(0.0502)
+DI_con_treat_high	0.0947
+	(0.0799)
+Constant	12.01***
+	(0.0389)
+	
+Observations	56,072
+R-squared	0.503
+Robust standard errors in parentheses	
+*** p<0.01, ** p<0.05, * p<0.1	

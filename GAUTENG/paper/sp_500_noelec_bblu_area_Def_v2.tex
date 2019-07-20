@@ -1,0 +1,505 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+
+
+\begin{table}
+\caption{Building Density}
+\begin{tabular}{lDDDD}
+\toprule
+ & \small (1)  & \small (2) & \small (3) & \small (4) \\
+ & Total & Formal   & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
+\input{figures/b_ksp_o0_d250_500_top}
+\midrule
+% \input{figures/b_inc_ksp_o0_d250_500_top_one_mean.tex}
+% \bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}
+\caption{Building Density by Neighborhood Income Quartile}
+\begin{tabular}{lDDDD}
+\toprule
+ & \small (1)  & \small (2) & \small (3) & \small (4) \\
+ & Total & Formal   & Informal Bkyd. & Informal Non-Bkyd. \\ \midrule
+\input{figures/b_q_ksp_o0_d250_500_top}
+\midrule
+% \input{figures/b_inc_ksp_o0_d250_500_top_one_mean.tex}
+% \bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates}\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+ & \small Formal House & \small Flush Toilet & \small Water Indoors  & \small Electricity & \small Total Rooms  & \small Own House  \\ \midrule
+\input{figures/ch1_ksp_o0_d250_500_bb1_top} \midrule
+ \\
+ & \small (5)  & \small (6)  & \small (7) & \small (8)  & \small (9)  & \small (10)\\
+ & \small HH Size & Total People & Age HoH & African HoH & Employed HoH & HH Log Income \\ \midrule
+\input{figures/ch2_ksp_o0_d250_500_bb1_top}
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+\multicolumn{5}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+\multicolumn{5}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }
+\end{tabular}
+\end{table}
+
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates by Neighborhood Income Quartile}\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+ & \small Formal House & \small Flush Toilet & \small Water Indoors  & \small Electricity & \small Total Rooms  & \small Own House  \\ \midrule
+\input{figures/ch1_ksp_o0_d250_500_bb1_q_top} \midrule
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+\multicolumn{5}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+\multicolumn{5}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }
+\end{tabular}
+\end{table}
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates by Neighborhood Income Quartile}\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (5)  & \small (6)  & \small (7) & \small (8)  & \small (9)  & \small (10)\\
+ & \small HH Size & Total People & Age HoH & African HoH & Employed HoH & HH Log Income \\ \midrule
+\input{figures/ch2_ksp_o0_d250_500_bb1_q_top}
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+\multicolumn{5}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+\multicolumn{5}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }
+\end{tabular}
+\end{table}
+
+
+
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+% \resizebox{.95\linewidth}{!}{
+\begin{tabular}{lDDDD}
+\toprule
+& \small (1) & \small (2)  & \small (3) & \small (4)  \\
+  & All Housing & Formal Housing &  Informal Bkyd. Housing & Informal Non-Bkyd. Housing   \\ 
+  %\midrule 
+
+&\multicolumn{4}{c}{\textbf{People}} \\[.4em]\midrule
+\input{figures/chtp_ksp_o0_d250_500_bb1_top_mean}
+
+% &\multicolumn{4}{c}{\textbf{HH Size}} \\[.4em]\midrule
+% \input{figures/hhs_ksp_o0_d250_500_bb1_top_mean}
+
+&\multicolumn{4}{c}{\textbf{Rooms}} \\[.4em]\midrule
+\input{figures/room_ksp_o0_d250_500_bb1_top_mean}
+
+&\multicolumn{4}{c}{\textbf{Flush Toilet}} \\[.4em]\midrule
+\input{figures/toih_ksp_o0_d250_500_bb1_top_mean} 
+
+&\multicolumn{4}{c}{\textbf{Piped Water}} \\[.4em]\midrule
+\input{figures/wath_ksp_o0_d250_500_bb1_top_mean}
+
+&\multicolumn{4}{c}{\textbf{Electricity}} \\[.4em]\midrule
+\input{figures/elec_ksp_o0_d250_500_bb1_top_one_mean}
+
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+% }
+\end{table}
+
+
+
+
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates }\label{table:censusestimates}
+\vspace{-2mm}
+% \resizebox{.95\linewidth}{!}{
+\begin{tabular}{lDDDD}
+\toprule
+& \small (1) & \small (2)  & \small (3) & \small (4)  \\
+  & All Housing & Formal Housing &  Informal Backyard Housing & Informal Non-Backyard Housing   \\ 
+  %\midrule 
+
+
+% &\multicolumn{4}{c}{\textbf{Female HoH}} \\[.4em]\midrule
+% \input{figures/sex_ksp_o0_d250_500_bb1_top_mean}
+&\multicolumn{4}{c}{\textbf{Age HoH}} \\[.4em]\midrule
+\input{figures/age_ksp_o0_d250_500_bb1_top_mean}
+
+&\multicolumn{4}{c}{\textbf{African HoH}} \\[.4em]\midrule
+\input{figures/african_ksp_o0_d250_500_bb1_top_mean}
+&\multicolumn{4}{c}{\textbf{Employed HoH}} \\[.4em]\midrule
+\input{figures/emp_ksp_o0_d250_500_bb1_top_mean}
+
+% &\multicolumn{4}{c}{\textbf{Income}} \\[.4em]\midrule
+% \input{figures/inc_ksp_o0_d250_500_bb1_top_one_mean}
+
+&\multicolumn{4}{c}{\textbf{Log Income}} \\[.4em]\midrule
+\input{figures/ln_inc_ksp_o0_d250_500_bb1_top_one_mean}
+
+%   \textbf{Water Yard} \\ \midrule
+% \input{figures/waty_ksp_o0_d250_500_bb1_top} \\
+%   \textbf{Electricity} \\ \midrule
+% \input{figures/elec_ksp_o0_d250_500_bb1_top_mean} \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+% }
+\end{table}
+
+
+
+
+
+
+\begin{table}
+\small
+\centering
+\caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/price_temp_Tester_3d_spill_top_no_lab}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/price_temp_Tester_3d_q_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Diff-in-Diff Estimates on Log-Prices}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/price_temp_Tester_2d_spill_top_no_lab}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/price_temp_Tester_2d_q_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
+
+
+\begin{figure*}
+        \centering
+   %     \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
+  %      {\small Pre-Period Densities} 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_q}
+        \end{subfigure}
+       
+\end{figure*}
+
+
+\begin{figure*}
+ \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_q}
+        \end{subfigure}
+\end{figure*}
+
+
+%%%%%%%% TRANSACTION FREQUENCY
+
+
+
+
+\begin{table}
+\small
+\centering
+\caption{Triple Difference Estimates on Transaction Frequency}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/s_ksp_o0_d250_500_spill_top.tex}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/s_q_ksp_o0_d250_500_top.tex}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Diff-in-Diff Estimates on Transaction Frequency}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/s_d2_ksp_o0_d250_500_spill_top}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/s_d2_q_ksp_o0_d250_500_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
+
+
+\begin{figure*}
+        \centering
+   %     \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
+  %      {\small Pre-Period Densities} 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_ctrl_q}
+        \end{subfigure}
+       
+\end{figure*}
+
+
+\begin{figure*}
+ \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_ctrl_q}
+        \end{subfigure}
+\end{figure*}
+
+
+
+
+
+\begin{table}[h!]
+	\centering
+	\caption{Housing Comparisons}
+\vspace{-2mm}
+\begin{tabular}{l*{1}{ccccc}}
+\toprule
+& Proj & \multicolumn{4}{c}{ Spill} \\
+&  & Q1 & Q2 & Q3 &Q4 \\
+\midrule
+\input{figures/census_compare_houses_proj_full_4} 
+\bottomrule
+% \multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 50\% } \\ [-.5em]
+% \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+% \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
+\end{tabular}
+\end{table}
+
+
+
+\begin{table}[h!]
+	\centering
+	\caption{Housing Comparisons Formal Housing Only}
+\vspace{-2mm}
+\begin{tabular}{l*{1}{ccccc}}
+\toprule
+& Proj & \multicolumn{4}{c}{ Spill} \\
+&  & Q1 & Q2 & Q3 &Q4 \\
+\midrule
+\input{figures/census_compare_houses_proj_for_4} 
+\bottomrule
+% \multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 50\% } \\ [-.5em]
+% \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+% \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
+\end{tabular}
+\end{table}
+
+
+
+
+
+\end{document}
+
+

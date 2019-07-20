@@ -44,6 +44,49 @@
 \begin{document}
 
 
+\begin{table}
+\small
+\centering
+\caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/price_temp_Tester_3d_spill_top_no_lab}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/price_temp_Tester_3d_q_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Diff-in-Diff Estimates on Log-Prices}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/price_temp_Tester_2d_spill_top_no_lab}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/price_temp_Tester_2d_q_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
+
 
 \begin{figure*}
         \centering
@@ -55,7 +98,7 @@
             {{\footnotesize Distance 3-Diff}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_q}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.48\textwidth}
@@ -63,14 +106,14 @@
             {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q}
         \end{subfigure}
         \begin{subfigure}[b]{0.48\textwidth}
                     \caption[Network2]%
             {{\footnotesize Distance 2-Diff}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_q}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.48\textwidth}
@@ -78,7 +121,7 @@
             {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_q}
         \end{subfigure}
        
 \end{figure*}
@@ -90,7 +133,7 @@
             {{\footnotesize Time 3-Diff}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_q}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.48\textwidth}
@@ -98,14 +141,14 @@
             {{\footnotesize Time 3-Diff, purch date/erf controls}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q}
         \end{subfigure}
         \begin{subfigure}[b]{0.48\textwidth}
                     \caption[Network2]%
             {{\footnotesize Time 2-Diff}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_q}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.48\textwidth}
@@ -113,130 +156,130 @@
             {{\footnotesize Time 2-Diff, purch date/erf controls}}    
             \label{fig:prefor}
             \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl}
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_q}
         \end{subfigure}
 \end{figure*}
 
 
 
-\begin{figure*}
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Dist 3-Diff post$\geq$2005}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2005}
-        \end{subfigure}
-        \hfill
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Dist 3-Diff post$\geq$2006}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2006}
-        \end{subfigure}
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Dist 3-Diff post$\geq$2007}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2007}
-        \end{subfigure}
-        \hfill
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Dist 3-Diff post$\geq$2008}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2008}
-        \end{subfigure}
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Dist 3-Diff post$\geq$2009}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2009}
-        \end{subfigure}
-\end{figure*}
+% \begin{figure*}
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Dist 3-Diff post$\geq$2005}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2005}
+%         \end{subfigure}
+%         \hfill
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Dist 3-Diff post$\geq$2006}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2006}
+%         \end{subfigure}
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Dist 3-Diff post$\geq$2007}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2007}
+%         \end{subfigure}
+%         \hfill
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Dist 3-Diff post$\geq$2008}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2008}
+%         \end{subfigure}
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Dist 3-Diff post$\geq$2009}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_2009}
+%         \end{subfigure}
+% \end{figure*}
 
 
 
 
 
 
-\begin{figure*}
-        \centering
-   %     \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
-  %      {\small Pre-Period Densities} 
-        %\vspace{2mm}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Distance 3-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_pfe}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Distance 3-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_pfe}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Distance 2-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_pfe}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Distance 2-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_pfe}
-        \end{subfigure}
+% \begin{figure*}
+%         \centering
+%    %     \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
+%   %      {\small Pre-Period Densities} 
+%         %\vspace{2mm}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Distance 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_pfe}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Distance 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_pfe}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Distance 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_pfe}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Distance 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_pfe}
+%         \end{subfigure}
        
-\end{figure*}
+% \end{figure*}
 
 
 
 
-\begin{figure*}
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Time 3-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_pfe}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Time 3-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_pfe}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Time 2-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_pfe}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Property FE Time 2-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_pfe}
-        \end{subfigure}
-\end{figure*}
+% \begin{figure*}
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Time 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_pfe}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Time 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_pfe}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Time 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_pfe}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Property FE Time 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_pfe}
+%         \end{subfigure}
+% \end{figure*}
 
 
 

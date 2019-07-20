@@ -1,0 +1,20 @@
+	(1)
+VARIABLES	lprice
+	
+D_0	-0.00737
+	(0.0159)
+D_0_treat	-0.0445
+	(0.0273)
+D_750	-0.00635
+	(0.0122)
+D_750_treat	-0.0252
+	(0.0231)
+treat	0.0531**
+	(0.0236)
+Constant	12.00***
+	(0.0112)
+	
+Observations	56,072
+R-squared	0.502
+Standard errors in parentheses	
+*** p<0.01, ** p<0.05, * p<0.1	
