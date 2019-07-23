@@ -301,11 +301,15 @@ cap drop cluster_joined;
 g cluster_joined = cluster_rdp if con==1 ; 
 replace cluster_joined = cluster_placebo if con==0 ; 
 
-g inc_2001_id = inc if year==2001;
-egen inc_2001=mean(inc_2001_id), by(sp_1);
 
+
+g inc_2001_id = inc if year==2001;
+egen inc_2001=mean(inc_2001_id), by(sp_1) ;
+* egen proj_sp = mean(proj),     by(sp_1) ;
 egen inc_q = cut(inc_2001), group(4);
 replace inc_q=inc_q+1;
+
+
 
 g proj_cluster = proj>.5 & proj<.;
 g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
@@ -433,7 +437,7 @@ foreach v in total for inf inf_bkyd inf_non_bkyd {;
 * g low_inc = inc_q == 0;
 * g high_inc = inc_q == 1;
 
-rgen_q_het ;
+rgen_q_het_cen ;
 
 * global outcomes " toilet_flush toilet_flush_for_id toilet_flush_bkyd_id toilet_flush_n_bkyd_id "  ; 
 * regs_q toilet_flush_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q  ;
@@ -449,7 +453,7 @@ global outcomes "
 
 regs ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
-regs_q ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
+regs_q_cen ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
 
 global outcomes "
   hh_size
@@ -462,7 +466,7 @@ global outcomes "
 
 regs ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
-regs_q ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
+regs_q_cen ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
 
 
 * global outcomes "

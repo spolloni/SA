@@ -60,7 +60,7 @@ global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
 
 
-global outcomes_pre = " total_buildings for inf_backyard inf_non_backyard ";
+global outcomes_pre = " total_buildings for inf_non_backyard inf_backyard  ";
 
 cap program drop outcome_gen;
 prog outcome_gen;

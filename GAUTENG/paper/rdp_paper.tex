@@ -445,6 +445,29 @@ In practice, these guidelines are loosely followed.  Recent reports point to cas
 % By design, subsidized housing in South Africa offers recipients [[[[ generous amounts of yard space ]]]], often diverted to alternative land uses. The construction of informal backyard shacks is a common occurrence within project boundaries. Recipients typically enter agreements with tenants (at times relatives) to lease the shacks for cash or in-kind payments. According to the 2011 census, backyard tenants represent 7.5\% of South African households.\footnote{This figure jumps to 12.5\% for the province of Gauteng, where our study is conducted.} Though the structures are not as durable as their government-provisioned counterparts, living conditions are typically superior to conventional informal settlements. Tenants gain indirect access to their landlord's services such as water taps, electricity connections, and toilets, and benefit from reduced eviction threats and greater personal safety \citep{beall2003social}. \cite{Brueckner2018backyarding} note that {\it backyarding} is suggestive of inefficiencies in the program delivery, and allows households to correct potential misallocations of resources. Importantly for our analysis, backyard shacks reveal that more households may benefit from subsidized housing than the listed number of direct recipients. According to the General Household Surveys (2009-2013), more than 33\% of government-provisioned homes have backyard shacks within two years of the delivery date. 
 
 
+\section{Conceptual Framework}\label{section:theory}
+
+\begin{itemize}
+	\item Separate informal and formal housing markets
+	\item Housing projects produce 
+		\begin{enumerate}
+			\item amenity effect
+				\begin{itemize}
+					\item decrease in formal housing prices in rich areas - negative amenity
+					% \item (don't really know about amenities in poor places)
+				\end{itemize}
+			\item supply effect
+				\begin{itemize}
+					\item decrease in nearby informal housing supply - crowd-out (slum eradication nearby.. could be positive?)
+						\begin{itemize}
+							\item also proportional with income quartile
+							\item indicates really elastic supply of informal housing
+						\end{itemize}
+					\item no change for formal housing supply
+				\end{itemize}
+		\end{enumerate}
+\end{itemize}
+
 
 
 
@@ -491,7 +514,7 @@ To examine housing price spillovers nearby projects, we include properties that 
 
 % \subsection{Census Data}
 
-We measure impacts on dwelling and household characteristics with the full 1996, 2001, and 2011 Censuses of Population and Housing. We analyze average outcomes at the {\it small-area} level, the smallest available census geography. The province of Gauteng is divided between approximately 17,000 small-areas in 1996, 11,000 small-areas in 2001, and 17,000 small-areas in 2011, which are not constant over time periods.  On average, each small-area contains 170 households. 
+We measure impacts on dwelling and household characteristics with the full 1996, 2001, and 2011 Censuses of Population and Housing. We analyze average outcomes at the smallest available census geography, which is referred to as {\it small-areas} by the South African census and which we refer to as census blocks for the purposes of this research.  The province of Gauteng is divided between approximately 17,000 blocks in 1996, 11,000 blocks in 2001, and 17,000 blocks in 2011, which are not constant over time periods.  On average, each block contains 170 households. 
 % Though we observe responses from every surveyed household in both census waves, the data does not allow for linking households across time periods. 
 
 % We analyze household-level responses describing the quality of their living quarters. 
@@ -524,7 +547,7 @@ We measure impacts on dwelling and household characteristics with the full 1996,
 % \subsection{Building Based Land Use}
 % \label{section:data:bblu}
 
-Our final data source consists of hand-coded building surveys derived from high-resolution aerial and satellite imagery. We obtain these data from GeoTerraImage (Pty) ltd., a local remote-sensing specialist.\footnote{\href{http://www.geoterraimage.com/}{\tt http://www.geoterraimage.com/}} The data differentiate structures across 30 categories, including formal and informal residential dwellings. Informal housing structures are easily identified from their temporary nature, often made of materials such as recycled wood and corrugated metal. In contrast, formal housing structures are permanent, generally made out of brick, and may have a pitched or a flat roof with tiles, zinc panels, or other materials. Importantly for our analysis, the data encodes backyard shacks as informal structures, but distinguishes between backyard and other types of informal buildings. We track changes in residential development by using two available survey waves in Gauteng: 2001 and 2012. As a validation exercise, we compute aggregated building counts at the census small-area level, and check the resulting figures against the number of households reporting to live in formal/informal housing in the census. The two data sources paint a consistent picture of housing in Gauteng, with high correlations ($\geq$ 0.85) between formal and informal building quantities in both available comparison years.\footnote{We correlate the 2001 and 2012 building surveys with the 2001 and 2011 censuses, respectively.} For estimation purposes, we transform this data into 25$\times$25m grid cell aggregates, creating five measures of housing density: (1) total residential structures split between (2) formal residential structures and (3) informal residential structures, which can be further decomposed into (4) backyard informal and (5) non-backyard informal structures.  In Figure \ref{fig:bblumaps}, we provide an example of the raw data and a depiction of our griding procedure, using the 2012 data wave.
+Our final data source consists of hand-coded building surveys derived from high-resolution aerial and satellite imagery. We obtain these data from GeoTerraImage (Pty) ltd., a local remote-sensing specialist.\footnote{\href{http://www.geoterraimage.com/}{\tt http://www.geoterraimage.com/}} The data differentiate structures across 30 categories, including formal and informal residential dwellings. Informal housing structures are easily identified from their temporary nature, often made of materials such as recycled wood and corrugated metal. In contrast, formal housing structures are permanent, generally made out of brick, and may have a pitched or a flat roof with tiles, zinc panels, or other materials. Importantly for our analysis, the data encodes backyard shacks as informal structures, but distinguishes between backyard and other types of informal buildings. We track changes in residential development by using two available survey waves in Gauteng: 2001 and 2012. As a validation exercise, we compute aggregated building counts at the census block level, and check the resulting figures against the number of households reporting to live in formal/informal housing in the census. The two data sources paint a consistent picture of housing in Gauteng, with high correlations ($\geq$ 0.85) between formal and informal building quantities in both available comparison years.\footnote{We correlate the 2001 and 2012 building surveys with the 2001 and 2011 censuses, respectively.} For estimation purposes, we transform this data into 25$\times$25m grid cell aggregates, creating five measures of housing density: (1) total residential structures split between (2) formal residential structures and (3) informal residential structures, which can be further decomposed into (4) backyard informal and (5) non-backyard informal structures.  In Figure \ref{fig:bblumaps}, we provide an example of the raw data and a depiction of our griding procedure, using the 2012 data wave.
 % These grid cells will be the main units of observations for our housing density regressions, described in section \ref{section:bbluestimates}. 
 
 
@@ -545,6 +568,15 @@ Our final data source consists of hand-coded building surveys derived from high-
 % Unconstructed and constructed Differences
 
 % Which types of neighborhoods receive unconstructed and constructed projects and where are projects located within neighborhoods
+
+
+Note! :
+
+\begin{itemize}
+\item first, hh 2001 subplaces do not intersect perfectly with project area, so average incomes include project areas in the pre-period, which actually might be fine
+\item second, quartiles defined for prices may be different than quartiles defined for 
+\item it is possible to do the nearby analysis conditioning on nearby incomes... maybe its fine as is....
+\end{itemize}
 
 We provide descriptive evidence to first validate our measures of constructed and unconstructed projects.  We then examine differences between neighborhoods with constructed projects and neighborhoods with unconstructed projects.  We also examine where projects are located within neighborhoods.  Finally, we document how project areas and nearby areas evolve differentially over time.  
 
@@ -582,7 +614,7 @@ Housing prices within 1km of projects are lower than the average price of 252,00
 
 % Next, we turn to household census data to assess how both types of projects differ in terms of dwelling characteristics prior to project construction. 
 
-To further assess where projects are located, Table~\ref{table:projectdescriptivescensus} uses pooled 1996 and 2001 census data to examine preexisting housing quality for project footprints before construction.  Since census small-areas are often larger than housing projects, Table~\ref{table:projectdescriptivescensus} considers census small-areas as pertaining to a housing project when over 50\% of the land area of the small-area overlaps with a project footprint.\footnote{Our census geography selection method is depicted in more detail in appendix \ref{appendix:bufferdesign}.}  Table~\ref{table:projectdescriptivescensus} compares means for household indicators aggregated at the small-area level based on whether the census boundaries overlap with constructed (first column) or planned but unconstructed projects (second column).  As a reference, the third column provides averages for all census small-areas in the Gauteng province.
+To further assess where projects are located, Table~\ref{table:projectdescriptivescensus} uses pooled 1996 and 2001 census data to examine preexisting housing quality for project footprints before construction.  Since census blocks are often larger than housing projects, Table~\ref{table:projectdescriptivescensus} considers census blocks as pertaining to a housing project when over 50\% of the land area of the block overlaps with a project footprint.\footnote{Our census geography selection method is depicted in more detail in appendix \ref{appendix:bufferdesign}.}  Table~\ref{table:projectdescriptivescensus} compares means for household indicators aggregated at the block level based on whether the census boundaries overlap with constructed (first column) or planned but unconstructed projects (second column).  As a reference, the third column provides averages for all census blocks in the Gauteng province.
 
 \begin{table}[h!]
 	\centering
@@ -590,18 +622,18 @@ To further assess where projects are located, Table~\ref{table:projectdescriptiv
 \vspace{-2mm}
 \begin{tabular}{l*{1}{ccc}}
 \toprule
-& Constructed & Unconstructed & All small-areas \\
+& Constructed & Unconstructed & All blocks \\
 \midrule
 \input{figures/census_at_baseline_AGG_4} 
 \bottomrule
-\multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 50\% } \\ [-.5em]
+\multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census blocks with over 50\% } \\ [-.5em]
 \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
-\multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
+\multicolumn{4}{l}{\scriptsize ``All''  includes all blocks.  Means are weighted by land area.}
 \end{tabular}
 \end{table}
 
 
-Table \ref{table:projectdescriptivescensus} finds that before project construction, preexisting houses in project footprints are smaller and less formal with worse access to services compared to other houses in the province.  This finding is consistent with efforts by the Gauteng government to locate housing projects in inexpensive, poorer neighborhoods to both upgrade these neighborhoods as well as save costs.  Comparing preexisting houses in constructed and unconstructed projects, we do not observe systematic differences in housing attributes.  While constructed project footprints are more likely to have flush toilets, electricity, and large household sizes, households in unconstructed project footprints report having better access to formal houses and piped water in their homes.  With a small number of small-areas, average characteristics are not statistically different between constructed and unconstructed project footprints except for the formal housing measure.\footnote{Statistical significance is calculated at 5\% confidence level weighted by land area.}
+Table \ref{table:projectdescriptivescensus} finds that before project construction, preexisting houses in project footprints are smaller and less formal with worse access to services compared to other houses in the province.  This finding is consistent with efforts by the Gauteng government to locate housing projects in inexpensive, poorer neighborhoods to both upgrade these neighborhoods as well as save costs.  Comparing preexisting houses in constructed and unconstructed projects, we do not observe systematic differences in housing attributes.  While constructed project footprints are more likely to have flush toilets, electricity, and large household sizes, households in unconstructed project footprints report having better access to formal houses and piped water in their homes.  With a small number of blocks, average characteristics are not statistically different between constructed and unconstructed project footprints except for the formal housing measure.\footnote{Statistical significance is calculated at 5\% confidence level weighted by land area.}
 
 % Despite some similarities between averages in constructed and unconstructed areas, a simple t-test rejects the null hypothesis that means are equal for every tabulated variable.  
 
@@ -798,9 +830,9 @@ We propose combining near and far comparisons with constructed and unconstructed
 & \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{p} \, + \, \theta \, X_{ipnt} \, + \, \lambda_s \, + \, \varepsilon_{ipnt} \quad 
 \end{split}
 \end{align}
-\noindent where $y_{ipnt}$ is the outcome for unit $i$ in vicinity of project $p$ in neighborhood $n$ observed at time $t$ with idiosyncratic error $\varepsilon_{ipnt}$.  Units can be either a 25$\times$25m grid-cell, a census small-area, or a formal housing property.  Units are weighted according to their spatial area to ensure that project effects are representative across space.  Each unit is assigned to its nearest project according to the euclidean distances to project boundaries.\footnote{ DO THE ROBUSTNESS EXCLUDING THESE AREAS!!!!!!! }  $\textsc{\small Post}_{t}$ equals one in the period after construction or expected construction and zero otherwise.  $\textsc{\small Const}_{p}$ equals one if project $p$ is constructed and zero if project $p$ remains unconstructed.  $\lambda_{n}$ includes neighborhood fixed effects and $X_{ipnt}$ includes a vector of additional controls.  The terms $\textsc{\small Post}_{t}$, $\,\textsc{\small Const}_{p}$, and $\textsc{\small Post}_{t}\times\textsc{\small Const}_{p}$ represent a standard differences-in-differences framework, controlling for differential changes for constructed and unconstructed projects before and after construction.  
+\noindent where $y_{ipnt}$ is the outcome for unit $i$ in vicinity of project $p$ in neighborhood $n$ observed at time $t$ with idiosyncratic error $\varepsilon_{ipnt}$.  Units can be either a 25$\times$25m grid-cell, a census block, or a formal housing property.  Units are weighted according to their spatial area to ensure that project effects are representative across space.  Each unit is assigned to its nearest project according to the euclidean distances to project boundaries.\footnote{ DO THE ROBUSTNESS EXCLUDING THESE AREAS!!!!!!! }  $\textsc{\small Post}_{t}$ equals one in the period after construction or expected construction and zero otherwise.  $\textsc{\small Const}_{p}$ equals one if project $p$ is constructed and zero if project $p$ remains unconstructed.  $\lambda_{n}$ includes neighborhood fixed effects and $X_{ipnt}$ includes a vector of additional controls.  The terms $\textsc{\small Post}_{t}$, $\,\textsc{\small Const}_{p}$, and $\textsc{\small Post}_{t}\times\textsc{\small Const}_{p}$ represent a standard differences-in-differences framework, controlling for differential changes for constructed and unconstructed projects before and after construction.  
 
-We augment this standard framework by also estimating differential changes nearby project footprints ($<$500m) relative to further away from footprints (500m to 1,500m).  $\,\textsc{\small Proj}_{ip}$ measures the percentage of unit $i$'s area that overlaps with the footprint of project $p$.  When unit $i$ is measured in terms of GPS points such as the deeds data, $\,\textsc{\small Proj}_{ip}$ is either one (if unit $i$ is within footprint $p$) or zero (if unit $i$ is outside footprint $p$).  Other outcomes are measured at geographical areas such as census small-areas, which are often larger than project footprints or only partially overlap with project footprints.  In these cases, $\,\textsc{\small Proj}_{ip}$ takes a value between zero and one depending on the degree of overlap.  Likewise, $\,\textsc{\small Spill}_{ip}$ measures the percentage of unit $i$'s area that overlaps with a 0 to 500m buffer around the footprint of project $p$.  
+We augment this standard framework by also estimating differential changes nearby project footprints ($<$500m) relative to further away from footprints (500m to 1,500m).  $\,\textsc{\small Proj}_{ip}$ measures the percentage of unit $i$'s area that overlaps with the footprint of project $p$.  When unit $i$ is measured in terms of GPS points such as the deeds data, $\,\textsc{\small Proj}_{ip}$ is either one (if unit $i$ is within footprint $p$) or zero (if unit $i$ is outside footprint $p$).  Other outcomes are measured at geographical areas such as census blocks, which are often larger than project footprints or only partially overlap with project footprints.  In these cases, $\,\textsc{\small Proj}_{ip}$ takes a value between zero and one depending on the degree of overlap.  Likewise, $\,\textsc{\small Spill}_{ip}$ measures the percentage of unit $i$'s area that overlaps with a 0 to 500m buffer around the footprint of project $p$.  
 
 While our choice of buffer area is arbitrary, we aim to select a buffer area that is sufficiently wide to capture any potential spillover effects of housing projects.  With an average area of 3$\text{km}^{2}$, buffers from 0 to 500m are 2.5 times larger than project footprints.  To the extent that spillover effects dissipate across space, these buffers are likely to include spillover effects.\footnote{As shown in Figures~\ref{fig:prefor_fe} and \ref{fig:preinf_fe}, pre-period differences in building density within neighborhoods are uncorrelated with distance to project footprint at 500m and greater.  This finding suggests that any preexisting spillover effects from living near project areas disappear by 500m.}  Similarly, we limit the control group to areas between 500m to 1,500m under the assumption that spillover effects from housing projects have fully dissipated by 500m from project footprints.  This control group provides a useful way to control for any economic or housing market trends that may affect these neighborhoods.  In this framework, since each project includes two treatment groups (project and spillover) and one control group, we cluster all standard errors at the project by group level.
 
@@ -814,76 +846,103 @@ We are able to empirically examine anticipatory effects to some extent by observ
 
 Other concerns include local economic and housing market trends correlated both with project location within neighborhoods and with whether projects are constructed.  For example, if housing authorities target constructed projects to both declining or improving neighborhoods and declining or improving areas within these neighborhoods, then the triple-differences estimator would be unable to disentangle these trends from the effects of housing projects.  We are unable to empirically test for the presence of these trends.
 
+We also examine how effects may vary by neighborhood income quartile according to the following specification:
+\begin{align}\label{eq:mainhet}
+\begin{split}
+\quad y_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{s}^{q} \, \Bigg[ \,  \,   \textsc{\small Proj}_{ip} \,\, \Big( \alpha_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{i} \, + \, \alpha_2^q \, \textsc{\small Post}_{t} \, + \, \alpha_3^q \, \textsc{\small Const}_{p}\, +\, \alpha_4^q \Big) \, + \\[.2em]
+& \, \textsc{\small Spill}_{ip} \, \Big( \beta_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^q \, \textsc{\small Post}_{t} \, + \, \beta_3^q \, \textsc{\small Const}_{p} \, +\, \beta_4^q \Big) \, + \\[.2em]
+& \, \gamma_1^q \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2^q \,\textsc{\small Post}_{t} \, + \, \gamma_3^q \,  \textsc{\small Proj}_{p} \, \Bigg] \, + \, \theta \, X_{ipnt} \, + \, \lambda_s \, + \, \varepsilon_{ipnt} \quad 
+\end{split}
+\end{align}
+\noindent where $q$ indexes neighborhood income quartiles, and $Q_s^q$ takes a value of one if average household income for neighborhood $s$ falls within quartile $q$.  Average income is measured according to household incomes reported in the 2001 Census of Population and Housing.  
 
-%%% HOW BOUT THE NEAREST NEIGHBOR ASSUMPTION!! 
+
+
+%%% HOW BOUT THE NEAREST NEIGHBOR ASSUMPTION!!?!?!?!
 
 % driven by changes in local political or economic conditions that may also affect local housing development.  For example, growing neighborhoods may generate greater political resistance to housing projects, delaying project construction despite improvements in local housing.  Alternatively, worsening infrastructure quality may both increase the costs of finishing projects while also worsening local housing conditions.  
 
 % To the extent that these trends are reflected in average levels of local characteristics, we can evaluate potential sources of endogeneity by comparing baseline characteristics across constructed and unconstructed areas as in Section~\ref{section:descriptives}.  However, we are unable to test for these factors if changes in local economic and political conditions happen at the same time as project construction.
 
-
 % How is this assumption weaker than standard differences in differences?
 % We interpret the coefficients of interest $\alpha^d$ as the causal impacts of subsidized housing on outcome $y$ at distance $d$ from a housing project. Specifically, $\alpha^d$ measures the differential change in outcomes for constructed projects, relative to unconstructed projects. We discuss caveats below.
 
-
 % By comparing unconstructed versus constructed project areas, this method builds on previous studies of housing spillovers, which instead focus on comparing areas nearby to areas just further away from projects (\cite{diamond2016wants}).  The advantage of our method is that it does not require assuming how spillover effects dissipate with distance ex-ante; instead, we directly estimate these spillovers.  It is particularly helpful to relax this assumption for evaluating South African housing programs since (1) the large sizes of projects suggest that spillover effects may extend for long distances and (2) program recipients may be drawn from wide areas around housing projects.  
-
-
-
-
-
-% To examine differential effects for projects in city centers compared to projects in suburbs, we interact our coefficients of interest with indicators for these two geographic areas in the following specification:
-% \begin{align}\label{eq:main_het}
-% \begin{split}
-% \quad y_{ipt}  =&  \sum_{a\in\{\text{city},\text{suburb}\}}  \Bigg[    \sum\limits_{d\in D} I^{d}_{ipa}\Big( \alpha^{da} \textsc{\small Post}_{pta}\times\textsc{\small Const}_{pa}  +  \beta^{da}\textsc{\small Post}_{pta}  +  \gamma^{da}\textsc{\small Const}_{pa}  +  \theta^{da} \Big)  \Bigg]  \\ & +  \lambda_{p} +   \delta X_{ipt}  +  \varepsilon_{ipt} \quad 
-% \end{split}
-% \end{align}
-% where subscript $a$ indexes \textit{city} and \textit{suburb} projects.  We use a simple definition identifying \textit{city} projects as those with centroids that are below median distance (30.4 km) to their nearest central business district (CBD).  \textit{Suburb} projects include those above median distance to their nearest CBD.  Downtown Johannesburg and Pretoria are identified as CBDs.  $\alpha^{da}$ captures the differences-in-differences coefficient separately according to distance to the CBD.   
-
 
 
 \section{Estimation Results}\label{section:results}
 
 % To draw statistical inference on the patterns depicted in section \ref{section:descriptives}, we proceed to estimate variants of equation (\ref{eq:main}) for each outcome of interest. 
 
-
-% \subsection{Housing Density Effects}\label{section:bbluestimates}
-
 % d is 25 by 25, and t = 2001 and 2011
 
-We first investigate how housing projects impact housing density within and around their footprints.  We estimate equation (\ref{eq:main}) where the outcomes are building density measures for 25$\times$25m grid cells in 2001 and 2012.  Table~\ref{table:bbluDDD} reports the triple-difference coefficients of interest for (1) within project footprints and (2) 0-500m outside of project footprints.  Results are reported in terms of houses/$\text{km}^{2}$.  
 
-Column (1) finds that total housing density within project footprints statistically significantly increases by 612 houses/$\text{km}^{2}$, which is over twice the baseline average of 525 houses/$\text{km}^{2}$.  This finding suggests that government housing projects are able to substantially out-pace any private housing development in similar but unconstructed project footprints.  At the same time, total housing density 0-500m outside of projects decreases by around 189 houses/$\text{km}^{2}$ with statistical significance at the 10\% level.  Given an average project area of 1.2$\text{km}^{2}$ and an average buffer area of 3$\text{km}^{2}$, the magnitudes of these estimates suggest that each project generates around 734 new houses inside project footprints while crowding out around 567 houses in nearby areas.\footnote{734 new houses per footprint is much larger the 374 houses identified as project houses within footprints using the deeds transaction data in Table~\ref{table:projectdescriptives}.  This discrepancy is likely due to under-reporting of housing projects in deeds records \citep{seriq}.}
+\subsection{Housing Effects}\label{section:bbluestimates}
 
-To examine the composition of housing growth, Columns (2) and (3) disaggregate total housing growth into formal in and informal components.  Formal housing growth drives almost all of the increase in density within project footprints while informal housing generates most of the decline in density outside of project areas.  To the extent that formal housing has higher quality than informal housing, these results suggest that housing project generate an overall upgrade in local housing quality.  Within project areas, informal housing density remains nearly unchanged despite well-documented slum clearance programs in many of these projects \citep{hofmeyr2008risk}.\footnote{Cite APPENDIX WITH HETEROGENEITY OF RESULTS ACCORDING TO PROJECT TYPE< AND DESCRIBE PROJECT TYPE ANALYSIS!!!!}  
+We first investigate how housing projects impact housing density within and around their footprints.  We estimate equation (\ref{eq:main}) where the outcomes are building density measures for 25$\times$25m grid cells in 2001 and 2012 and $\textsc{\small Post}_{t}$ equals one for observations in 2012.  Table~\ref{table:bbluDDD} reports the triple-difference coefficients of interest for (1) within project footprints and (2) 0-500m outside of project footprints.\footnote{Appendix Table~\ref{table:bbluDDDfull} includes the full set of coefficients.}  Results are reported in terms of houses/$\text{km}^{2}$.  Appendix Table~\ref{table:bbluDDDhet} reports triple-difference coefficients separately by neighborhood income quartile following the specification in equation (\ref{eq:mainhet}).  
 
-Little change in total informal housing masks significant shifts in the type of informal housing within project footprints.  Our density measure differentiates informal housing between backyard and non-backyard housing.  Backyard housing is a common phenomenon in South Africa where households erect informal dwellings within the plots of formal dwellings \citep{Brueckner2018backyarding}.  Project houses are especially well-suited for backyarding because each house receives an individual landplot that is often much larger than the house itself.  Columns (4) and (5) include results for informal backyard and non-backyard housing respectively.  In project footprints, backyard housing almost completely replaces non-backyard informal housing as households erect new informal houses within the plots of project houses.  Both backyard and non-backyard housing decline 0-500m nearby projects although the coefficients are statistically insignificant.  These results suggest that bulldozing slums and replacing them with new housing projects does not change the resulting density of informal housing within project footprints.  However, these projects may have spillover effects on neighboring areas by crowding out growth of nearby informal housing.  
+Column (1)  of Table~\ref{table:bbluDDD} finds that total housing density within project footprints statistically significantly increases by 612 houses/$\text{km}^{2}$, which is over twice the baseline average of 525 houses/$\text{km}^{2}$.  This finding suggests that government housing projects are able to substantially out-pace any private housing development in similar but unconstructed project footprints.  At the same time, total housing density 0-500m outside of projects decreases by around 189 houses/$\text{km}^{2}$ with statistical significance at the 10\% level.  Given an average project area of 1.2$\text{km}^{2}$ and an average buffer area of 3$\text{km}^{2}$, the magnitudes of these estimates suggest that each project generates around 734 new houses inside project footprints while crowding out around 567 houses in nearby areas.\footnote{734 new houses per footprint is much larger the 374 houses identified as project houses within footprints using the deeds transaction data in Table~\ref{table:projectdescriptives}.  This discrepancy is likely due to under-reporting of housing projects in deeds records \citep{seriq}.}  Appendix Table~\ref{table:bbluDDDhet} includes corresponding estimates by neighborhood income quartile.  Column (1) finds that quartiles with larger increases in total housing (ie. Q2 and Q3) are also accompanied by greater decreases in housing density 0-500m outside of housing projects.  This finding provides further suggestive evidence that housing projects crowd-out nearby housing growth.
+
+% Backyard housing is a common phenomenon in South Africa where households erect informal dwellings within the plots of formal dwellings \citep{Brueckner2018backyarding}.  Project houses may be well-suited for backyarding because each house receives an individual landplot that is often much larger than the house itself. put this up top!!  with a discussion of the maps!!
+
+To examine the composition of housing growth, Columns (2) through (4) of Table~\ref{table:bbluDDD} disaggregate total housing into formal housing, informal non-backyard housing, and informal backyard housing.  Column (2) finds that the increase in total housing within projects is almost entirely driven by formal housing with a statistically significant, positive coefficient of 620 houses/$\text{km}^{2}$.  Large reductions in informal non-backyard housing (Column 3) within projects are consistent with qualitative evidence that housing authorities cleared preexisting slums before constructing new projects \citep{hofmeyr2008risk}.  Column (3) documents a statistically significant decrease of 530 informal non-backyard houses/$\text{km}^{2}$ within projects, which suggests that these slum clearance efforts were particularly aggressive given low preexisting densities of around 167 houses/$\text{km}^{2}$.  Column (4) indicates that project areas also experience substantial growth in backyard informal housing on the order of 522 houses/$\text{km}^{2}$, which almost exactly offsets reductions in informal non-backyard houses.    
+
+Appendix Table~\ref{table:bbluDDDhet} finds similarly zero net changes in informal housing within projects across all neighborhood income quartiles.  Yet, compared to richer quartiles (Q3 and Q4), poorer quartiles (Q1 and Q2) experience larger decreases in non-backyard informal housing that are offset by large increases in backyard informal housing.
+
+
+According to Columns (2) through (4) of Table~\ref{table:bbluDDD}, total reductions in housing density 0-500m outside of project footprints are driven by decreases in informal non-backyard housing and informal backyard housing although these coefficients are statistically insignificantly different from zero.  These findings suggest that housing projects primarily crowd-out nearby informal housing supply with little impact on nearby formal housing supply.
+
+
+% On net, the quantity of informal housing within projects remains roughly unchanged.
+% discuss appendix table, how the substitution is concentrated in lower income quartiles
+% Meanwhile, backyard housing growth (Column (3)) replaces informal non-backyard housing (Column (4)) that is removed as part of well-documented slum clearance programs in many of these projects \citep{hofmeyr2008risk}.  
+
+% Formal housing growth drives almost all of the increase in density within project footprints while informal housing generates most of the decline in density outside of project areas.  To the extent that formal housing has higher quality than informal housing, these results suggest that housing project generate an overall upgrade in local housing quality.  Within project areas, informal housing density remains nearly unchanged despite well-documented slum clearance programs in many of these projects \citep{hofmeyr2008risk}.\footnote{Cite APPENDIX WITH HETEROGENEITY OF RESULTS ACCORDING TO PROJECT TYPE< AND DESCRIBE PROJECT TYPE ANALYSIS!!!!}  
+
+%Little change in total informal housing masks significant shifts in the type of informal housing within project footprints.  Our density measure differentiates informal housing between backyard and non-backyard housing.  Backyard housing is a common phenomenon in South Africa where households erect informal dwellings within the plots of formal dwellings \citep{Brueckner2018backyarding}.  Project houses are especially well-suited for backyarding because each house receives an individual landplot that is often much larger than the house itself.  Columns (4) and (5) include results for informal backyard and non-backyard housing respectively.  In project footprints, backyard housing almost completely replaces non-backyard informal housing as households erect new informal houses within the plots of project houses.  Both backyard and non-backyard housing decline 0-500m nearby projects although the coefficients are statistically insignificant.  These results suggest that bulldozing slums and replacing them with new housing projects does not change the resulting density of informal housing within project footprints.  However, these projects may have spillover effects on neighboring areas by crowding out growth of nearby informal housing.  
 
 
 
 \begin{table}[h!]
 \small
 \centering
-\caption{Triple-Difference Estimates of Housing Density }\label{table:bbluDDD}
+\caption{Housing Estimates}\label{table:bbluDDD}
 \vspace{-2mm}
 \begin{tabular}{lCCCC}
 \toprule
 & \small (1) & \small (2) & \small (3) & \small (4) \\
- & \small Total Housing & \small Total Formal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule 
+ & \small Total Housing & \small Total Formal Housing & \small  Informal Non-Bkyd. Housing  & \small Informal Backyard Housing  \\ \midrule 
 \input{figures/b_ksp_o0_d250_500_top}
 \bottomrule\\[-.8em]
 \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }\\[-.3em]
 % \multicolumn{6}{l}{\footnotesize Project and spillover areas are 25$\times$25m grid cells.}\\[-.3em]
 \multicolumn{5}{l}{\footnotesize Outcomes are measure in terms of houses per $\text{km}^{2}$. }\\[-.3em]
 \multicolumn{5}{l}{\footnotesize Estimates control for 2001 census sub-place fixed effects.}\\[-.3em]
-\multicolumn{5}{l}{\footnotesize Coefficients are interactions with constructed and post indicators.}\\[-.3em]
+\multicolumn{5}{l}{\footnotesize Coefficients are interactions with constructed, $\textsc{Const}_{i}$  and post, $\textsc{Post}_{t}$ indicators.}\\[-.3em]
 \multicolumn{5}{l}{\footnotesize Appendix Table~\ref{table:bbluDDDfull} includes all corresponding triple-difference coefficients.} 
 \end{tabular}
 \end{table}
 
-
-
 \subsection{Infrastructure and Demographic Effects}\label{section:resultscensus}
+
+Given large shifts in quantities and types of housing within and around projects, we next use census data to understand whether housing projects also affect infrastructure access, housing quality, and residents' demographics.  We reestimate equation (\ref{eq:main}) using census data from 1996, 2001, and 2011.  Outcomes include housing and demographic characteristics averaged across households in each census block and year.  $\textsc{\small Post}_{t}$ equals one for observations from the 2011 census.  $\textsc{\small Proj}_{i}$ and $\textsc{\small Spill}_{i}$ measure the fraction of spatial overlap of each census block with project areas and spillover areas (0-500m) respectively.\footnote{3,118 blocks partially overlap with project areas while 1,138 blocks fully overlap with project areas.  Likewise, 7,456 blocks partially overlap with spillover areas while 1,402 blocks fully overlap with spillover areas.}  Specifications control for the spatial area of census blocks up to a cubic term and interacted with year in order to account for the possibility that household sampling may vary according to census block size.  All estimates are weighted by the spatial area of census blocks so that the estimates are representative of the spatial impacts of the projects.  Weighting according to spatial areas further ensures that the census results are directly comparable to the building density results.  Table~\ref{table:censusestimates} reports the triple-difference coefficients of interest for (1) within project footprints and (2) 0-500m outside of project footprints.\footnote{Appendix Tables \ref{table:censusestimatesfull} and \ref{table:censusestimatesfull2} include the full set of coefficients.  Census blocks lack the spatial precision needed to estimate effects separately by quartile of neighborhood income.}  
+
+% Appendix Tables \ref{table:censusestimateshet} and \ref{table:censusestimateshet2} report triple-difference coefficients for spillover areas separately by neighborhood income quartile following the specification in equation (\ref{eq:mainhet}).\footnote{Census blocks lack the spatial precision to  estimate within-project effects separately by quartile of neighborhood income.}
+
+Columns (1) to (6) of Table~\ref{table:censusestimates} capture changes in housing characteristics within and around housing project footprints.  Inside projects, the share of households living in formal housing jumps by 61 percentage points consistent with the large growth in formal housing density documented in Table~\ref{table:bbluDDD}.  The shares of households in project areas with flush toilets, piped water indoors, and/or electricity also increase by economically meaningful magnitudes although only the coefficient for access to piped water indoors is statistically significant.  The average number of rooms per house increases by 1.9 likely because new project houses are larger than informal backyard and non-backyard houses.  The coefficient for the share of household in project areas that report owning their home is positive but statistically insignificant.
+
+In spillover areas (0-500m outside of projects), the share of households that report living in formal houses (Column (1)) increases by a statistically insignificant 12 percentage points.  Any increase in the ratio of formal to informal housing nearby projects may reflect crowding-out of nearby informal housing as described by housing density estimates from Table~\ref{table:bbluDDD}.  Economically small and statistically insignificant coefficients for infrastructure access, number of rooms, and homeownership in spillover areas in Columns (2) to (5) suggests that infrastructure and housing stock investments in project areas do not spillover to surrounding neighborhoods.
+
+Complementing changes in housing characteristics, Columns (7) to (12) of Table~\ref{table:censusestimates} estimate changes in demographics within and around project footprints.  Within projects, household (``HH'') sizes increase by 0.59 people on average given a baseline average of 3.25 people per household, which is consistent with recipients of project houses inviting additional family members to live in their new houses.  Population density increases by 1,610 people per $\text{km}^{2}$, which is statistically insignificant, but economically meaningful --- this effect almost doubles the baseline average population density of 1,793.  Coefficients for average age, race, and employment status of the head of households (``HoH'') as well as household log-income are economically small and statistically insignificant, suggesting little demographic change as a result of these housing projects.  The point estimate for household income (Column (12)) suggests a 12\% increase in average household incomes in project areas although this result is statistically insignificant.  This evidence is consistent with housing authorities ensuring that preexisting slum residents are able to benefit from new project houses.  This evidence is less consistent with the hypothesis that political corruption steers project houses toward wealthier and more politically connected households \citep{seriq}.
+
+Spillover areas report positive, statistically insignificant coefficients for both household size (Column (7)) and population growth (Column (8)) that are much smaller in magnitude and significance than corresponding estimates inside projects.  Spillover estimates for household demographics in Columns (8) to (11) parallel estimates within projects by having low statistical significance and small magnitudes.  Estimates predict a large, statistically insignificant increase of 21\% in average household income.
+
+% INCLUDE THIS DISCUSSION OR NOT! :  INCLUDE THIS IN MECHANISMS/DISCUSSION SECTION????? To further examine which types of households benefit from housing projects, Appendix Table~\ref{table:comparisons} compares average characteristics for households living in formal houses in constructed project areas and nearby non-project areas.  Project areas are defined as census blocks with over 30\% overlap with projects and non-project areas are defined as census blocks that do not overlap with project areas and have centroids within 1,500m of project boundaries.  (reference the last table!!)
+
+% Results are reported in terms of houses/$\text{km}^{2}$.
+
+
+ % are building density measures for 25$\times$25m grid cells in 2001 and 2012 and $\textsc{\small Post}_{t}$ is equal to one for observations in 2012.    
 
 
 \begin{table}[]
@@ -891,85 +950,87 @@ Little change in total informal housing masks significant shifts in the type of 
 \centering
 \caption{Census Household-level Estimates}\label{table:censusestimates}
 \vspace{-2mm}
-\begin{tabular}{lDDDD}
+\begin{tabular}{lDDDDDD}
 \toprule
- & \small (1) & \small (2)  & \small (3) & \small (4) \\
- & \small Formal House & \small Flush Toilet & \small Water Indoors  & \small Electricity  \\ \midrule
+ & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+ & \small Is a Formal House & \small Has a Flush Toilet & \small Has Piped Water Indoors  & \small Has Electricity & \small Total Rooms  & \small Owns House  \\ \midrule
 \input{figures/ch1_ksp_o0_d250_500_bb1_top} \midrule
  \\
- & \small (5)  & \small (6)  & \small (7) & (8)\\
- & \small Total Rooms  & \small Own Dwelling  & \small Household Size & Population Density\\ \midrule
+ & \small (7)  & \small (8)  & \small (9) & \small (10)  & \small (11)  & \small (12)\\
+ & \small HH Size & People per $\text{km}^{2}$ & Age HoH & HoH is African  & HoH is Employed  & HH Log Income \\ \midrule
 \input{figures/ch2_ksp_o0_d250_500_bb1_top}
 % \input{figures/census_hh_DDregs_AGG}
 \bottomrule\\[-.6em]
-\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
-\multicolumn{5}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
-\multicolumn{5}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }
+\multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+\multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
 \end{tabular}
 \end{table}
 
 
+% To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-sections and test for differential 10-year changes between constructed and unconstructed project areas. Because these data have coarser spatial resolutions, we perform this comparison at two levels of exposure to the policy: $D=\{\text{\small\it project},\text{\small\it spillover}\}$. As in table \ref{table:projectdescriptivescensus}, {\it project} blocks overlap with more than 30\% of their area with project boundaries. The remaining {\it spillover} blocks have less than 30\% area overlap, but their centroids fall within 1.5 km of a project boundary. Appendix \ref{appendix:bufferdesign} illustrates an example of these two definitions for a given project. Our estimating equation is:
+
+
+% To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-sections and test for differential 10-year changes between constructed and unconstructed project areas. Because these data have coarser spatial resolutions, we perform this comparison at two levels of exposure to the policy: $D=\{\text{\small\it project},\text{\small\it spillover}\}$. As in table \ref{table:projectdescriptivescensus}, {\it project} small-areas overlap with more than 30\% of their area with project boundaries. The remaining {\it spillover} small-areas have less than 30\% area overlap, but their centroids fall within 1.5 km of a project boundary. Appendix \ref{appendix:bufferdesign} illustrates an example of these two definitions for a given project. Our estimating equation is:
+
+% \vspace{-4mm}
+
+% \begin{equation}\label{eq:censushh}
+% \quad y_{ipt} \, = \, \lambda_{p} \,+\, \sum\limits_{\substack{d\in \{project,\\ spillover\}}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \,\Big) + \, \theta I^{project}_{ip} \, +  \, \varepsilon_{ipt} \quad 
+% \end{equation}
+
+% \noindent where $y_{ipt}$ denotes the census outcome for small-area $i$ in vicinity of (either constructed or planned but unconstructed) project $p$, observed in census $t\in\{2001,2011\}$. The parameter $\alpha^{project}$ ($\alpha^{spillover}$) expresses the difference-in-differences effect of the public housing policy in {\it project} ({\it spillover}) small-areas, using unconstructed projects as the control group. We estimate equation (\ref{eq:censushh}) using the same binary outcomes tabulated in table \ref{table:projectdescriptivescensus}, with the addition of a population density variable. We construct this additional outcome by computing the sum of household sizes  and dividing it by the square-kilometer area of the census small-area. To allow for arbitrary correlations between observations within the same project area, we cluster standard errors at the project level. 
+
+% Table~\ref{table:censusestimates} provides estimates for each outcome. Rows 1 through 4 describe effects for households in our {\it project} exposure definition, while rows 5 through 7 describe effects for our {\it spillover} definition. Rows 3 and 7 respectively show that for both {\it project} and {\it spillover} exposures, the model cannot reject the null that treated and control areas are equal at baseline (in 2001). The difference-in-differences coefficients in the first row (project$\,\times\,$post$\,\times\,$const) document statistically significant improvements in access to services such as flush toilets, indoor water taps, and electricity.\footnote{With the exception of electricity for lighting, which falls short of the 10\% significance level. } With access rates increasing by over 10 percentage points, the economic magnitudes of these estimates are large, consistent with the policy successfully providing better housing. We note that households living within {\it project} exposure areas need not be direct recipients of government houses, since our definition is inclusive of indirect recipients such as backyard shack dwellers as well. 
+
+% We do not find corresponding effects for households in the vicinity of constructed projects. With the exception of number of rooms in column (6), row 5 of table \ref{table:censusestimates} detects no statistically significant effects for outcomes in {\it spillover} areas. Though 95\% confidence intervals admit sizeable positive effects, we can rule in most cases that this effect equals its {\it project} counterpart.\footnote{Row 8 of table~\ref{table:censusestimates} tests the hypothesis that the {\it project} and {\it spillover} DID effects are equal, and reports p-values from the associated F-test.} These results suggest that households adjacent to constructed projects are not incentivized to invest in higher housing quality. 
 
 
 
-To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-sections and test for differential 10-year changes between constructed and unconstructed project areas. Because these data have coarser spatial resolutions, we perform this comparison at two levels of exposure to the policy: $D=\{\text{\small\it project},\text{\small\it spillover}\}$. As in table \ref{table:projectdescriptivescensus}, {\it project} small-areas overlap with more than 30\% of their area with project boundaries. The remaining {\it spillover} small-areas have less than 30\% area overlap, but their centroids fall within 1.5 km of a project boundary. Appendix \ref{appendix:bufferdesign} illustrates an example of these two definitions for a given project. Our estimating equation is:
+% \subsection{Population Composition}
 
-\vspace{-4mm}
-
-\begin{equation}\label{eq:censushh}
-\quad y_{ipt} \, = \, \lambda_{p} \,+\, \sum\limits_{\substack{d\in \{project,\\ spillover\}}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \,\Big) + \, \theta I^{project}_{ip} \, +  \, \varepsilon_{ipt} \quad 
-\end{equation}
-
-\noindent where $y_{ipt}$ denotes the census outcome for small-area $i$ in vicinity of (either constructed or planned but unconstructed) project $p$, observed in census $t\in\{2001,2011\}$. The parameter $\alpha^{project}$ ($\alpha^{spillover}$) expresses the difference-in-differences effect of the public housing policy in {\it project} ({\it spillover}) small-areas, using unconstructed projects as the control group. We estimate equation (\ref{eq:censushh}) using the same binary outcomes tabulated in table \ref{table:projectdescriptivescensus}, with the addition of a population density variable. We construct this additional outcome by computing the sum of household sizes  and dividing it by the square-kilometer area of the census small-area. To allow for arbitrary correlations between observations within the same project area, we cluster standard errors at the project level. 
-
-Table~\ref{table:censusestimates} provides estimates for each outcome. Rows 1 through 4 describe effects for households in our {\it project} exposure definition, while rows 5 through 7 describe effects for our {\it spillover} definition. Rows 3 and 7 respectively show that for both {\it project} and {\it spillover} exposures, the model cannot reject the null that treated and control areas are equal at baseline (in 2001). The difference-in-differences coefficients in the first row (project$\,\times\,$post$\,\times\,$const) document statistically significant improvements in access to services such as flush toilets, indoor water taps, and electricity.\footnote{With the exception of electricity for lighting, which falls short of the 10\% significance level. } With access rates increasing by over 10 percentage points, the economic magnitudes of these estimates are large, consistent with the policy successfully providing better housing. We note that households living within {\it project} exposure areas need not be direct recipients of government houses, since our definition is inclusive of indirect recipients such as backyard shack dwellers as well. 
-
-We do not find corresponding effects for households in the vicinity of constructed projects. With the exception of number of rooms in column (6), row 5 of table \ref{table:censusestimates} detects no statistically significant effects for outcomes in {\it spillover} areas. Though 95\% confidence intervals admit sizeable positive effects, we can rule in most cases that this effect equals its {\it project} counterpart.\footnote{Row 8 of table~\ref{table:censusestimates} tests the hypothesis that the {\it project} and {\it spillover} DID effects are equal, and reports p-values from the associated F-test.} These results suggest that households adjacent to constructed projects are not incentivized to invest in higher housing quality. 
-
-
-
-\subsection{Population Composition}
-
-\begin{table}[h!] 
-\caption{Effect of Housing Projects on Socio-demographics}
-\label{table:sorting}
-\small
-\centering
-%\caption{Census Composition Estimates }
-\vspace{-2mm}
-\begin{tabular}{lDDDDD}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
-& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
-\input{figures/census_pers_DDregs_AGG}
-\bottomrule
-\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
-\multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}
-\end{tabular}
-\end{table}
+% \begin{table}[h!] 
+% \caption{Effect of Housing Projects on Socio-demographics}
+% \label{table:sorting}
+% \small
+% \centering
+% %\caption{Census Composition Estimates }
+% \vspace{-2mm}
+% \begin{tabular}{lDDDDD}
+% \toprule
+% & \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+% & \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+% \input{figures/census_pers_DDregs_AGG}
+% \bottomrule
+% \multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01  }\\
+% \multicolumn{6}{l}{\footnotesize P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+% \end{tabular}
+% \end{table}
 
 
-\begin{table}[h!] 
-\caption{Census Household-level Post\tim\unskip Constructed Coefficients: City Versus Suburb}
-\label{table:sorting_het}
-\small
-\centering
-%\caption{Census Composition Estimates }
-\vspace{-2mm}
-\begin{tabular}{lDDDDD}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
-& \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
-\input{figures/census_pers_DDregs_AGG_het}
-\bottomrule
-\multicolumn{6}{l}{\footnotesize All difference-in-differences controls are included in the specification while only the interaction terms} \\
-\multicolumn{6}{l}{\footnotesize  for Post\tim Constructed are shown. Standard errors clustered at the project level in parenthesis.  }\\
-\multicolumn{6}{l}{\footnotesize \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01. P.O.B. means ``place of birth.''  Monthly income is in Rands.}
-\end{tabular}
-\end{table}
+% \begin{table}[h!] 
+% \caption{Census Household-level Post\tim\unskip Constructed Coefficients: City Versus Suburb}
+% \label{table:sorting_het}
+% \small
+% \centering
+% %\caption{Census Composition Estimates }
+% \vspace{-2mm}
+% \begin{tabular}{lDDDDD}
+% \toprule
+% & \small (1) & \small (2) & \small (3) & \small (4)& \small (5)\\
+% & \small Age & \small P.O.B. not Gauteng & \small Unemployed & \small Years of Education & \small Monthly Income \\ \midrule 
+% \input{figures/census_pers_DDregs_AGG_het}
+% \bottomrule
+% \multicolumn{6}{l}{\footnotesize All difference-in-differences controls are included in the specification while only the interaction terms} \\
+% \multicolumn{6}{l}{\footnotesize  for Post\tim Constructed are shown. Standard errors clustered at the project level in parenthesis.  }\\
+% \multicolumn{6}{l}{\footnotesize \textsuperscript{c} p$<$0.10, \textsuperscript{b} p$<$0.05, \textsuperscript{a} p$<$0.01. P.O.B. means ``place of birth.''  Monthly income is in Rands.}
+% \end{tabular}
+% \end{table}
 
 
-To inspect whether housing projects induce population sorting within and across proj\-ect areas, we test how average sociodemographics change as a result of their construction.  Re-estimating equation (\ref{eq:censushh}) using person-level responses from the 2001 and 2011 censuses, table~\ref{table:sorting} provides the differences-in-differences results for years of age, an indicator for place of birth outside of Gauteng province, an indicator for unemployment, years of education, and monthly income in Rands.  We detect no statistically significant effects on average age and being born outside of Gauteng for both {\it project} and {\it spillover} areas.  However, we find that unemployment rates improve by 3.5 and 5.4 percentage points for project and spillover areas respectively.  Similarly, average years of education and monthly income both increase at comparable magnitudes in both exposure definitions.  The unemployment and education coefficients are statistically significant for locations within and adjacent to project boundaries.  These findings suggest that more educated, higher income households are moving to constructed areas relative to unconstructed project areas. To check indirectly whether specific segments of the population move into  new projects from locations nearby, row 8 of table~\ref{table:sorting} tests the equality of the {\it project} and {\it spillover} DID effects. If these "lateral relocations" are happening at high rates, one would expect to find coefficients of opposite signs. The model cannot reject the equality of both coefficients for every outcome. 
+% To inspect whether housing projects induce population sorting within and across proj\-ect areas, we test how average sociodemographics change as a result of their construction.  Re-estimating equation (\ref{eq:censushh}) using person-level responses from the 2001 and 2011 censuses, table~\ref{table:sorting} provides the differences-in-differences results for years of age, an indicator for place of birth outside of Gauteng province, an indicator for unemployment, years of education, and monthly income in Rands.  We detect no statistically significant effects on average age and being born outside of Gauteng for both {\it project} and {\it spillover} areas.  However, we find that unemployment rates improve by 3.5 and 5.4 percentage points for project and spillover areas respectively.  Similarly, average years of education and monthly income both increase at comparable magnitudes in both exposure definitions.  The unemployment and education coefficients are statistically significant for locations within and adjacent to project boundaries.  These findings suggest that more educated, higher income households are moving to constructed areas relative to unconstructed project areas. To check indirectly whether specific segments of the population move into  new projects from locations nearby, row 8 of table~\ref{table:sorting} tests the equality of the {\it project} and {\it spillover} DID effects. If these "lateral relocations" are happening at high rates, one would expect to find coefficients of opposite signs. The model cannot reject the equality of both coefficients for every outcome. 
 
 
 
@@ -977,72 +1038,97 @@ To inspect whether housing projects induce population sorting within and across 
 
 \subsection{Price Effects}\label{section:resultsprices}
 
-To identify the spillover effects of public housing on local housing markets, we adopt the specification from Section~\ref{section:bbluestimates}, instead using transaction price as an outcome:
+To identify the spillover effects of public housing on local housing markets,
 
-\begin{equation} \label{equation:prices}
-\begin{aligned}
-\quad y_{ipt} \, =& \, \lambda_{0} \,+\, \sum\limits_{d\in D\setminus\{1200m\}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \theta^{d} \Big) \\
-& \, + \, \alpha^o \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^o\textsc{\small Post}_{pt} \, +  \lambda_p \, + \, \eta_t \, + \, \delta X_i \, + \, \varepsilon_{ipt} \quad 
-\end{aligned}
-\end{equation}
+
+%  we adopt the specification from Section~\ref{section:bbluestimates}, instead using transaction price as an outcome:
+
+% \begin{equation} \label{equation:prices}
+% \begin{aligned}
+% \quad y_{ipt} \, =& \, \lambda_{0} \,+\, \sum\limits_{d\in D\setminus\{1200m\}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \theta^{d} \Big) \\
+% & \, + \, \alpha^o \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^o\textsc{\small Post}_{pt} \, +  \lambda_p \, + \, \eta_t \, + \, \delta X_i \, + \, \varepsilon_{ipt} \quad 
+% \end{aligned}
+% \end{equation}
 
 \noindent The outcome, $y_{itp}$, is measured in terms of the log-purchase price of property $i$ sold at time $t$ in the vicinity of project $p$.  Since we observe the exact transaction date, we set $\textsc{\small Post}_{pt}$\,=1 if date $t$ is after the month of project implementation and zero otherwise.  To account for smaller sample sizes than in the density estimation, we consider wider 200 meter distance bins from 0 to 1200 meters.  Additionally, $\lambda_p$ includes a project fixed effect, controlling for any fixed, unobserved drivers of house prices that vary between projects.\footnote{The project fixed effect subsumes the $\textsc{\footnotesize Const}_{p}$ effect since construction status does not vary within project over time.}  $\eta_{t}$ controls for year, year-month, and calendar month fixed effects depending on the specification to account for any factors such as shifts in aggregate housing demand that may be correlated with prices and the timing of housing projects.  To control for property characteristics, $X_i$ includes up to a cubic polynomial in lot size and a control for latitude-longitude cells in some specifications. Similarly to section~\ref{section:bbluestimates}, coefficients $\alpha^d$ express double-difference effects relative to effects within 1,000 to 1,200 meters of projects, again allowing for a triple-differences interpretation.  
 
-\begin{figure}[b!]
-\caption{Price Estimates over Distance from Project}\label{figure:distplot}
-\centering
-\includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot}
-\vspace{-2mm}
-\end{figure}
 
-\begin{figure}[b!]
-\caption{Price Estimates over Distance from Project Het}\label{figure:distplot_het}
+\begin{table}
+\small
 \centering
-\includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot_het}
+\caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD_het}
 \vspace{-2mm}
-\end{figure}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/price_temp_Tester_3d_spill_top_no_lab}
+\\
+By Income Quartile \\[.3em]
+
+ \input{figures/price_temp_Tester_3d_q_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+
+% \begin{figure}[b!]
+% \caption{Price Estimates over Distance from Project}\label{figure:distplot}
+% \centering
+% \includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot}
+% \vspace{-2mm}
+% \end{figure}
+
+% \begin{figure}[b!]
+% \caption{Price Estimates over Distance from Project Het}\label{figure:distplot_het}
+% \centering
+% \includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot_het}
+% \vspace{-2mm}
+% \end{figure}
 
 
 Figure~\ref{figure:distplot} plots coefficients $\alpha^d$ and associated standard errors for every $d\in D$. This specification includes project as well as calendar month fixed effects and includes only transactions that occur within three years of project construction.  Examining the point estimates, we find evidence of a drop in prices of around 0.1 log points or around 10\% within 200 meters of the project boundary.  Beyond 200 meters, this negative price effect disappears with all point estimates closely tracking zero.  Clustering standard errors at the project-level leaves wide confidence intervals at all distances, meaning that we are unable to reject equivalence between any coefficient and the price effect for the reference category at the 10\% confidence level.
 
 Table~\ref{table:priceDDD} provides point estimates for distance bins up to 600 meters across a variety of controls and using a broader reference category including all distances from 600 meters to 1,200 meters.  The first row confirms a price drop of around 10\% that is relatively stable as we include additional controls for project, time, and location.  We find much smaller but similarly negative price effects between 200 and 600 meters.  Wide standard errors ensure that no coefficients are statistically different from zero. Due to the noisiness of the data, we are unable to rule out large effects at all distances. 
 
-\begin{table}[h!]
-\small
-\centering
-\caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD}
-\vspace{-2mm}
-\begin{tabular}{lCCCC}
-\toprule
- & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
-\input{figures/price_regDDD.tex}
-\bottomrule
-\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-\end{tabular}
-\end{table} 
+% \begin{table}[h!]
+% \small
+% \centering
+% \caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD}
+% \vspace{-2mm}
+% \begin{tabular}{lCCCC}
+% \toprule
+%  & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
+% \input{figures/price_regDDD.tex}
+% \bottomrule
+% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table} 
 
+% \begin{table}[h!]
+% \small
+% \centering
+% \caption{Triple Difference Estimates on Log-Prices Het}\label{table:priceDDD_het}
+% \vspace{-2mm}
+% \begin{tabular}{lCCCC}
+% \toprule
+%  & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
+% \input{figures/price_regDDD_het.tex}
+% \bottomrule
+% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table} 
 
-
-\begin{table}[h!]
-\small
-\centering
-\caption{Triple Difference Estimates on Log-Prices Het}\label{table:priceDDD_het}
-\vspace{-2mm}
-\begin{tabular}{lCCCC}
-\toprule
- & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
-\input{figures/price_regDDD_het.tex}
-\bottomrule
-\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-\end{tabular}
-\end{table} 
-
-\begin{figure}[t!]
-\caption{Time-to-Event Price Estimates}\label{figure:timeplot}
-\centering
-\includegraphics[width=0.99\textwidth,trim={0cm 0cm 0cm 0cm},clip=true]{figures/DDDplot_pertime_alt_unspaghetti}
-\vspace{-2mm}
-\end{figure}
+% \begin{figure}[t!]
+% \caption{Time-to-Event Price Estimates}\label{figure:timeplot}
+% \centering
+% \includegraphics[width=0.99\textwidth,trim={0cm 0cm 0cm 0cm},clip=true]{figures/DDDplot_pertime_alt_unspaghetti}
+% \vspace{-2mm}
+% \end{figure}
 
 We look into the dynamics of these effects by substituting the $\textsc{\small Post}_{pt}$ term with year dummies relative to the date of construction. We estimate these trends separately for four different distance bins relative to the project boundary.  Figure~\ref{figure:timeplot} plots these coefficients, excluding the confidence intervals.  Further splitting the sample for this exercise widens the confidence intervals so that all 90\% intervals contain zero.  We set the reference category to be two-years prior to project construction for the furthest distance bin. Figure~\ref{figure:timeplot} shows some evidence of anticipation, with prices level declining one year before construction at all distances. After project construction, prices appear to gradually recover. %Time trends for distances beyond 600 meters appear relatively uncorrelated with the time of project completion, suggesting that these areas may be unaffected by project construction.
 
@@ -1223,263 +1309,468 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 
 
 
-\begin{table}[h!]
-	\centering
-	\caption{Dwelling Characteristics at Baseline from 2001 Census: City versus Suburb}\label{table:projectdescriptivescensushet}
-\vspace{-2mm}
-\begin{tabular}{l*{1}{ccccc}}
-\toprule
-& \multicolumn{2}{c}{\textbf{City}} & \multicolumn{2}{c}{\textbf{Suburb}} &   \\
-& Const. & Unconst. & Const. & Unconst. &  All  \\
-\midrule
-\input{figures/census_at_baseline_AGG_het} 
-\bottomrule
-\multicolumn{6}{l}{\scriptsize ``Const.'' and ``Unconst.'' include census small-areas with over 30\% }  \\ [-.5em]
-\multicolumn{6}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
-\multicolumn{6}{l}{\scriptsize ``All''  includes all small-areas.  ``City'' includes areas within 30.4 km } \\ [-.5em]
-\multicolumn{6}{l}{\scriptsize of a CBD and ``Suburb'' includes areas over 30.4 km away from a CBD. } 
-\end{tabular}
-\end{table}
-
-
-
-\vspace{0mm}
-\begin{table}[h!]
-\centering
-\caption{Housing Project Areas Description}\label{table:projectdescriptives_het}
-\vspace{0mm}
-\begin{tabular}{l*{1}{cccccc}}
-\toprule
-  & \multicolumn{2}{c}{\textbf{All}}& \multicolumn{2}{c}{\textbf{Greenfield}}  & \multicolumn{2}{c}{\textbf{In-Situ Upgrading}}   \\
-  &Const. & Unconst. &Const. & Unconst.   & Const. & Unconst. \\
-\midrule
-\input{figures/descriptives_tablet_all_4}
-\bottomrule
-\multicolumn{7}{l}{\scriptsize Const. refers to constructed projects and unconst. refers to unconstructed projects.}\\[-.5em]
-\multicolumn{7}{l}{\scriptsize $^*$Calculated from {\it expected} completion dates using Gauteng National Treasury budget reports.}\\[-.5em]
-\multicolumn{7}{l}{\scriptsize $^\dagger$ The USD averaged to about 7.70 Rands during the 2001-2011 period.}\\[-.5em]
-\multicolumn{7}{l}{\scriptsize $^\ddagger$Measured as the average minimum distance with respect to Johannesburg and Pretoria CBDs. } \\[-.5em]
-\end{tabular}
-\end{table} 
-
-
-
-\begin{table}
-\caption{Building Density Heterogeneity by Project Type}
-\begin{tabular}{lDDDDD}
-\toprule
- & \small (1) & \small (2)  & \small (3) & \small (4) & \small (5) \\
- & Total & Formal  & Informal & Informal Bkyd. & Informal Non-Bkyd. \\
-  \midrule
-\input{figures/b_t_ksp_o0_d250_500_top_lonely}
-\bottomrule
-\end{tabular}
-\end{table}
-
-
-
-
-
-
-\begin{figure*}
-        \centering
-        \caption[ Pre-period housing densities in constructed and unconstructed projects by project type ]
-       {\small Pre-period housing densities in constructed and unconstructed projects by project type } 
-        \vspace{2mm}
-        
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{Greenfield} pre-period formal  raw data}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_1_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{Greenfield} pre-period informal  raw data}}     
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_1_spk.pdf}
-
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{In-Situ} pre-period formal  raw data}}   
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_2_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{In-Situ} pre-period informal  raw data}}     
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_2_spk.pdf}
-
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{Other} pre-period formal  raw data}}   
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_3_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{Other} pre-period informal  raw data}}      
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_3_spk.pdf}
-
-        \end{subfigure}
-\end{figure*}
-
-
-
-
-\begin{figure*}
-        \centering
-        \caption[ Pre-period housing densities for constructed and unconstructed projects by project type demeaned by 2001 census subplace]
-        {\small Pre-period housing densities for constructed and unconstructed projects by project type demeaned by 2001 census subplace} 
-        \vspace{2mm}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{Greenfield} pre-period formal  fe }}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_fe_pre_pre_means_4_1_spk.pdf}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{Greenfield} pre-period informal fe }}     
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_fe_pre_pre_means_4_1_spk.pdf}
-
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{In-Situ} pre-period formal fe }}   
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_fe_pre_pre_means_4_2_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{In-Situ} pre-period informal fe }}     
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_fe_pre_pre_means_4_2_spk.pdf}
-
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{Other} pre-period formal fe }}   
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_fe_pre_pre_means_4_3_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{Other} pre-period informal fe }}      
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_fe_pre_pre_means_4_3_spk.pdf}
-
-        \end{subfigure}
-\end{figure*}
-
-
-
-
-\begin{figure*}
-        \centering
-   %     \caption[ Pre-Period Housing Densities in Constructed and Unconstructed Projects Areas ]
-  %      {\small Pre-Period Densities} 
-        %\vspace{2mm}
-       
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{Greenfield} changes formal  raw data}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_1_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{Greenfield} changes informal raw data }}     
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_1_spk.pdf}
-
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{In-Situ} changes formal raw data }}   
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_2_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}  
-                    \caption[]%
-            {{\footnotesize \textbf{In-Situ} changes informal raw data }}     
-            \label{fig:preinf}
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_2_spk.pdf}
-
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize \textbf{Other} changes formal raw data}}   
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_3_spk.pdf}
-
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth} 
-                    \caption[]%
-            {{\footnotesize \textbf{Other} changes informal  raw data}}      
-            \label{fig:preinf} 
-            \centering 
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_3_spk.pdf}
-
-        \end{subfigure}
-\end{figure*}
-
-
-
 
 \begin{table}[h!]
 \small
 \centering
 \caption{Triple Difference Estimates of Housing Density }\label{table:bbluDDDfull}
 \vspace{-2mm}
-\begin{tabular}{lCCCCC}
+\begin{tabular}{lCCCC}
 \toprule
-& \small (1) & \small (2) & \small (3) & \small (4)& \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Total Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule 
+& \small (1) & \small (2) & \small (3) & \small (4) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule 
 \input{figures/b_ksp_o0_d250_500}
 \bottomrule
-\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }\\[-.3em]
-\multicolumn{6}{l}{\footnotesize Project areas are 25$\times$25m grid cells within 1,500m of project footprints.}\\[-.3em]
-\multicolumn{6}{l}{\footnotesize Housing densities are measure in terms of houses per $\text{km}^{2}$.}\\[-.3em]
-\multicolumn{6}{l}{\footnotesize ``inside'' means within project footprint.  ``constr'' means constructed.} 
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }\\[-.3em]
+\multicolumn{5}{l}{\footnotesize Project areas are 25$\times$25m grid cells within 1,500m of project footprints.}\\[-.3em]
+\multicolumn{5}{l}{\footnotesize Housing densities are measure in terms of houses per $\text{km}^{2}$.}\\[-.3em]
+\multicolumn{5}{l}{\footnotesize ``inside'' means within project footprint.  ``constr'' means constructed.} 
+\end{tabular}
+\end{table}
+
+
+
+
+\begin{table}
+\caption{Building Density by Neighborhood Income Quartile}\label{table:bbluDDDhet}
+\begin{tabular}{lDDDD}
+\toprule
+ & \small (1)  & \small (2) & \small (3) & \small (4) \\
+ & Total Housing & Formal Housing   &Informal Non-Bkyd. Housing  &  Informal Bkyd. Housing  \\ \midrule
+\input{figures/b_q_ksp_o0_d250_500_top}
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+
+
+% \begin{table}[]
+% \small
+% \centering
+% \caption{Census Household-level Estimates in Spillover Area by Neighborhood Income Quartile}\label{table:censusestimateshet}
+% \vspace{-2mm}
+% \begin{tabular}{lDDDDDD}
+% \toprule
+%  & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+%  & \small Is a Formal House & \small Has a Flush Toilet & \small Has Piped Water Indoors  & \small Has Electricity & \small Total Rooms  & \small Owns House  \\ \midrule
+% \input{figures/ch1_ksp_o0_d250_500_bb1_q_top} 
+% % \input{figures/census_hh_DDregs_AGG}
+% \bottomrule\\[-.6em]
+% \multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Income quartiles are from average household income in 2001 census subplaces.} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[]
+% \small
+% \centering
+% \caption{Census Household-level Estimates in Spillover Area by Neighborhood Income Quartile Cont.}\label{table:censusestimateshet2}
+% \vspace{-2mm}
+% \begin{tabular}{lDDDDDD}
+% \toprule
+%  & \small (7) & \small (8)  & \small (9)  & \small (10) & \small (11)  & \small (12) \\
+%  & \small HH Size & People per $\text{km}^{2}$ & Age HoH & HoH is African  & HoH is Employed  & HH Log Income \\ \midrule
+% \input{figures/ch2_ksp_o0_d250_500_bb1_q_top}
+% % \input{figures/census_hh_DDregs_AGG}
+% \bottomrule\\[-.6em]
+% \multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Income quartiles are from average household income in 2001 census subplaces.} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+% \end{tabular}
+% \end{table}
+
+
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates}\label{table:censusestimatesfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+ & \small Is a Formal House & \small Has a Flush Toilet & \small Has Piped Water Indoors  & \small Has Electricity & \small Total Rooms  & \small Owns House  \\ \midrule
+\input{figures/ch1_ksp_o0_d250_500_bb1} \midrule
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+\multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+\end{tabular}
+}
+\end{table}
+
+\begin{table}[]
+\small
+\centering
+\caption{Census Household-level Estimates Cont.}\label{table:censusestimatesfull2}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (7) & \small (8)  & \small (9)  & \small (10) & \small (11)  & \small (12)  \\
+ & \small HH Size & People per $\text{km}^{2}$ & Age HoH & HoH is African  & HoH is Employed  & HH Log Income \\ \midrule
+\input{figures/ch2_ksp_o0_d250_500_bb1}
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+\multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+\end{tabular}
+}
+\end{table}
+
+
+
+
+
+
+
+
+% \begin{table}[]
+% \small
+% \centering
+% \caption{Census Household-level Estimates By Housing Type}\label{table:censusestimateshousetype}
+% \vspace{-2mm}
+% % \resizebox{.95\linewidth}{!}{
+% \begin{tabular}{lDDDD}
+% \toprule
+% & \small (1) & \small (2)  & \small (3) & \small (4)  \\
+%   & All Housing & Formal Housing &  Informal Bkyd. Housing & Informal Non-Bkyd. Housing   \\ 
+%   %\midrule 
+
+% &\multicolumn{4}{c}{\textbf{People}} \\[.4em]\midrule
+% \input{figures/chtp_ksp_o0_d250_500_bb1_top_mean}
+
+% % &\multicolumn{4}{c}{\textbf{HH Size}} \\[.4em]\midrule
+% % \input{figures/hhs_ksp_o0_d250_500_bb1_top_mean}
+
+% &\multicolumn{4}{c}{\textbf{Rooms}} \\[.4em]\midrule
+% \input{figures/room_ksp_o0_d250_500_bb1_top_mean}
+
+% &\multicolumn{4}{c}{\textbf{Flush Toilet}} \\[.4em]\midrule
+% \input{figures/toih_ksp_o0_d250_500_bb1_top_mean} 
+
+% &\multicolumn{4}{c}{\textbf{Piped Water}} \\[.4em]\midrule
+% \input{figures/wath_ksp_o0_d250_500_bb1_top_mean}
+
+% &\multicolumn{4}{c}{\textbf{Electricity}} \\[.4em]\midrule
+% \input{figures/elec_ksp_o0_d250_500_bb1_top_one_mean}
+
+% \bottomrule
+% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% % }
+% \end{table}
+
+
+
+% \begin{table}[]
+% \small
+% \centering
+% \caption{Census Household-level Estimates By Housing Type}\label{table:censusestimateshousetype2}
+% \vspace{-2mm}
+% % \resizebox{.95\linewidth}{!}{
+% \begin{tabular}{lDDDD}
+% \toprule
+% & \small (1) & \small (2)  & \small (3) & \small (4)  \\
+%   & All Housing & Formal Housing &  Informal Backyard Housing & Informal Non-Backyard Housing   \\ 
+
+% &\multicolumn{4}{c}{\textbf{Age HoH}} \\[.4em]\midrule
+% \input{figures/age_ksp_o0_d250_500_bb1_top_mean}
+% &\multicolumn{4}{c}{\textbf{African HoH}} \\[.4em]\midrule
+% \input{figures/african_ksp_o0_d250_500_bb1_top_mean}
+% &\multicolumn{4}{c}{\textbf{Employed HoH}} \\[.4em]\midrule
+% \input{figures/emp_ksp_o0_d250_500_bb1_top_mean}
+% &\multicolumn{4}{c}{\textbf{Log Income}} \\[.4em]\midrule
+% \input{figures/ln_inc_ksp_o0_d250_500_bb1_top_one_mean}
+
+% \bottomrule
+% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% % }
+% \end{table}
+
+
+
+
+\begin{figure*}
+        \centering
+   \caption[ Prices over distance ]
+    {\small Prices over distance} 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_q}
+        \end{subfigure}
+       
+\end{figure*}
+
+
+\begin{figure*}
+         \centering
+   \caption[ Prices over time ]
+    {\small Prices over time} 
+ \begin{subfigure}[b]{0.48\textwidth}
+
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_q}
+        \end{subfigure}
+\end{figure*}
+
+
+%%%%%%%% TRANSACTION FREQUENCY
+
+
+
+
+
+\begin{table}
+\small
+\centering
+\caption{Diff-in-Diff Estimates on Log-Prices}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/price_temp_Tester_2d_spill_top_no_lab}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/price_temp_Tester_2d_q_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
+
+
+\begin{table}
+\small
+\centering
+\caption{Triple Difference Estimates on Transaction Frequency}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/s_ksp_o0_d250_500_spill_top.tex}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/s_q_ksp_o0_d250_500_top.tex}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Diff-in-Diff Estimates on Transaction Frequency}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+
+ \input{figures/s_d2_ksp_o0_d250_500_spill_top}
+\\
+\textbf{By Income Quartile:} \\
+
+ \input{figures/s_d2_q_ksp_o0_d250_500_top}
+
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\end{tabular}
+\end{table} 
+
+
+\begin{figure*}
+       \centering
+   \caption[ Transaction frequency over distance ]
+    {\small Transaction frequency over distance} 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_ctrl_q}
+        \end{subfigure}
+       
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+   \caption[ Transaction frequency over time ]
+    {\small Transaction frequency over time} 
+ \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 3-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_ctrl_q}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_no_ctrl_q}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+                    \caption[Network2]%
+            {{\footnotesize Time 2-Diff, purch date/erf controls}}    
+            \label{fig:prefor}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_ctrl_q}
+        \end{subfigure}
+\end{figure*}
+
+
+
+
+
+% \begin{table}[h!]
+% 	\centering
+% 	\caption{Housing Comparisons (at endline in constructed areas)}
+% \vspace{-2mm}
+% \begin{tabular}{l*{1}{ccccc}}
+% \toprule
+% & Proj & \multicolumn{4}{c}{ Spill} \\
+% &  & Q1 & Q2 & Q3 &Q4 \\
+% \midrule
+% \input{figures/census_compare_houses_proj_full_4} 
+% \bottomrule
+% % \multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 50\% } \\ [-.5em]
+% % \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+% % \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
+% \end{tabular}
+% \end{table}
+
+
+
+\begin{table}[h!]
+	\centering
+	\caption{Average Census Characteristics in Constructed Areas for Households living in Formal Houses in 2011 by Neighborhood Income Quartile}\label{table:comparisons}
+\vspace{-2mm}
+\begin{tabular}{l*{1}{CCCCC}}
+\toprule
+& Project Areas & \multicolumn{4}{c}{ Non-Project Areas (0-1,500m outside)} \\
+&  & Q1 & Q2 & Q3 &Q4 \\
+\midrule
+\input{figures/census_compare_houses_proj_for_4} 
+\bottomrule
+ \multicolumn{6}{l}{\scriptsize Income quartiles (Q1-Q4) is by average household income in 2001 census sub-places.} \\ [-.5em]
+ \multicolumn{6}{l}{\scriptsize  Averages include only households living in formal houses. } \\ [-.5em]
+ \multicolumn{6}{l}{\scriptsize  Project areas are defined as census blocks with over 30\% overlap with project footprints. } \\ [-.5em]
+% \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+% \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
 \end{tabular}
 \end{table}
 
