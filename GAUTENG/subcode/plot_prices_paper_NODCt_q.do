@@ -1,6 +1,7 @@
 
 clear
 est clear
+set matsize 10000
 
 do reg_gen.do
 * do reg_gen_price.do
@@ -180,7 +181,7 @@ global outcomes="lprice";
 * global fecount = 2 ;
 
 * global rl1 = "Year-Month FE";
-* global rl2 = "Plot Size (up to cubic)";
+* global rl2 = "Plot Size (up to cubic polynomial)";
 * *global rl3 = "Constructed Diff-in-Diff";
 
 * * mat define F = (0,1,0,1
@@ -241,21 +242,32 @@ global a_ll = "a(LL)";
 
 
 
-*   (1) name                  (2) type    (3) round var   (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside   (10) dshift
-*pf "price_dist_3d_no_ctrl"     "dist"          200              ""              0              0         0             LL           0
-* pf "price_dist_3d_no_ctrl"   "dist"          200               ""              0              0         0             LL           0
-
-
-global dist_bins = 200
+global dist_bins = 250
 global key_fe = "LL"
 global month_window = 48
 
 
 *global D_shift = 100
 *   (1) name                  (2) type    (3) round var         (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside  (10) dshift
-pf "price_dist_3d_no_ctrl_q"       "dist"       $dist_bins              ""              0              1         0       "$key_fe"     0      100
+
+pf "price_dist_3d_ctrl_q"       "dist"          $dist_bins              ""                   0              1         1       "$key_fe"      0    100
+
+pf "price_time_3d_ctrl_q"       "time"             24               $month_window             0             1         1      "$key_fe"        0  6
+
+
+*   (1) name                  (2) type    (3) round var   (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside   (10) dshift
+
+* pf "price_dist_3d_no_ctrl"      "dist"       $dist_bins             ""              0              1         0      "$key_fe"        0 1000
+* pf "price_time_3d_no_ctrl_q"    "time"       24               $month_window     0           1         0      "$key_fe"        0  6
+
+
 
 /*
+
+pf "price_time_3d_no_ctrl_q"   "time"          24               $month_window               0             1         0     "$key_fe"     0  6
+pf "price_dist_3d_no_ctrl_q"       "dist"       $dist_bins              ""              0              1         0       "$key_fe"     0      100
+
+
 
 pf "price_dist_3d_ctrl_q"          "dist"          $dist_bins              ""              0              1         1       "$key_fe"      0    100
 

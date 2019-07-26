@@ -1,5 +1,53 @@
 
 
+* cap prog drop prep_dist
+* prog define prep_dist
+
+*     g D = distance_rdp if con==1 
+*     replace D = distance_placebo if con==0 
+*     if `2'==0 {
+*       g treat = post 
+*     }
+*     else {
+*       g treat = purch_yr>=`2'
+*     }
+*     replace D = round(D,`1')
+*     sum D, detail
+*     global D_max = `=r(max)'
+*     global D_adj = $D_max
+*     replace D = D + $D_adj
+*     local x_title "Distance to Project Footprint"
+*     global D_drop = $D_max + $D_max
+*     global x_lab = "meters"
+* end
+
+
+* cap prog drop prep_time
+* prog define prep_time
+*     g D = mo2con_rdp if con==1
+*     replace D = mo2con_placebo if con==0 
+*     g treat = (distance_rdp>=0 & distance_rdp<=500 & con==1) | (distance_placebo>=0 & distance_placebo<=500 & con==0)
+*     if `3'==1 {
+*       g inside = (distance_rdp<0 & con==1) | (distance_placebo<0 & con==0)
+*     }
+*     global T_thresh = `2'
+
+*     *replace D = . if D<-$T_thresh  | D>$T_thresh
+*     replace D = -$T_thresh if D<-$T_thresh
+*     replace D = $T_thresh if D>$T_thresh
+*     replace D = round(D,`1')
+*     sum D, detail
+*     global D_max = `=r(max)'
+*     global D_adj = $D_max
+*     replace D = D + $D_adj
+*     local x_title "Month to Construction"
+*     global D_drop = $D_max - `1'
+*     global x_lab = "months"
+* end
+
+
+
+
 cap prog drop prep_dist
 prog define prep_dist
 
@@ -11,7 +59,11 @@ prog define prep_dist
     else {
       g treat = purch_yr>=`2'
     }
-    replace D = round(D,`1')
+    * replace D = round(D,`1')
+    egen D1 = cut(D), at(0(`1')1500)
+    replace D1 = D1+ `1'/2
+    replace D = D1
+    drop D1
     sum D, detail
     global D_max = `=r(max)'
     global D_adj = $D_max
@@ -32,20 +84,20 @@ prog define prep_time
     }
     global T_thresh = `2'
 
-    *replace D = . if D<-$T_thresh  | D>$T_thresh
-    replace D = -$T_thresh if D<-$T_thresh
-    replace D = $T_thresh if D>$T_thresh
-    replace D = round(D,`1')
+    egen D1 = cut(D), at(-$T_thresh(`1')$T_thresh)
+    replace D1 = D1 + `1'/2
+    replace D1 = -$T_thresh if D<-$T_thresh
+    replace D1 = $T_thresh if D>$T_thresh
+    replace D = D1
+    drop D1
     sum D, detail
     global D_max = `=r(max)'
     global D_adj = $D_max
     replace D = D + $D_adj
-    local x_title "Month to Construction"
-    global D_drop = $D_max - `1'
+    local x_title "Month to Scheduled Construction"
+    global D_drop = $D_max - `1'/2
     global x_lab = "months"
 end
-
-
 
 cap prog drop prep_reg
 prog define prep_reg
@@ -181,30 +233,66 @@ prog define plotting
 	*  legend(order( 2 "Q1"  4 "Q2"  6 "Q3"  8 "Q4"  )  ring(0) position(10)) xline(0,lp(dot)) xtitle("`2'")
 	*         graph export "`1'.pdf", as(pdf) replace
 
+	* global sq = "bbox(0,0,23063,23063,923,444,0)"
+
 	if "`2'"=="time" {
-		global x_label = "{&le}-48 {&ge}48 -36(12)36"
-		global x_title = "Months to Construction"
+		* global x_label =  `" -48 "{&le}-48" 48 "{&ge}48" -24(24)24 "'
+		global x_label =  `" -48 "{&le}-48" 48 "{&ge}48" -24(24)24 "'
+		global x_title = ""
+		* global x_title = "Months to Construction"
 	}
 	if "`2'"=="dist" {
-		global x_label = "0(500)1500"
-		global x_title = "Distance outside Project Boundary"
+		global x_label = "0(750)1500"
+		global x_title = ""
+		* global x_title = "Distance outside Project Boundary"
 	}
-
+	* legend(order( 1 "Estimate" 2 "95% CI" )  ring(0) position(10)) xline(0,lp(dot))
+	* xline(0,lp(dot) )
 	foreach v in $Q_lev {
+		* global y_scale_set = ""
+		 * global y_scale_set = "yscale(off)"
+		*global xsize = 4
+		* if `v'!=1 {
+		* 	* global y_scale_set = "yscale(off)"
+		* 	*global xsize = 3
+		* }
+		* local v "1"
 	twoway (line estimate D if q==`v', lp(solid) lc(black) lw(medthick) )|| ///
 	(line min95 D if q==`v', lc(gs4) lp(dash) lw(medthick) ) || (line max95 D if q==`v', lc(gs4) lp(dash) lw(medthick) ) , ///
-	legend(order( 1 "Estimate" 2 "95% CI" )  ring(0) position(10)) xline(0,lp(dot)) xtitle("$x_title") xlab($x_label)
-	 graph export "`1'_q`v'.pdf", as(pdf) replace
+	legend(order( 1 "Estimate" 2 "95% CI")  ring(0) position(10))  xtitle("$x_title") xlab( $x_label ) title("Q`v'")
+	 * graph export "`1'_q`v'.pdf", as(pdf) replace
+	 graph save "`1'_q`v'", replace
 	}
-	        
 
+	* graph combine "`1'_q1" "`1'_q2" "`1'_q3" "`1'_q4", col(4)
+	* graph combine "price_dist_3d_no_ctrl_q_q1" "price_dist_3d_no_ctrl_q_q2" "price_dist_3d_no_ctrl_q_q3" "price_dist_3d_no_ctrl_q_q4", ycommon col(4) xsize(6) 
+	       
+
+	* grc1leg "price_dist_3d_no_ctrl_q_q1" "price_dist_3d_no_ctrl_q_q2" "price_dist_3d_no_ctrl_q_q3" "price_dist_3d_no_ctrl_q_q4",  ycommon col(4) xsize(6) 
+	grc1leg "`1'_q1" "`1'_q2" "`1'_q3" "`1'_q4",  ycommon col(4) xsize(6) 
+	
+	graph export "`1'_comb.pdf", as(pdf) replace
+	        
 end
 
 
 cap prog drop plotting_one
 prog define plotting_one
-    twoway rcap min95 max95 D  || scatter estimate D  ,  /// 
-        legend(off) xtitle("`2'")
+
+	if "`2'"=="time" {
+		global x_label =  `" -48 "{&le}-48" 48 "{&ge}48" -24(24)24 "'
+		global x_title = ""
+		global x_title = "Months to Scheduled Construction"
+	}
+	if "`2'"=="dist" {
+		global x_label = "0(750)1500"
+		* global x_title = ""
+		global x_title = "Distance outside Project Boundary"
+	}
+	sort D
+	twoway (line estimate D, lp(solid) lc(black) lw(medthick) )|| ///
+	(line min95 D, lc(gs4) lp(dash) lw(medthick) ) || (line max95 D, lc(gs4) lp(dash) lw(medthick) ) , ///
+	legend(order( 1 "Estimate" 2 "95% CI") ring(1) position(7))  xtitle("$x_title") xlab( $x_label )
         graph export "`1'.pdf", as(pdf) replace
 end
 
@@ -309,7 +397,7 @@ prog define pf
       destring D, replace force
       fill_obs_one
 
-      plotting_one "`1'_one" "`x_title'"
+      plotting_one "`1'_one" `2'
     restore
 
   if `9'==1 {
@@ -330,9 +418,10 @@ prog define pf
       fill_obs_one
 
       sort D 
-      plotting_one "`1'_inside_one" "`x_title'"
+      plotting_one "`1'_inside_one" `2'
 
     restore
+
   }
 
 end

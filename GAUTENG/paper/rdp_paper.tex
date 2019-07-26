@@ -825,9 +825,9 @@ An alternative approach would be to compare changes in areas with constructed pr
 We propose combining near and far comparisons with constructed and unconstructed comparisons in the following triple-differences specification:
 \begin{align}\label{eq:main}
 \begin{split}
-\quad y_{ipnt} \, =& \,   \textsc{\small Proj}_{ip} \,\, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{i} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
+\quad y_{ipnt} \, =& \,   \textsc{\small Proj}_{ip} \,\, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
 & \, \textsc{\small Spill}_{ip} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p} \, +\, \beta_4 \Big) \, + \\[.2em]
-& \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{p} \, + \, \theta \, X_{ipnt} \, + \, \lambda_s \, + \, \varepsilon_{ipnt} \quad 
+& \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{p} \, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
 \end{split}
 \end{align}
 \noindent where $y_{ipnt}$ is the outcome for unit $i$ in vicinity of project $p$ in neighborhood $n$ observed at time $t$ with idiosyncratic error $\varepsilon_{ipnt}$.  Units can be either a 25$\times$25m grid-cell, a census block, or a formal housing property.  Units are weighted according to their spatial area to ensure that project effects are representative across space.  Each unit is assigned to its nearest project according to the euclidean distances to project boundaries.\footnote{ DO THE ROBUSTNESS EXCLUDING THESE AREAS!!!!!!! }  $\textsc{\small Post}_{t}$ equals one in the period after construction or expected construction and zero otherwise.  $\textsc{\small Const}_{p}$ equals one if project $p$ is constructed and zero if project $p$ remains unconstructed.  $\lambda_{n}$ includes neighborhood fixed effects and $X_{ipnt}$ includes a vector of additional controls.  The terms $\textsc{\small Post}_{t}$, $\,\textsc{\small Const}_{p}$, and $\textsc{\small Post}_{t}\times\textsc{\small Const}_{p}$ represent a standard differences-in-differences framework, controlling for differential changes for constructed and unconstructed projects before and after construction.  
@@ -849,12 +849,12 @@ Other concerns include local economic and housing market trends correlated both 
 We also examine how effects may vary by neighborhood income quartile according to the following specification:
 \begin{align}\label{eq:mainhet}
 \begin{split}
-\quad y_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{s}^{q} \, \Bigg[ \,  \,   \textsc{\small Proj}_{ip} \,\, \Big( \alpha_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{i} \, + \, \alpha_2^q \, \textsc{\small Post}_{t} \, + \, \alpha_3^q \, \textsc{\small Const}_{p}\, +\, \alpha_4^q \Big) \, + \\[.2em]
-& \, \textsc{\small Spill}_{ip} \, \Big( \beta_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^q \, \textsc{\small Post}_{t} \, + \, \beta_3^q \, \textsc{\small Const}_{p} \, +\, \beta_4^q \Big) \, + \\[.2em]
-& \, \gamma_1^q \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2^q \,\textsc{\small Post}_{t} \, + \, \gamma_3^q \,  \textsc{\small Proj}_{p} \, \Bigg] \, + \, \theta \, X_{ipnt} \, + \, \lambda_s \, + \, \varepsilon_{ipnt} \quad 
+\quad y_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{n}^{q} \, \Bigg[ \,  \,   \textsc{\small Proj}_{ipq} \,\, \Big( \alpha_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \alpha_2^q \, \textsc{\small Post}_{t} \, + \, \alpha_3^q \, \textsc{\small Const}_{pq}\, +\, \alpha_4^q \Big) \, + \\[.2em]
+& \, \textsc{\small Spill}_{ipq} \, \Big( \beta_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \beta_2^q \, \textsc{\small Post}_{t} \, + \, \beta_3^q \, \textsc{\small Const}_{pq} \, +\, \beta_4^q \Big) \, + \\[.2em]
+& \, \gamma_1^q \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \gamma_2^q \,\textsc{\small Post}_{t} \, + \, \gamma_3^q \,  \textsc{\small Proj}_{pq} \, \Bigg] \, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
 \end{split}
 \end{align}
-\noindent where $q$ indexes neighborhood income quartiles, and $Q_s^q$ takes a value of one if average household income for neighborhood $s$ falls within quartile $q$.  Average income is measured according to household incomes reported in the 2001 Census of Population and Housing.  
+\noindent where $q$ indexes neighborhood income quartiles, and $Q_s^q$ takes a value of one if average household income for neighborhood $n$ falls within quartile $q$.  Average income is measured according to household incomes reported in the 2001 Census of Population and Housing.  
 
 
 
@@ -889,9 +889,7 @@ To examine the composition of housing growth, Columns (2) through (4) of Table~\
 
 Appendix Table~\ref{table:bbluDDDhet} finds similarly zero net changes in informal housing within projects across all neighborhood income quartiles.  Yet, compared to richer quartiles (Q3 and Q4), poorer quartiles (Q1 and Q2) experience larger decreases in non-backyard informal housing that are offset by large increases in backyard informal housing.
 
-
 According to Columns (2) through (4) of Table~\ref{table:bbluDDD}, total reductions in housing density 0-500m outside of project footprints are driven by decreases in informal non-backyard housing and informal backyard housing although these coefficients are statistically insignificantly different from zero.  These findings suggest that housing projects primarily crowd-out nearby informal housing supply with little impact on nearby formal housing supply.
-
 
 % On net, the quantity of informal housing within projects remains roughly unchanged.
 % discuss appendix table, how the substitution is concentrated in lower income quartiles
@@ -900,8 +898,6 @@ According to Columns (2) through (4) of Table~\ref{table:bbluDDD}, total reducti
 % Formal housing growth drives almost all of the increase in density within project footprints while informal housing generates most of the decline in density outside of project areas.  To the extent that formal housing has higher quality than informal housing, these results suggest that housing project generate an overall upgrade in local housing quality.  Within project areas, informal housing density remains nearly unchanged despite well-documented slum clearance programs in many of these projects \citep{hofmeyr2008risk}.\footnote{Cite APPENDIX WITH HETEROGENEITY OF RESULTS ACCORDING TO PROJECT TYPE< AND DESCRIBE PROJECT TYPE ANALYSIS!!!!}  
 
 %Little change in total informal housing masks significant shifts in the type of informal housing within project footprints.  Our density measure differentiates informal housing between backyard and non-backyard housing.  Backyard housing is a common phenomenon in South Africa where households erect informal dwellings within the plots of formal dwellings \citep{Brueckner2018backyarding}.  Project houses are especially well-suited for backyarding because each house receives an individual landplot that is often much larger than the house itself.  Columns (4) and (5) include results for informal backyard and non-backyard housing respectively.  In project footprints, backyard housing almost completely replaces non-backyard informal housing as households erect new informal houses within the plots of project houses.  Both backyard and non-backyard housing decline 0-500m nearby projects although the coefficients are statistically insignificant.  These results suggest that bulldozing slums and replacing them with new housing projects does not change the resulting density of informal housing within project footprints.  However, these projects may have spillover effects on neighboring areas by crowding out growth of nearby informal housing.  
-
-
 
 \begin{table}[h!]
 \small
@@ -918,7 +914,7 @@ According to Columns (2) through (4) of Table~\ref{table:bbluDDD}, total reducti
 % \multicolumn{6}{l}{\footnotesize Project and spillover areas are 25$\times$25m grid cells.}\\[-.3em]
 \multicolumn{5}{l}{\footnotesize Outcomes are measure in terms of houses per $\text{km}^{2}$. }\\[-.3em]
 \multicolumn{5}{l}{\footnotesize Estimates control for 2001 census sub-place fixed effects.}\\[-.3em]
-\multicolumn{5}{l}{\footnotesize Coefficients are interactions with constructed, $\textsc{Const}_{i}$  and post, $\textsc{Post}_{t}$ indicators.}\\[-.3em]
+\multicolumn{5}{l}{\footnotesize Coefficients are interactions with constructed, $\textsc{Const}_{p}$  and post, $\textsc{Post}_{t}$ indicators.}\\[-.3em]
 \multicolumn{5}{l}{\footnotesize Appendix Table~\ref{table:bbluDDDfull} includes all corresponding triple-difference coefficients.} 
 \end{tabular}
 \end{table}
@@ -929,23 +925,8 @@ Given large shifts in quantities and types of housing within and around projects
 
 % Appendix Tables \ref{table:censusestimateshet} and \ref{table:censusestimateshet2} report triple-difference coefficients for spillover areas separately by neighborhood income quartile following the specification in equation (\ref{eq:mainhet}).\footnote{Census blocks lack the spatial precision to  estimate within-project effects separately by quartile of neighborhood income.}
 
-Columns (1) to (6) of Table~\ref{table:censusestimates} capture changes in housing characteristics within and around housing project footprints.  Inside projects, the share of households living in formal housing jumps by 61 percentage points consistent with the large growth in formal housing density documented in Table~\ref{table:bbluDDD}.  The shares of households in project areas with flush toilets, piped water indoors, and/or electricity also increase by economically meaningful magnitudes although only the coefficient for access to piped water indoors is statistically significant.  The average number of rooms per house increases by 1.9 likely because new project houses are larger than informal backyard and non-backyard houses.  The coefficient for the share of household in project areas that report owning their home is positive but statistically insignificant.
 
-In spillover areas (0-500m outside of projects), the share of households that report living in formal houses (Column (1)) increases by a statistically insignificant 12 percentage points.  Any increase in the ratio of formal to informal housing nearby projects may reflect crowding-out of nearby informal housing as described by housing density estimates from Table~\ref{table:bbluDDD}.  Economically small and statistically insignificant coefficients for infrastructure access, number of rooms, and homeownership in spillover areas in Columns (2) to (5) suggests that infrastructure and housing stock investments in project areas do not spillover to surrounding neighborhoods.
-
-Complementing changes in housing characteristics, Columns (7) to (12) of Table~\ref{table:censusestimates} estimate changes in demographics within and around project footprints.  Within projects, household (``HH'') sizes increase by 0.59 people on average given a baseline average of 3.25 people per household, which is consistent with recipients of project houses inviting additional family members to live in their new houses.  Population density increases by 1,610 people per $\text{km}^{2}$, which is statistically insignificant, but economically meaningful --- this effect almost doubles the baseline average population density of 1,793.  Coefficients for average age, race, and employment status of the head of households (``HoH'') as well as household log-income are economically small and statistically insignificant, suggesting little demographic change as a result of these housing projects.  The point estimate for household income (Column (12)) suggests a 12\% increase in average household incomes in project areas although this result is statistically insignificant.  This evidence is consistent with housing authorities ensuring that preexisting slum residents are able to benefit from new project houses.  This evidence is less consistent with the hypothesis that political corruption steers project houses toward wealthier and more politically connected households \citep{seriq}.
-
-Spillover areas report positive, statistically insignificant coefficients for both household size (Column (7)) and population growth (Column (8)) that are much smaller in magnitude and significance than corresponding estimates inside projects.  Spillover estimates for household demographics in Columns (8) to (11) parallel estimates within projects by having low statistical significance and small magnitudes.  Estimates predict a large, statistically insignificant increase of 21\% in average household income.
-
-% INCLUDE THIS DISCUSSION OR NOT! :  INCLUDE THIS IN MECHANISMS/DISCUSSION SECTION????? To further examine which types of households benefit from housing projects, Appendix Table~\ref{table:comparisons} compares average characteristics for households living in formal houses in constructed project areas and nearby non-project areas.  Project areas are defined as census blocks with over 30\% overlap with projects and non-project areas are defined as census blocks that do not overlap with project areas and have centroids within 1,500m of project boundaries.  (reference the last table!!)
-
-% Results are reported in terms of houses/$\text{km}^{2}$.
-
-
- % are building density measures for 25$\times$25m grid cells in 2001 and 2012 and $\textsc{\small Post}_{t}$ is equal to one for observations in 2012.    
-
-
-\begin{table}[]
+\begin{table}[hbt!]
 \small
 \centering
 \caption{Census Household-level Estimates}\label{table:censusestimates}
@@ -968,6 +949,22 @@ Spillover areas report positive, statistically insignificant coefficients for bo
 \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
 \end{tabular}
 \end{table}
+
+
+Columns (1) to (6) of Table~\ref{table:censusestimates} capture changes in housing characteristics within and around housing project footprints.  Inside projects, the share of households living in formal housing jumps by 61 percentage points consistent with the large growth in formal housing density documented in Table~\ref{table:bbluDDD}.  The shares of households in project areas with flush toilets, piped water indoors, and/or electricity also increase by economically meaningful magnitudes although only the coefficient for access to piped water indoors is statistically significant.  The average number of rooms per house increases by 1.9 likely because new project houses are larger than informal backyard and non-backyard houses.  The coefficient for the share of household in project areas that report owning their home is positive but statistically insignificant.
+
+In spillover areas (0-500m outside of projects), the share of households that report living in formal houses (Column (1)) increases by a statistically insignificant 12 percentage points.  Any increase in the ratio of formal to informal housing nearby projects may reflect crowding-out of nearby informal housing as described by housing density estimates from Table~\ref{table:bbluDDD}.  Economically small and statistically insignificant coefficients for infrastructure access, number of rooms, and homeownership in spillover areas in Columns (2) to (5) suggests that infrastructure and housing stock investments in project areas do not spillover to surrounding neighborhoods.
+
+Complementing changes in housing characteristics, Columns (7) to (12) of Table~\ref{table:censusestimates} estimate changes in demographics within and around project footprints.  Within projects, household (``HH'') sizes increase by 0.59 people on average given a baseline average of 3.25 people per household, which is consistent with recipients of project houses inviting additional family members to live in their new houses.  Population density increases by 1,610 people per $\text{km}^{2}$, which is statistically insignificant, but economically meaningful --- this effect almost doubles the baseline average population density of 1,793.  Coefficients for average age, race, and employment status of the head of households (``HoH'') as well as household log-income are economically small and statistically insignificant, suggesting little demographic change as a result of these housing projects.  The point estimate for household income (Column (12)) suggests a 12\% increase in average household incomes in project areas although this result is statistically insignificant.  This evidence is consistent with housing authorities ensuring that preexisting slum residents are able to benefit from new project houses.  This evidence is less consistent with the hypothesis that political corruption steers project houses toward wealthier and more politically connected households \citep{seriq}.
+
+Spillover areas report positive, statistically insignificant coefficients for both household size (Column (7)) and population growth (Column (8)) that are much smaller in magnitude and significance than corresponding estimates inside projects.  Spillover estimates for household demographics in Columns (8) to (11) parallel estimates within projects by having low statistical significance and small magnitudes.  Estimates predict a large, statistically insignificant increase of 21\% in average household income.
+
+% INCLUDE THIS DISCUSSION OR NOT! :  INCLUDE THIS IN MECHANISMS/DISCUSSION SECTION????? To further examine which types of households benefit from housing projects, Appendix Table~\ref{table:comparisons} compares average characteristics for households living in formal houses in constructed project areas and nearby non-project areas.  Project areas are defined as census blocks with over 30\% overlap with projects and non-project areas are defined as census blocks that do not overlap with project areas and have centroids within 1,500m of project boundaries.  (reference the last table!!)
+
+% Results are reported in terms of houses/$\text{km}^{2}$.
+
+ % are building density measures for 25$\times$25m grid cells in 2001 and 2012 and $\textsc{\small Post}_{t}$ is equal to one for observations in 2012.    
+
 
 
 % To assess impacts on dwelling quality, we pool the 2001 and 2011 census cross-sections and test for differential 10-year changes between constructed and unconstructed project areas. Because these data have coarser spatial resolutions, we perform this comparison at two levels of exposure to the policy: $D=\{\text{\small\it project},\text{\small\it spillover}\}$. As in table \ref{table:projectdescriptivescensus}, {\it project} blocks overlap with more than 30\% of their area with project boundaries. The remaining {\it spillover} blocks have less than 30\% area overlap, but their centroids fall within 1.5 km of a project boundary. Appendix \ref{appendix:bufferdesign} illustrates an example of these two definitions for a given project. Our estimating equation is:
@@ -1038,102 +1035,63 @@ Spillover areas report positive, statistically insignificant coefficients for bo
 
 \subsection{Price Effects}\label{section:resultsprices}
 
-To identify the spillover effects of public housing on local housing markets,
+
+We examine how housing projects may affect the values of nearby formal housing using deeds data on housing transactions.  Because few private housing transactions occur within project footprints and because it is possible that project house allocations may be miscoded as private housing transactions, we restrict our analysis to properties located outside of project footprints.  According to this restriction, we estimate the following modification of equation (\ref{eq:main}):
+\begin{align}\label{eq:mainprice}
+\begin{split}
+\quad y_{ipnt} \, =& \,\, \textsc{\small Spill}_{ip} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p} \, +\, \beta_4 \Big) \, + \\[.2em]
+& \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{p} \, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
+\end{split}
+\end{align}
+\noindent where the unit of analysis, $i$ is a property transaction, time, $t$ is monthly, and the outcome, $y_{ipnt}$ is the log-price of each property transaction.  To utilize monthly transaction data, we limit the sample to include constructed housing projects where the month of completion is available and unconstructed housing projects where we are able to project an expected month of construction.\footnote{EVALUATE THIS SAMPLE LIMITATION?}  We refer to the completion month for constructed projects and the expected completion month for unconstructed projects jointly as the scheduled construction month.  $\textsc{\small Post}_{t}$ takes a value of one for transactions occurring after the scheduled construction month.  $\textsc{\small Spill}_{ip}$ takes a value of one for properties between 0 and 500 meters outside of their nearest project boundary.  Some specifications include additional controls, $X_{ipnt}$  for the calendar month of each transaction and up to a cubic polynomial in the plot size of each property.  All specifications control for neighborhood fixed effects, $\lambda_n$.  
+
+To examine how price effects may vary by neighborhood income quartile, we also estimate the following modification of equation (\ref{eq:mainhet}):
+\begin{align}\label{eq:mainhetprice}
+\begin{split}
+\quad y_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{n}^{q} \, \Bigg[ \,\, \textsc{\small Spill}_{ipq} \, \Big( \beta_1^q \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \beta_2^q \, \textsc{\small Post}_{t} \, + \, \beta_3^q \, \textsc{\small Const}_{pq} \, +\, \beta_4^q \Big) \, + \\[.2em]
+& \, \gamma_1^q \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \gamma_2^q \,\textsc{\small Post}_{t} \, + \, \gamma_3^q \,  \textsc{\small Proj}_{pq} \, \Bigg] \, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
+\end{split}
+\end{align}
+\noindent where $Q_n^q$ indexes neighborhood income quartile.  
+
+Table~\ref{table:priceDDD_het} reports estimation results for all neighborhoods following equation (\ref{eq:mainprice}) and separately by neighborhood quartile following equation (\ref{eq:mainhetprice}).  Table~\ref{table:priceDDD_het} includes triple difference coefficients, $\beta_1$ and $\beta_1^q$, which capture the differential price change for properties between 0 and 500 meters from project boundaries before and after scheduled construction for constructed versus unconstructed projects.  With log-prices as an outcome, coefficients can be interpreted as in terms of percent of transaction prices.
 
 
-%  we adopt the specification from Section~\ref{section:bbluestimates}, instead using transaction price as an outcome:
 
-% \begin{equation} \label{equation:prices}
-% \begin{aligned}
-% \quad y_{ipt} \, =& \, \lambda_{0} \,+\, \sum\limits_{d\in D\setminus\{1200m\}} I^d_{ip}\Big( \alpha^d \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^d\textsc{\small Post}_{pt} \, + \, \gamma^d\textsc{\small Const}_{p} \, + \, \theta^{d} \Big) \\
-% & \, + \, \alpha^o \textsc{\small Post}_{pt}\times\textsc{\small Const}_{p} \, + \, \beta^o\textsc{\small Post}_{pt} \, +  \lambda_p \, + \, \eta_t \, + \, \delta X_i \, + \, \varepsilon_{ipt} \quad 
-% \end{aligned}
-% \end{equation}
-
-\noindent The outcome, $y_{itp}$, is measured in terms of the log-purchase price of property $i$ sold at time $t$ in the vicinity of project $p$.  Since we observe the exact transaction date, we set $\textsc{\small Post}_{pt}$\,=1 if date $t$ is after the month of project implementation and zero otherwise.  To account for smaller sample sizes than in the density estimation, we consider wider 200 meter distance bins from 0 to 1200 meters.  Additionally, $\lambda_p$ includes a project fixed effect, controlling for any fixed, unobserved drivers of house prices that vary between projects.\footnote{The project fixed effect subsumes the $\textsc{\footnotesize Const}_{p}$ effect since construction status does not vary within project over time.}  $\eta_{t}$ controls for year, year-month, and calendar month fixed effects depending on the specification to account for any factors such as shifts in aggregate housing demand that may be correlated with prices and the timing of housing projects.  To control for property characteristics, $X_i$ includes up to a cubic polynomial in lot size and a control for latitude-longitude cells in some specifications. Similarly to section~\ref{section:bbluestimates}, coefficients $\alpha^d$ express double-difference effects relative to effects within 1,000 to 1,200 meters of projects, again allowing for a triple-differences interpretation.  
-
-
-\begin{table}
+\begin{table}[htb!]
 \small
 \centering
-\caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD_het}
+\caption{Triple-Difference Estimates of Log-Prices 0 to 500 Meters Outside of Housing Projects}\label{table:priceDDD_het}
 \vspace{-2mm}
 \begin{tabular}{lCC}
 \toprule
  & \small (1) & \small (2)   \\ \midrule 
-
- \input{figures/price_temp_Tester_3d_spill_top_no_lab}
-\\
-By Income Quartile \\[.3em]
-
+ \input{figures/price_temp_Tester_3d_spill_top_no_lab}\\
+By Neighborhood Income Quartile \\[.3em]
  \input{figures/price_temp_Tester_3d_q_top}
-
 \bottomrule
-\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
-\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+\multicolumn{3}{l}{\footnotesize Estimates capture differential price effects for properties  } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize 0 to 500 meters outside of project boundaries relative to   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize properties 500 to 1,500 meters from boundaries before and   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize after scheduled construction for constructed and  unconstructed projects. } \\[-.3em]
+% \multicolumn{3}{l}{\footnotesize    } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Income quartiles are from average household 2001 incomes in } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize census 2001 subplaces.  All estimates include neighborhood fixed effects.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
 \end{tabular}
 \end{table}
 
+Column (1) of Table~\ref{table:priceDDD_het} documents a statistically insignificant 7\% decrease in housing prices, which shrinks to 6\% in column (2) after accounting for year-month fixed effects as well as up to a cubic polynomial in plot size.  Examining price effects by quartile of neighborhood income, we find that price effects become increasingly negative in higher quartile neighborhoods.  The poorest quartile (Q1) exhibits a small, statistically insignificant 3\% change in prices (column (2)) while the richest quartile (Q4) experiences a 17\% decrease in prices, which is statistically significant at the 5\% level.  Comparing columns (1) and (2), we find that additional controls have little impact on the magnitudes or statistical significance of the estimates.
+
+Appendix~\ref{section:appendixpricedist} estimates differential changes in prices before and after scheduled construction for constructed versus unconstructed projects non-parametrically according to distance to the nearest project boundary.  The strongest decreases in prices appear concentrated closest to project boundaries --- especially for the richest income quartile (Q4) --- although not all price gradients are monotonically increasing with distance to project boundaries.  
+
+To examine the dynamics of these price effects, Appendix~\ref{section:appendixpricetime} provides corresponding estimates of differential changes in prices for properties near versus far from project boundaries for constructed versus unconstructed projects non-parametrically by months to scheduled construction.  Estimates indicate some evidence of pretrends with prices declining in anticipation of project completion particularly for the bottom income quartile.  Pretrends are close to zero for the top two income quartiles.  Declines in prices occur sharply after scheduled construction and are most pronounced in the 48 months following scheduled construction for the top two income quartiles.
+
+One concern with this approach is that our method of imputing the expected month of project completion for planned, but unconstructed  may introduce noise into the estimates.  As a robustness exercise, Appendix~\ref{section:appendixpricedd} provides differences-in-differences estimates of price effects using only constructed projects and comparing properties near and far from project boundaries before and after construction.  Results from this exercise (Table~\ref{table:priceDD_het}) closely match triple-difference estimates (Table~\ref{table:priceDDD_het}).
 
 
-% \begin{figure}[b!]
-% \caption{Price Estimates over Distance from Project}\label{figure:distplot}
-% \centering
-% \includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot}
-% \vspace{-2mm}
-% \end{figure}
-
-% \begin{figure}[b!]
-% \caption{Price Estimates over Distance from Project Het}\label{figure:distplot_het}
-% \centering
-% \includegraphics[width=0.9\textwidth,trim={0cm .7cm 0cm 0.7cm},clip=true]{figures/price_regs_DDDplot_het}
-% \vspace{-2mm}
-% \end{figure}
-
-
-Figure~\ref{figure:distplot} plots coefficients $\alpha^d$ and associated standard errors for every $d\in D$. This specification includes project as well as calendar month fixed effects and includes only transactions that occur within three years of project construction.  Examining the point estimates, we find evidence of a drop in prices of around 0.1 log points or around 10\% within 200 meters of the project boundary.  Beyond 200 meters, this negative price effect disappears with all point estimates closely tracking zero.  Clustering standard errors at the project-level leaves wide confidence intervals at all distances, meaning that we are unable to reject equivalence between any coefficient and the price effect for the reference category at the 10\% confidence level.
-
-Table~\ref{table:priceDDD} provides point estimates for distance bins up to 600 meters across a variety of controls and using a broader reference category including all distances from 600 meters to 1,200 meters.  The first row confirms a price drop of around 10\% that is relatively stable as we include additional controls for project, time, and location.  We find much smaller but similarly negative price effects between 200 and 600 meters.  Wide standard errors ensure that no coefficients are statistically different from zero. Due to the noisiness of the data, we are unable to rule out large effects at all distances. 
-
-% \begin{table}[h!]
-% \small
-% \centering
-% \caption{Triple Difference Estimates on Log-Prices}\label{table:priceDDD}
-% \vspace{-2mm}
-% \begin{tabular}{lCCCC}
-% \toprule
-%  & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
-% \input{figures/price_regDDD.tex}
-% \bottomrule
-% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-% \end{tabular}
-% \end{table} 
-
-% \begin{table}[h!]
-% \small
-% \centering
-% \caption{Triple Difference Estimates on Log-Prices Het}\label{table:priceDDD_het}
-% \vspace{-2mm}
-% \begin{tabular}{lCCCC}
-% \toprule
-%  & \small (1) & \small (2) & \small (3) & \small (4) \\ \midrule 
-% \input{figures/price_regDDD_het.tex}
-% \bottomrule
-% \multicolumn{5}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-% \end{tabular}
-% \end{table} 
-
-% \begin{figure}[t!]
-% \caption{Time-to-Event Price Estimates}\label{figure:timeplot}
-% \centering
-% \includegraphics[width=0.99\textwidth,trim={0cm 0cm 0cm 0cm},clip=true]{figures/DDDplot_pertime_alt_unspaghetti}
-% \vspace{-2mm}
-% \end{figure}
-
-We look into the dynamics of these effects by substituting the $\textsc{\small Post}_{pt}$ term with year dummies relative to the date of construction. We estimate these trends separately for four different distance bins relative to the project boundary.  Figure~\ref{figure:timeplot} plots these coefficients, excluding the confidence intervals.  Further splitting the sample for this exercise widens the confidence intervals so that all 90\% intervals contain zero.  We set the reference category to be two-years prior to project construction for the furthest distance bin. Figure~\ref{figure:timeplot} shows some evidence of anticipation, with prices level declining one year before construction at all distances. After project construction, prices appear to gradually recover. %Time trends for distances beyond 600 meters appear relatively uncorrelated with the time of project completion, suggesting that these areas may be unaffected by project construction.
-
-
-
+COMPARE PRICE ESTIMATES TO DIAMOND PLEASE!
 
 
 
@@ -1362,7 +1320,7 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 % \multicolumn{7}{l}{\footnotesize Income quartiles are from average household income in 2001 census subplaces.} \\[-.3em] 
 % \multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
 % \multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
-% \multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic polynomial in unit area by time. }\\[-.3em] 
 % \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
 % \end{tabular}
 % \end{table}
@@ -1383,7 +1341,7 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 % \multicolumn{7}{l}{\footnotesize Income quartiles are from average household income in 2001 census subplaces.} \\[-.3em] 
 % \multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
 % \multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
-% \multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+% \multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic polynomial in unit area by time. }\\[-.3em] 
 % \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
 % \end{tabular}
 % \end{table}
@@ -1406,7 +1364,7 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 \multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
 \multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
 \multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
-\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic polynomial in unit area by time. }\\[-.3em] 
 \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
 \end{tabular}
 }
@@ -1428,7 +1386,7 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 \multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em] 
 \multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em] 
 \multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em] 
-\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em] 
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic polynomial in unit area by time. }\\[-.3em] 
 \multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
 \end{tabular}
 }
@@ -1505,232 +1463,397 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 % % }
 % \end{table}
 
+\subsection{Price Estimates by Distance to Project Boundary}\label{section:appendixpricedist}
+
+% We examine how prices change differentially over time for constructed relative to unconstructed projects across neighborhood income quartiles and at different distances from project boundaries using the following specification:
+% \begin{align*}
+% \quad \text{Log-Prices}_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{n}^{q} \, \Bigg[ \, \, \beta_1^{q} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p}\,  \\
+%  &\, + \sum_{d=0}^{1200} \,D_i^{d} \, \Big( \, \alpha_1^{q,d} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2^{q,d} \, \textsc{\small Post}_{t} \, + \, \alpha_3^{q,d} \, \textsc{\small Const}_{p}\, +\, \alpha_4^{q,d} \Big) \, \Bigg] \\
+% &\, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
+% \end{align*}
+% \noindent where distance to project boundary, $d$, ranges from 0 to 1,200 meters in intervals of 250 meters.    Coefficient, $\beta_1^{q}$ captures average differential changes in log-prices for constructed and unconstructed projects pre and post (expected) construction located in neighborhood income quartile $q$.  $D_i^{d}$ takes a value of one for properties, $i$, in 250 meter intervals, $d$, from 0 to 1,250 meters.  The coefficients of interest, $\alpha_1^{q,d}$ capture the differential changes in log-prices between constructed and unconstructed projects pre and post (expected) construction located in for each neighborhood income quartile $q$ and for each distance bin $d$ relative to similar changes for properties located in the omitted distance category, which is the furthest distance bin (1,250 to 1,500 meters).  $\alpha_1^{q,d}$ coefficients track how price changes evolve over distance to project boundaries according to neighborhood income quartile.  Additional controls $X_{ipnt}$ include up to a cubic polynomial in the lot size of properties as well as a fixed effects for the year-month of each transaction.  The specification also includes neighborhood fixed effects $\lambda_n$.  Figure~\ref{figure:pricesoverdistance} plots $\alpha_1^{q,d}$ coefficients with respect to distance to the nearest project boundary across income quartiles.
+
+
+We examine how prices change differentially over time for constructed relative to unconstructed projects at different distances from project boundaries using the following specification:
+\begin{align*}
+\quad \text{Log-Price}_{ipnt} \, =&  \, \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p}\,  \\
+ &\, + \sum_{d=1}^5 \,D_i^{d} \, \Big( \, \alpha_1^{d} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2^{d} \, \textsc{\small Post}_{t} \, + \, \alpha_3^{d} \, \textsc{\small Const}_{p}\, +\, \alpha_4^{d} \Big) \, \\
+&\, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad  \\
+\text{where}& \\
+& D_i^{d} = \mathbbm{1} \Big\{ dist_i \geq (250*d) - 250 \,\,\, \& \,\,\, dist_i \leq (250*d) + 250 \Big\}
+\end{align*}
+\noindent where distance to project boundary, $d$, ranges from 0 to 1,200 meters in intervals of 250 meters.  $\textsc{\small Const}_{p}$ is an indicator for being near a constructed project, and  $\textsc{\small Post}_{t}$ is an indicator that takes a value of one for properties sold after scheduled construction date for each project.  Coefficient, $\beta_1$ captures average differential changes in log-prices for constructed and unconstructed projects pre and post scheduled construction located in neighborhood income quartile $q$.  $D_i^{d}$ takes a value of one for properties, $i$, in 250 meter intervals, $d$, from 0 to 1,250 meters.  The coefficients of interest, $\alpha_1^{q,d}$ capture the differential changes in log-prices between constructed and unconstructed projects pre and post scheduled construction for each distance bin $d$ relative to similar changes for properties located in the omitted distance category, which is the furthest distance bin (1,250 to 1,500 meters).  $\alpha_1^{d}$ coefficients track how log-price changes evolve over distance to project boundaries.  Additional controls $X_{ipnt}$ include up to a cubic polynomial in the lot size of properties as well as a fixed effects for the year-month of each transaction.  The specification also includes neighborhood fixed effects $\lambda_n$.  Figure~\ref{figure:pricesoverdistance} plots $\alpha_1^{d}$ coefficients with respect to distance to the nearest project boundary.  
+
+\begin{figure}[!htb]
+       { \centering
+   \caption[ Log-Price Estimates by Distance to Nearest Project Boundary ]
+    {\small Log-Price Estimates by Distance to Nearest Project Boundary }\label{figure:pricesoverdistance}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q_one.pdf}
+} 
+Estimates include differential changes in prices before and after (construction) for constructed relative to unconstructed project areas.  Estimates are normalized with respect to price changes in the furthest distance group --- 1,250 to 1,500 meters from project boundaries.  The y-axis is in terms of changes in log-prices.
+\end{figure}
+
+In Figure~\ref{figure:pricesoverdistance}, we observe low price changes nearby project boundaries, which rise moving to 750 meters from project boundaries before falling back to zero price change at further distances.  Overall, this pattern does not provide evidence of a clear, monotonic gradient in housing price changes with respect to distance to housing projects.
+
+We also explore how these effects vary according to neighborhood income quartile in the following specification:
+\begin{align*}
+\quad \text{Log-Price}_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{n}^{q} \, \Bigg[ \, \, \beta_1^{q} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \beta_2^{q} \, \textsc{\small Post}_{t} \, + \, \beta_3^{q} \, \textsc{\small Const}_{pq}\,  \\
+ &\, + \sum_{d=1}^{5} \,D_i^{d} \, \Big( \, \alpha_1^{q,d} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{pq} \, + \, \alpha_2^{q,d} \, \textsc{\small Post}_{t} \, + \, \alpha_3^{q,d} \, \textsc{\small Const}_{pq}\, +\, \alpha_4^{q,d} \Big) \, \Bigg] \\
+&\, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad  \\
+\text{where}& \\
+& D_i^{d} = \mathbbm{1} \Big\{ dist_i \geq (250*d) - 250 \,\,\, \& \,\,\, dist_i \leq (250*d) + 250\Big\}
+\end{align*}
+\noindent where $q$ indexes quartiles from 1 to 4 and $Q_{n}^{q}$ takes a value of one if average income in neighborhood $n$ falls within quartile $q$.  Figure~\ref{figure:pricesoverdistancehet} plots $\alpha_1^{d,q}$ coefficients with respect to distance to the nearest project boundary across income quartiles.
+
+\begin{figure}[!htb]
+       { \centering
+   \caption[ Log-Price Estimates by Distance to Nearest Project Boundary by Neighborhood Income Quartile ]
+    {\small Log-Price Estimates by Distance to Nearest Project Boundary by Neighborhood Income Quartile}\label{figure:pricesoverdistancehet}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q_comb.pdf}
+} 
+Estimates include differential changes in prices before and after scheduled construction relative to unconstructed project areas.  Estimates are normalized with respect to price changes in the furthest distance group --- 1,250 to 1,500 meters from project boundaries.  Q1 to Q4 index neighborhood income quartiles measured using the 2001 census of population and housing.  The y-axis is in terms of changes in log-prices and the x-axis measures meters outside of the nearest housing project boundary.
+\end{figure}
+
+In Figure~\ref{figure:pricesoverdistancehet}, the poorest quartile (Q1) exhibits a decreasing gradient consistent with an appreciation in prices close to project boundaries.  The second and third quartiles (Q2 and Q3) provide little evidence of a clear pattern betwene prices and distance.  The richest quartile (Q4) finds an increasing gradient consistent with large drops in prices nearby constructed projects.
+
+
+\subsection{Price Estimates by Months to Project Construction}\label{section:appendixpricetime}
+
+We examine how prices change differentially for properties less than 500 meters outside of boundaries compared to projects between 500 and 1,500 meters outside of boundaries and between constructed and unconstructed project areas.  We further plot these differences with respect to months to the (expected) construction month of each project across neighborhood income quartiles using the following specification:
+\begin{align*}
+\quad \text{Log-Prices}_{ipnt} \, =&   \, \beta_1 \, \textsc{\small Spill}_{i}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Spill}_{i} \, + \, \beta_3 \, \textsc{\small Const}_{p}\,  \\
+ &\, + \sum_{l=1}^{5} T_{l} \, \Big( \, \alpha_1^{l} \, \textsc{\small Spill}_{i}\times\textsc{\small Const}_{p} \, + \, \alpha_2^{l} \, \textsc{\small Spill}_{i} \, + \, \alpha_3^{l} \, \textsc{\small Const}_{p}\, +\, \alpha_4^{l} \Big) \,  \\
+&\, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad \\
+\text{Where }& \\
+&T_1 = \mathbbm{1} \Big\{\, t \leq -48  \,\Big\} \,, \,\,\, T_2 = \mathbbm{1} \Big\{\, t > -48 \,\,\,\&\,\,\, t<=-24 \,\Big\} \,\,, \\
+&T_3 = \mathbbm{1} \Big\{\, t > 0 \,\,\,\&\,\,\, t<=24 \,\Big\} \,\, ,\,\,T_4\,=\,\mathbbm{1} \Big\{\, t > 24 \,\,\,\&\,\,\, t<=48 \,\Big\} \, , \,\,\, T_5 = \mathbbm{1} \Big\{\, t \geq 48\,\Big\} 
+\end{align*}
+\noindent where $\textsc{\small Spill}_{i}$ is an indicator for properties within 500 meters outside of a project boundary and $\textsc{\small Const}_{p}$ is an indicator for being nearby a project that is successfully constructed.  $t$ indexes months to scheduled construction with the scheduled construction month normalized to zero.  Differential prices near and far from constructed projects compared to unconstructed projects are estimated separately according to (1) all transactions more than 48 months before scheduled construction, (2) transactions between 48 and 24 months prior to scheduled construction, (3) transactions within 24 months after scheduled construction, (4) transactions within 24 months to 48 months after scheduled construction, and (5) all transactions over 48 months after scheduled construction.  This specification leaves transactions occurring in the 24 months immediately before scheduled construction as the omitted category.  Coefficient, $\beta_1$ captures differential changes in log-prices near and far from constructed and unconstructed projects across all time periods.  The coefficients of interest, $\alpha_1^{l}$ track how prices change differentially in the 5 time windows relative to the omitted category --- 24 months before scheduled construction.  Additional controls $X_{ipnt}$ include up to a cubic polynomial in the lot size of properties as well as a fixed effects for the year-month of each transaction.  The specification also includes neighborhood fixed effects $\lambda_n$.  Figure~\ref{figure:pricesovertime} plots $\alpha_1^{l}$ coefficients with respect to months to scheduled construction.
+
+Figure~\ref{figure:pricesovertime} finds a negative price differential 48 or more months before construction, which jumps above zero 48 to 24 months before scheduled construction.   The results support a declining pretrend with prices dropping by 10\% in the 48 months before scheduled construction.  This trend continues with a similar slope in the 48 months after scheduled construction, reaching a 20\% decline in prices between 24 and 48 months after construction.  Over 48 months after construction the price difference remains negative.  
+
+\begin{figure}[!htb]
+      {  \centering
+   \caption[ Log-Prices By Months to Scheduled Construction ]
+    {\small Log-Prices By Months to Scheduled Construction }\label{figure:pricesovertime} 
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q_one.pdf}
+}
+Estimates capture differential changes in log-prices for properties within 500m of project boundaries compared to properties located between 500m to 1,500m from project boundaries for constructed relative to unconstructed projects.  These estimates are computed at different time periods relative to the scheduled construction month of each project with price changes in the 24 months before scheduled construction normalized to zero.   The y-axis is in terms of changes in log-prices.
+\end{figure}
+
+Figure~\ref{figure:pricesovertime}  finds a negative price differential 48 or more months before construction, which recovers to above zero in 48 to 24 months before scheduled construction.  In the 48 months after scheduled construction, the price difference dips increasingly below zero.  Over 48 months after construction the price difference remains negative.
 
 
 
-\begin{figure*}
-        \centering
-   \caption[ Prices over distance ]
-    {\small Prices over distance} 
-        %\vspace{2mm}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 3-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 2-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_q}
-        \end{subfigure}
+We also explore how these effects vary according to neighborhood income quartile in the following specification:
+\begin{align*}
+\quad \text{Log-Prices}_{ipnt} \, =& \sum_{q=1}^{4} \, Q_{n}^{q} \, \Bigg[ \, \, \beta_1^{q} \, \textsc{\small Spill}_{iq}\times\textsc{\small Const}_{pq} \, + \, \beta_2 \, \textsc{\small Spill}_{iq} \, + \, \beta_3 \, \textsc{\small Const}_{pq}\,  \\
+ &\, + \sum_{l=1}^{5} T_{l} \, \Big( \, \alpha_1^{q,l} \, \textsc{\small Spill}_{iq}\times\textsc{\small Const}_{pq} \, + \, \alpha_2^{q,l} \, \textsc{\small Spill}_{iq} \, + \, \alpha_3^{q,l} \, \textsc{\small Const}_{pq}\, +\, \alpha_4^{q,l} \Big) \, \Bigg] \\
+&\, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad \\
+\text{Where }& \\
+&T_1 = \mathbbm{1} \Big\{\, t \leq -48  \,\Big\} \,, \,\,\, T_2 = \mathbbm{1} \Big\{\, t > -48 \,\,\,\&\,\,\, t<=-24 \,\Big\} \,\,, \\
+&T_3 = \mathbbm{1} \Big\{\, t > 0 \,\,\,\&\,\,\, t<=24 \,\Big\} \,\, ,\,\,T_4\,=\,\mathbbm{1} \Big\{\, t > 24 \,\,\,\&\,\,\, t<=48 \,\Big\} \, , \,\,\, T_5 = \mathbbm{1} \Big\{\, t \geq 48\,\Big\} 
+\end{align*}
+\noindent where $q$ indexes quartiles from 1 to 4 and $Q_{n}^{q}$ takes a value of one if average income in neighborhood $n$ falls within quartile $q$.  Figure~\ref{figure:pricesovertimehet} plots $\alpha_1^{d,q}$ coefficients with respect to time to scheduled construction across income quartiles.
+
+Figure~\ref{figure:pricesovertimehet} provides evidence of a strong decreasing pretrend in prices for the first quartile, dropping from price increases of around 100\% over 48 months before scheduled construction.  By contrast, the fourth quartile exhibits little pretrend in anticipation of scheduled construction.  Following scheduled construction, prices following a slight upward trend in the first quartile.  Moving from the second to the fourth quartiles, trends in prices after scheduled construction become more and more negative.  Prices for the third and fourth quartiles drop substantially in the 48 months reaching just after scheduled construction before partially rebounding more than 48 months after scheduled construction.  
+
+\begin{figure}[!htb]
+      {  \centering
+   \caption[ Log-Prices By Months to Scheduled Construction by Neighborhood Income Quartile ]
+    {\small Log-Prices By Months to Scheduled Construction by Neighborhood Income Quartile }\label{figure:pricesovertimehet} 
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q_comb.pdf}
+}
+Estimates capture differential changes in log-prices for properties within 500m of project boundaries compared to properties located between 500m to 1,500m from project boundaries for constructed relative to unconstructed projects.  These price effects are computed at different time periods relative to the scheduled construction month of each project with price effects in the 24 months before scheduled construction normalized to zero.  Q1 to Q4 index neighborhood income quartiles measured using the 2001 census of population and housing.  The y-axis is in terms of changes in log-prices and the x-axis measures months to scheduled construction.
+\end{figure}
+
+
+
+\subsection{Difference-in-Differences Estimates on Log-Prices}\label{section:appendixpricedd}
+
+As a robustness exercise, we estimate a differences-in-differences specification comparing properties close and far from project boundaries before and after scheduled construction only for projects that were successfully constructed.  We implement the following specification:
+\begin{align}\label{eq:mainpricedd}
+\begin{split}
+\quad y_{ipnt} \, =& \,\,   \beta_1 \textsc{\small Spill}_{ip}\times\textsc{\small Post}_{t} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Spill}_{ip} \, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
+\end{split}
+\end{align}
+We also estimate this differences-in-differences specification separately according to neighborhood income quartile with the following specification:
+\begin{align}\label{eq:mainpricehetdd}
+\begin{split}
+\quad y_{ipnt} \, =& \,\, \sum_{q=1}^{4} Q_{n}^{q} \Bigg[ \beta_1^{q} \textsc{\small Spill}_{ipq}\times\textsc{\small Post}_{t} \, + \, \beta_2^{q} \, \textsc{\small Post}_{t} \, + \, \beta_3^{q} \, \textsc{\small Spill}_{ipq} \, \Bigg] + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
+\end{split}
+\end{align}
+\noindent where $q$ indexes quartiles from 1 to 4 and $Q_{n}^{q}$ takes a value of one if average income in neighborhood $n$ falls within quartile $q$.
+
+Table~\ref{table:priceDD_het} provides estimates across all neighborhoods and by income quartile separately, finding similar results to triple-difference results in Table~\ref{table:priceDDD_het}.
+
+\begin{table}
+\small
+\centering
+\caption{Differences-in-Differences Estimates of Log-Prices 0 to 500 Meters Outside of Housing Projects}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule 
+ \input{figures/price_temp_Tester_2d_spill_top_no_lab} \\
+By Neighborhood Income Quartile \\
+ \input{figures/price_temp_Tester_2d_q_top}
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Estimates capture differential price effects for properties  } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize 0 to 500 meters outside of project boundaries relative to   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize properties 500 to 1,500 meters from boundaries before and   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize after scheduled construction. } \\[-.3em]
+% \multicolumn{3}{l}{\footnotesize    } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Income quartiles are from average household 2001 incomes in } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize census 2001 subplaces.  All estimates include neighborhood fixed effects.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\end{tabular}
+\end{table} 
+
+
+
+
+
+% \begin{figure*}
+%         \centering
+%    \caption[ Prices over distance ]
+%     {\small Prices over distance} 
+%         %\vspace{2mm}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_q_q1.pdf}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_q}
+%         \end{subfigure}
        
-\end{figure*}
+% \end{figure*}
 
 
-\begin{figure*}
-         \centering
-   \caption[ Prices over time ]
-    {\small Prices over time} 
- \begin{subfigure}[b]{0.48\textwidth}
 
-                    \caption[Network2]%
-            {{\footnotesize Time 3-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 3-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 2-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 2-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_q}
-        \end{subfigure}
-\end{figure*}
+
+% \begin{figure*}
+%         \centering
+%    \caption[ Prices over distance ]
+%     {\small Prices over distance} 
+%         %\vspace{2mm}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_2d_ctrl_q}
+%         \end{subfigure}
+       
+% \end{figure*}
+
+
+% \begin{figure*}
+%          \centering
+%    \caption[ Prices over time ]
+%     {\small Prices over time} 
+%  \begin{subfigure}[b]{0.48\textwidth}
+
+%                     \caption[Network2]%
+%             {{\footnotesize Time 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_2d_ctrl_q}
+%         \end{subfigure}
+% \end{figure*}
 
 
 %%%%%%%% TRANSACTION FREQUENCY
 
 
+% \begin{table}
+% \small
+% \centering
+% \caption{Triple Difference Estimates on Transaction Frequency}\label{table:priceDDD_het}
+% \vspace{-2mm}
+% \begin{tabular}{lCC}
+% \toprule
+%  & \small (1) & \small (2)   \\ \midrule 
+
+%  \input{figures/s_ksp_o0_d250_500_spill_top.tex}
+% \\
+% \textbf{By Income Quartile:} \\
+
+%  \input{figures/s_q_ksp_o0_d250_500_top.tex}
+
+% \bottomrule
+% \multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+% \multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table}
 
 
+% \begin{table}
+% \small
+% \centering
+% \caption{Diff-in-Diff Estimates on Transaction Frequency}\label{table:priceDD_het}
+% \vspace{-2mm}
+% \begin{tabular}{lCC}
+% \toprule
+%  & \small (1) & \small (2)   \\ \midrule 
 
-\begin{table}
-\small
-\centering
-\caption{Diff-in-Diff Estimates on Log-Prices}\label{table:priceDD_het}
-\vspace{-2mm}
-\begin{tabular}{lCC}
-\toprule
- & \small (1) & \small (2)   \\ \midrule 
+%  \input{figures/s_d2_ksp_o0_d250_500_spill_top}
+% \\
+% \textbf{By Income Quartile:} \\
 
- \input{figures/price_temp_Tester_2d_spill_top_no_lab}
-\\
-\textbf{By Income Quartile:} \\
+%  \input{figures/s_d2_q_ksp_o0_d250_500_top}
 
- \input{figures/price_temp_Tester_2d_q_top}
-
-\bottomrule
-\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
-\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-\end{tabular}
-\end{table} 
-
-
-\begin{table}
-\small
-\centering
-\caption{Triple Difference Estimates on Transaction Frequency}\label{table:priceDDD_het}
-\vspace{-2mm}
-\begin{tabular}{lCC}
-\toprule
- & \small (1) & \small (2)   \\ \midrule 
-
- \input{figures/s_ksp_o0_d250_500_spill_top.tex}
-\\
-\textbf{By Income Quartile:} \\
-
- \input{figures/s_q_ksp_o0_d250_500_top.tex}
-
-\bottomrule
-\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
-\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-\end{tabular}
-\end{table}
+% \bottomrule
+% \multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
+% \multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
+% \end{tabular}
+% \end{table} 
 
 
-\begin{table}
-\small
-\centering
-\caption{Diff-in-Diff Estimates on Transaction Frequency}\label{table:priceDD_het}
-\vspace{-2mm}
-\begin{tabular}{lCC}
-\toprule
- & \small (1) & \small (2)   \\ \midrule 
-
- \input{figures/s_d2_ksp_o0_d250_500_spill_top}
-\\
-\textbf{By Income Quartile:} \\
-
- \input{figures/s_d2_q_ksp_o0_d250_500_top}
-
-\bottomrule
-\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\
-\multicolumn{3}{l}{ \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }
-\end{tabular}
-\end{table} 
-
-
-\begin{figure*}
-       \centering
-   \caption[ Transaction frequency over distance ]
-    {\small Transaction frequency over distance} 
-        %\vspace{2mm}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 3-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_ctrl_q}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 2-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_ctrl_q}
-        \end{subfigure}
+% \begin{figure*}
+%        \centering
+%    \caption[ Transaction frequency over distance ]
+%     {\small Transaction frequency over distance} 
+%         %\vspace{2mm}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_3d_ctrl_q}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Distance 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_dist_2d_ctrl_q}
+%         \end{subfigure}
        
-\end{figure*}
+% \end{figure*}
 
 
-\begin{figure*}
-\centering
-   \caption[ Transaction frequency over time ]
-    {\small Transaction frequency over time} 
- \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 3-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 3-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_ctrl_q}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 2-Diff}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_no_ctrl_q}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.48\textwidth}
-                    \caption[Network2]%
-            {{\footnotesize Time 2-Diff, purch date/erf controls}}    
-            \label{fig:prefor}
-            \centering
-            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_ctrl_q}
-        \end{subfigure}
-\end{figure*}
+% \begin{figure*}
+% \centering
+%    \caption[ Transaction frequency over time ]
+%     {\small Transaction frequency over time} 
+%  \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 3-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 3-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_3d_ctrl_q}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 2-Diff}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_no_ctrl_q}
+%         \end{subfigure}
+%         \hfill
+%         \begin{subfigure}[b]{0.48\textwidth}
+%                     \caption[Network2]%
+%             {{\footnotesize Time 2-Diff, purch date/erf controls}}    
+%             \label{fig:prefor}
+%             \centering
+%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/freq_time_2d_ctrl_q}
+%         \end{subfigure}
+% \end{figure*}
 
 
 
@@ -1755,24 +1878,24 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 
 
 
-\begin{table}[h!]
-	\centering
-	\caption{Average Census Characteristics in Constructed Areas for Households living in Formal Houses in 2011 by Neighborhood Income Quartile}\label{table:comparisons}
-\vspace{-2mm}
-\begin{tabular}{l*{1}{CCCCC}}
-\toprule
-& Project Areas & \multicolumn{4}{c}{ Non-Project Areas (0-1,500m outside)} \\
-&  & Q1 & Q2 & Q3 &Q4 \\
-\midrule
-\input{figures/census_compare_houses_proj_for_4} 
-\bottomrule
- \multicolumn{6}{l}{\scriptsize Income quartiles (Q1-Q4) is by average household income in 2001 census sub-places.} \\ [-.5em]
- \multicolumn{6}{l}{\scriptsize  Averages include only households living in formal houses. } \\ [-.5em]
- \multicolumn{6}{l}{\scriptsize  Project areas are defined as census blocks with over 30\% overlap with project footprints. } \\ [-.5em]
-% \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
-% \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
-\end{tabular}
-\end{table}
+% \begin{table}[h!]
+% 	\centering
+% 	\caption{Average Census Characteristics in Constructed Areas for Households living in Formal Houses in 2011 by Neighborhood Income Quartile}\label{table:comparisons}
+% \vspace{-2mm}
+% \begin{tabular}{l*{1}{CCCCC}}
+% \toprule
+% & Project Areas & \multicolumn{4}{c}{ Non-Project Areas (0-1,500m outside)} \\
+% &  & Q1 & Q2 & Q3 &Q4 \\
+% \midrule
+% \input{figures/census_compare_houses_proj_for_4} 
+% \bottomrule
+%  \multicolumn{6}{l}{\scriptsize Income quartiles (Q1-Q4) is by average household income in 2001 census sub-places.} \\ [-.5em]
+%  \multicolumn{6}{l}{\scriptsize  Averages include only households living in formal houses. } \\ [-.5em]
+%  \multicolumn{6}{l}{\scriptsize  Project areas are defined as census blocks with over 30\% overlap with project footprints. } \\ [-.5em]
+% % \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+% % \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
+% \end{tabular}
+% \end{table}
 
 
 

@@ -240,26 +240,291 @@ cd ../..;
 cd $output ;
 };
 
+#delimit cr;
 
 
 
-if $reg_triplediff2 == 1 {;
+g cluster_joined_1 = cluster_rdp if con==1 
+replace cluster_joined_1 = cluster_placebo if con==0 
 
-egen inc_q = cut(inc), group(4);
-replace inc_q=inc_q+1;
-
-
-regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
-
-rgen_q_het ;
-
-regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+drop if (proj>0 & proj<1)
+drop if (spill1>0 & spill1<1)
 
 
+egen tb=sum(total_buildings), by(post)
+
+egen tbs = sum(total_buildings), by(cluster_joined_1 $regressors)
+g to = tbs/tb
+
+
+egen tbs_1 = sum(total_buildings), by(cluster_joined_1)
+g to_1 = tbs/tbs_1
+
+bys cluster_joined_1 $regressors: g CN=_N
+bys cluster_joined_1 $regressors: g cn=_n
+
+
+g ln_tbs = log(tbs)
+reg ln_tbs $regressors [pweight = CN]  if cn==1
+
+
+areg tbs $regressors  if cn==1, a(sp_1)
+
+
+areg total_buildings $regressors  if cn==1, a(sp_1)
+
+
+egen CJ = sum(total_buildings), by(cluster_joined_1 post)
+
+g tbsc=tbs/CN
+
+reg tbsc $regressors 
+
+
+reg tbs $regressors [pweight = CN]  if cn==1, cluster(cluster_joined) robust
 
 
 
-* preserve;
+g build = total_buildings>0
+
+probit build $regressors
+
+logit build $regressors
+
+
+
+
+g tbsc1 = tbsc/tb
+
+logit tbsc1 $regressors if cn==1
+
+
+g tbsc2 = tbsc/CJ/CN
+
+logit tbsc2 $regressors if cn==1 & con==1
+
+
+logit tbsc2 $regressors if cn==1 & con==0
+
+
+
+
+reg to_1 $regressors if cn==1
+
+
+
+egen allb=sum(total_buildings)
+
+
+egen sp_sum = sum(total_buildings), by(sp_1 $regressors)
+
+
+
+bys cluster_joined_1 post: g pop=_N
+
+
+
+cap drop pop
+cap drop pop_sep
+cap drop shr
+cap drop grp
+cap drop grpN
+
+global grp_var = "sp_1"
+global grpout = "total_buildings"
+
+egen pop = sum($grpout), by(cluster_joined_1 post)
+
+egen pop_sep  = sum($grpout), by($grp_var cluster_joined_1 $regressors)
+
+g shr = pop_sep/pop
+
+bys $grp_var cluster_joined_1 $regressors: g grp =_n
+bys $grp_var cluster_joined_1 $regressors: g grpN=_N
+
+
+logit shr $regressors [pweight = grpN] if grp==1, cluster(cluster_joined) robust
+
+
+
+
+cap drop pop
+cap drop pop_sep
+cap drop shr
+cap drop grp
+cap drop grpN
+
+global grp_var = "sp_1"
+global grpout = "for"
+
+* egen pop_sep  = sum($grpout), by($grp_var cluster_joined_1 $regressors)
+
+egen pop = sum(total_buildings), by(sp_1 post)
+g shr = total_buildings/pop
+
+egen pop_for = sum(for), by(sp_1 post)
+g shr_for = for/pop_for
+
+egen pop_inf = sum(inf), by(sp_1 post)
+g shr_inf = inf/pop_inf
+
+* bys $grp_var cluster_joined_1 $regressors: g grp =_n
+* bys $grp_var cluster_joined_1 $regressors: g grpN=_N
+
+
+logit shr $regressors, cluster(cluster_joined) robust
+
+
+logit shr_for $regressors, cluster(cluster_joined) robust
+
+logit shr_inf $regressors, cluster(cluster_joined) robust
+
+
+
+logit shr $regressors [pweight = grpN] if grp==1 & post==0
+
+logit shr $regressors [pweight = grpN] if grp==1 & post==1
+
+
+
+
+
+cap drop xr
+cap drop yr
+cap drop ng
+cap drop sp_sum1
+cap drop ngc
+cap drop NN
+
+g xr = round(X,1500)
+g yr = round(Y,1500)
+
+egen ng = group(xr yr post)
+
+bys ng $regressors: g ngc=_n
+bys ng $regressors: g NN=_N
+
+
+egen sp_sum1 = sum(total_buildings), by(ng $regressors)
+* replace sp_sum1 = sp_sum1/NN
+
+reg sp_sum1 $regressors [pweight = NN] if ngc==1, cluster(cluster_joined) robust
+
+poisson sp_sum1 $regressors [pweight = NN] if ngc==1, cluster(cluster_joined) robust
+
+
+
+poisson sp_sum1 $regressors [pweight = NN] if ngc==1, cluster(cluster_joined) robust
+
+
+
+poisson total_buildings  proj spill1 if con==1 & post==0
+
+poisson total_buildings  proj spill1 if con==0 & post==0
+
+
+poisson total_buildings  proj spill1 if con==1 & post==1
+
+poisson total_buildings  proj spill1 if con==0 & post==1
+
+
+
+poisson total_buildings $regressors if post==1
+
+poisson total_buildings $regressors if post==0
+
+
+
+poisson for $regressors 
+
+
+
+
+
+xtset sp_1 post
+
+xtpoisson total_buildings  $regressors, fe 
+
+poisson total_buildings $regressors
+
+
+logit build $regressors
+
+g populated = total_buildings>0 
+
+
+reg total_buildings $regressors if con==1
+reg total_buildings $regressors if con==0
+
+
+reg populated $regressors
+
+
+logit total_buildings $regressors
+
+
+logit populated $regressors
+
+
+logit to $regressors  [pweight = CN]  if cn==1
+
+reg tbs $regressors  [pweight = CN]  if cn==1
+
+
+g ln_tbs = log(tbs)
+
+reg total_buildings $regressors
+
+reg ln_tbs $regressors [pweight = CN]  if cn==1 
+
+
+
+reg tbs $regressors  [pweight = CN]  if cn==1 & tbs<=14000
+
+
+areg tbs $regressors  [pweight = CN]  if cn==1, a(cluster_joined_1)
+
+
+reg tbs $regressors
+
+reg to $regressors
+
+/*
+
+egen tb = sum(total_buildings), by(cluster_joined_1 post)
+
+g tbs = total_buildings/tb
+
+g tbs0 = tbs
+replace tbs0 = 0 if tbs==.
+
+* logit tbs $regressors
+
+* reg tbs0 $regressors
+
+
+
+/*
+
+egen tbm = mean(total_buildings_new), by(cluster_joined post)
+
+bys cluster_joined post: g cnj=_n
+keep if cnj==1
+
+egen tbm_s = sum(tbm), by(cluster_joined_1 post)
+
+g tbr = tbm/tbm_s
+
+replace tbr=0 if tbr==.
+
+logit tbr $regressors
+
+reg tbr $regressors
+
+reg tbm $regressors
+
+     
+     * preserve;
 * keep if inc_q==0;
 * regs b_i0_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 * restore;

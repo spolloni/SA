@@ -575,6 +575,8 @@ end
 cap prog drop lab_var_top_price_q
 prog define lab_var_top_price_q
 
+	lab var spill_con_post "All Neighborhoods"
+
 	levelsof inc_q
   	global Q_lev = "`=r(levels)'"
 

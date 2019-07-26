@@ -59,10 +59,9 @@ duplicates drop area_code year, force;
 save "census_building_query.dta", replace;
 
 
+
+
 /*
-
-
-
 
 
 save "temp_censuspers_agg_buffer_bblu_${dist_break_reg1}_${dist_break_reg2}${V}.dta", replace; 

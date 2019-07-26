@@ -407,6 +407,8 @@ def bblu_within(db,table,input_file,idvar,time):
 # bblu_within(db,'bblu_pre_in_sal_2001','sal_2001','OGC_FID','pre')
 # bblu_within(db,'bblu_post_in_sal_2011','sal_ea_2011','OGC_FID','post')
 
+bblu_within(db,'bblu_pre_in_ea_2001','ea_2001','OGC_FID','pre')
+bblu_within(db,'bblu_post_in_ea_2001','ea_2001','OGC_FID','post')
 
 
 def grid_sal_point(db,table,input_file,idvar):

@@ -168,7 +168,7 @@ global extra_controls_2 = "" ;
 * global extra_controls_2 = " $extra_controls_2   [pweight = area]  " ;
 
 
-
+/*
 
 
 * keep if distance_rdp<$dist_max_reg | distance_placebo<$dist_max_reg ;
