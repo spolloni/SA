@@ -18,6 +18,13 @@ global temp_file_emp="Generated/Gauteng/temp/plot_ghs_temp_emp.dta";
 
 global temp_analysis="Generated/Gauteng/temp/plot_ghs_analysis.dta";
 
+global temp_ea_grid="Generated/Gauteng/temp/ea_grid.dta";
+
+global temp_output_mp="Generated/Gauteng/temp/grid_ghs_price_post.dta";
+global temp_output_m="Generated/Gauteng/temp/grid_ghs_price.dta";
+
+
+
 if $LOCAL==1 {;
 	cd ..;
 };
@@ -261,7 +268,6 @@ local qry = "
 
   FROM ghs_pers  AS GP 
     JOIN ghs AS GH ON GP.uqnr =GH.uqnr AND GP.year = GH.year
-
   ";
 
 
@@ -287,7 +293,23 @@ drop _merge;
 
 
 save $temp_analysis, replace ; 
+
+
+local qry = " 
+  SELECT A.grid_id, A.ea_code FROM grid_ea_2001 AS A
+  ";
+
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+save $temp_ea_grid, replace;
+
 };
+
+
+
+
+
 
 #delimit cr;
 
@@ -295,7 +317,108 @@ save $temp_analysis, replace ;
 
 use $temp_analysis, clear
 
-cd $output
+g rent_total = rent if rent>0 & rent<10000
+replace rent_total = 250  if rent_cat==1
+replace rent_total = 750  if rent_cat==2
+replace rent_total = 2000  if rent_cat==3
+replace rent_total = 4000  if rent_cat==4
+replace rent_total = 6000  if rent_cat==5
+replace rent_total = 9000  if rent_cat==6
+
+
+g price_total = price if price>0 & price<=4000000
+replace price_total = 25000   if price_cat==1
+replace price_total = 150000   if price_cat==2
+replace price_total = 375000  if price_cat==3
+replace price_total = 750000  if price_cat==4
+replace price_total = 1250000  if price_cat==5
+replace price_total = 2500000  if price_cat==6
+replace price_total = 4000000  if price_cat==7
+
+g year1=year
+global ctrls_cat_list =  "year1 roof wall roof_q wall_q tot_rooms owner rdp water_source pipe_cause toilet toilet_shr toilet_dist electricity rubbish gender  race "
+
+
+global ctrls_cont_list = "age water_distance pipe_breaks edu sal sal_work"
+
+
+global ctrls_cat = ""
+foreach v in $ctrls_cat_list {
+  replace `v'=99 if `v'==.
+  global ctrls_cat = " $ctrls_cat i.`v' "
+}
+
+global ctrls_cont = ""
+foreach v in $ctrls_cont_list {
+  replace `v'=0 if `v'==.
+  global ctrls_cont = " $ctrls_cont `v' "
+}
+
+
+
+* g ln_price_total = log(price_total)
+* g ln_rent_total = log(rent_total)
+
+g for = dwell==1 |  dwell==3 | dwell==4
+g bkyd = ((dwell==6 | dwell==7) & year<=2008) | ((dwell==7 | dwell==8) & year>2008)
+g nbkyd = (dwell==8 & year<=2008) | ((dwell==9) & year>2008)
+g inf = bkyd==1 | nbkyd==1
+
+
+g post = year>2008
+
+foreach v in rent price {
+  egen mp_`v' = mean(`v'_total), by(ea_code post)
+  egen m_`v' = mean(`v'_total), by(ea_code)
+    reg `v'_total $ctrls_cat $ctrls_cont
+    predict mr_`v', residuals
+
+
+  foreach j in for bkyd nbkyd inf {
+    g id_`v'_`j' = `v'_total if `j'==1
+    egen mp_`v'_`j' = mean(id_`v'_`j'), by(ea_code post)
+    egen m_`v'_`j' = mean(id_`v'_`j'), by(ea_code)
+
+    reg id_`v'_`j'  $ctrls_cat $ctrls_cont
+    predict mr_`v'_`j', residuals
+
+    drop id_`v'_`j'
+  }
+}
+
+preserve 
+  keep ea_code mp_*  post
+  duplicates drop ea_code, force
+  merge 1:m  ea_code using $temp_ea_grid
+  keep if _merge==3
+  drop _merge
+  ren grid_id id
+  save $temp_output_mp, replace
+restore
+
+
+preserve 
+  keep ea_code m_* mr_*
+  duplicates drop ea_code, force
+  merge 1:m ea_code using $temp_ea_grid
+  keep if _merge==3
+  drop _merge
+  ren grid_id id
+  save $temp_output_m, replace
+restore
+
+
+
+* cd $output;
+
+
+
+
+
+
+
+/*
+
 
 ren ea_code area_code
 g bblu_year = 2001 if year<=2008

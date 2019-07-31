@@ -44,6 +44,57 @@
 \begin{document}
 
 
+\begin{figure*}[h!]
+        \centering
+        \caption[ 2001 Housing Densities in Constructed and Unconstructed Projects]
+        {\small 2001 Housing Densities in Constructed and Unconstructed Projects} 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_spk.pdf}
+            \caption[Network2]%
+            {{\small Formal density}}    
+            \label{fig:prefor_raw}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_spk.pdf}
+            \caption[]%
+            {{\small Informal density}}    
+            \label{fig:preinf_raw}
+        \end{subfigure}
+        \label{fig:rawbblumeans_het}
+        %\vspace{-6mm}
+   {\scriptsize Negative distances indicate areas within project boundaries while positive distances measure areas away increasingly outside of project boundaries.  Within neighborhood densities are calculated by subtracting mean densities  \\[-.5em] at the 2001 census subplace level from each 25$\times$25m grid cell.}
+    \end{figure*} 
+
+
+
+\begin{figure*}[h!]
+        \centering
+        \caption[ Changes in Housing Densities in Constructed and Unconstructed Projects Areas]
+        {\small Changes in Housing Densities in Constructed and Unconstructed projects } 
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_spk}
+            \caption[]%
+            {{\small formal housing density change}}    
+            \label{fig:forchange}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_spk}
+            \caption[]%
+            {{\small informal housing density change}}    
+            \label{fig:infchange}
+        \end{subfigure}
+        \label{fig:rawbblumeanschange}
+        \vspace{-6mm}
+    \end{figure*} 
+
 \begin{table}
 \caption{Building Density}
 \begin{tabular}{lDDDD}
@@ -71,6 +122,9 @@
 % \bottomrule
 \end{tabular}
 \end{table}
+
+
+
 
 
 \begin{table}[]
@@ -487,22 +541,22 @@
 
 
 
-\begin{table}[h!]
-	\centering
-	\caption{Housing Comparisons Formal Housing Only (at endline in constructed areas)}
-\vspace{-2mm}
-\begin{tabular}{l*{1}{ccccc}}
-\toprule
-& Proj & \multicolumn{4}{c}{ Spill} \\
-&  & Q1 & Q2 & Q3 &Q4 \\
-\midrule
-\input{figures/census_compare_houses_proj_for_4} 
-\bottomrule
-% \multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 50\% } \\ [-.5em]
-% \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
-% \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
-\end{tabular}
-\end{table}
+% \begin{table}[h!]
+% 	\centering
+% 	\caption{Housing Comparisons Formal Housing Only (at endline in constructed areas)}
+% \vspace{-2mm}
+% \begin{tabular}{l*{1}{ccccc}}
+% \toprule
+% & Proj & \multicolumn{4}{c}{ Spill} \\
+% &  & Q1 & Q2 & Q3 &Q4 \\
+% \midrule
+% \input{figures/census_compare_houses_proj_for_4} 
+% \bottomrule
+% % \multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census small-areas with over 50\% } \\ [-.5em]
+% % \multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+% % \multicolumn{4}{l}{\scriptsize ``All''  includes all small-areas.  Means are weighted by land area.}
+% \end{tabular}
+% \end{table}
 
 
 

@@ -680,5 +680,47 @@ def add_landplot(db,source):
     
 
 
+def add_elevation(db,source):
+
+    shp = glob.glob(source+'*elevation.shp')[0]
+    tablename = 'elevation'
+
+    # create mock table for overwrite
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            {} (mock INT);'''.format(tablename))
+    con.commit()
+    con.close()
+
+    # push shapefile to db
+    cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+           db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
 
 
+    return
+    
+
+
+def add_elevation_points(db,source):
+
+    shp = glob.glob(source+'*elevation_chain_200.shp')[0]
+    tablename = 'elevation_points'
+
+    # create mock table for overwrite
+    con = sql.connect(db)
+    cur = con.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS 
+            {} (mock INT);'''.format(tablename))
+    con.commit()
+    con.close()
+
+    # push shapefile to db
+    cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+           db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+    subprocess.call(' '.join(cmd),shell=True)
+
+
+    return
+    

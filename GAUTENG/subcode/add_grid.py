@@ -335,6 +335,83 @@ def grid_sal(db,table,input_file,idvar):
 # grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
 # grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
 
+
+
+def grid_ea(db,table,input_file,idvar):
+    print ' new ea intersection is runningggggggg '
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.OGC_FID, A.ea_code
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                            GROUP BY G.{} ;
+
+                '''.format(table,idvar,input_file,'ea_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+    print 'all set with sp_1 !'
+
+# grid_ea(db,'grid_ea_2001','grid_temp_25','grid_id')
+
+
+def elevation_ea(db,table,input_file,idvar):
+    print ' new ea intersection is runningggggggg '
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.OGC_FID, A.ea_code
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                             ;
+
+                '''.format(table,idvar,input_file,'ea_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+    print 'all set with sp_1 !'
+
+# elevation_ea(db,'elevation_ea_2001','elevation','height')
+
+
+
+# def within_erven(db,table,input_file,idvar):
+#     print ' new erven intersection is runningggggggg '+table
+#     con = sql.connect(db)
+#     cur = con.cursor()
+#     con.enable_load_extension(True)
+#     con.execute("SELECT load_extension('mod_spatialite');")
+#     con.execute("DROP TABLE IF EXISTS {};".format(table))
+#     con.execute('''
+#                 CREATE TABLE {} AS
+#                 SELECT G.{}, A.property_id
+#                 FROM {} AS G, {} AS A
+#                             WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+#                                             WHERE f_table_name='{}' AND search_frame=G.GEOMETRY)
+#                                             AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
+#                                             GROUP BY A.property_id
+#                                              ;
+
+#                 '''.format(table,idvar,input_file,'erven',input_file))
+#     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+#     print 'all set with elevation erven !'+table
+
+### WAY TOO MANY ERVENS TO DO THIS ! 
+# within_erven(db,'elevation_erven','elevation','height')
+# within_erven(db,'grid_erven','grid_temp_25','grid_id')
+
+
+
+
 def bblu_in_range(db,time):
     print 'starting bblu ' +time+' within .. '
     con = sql.connect(db)
@@ -407,8 +484,8 @@ def bblu_within(db,table,input_file,idvar,time):
 # bblu_within(db,'bblu_pre_in_sal_2001','sal_2001','OGC_FID','pre')
 # bblu_within(db,'bblu_post_in_sal_2011','sal_ea_2011','OGC_FID','post')
 
-bblu_within(db,'bblu_pre_in_ea_2001','ea_2001','OGC_FID','pre')
-bblu_within(db,'bblu_post_in_ea_2001','ea_2001','OGC_FID','post')
+# bblu_within(db,'bblu_pre_in_ea_2001','ea_2001','OGC_FID','pre')
+# bblu_within(db,'bblu_post_in_ea_2001','ea_2001','OGC_FID','post')
 
 
 def grid_sal_point(db,table,input_file,idvar):
@@ -430,8 +507,32 @@ def grid_sal_point(db,table,input_file,idvar):
                 '''.format(table,idvar,input_file,'sal_2001',input_file,idvar))
     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
 
+
+
 # grid_sal_point(db,'erven_s2001','erven','property_id')
 
+
+
+def grid_ea_point(db,table,input_file,idvar):
+    print 'grid ea point'
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.ea_code
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                            GROUP BY G.{} ;
+
+                '''.format(table,idvar,input_file,'ea_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+
+# grid_ea_point(db,'erven_ea_2001','erven','property_id')
 
 
 # def grid_sal2011(db,table,input_file,idvar):
@@ -648,6 +749,101 @@ def grid_xy(db,gridtype):
 
 
 # grid_xy(db,'grid_temp_25')
+
+
+def grid_to_erven(db):
+
+    print "start grid to erven"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_erven;') 
+    make_qry=  ''' CREATE TABLE grid_to_erven AS 
+                            SELECT A.property_id AS property_id, G.grid_id
+                                FROM erven as A, grid_temp_25 AS G
+                                    WHERE A.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='erven' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
+                    '''
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX grid_to_erven_index ON grid_to_erven (grid_id);")
+    cur.execute("CREATE INDEX prop_id_to_erven_index ON grid_to_erven (property_id);")    
+    con.commit()
+    con.close()   
+    print "finish grid to erven"
+
+    return
+
+
+# grid_to_erven(db)
+
+
+def grid_to_elevation(db):
+
+    print "start grid to elevation"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_elevation;') 
+    make_qry=  ''' CREATE TABLE grid_to_elevation AS 
+                            SELECT A.height , G.grid_id
+                                FROM elevation as A, grid_temp_25 AS G
+                                    WHERE A.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='elevation' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
+                    '''
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX grid_to_elevation_index ON grid_to_elevation (grid_id);")
+    #cur.execute("CREATE INDEX prop_id_to_erven_index ON grid_to_erven (property_id);")    
+    con.commit()
+    con.close()   
+    print "finish grid to elevation"
+
+    return
+
+### TAKES WAYY TOO LONG UNFORT
+# grid_to_elevation(db)
+
+
+def grid_to_elevation_points(db):
+
+    print "start grid to elevation points"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_elevation_points;') 
+    make_qry=  ''' CREATE TABLE grid_to_elevation_points AS 
+                            SELECT A.fid , G.grid_id
+                                FROM elevation_points as A, grid_temp_25 AS G
+                                    WHERE A.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='elevation_points' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
+                    '''
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX grid_to_elevation_index ON grid_to_elevation_points (grid_id);")
+    cur.execute("CREATE INDEX elevation_id_to_grid_index ON grid_to_elevation_points (fid);")    
+    con.commit()
+    con.close()   
+    print "finish grid to elevation points"
+
+    return
+
+# grid_to_elevation_points(db)
 
 
 

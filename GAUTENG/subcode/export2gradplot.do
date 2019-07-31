@@ -13,7 +13,7 @@ local qry = "
          A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day,
          A.purch_price, A.trans_id, A.property_id, A.seller_name,
 
-         B.erf_size, B.latitude, B.longitude, 
+         B.erf_size, B.latitude, B.longitude, B.bblu_pre,
 
          C.rdp_property,
  

@@ -6,7 +6,7 @@ main.py
 '''
 
 from pysqlite2 import dbapi2 as sql
-from subcode.data2sql import add_trans, add_erven, add_bonds
+from subcode.data2sql import add_trans, add_erven, add_bonds, add_elevation, add_elevation_points
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
 from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
 from subcode.dissolve import dissolve_census, dissolve_BBLU
@@ -15,7 +15,6 @@ from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid, intersGE
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
 from subcode.add_grid import buffer_area_int, buffer_area_int, census_xy, census_1996_xy, grid_xy, grid_sal, grid_sal_point
-
 
 from subcode.distfuns_admin import dist, intersPOINT, areaGEOM
 
@@ -40,6 +39,7 @@ rawland = project + 'Raw/LANDPLOTS/'
 gendata = project + 'Generated/GAUTENG/'
 outdir  = project + 'Output/GAUTENG/'
 tempdir = gendata + 'temp/'
+
 
 for p in [gendata,outdir]:
     if not os.path.exists(gendata):
@@ -179,6 +179,14 @@ if _1_c_IMPORT ==1:
 if _1_d_IMPORT ==1:
 
     print '\n'," Importing GCRO & Landplots data into SQL... ",'\n'
+
+    print '\n'," Import elevation lines ... ",'\n'
+    add_elevation(db,rawgis)
+    print 'elevation done!'
+
+    print '\n'," Import elevation points ... ",'\n'
+    add_elevation_points(db,rawgis)
+    print 'elevation points done!'
 
     add_gcro(db,rawgcro)
     print 'GCRO data: done!' 
@@ -333,7 +341,8 @@ if _4_g_DISTS_ ==1:
         import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
                                 st_y(st_centroid(p.GEOMETRY)) AS y, p.grid_id
                                 FROM  {} AS  p '''.format(grid_name)
-        dist(db,hull,'grid_temp_3',import_script,dist_threshold)
+        # dist(db,hull,'grid_temp_3',import_script,dist_threshold)
+        dist(db,hull,'grid_temp_25',import_script,dist_threshold)
         print '\n'," -- Grid Distance ", '\n'
         intersGEOMgrid(db,hull,grid_name) 
         print '\n'," -- grid: done!", '\n'

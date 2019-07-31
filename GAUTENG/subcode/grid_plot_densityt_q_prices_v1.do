@@ -100,144 +100,28 @@ if $bblu_do_analysis==1 {;
 
 use bbluplot_grid_${grid}.dta, clear;
 
-
-
 g area = $grid*$grid;
 
 global grid_mult = 1000000/($grid*$grid);
 
-ren rdp_cluster cluster_rdp;
-ren placebo_cluster cluster_placebo;
-ren rdp_distance distance_rdp;
-ren placebo_distance distance_placebo;
+drop if (area_int_rdp>0 & area_int_rdp<.) | (area_int_placebo>0 & area_int_placebo<.) ;
 
-replace distance_placebo=-distance_placebo if area_int_placebo>.5 & area_int_placebo<. ;
-replace distance_rdp=-distance_rdp if area_int_rdp>.5 & area_int_rdp<. ;
-drop area_int_rdp area_int_placebo;
-
-
-replace distance_placebo = . if distance_rdp<0 ;
-replace distance_rdp     = . if distance_placebo<0;
-
-replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
-replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
-
-replace distance_placebo=. if distance_placebo>${dist_max} ;
-replace distance_rdp=. if distance_rdp>${dist_max} ;
-
-
-
-drop if distance_rdp==. & distance_placebo==. ; 
-
-merge m:1 sp_1 using "temp_2001_inc.dta";
+fmerge m:1 sp_1 using "temp_2001_inc.dta";
 drop if _merge==2;
 drop _merge;
 
-merge m:1 id using "temp/grid_ghs_price.dta";
+fmerge m:1 id using "temp/grid_ghs_price.dta";
 drop if _merge==2;
 drop _merge;
 
-merge m:1 id using "grid_elevation.dta";
+fmerge m:1 id using "grid_elevation.dta";
 drop if _merge==2;
 drop _merge;
 
-merge m:1 id using "grid_prices.dta";
+fmerge m:1 id using "grid_prices.dta";
 drop if _merge==2;
 drop _merge;
 
-
-
-if $type_area == 0 {;
-  g proj   = distance_rdp<=0 | distance_placebo<=0 ;
-  g spill1  = ( distance_rdp>0 & distance_rdp<$dist_break_reg1 ) | ( distance_placebo>0 & distance_placebo<$dist_break_reg1 ) ;
-  g spill2  = ( distance_rdp>=$dist_break_reg1 & distance_rdp<=$dist_break_reg2 ) | ( distance_placebo>=$dist_break_reg1 & distance_placebo<=$dist_break_reg2 ) ;
-  g con    = distance_rdp!=. ;
-};
-
-if $type_area>=1 {;
-  rgen_area ;
-};
-
-g dist_temp = distance_rdp if distance_rdp<distance_placebo ;
-replace dist_temp = distance_placebo if distance_placebo<=distance_rdp ;
-
-drop distance_rdp;
-g distance_rdp = dist_temp if con==1;
-drop distance_placebo;
-g distance_placebo = dist_temp if con==0;
-drop dist_temp;
-
-
-sum distance_rdp;
-global max = round(ceil(`r(max)'),$bin);
-
-egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
-g drdp=dists_rdp;
-replace drdp=. if drdp>$max-$bin; 
-* replace dists_rdp = dists_rdp+`=abs($dist_min)';
-
-egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
-g dplacebo = dists_placebo;
-replace dplacebo=. if dplacebo>$max-$bin;
-* replace dists_placebo = dists_placebo+`=abs($dist_min)';
-
-
-
-
-rgen ${no_post};
-
-
-g cluster_joined = cluster_rdp if con==1 ; 
-replace cluster_joined = cluster_placebo if con==0 ; 
-
-g proj_cluster = proj>.5 & proj<.;
-g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
-
-if $many_spill == 1 { ;
-g spill2_cluster = proj_cluster==0 & spill1_cluster==0 & spill2>.5 & spill2<.;
-egen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
-drop cluster_joined ;
-ren cj1 cluster_joined ;
-};
-if $many_spill == 0 {;
-*replace spill1_cluster = 1 if spill2_cluster==1;
-egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
-drop cluster_joined ;
-ren cj1 cluster_joined ;
-};
-
-
-
-global outcomes="";
-foreach v in $outcomes_pre {;
-   g `v'_new=`v'*$grid_mult;
-   global outcomes = " $outcomes `v'_new " ;
-};
-
-gen_LL ;
-
-
-foreach v in for inf {;
-if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
-  egen `v'_m = mean(`v'),  by( LL post ) ;
-  g `v'_fe_pre=`v'-`v'_m ;
-  drop `v'_m ;
-  };
-else {;
-g `v'_fe_pre=`v' ;
-};
-};
-
-foreach v in for inf {;
-if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
-  egen `v'_m = mean(`v'),  by( LL  ) ;
-g `v'_fe=`v'-`v'_m ;
-  drop `v'_m ;
-  };
-else {;
-g `v'_fe=`v' ;
-};
-};
 
 * go to working dir;
 cd ../..;
@@ -258,15 +142,6 @@ cd $output ;
 #delimit cr;
 
 
-g cluster_joined_1 = cluster_rdp if con==1 
-replace cluster_joined_1 = cluster_placebo if con==0 
-
-drop if (proj>0 & proj<1)
-drop if (spill1>0 & spill1<1)
-
-
-
-
 cap drop xg
 cap drop yg
 cap drop xyg
@@ -285,9 +160,9 @@ cap drop garea
 
 
 * global gsize = 200  * t 2.5  z 7
-* global gsize = 150  
+global gsize = 150  
 
-global gsize = 120
+* global gsize = 120
 * t 2.83 z 5.5
 * global gsize = 100  
  * t 4    z 4 
@@ -322,22 +197,43 @@ g slope = hd/(sqrt(gN*25*25)/3.14)
 replace slope=0 if slope==.
 
 gegen p   =  mean(pm), by(xyg)
-* egen mtb =  mean(total_buildings), by(xyg)
-* reg p slope gN if gn==1, robust
 
 g garea=gN*25*25
 
 
-reg p slope  if total_buildings<=5 & distance_rdp>0 & distance_placebo>0, cluster(xyg) robust
-
-oprobit total_buildings slope  if total_buildings<=5 & distance_rdp>0 & distance_placebo>0 & p!=., cluster(xyg) robust
+reg p slope  if total_buildings<=5 , cluster(xyg) robust
 
 
+egen slopeg=cut(slope), group(20)
+
+gegen mt = mean(total_buildings), by(slopeg)
+
+bys slopeg: g sgn=_n
+
+twoway scatter mt slopeg if sgn==1
 
 
+
+* reg total_buildings slope  if total_buildings<=5 & p!=., cluster(xyg) robust
+* oprobit total_buildings slope  if total_buildings<=5 , cluster(xyg) robust
+
+
+
+reg p slope  if total_buildings<=5 & slope>0, cluster(xyg) robust
+
+reg total_buildings slope  if total_buildings<=5 & p!=. & slope>0, cluster(xyg) robust
+
+oprobit total_buildings slope  if total_buildings<=5 & p!=. & slope>0, cluster(xyg) robust
+
+
+
+cmp ( total_buildings = p garea) ( p = slope garea) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+
+
+
+
+/*
 *** problem is: don't have price for second stage...... 
-
-
 
 
 oprobit total_buildings slope  if total_buildings<=5 & distance_rdp>0 & distance_placebo>0, cluster(xyg) robust
@@ -372,6 +268,8 @@ estout ivregest using  "ivregest.tex", replace  style(tex) ///
 * reg mtb slope gN if gn==1, robust
 
 
+* egen mtb =  mean(total_buildings), by(xyg)
+* reg p slope gN if gn==1, robust
 
 
 
