@@ -142,6 +142,8 @@ cd $output ;
 #delimit cr;
 
 
+
+
 cap drop xg
 cap drop yg
 cap drop xyg
@@ -155,21 +157,14 @@ cap drop slope
 cap drop p
 cap drop mtb
 cap drop garea
+cap drop p_nd
+cap drop p_d
+cap drop pdiff
 
+global gsize = 150   
 
-
-
-* global gsize = 200  * t 2.5  z 7
-global gsize = 150  
-
-* global gsize = 120
-* t 2.83 z 5.5
-* global gsize = 100  
- * t 4    z 4 
-* global gsize = 75   
- * t 3.94    z 2.32
-* global gsize = 50  ** 300 groups
-
+* PRIMARY SPEC!! 
+* global gsize = 200  * t 2.5  z 7* global gsize = 120* t 2.83 z 5.5* global gsize = 100   * t 4    z 4 * global gsize = 75    * t 3.94    z 2.32* global gsize = 50  ** 300 groups
 
 global xsize = (-1385063+1262713)/$gsize
 
@@ -189,10 +184,6 @@ gegen hmean= mean(height), by(xyg)
 
 g hd = hmax - hmin
 
-
-hist hd if gn==1
-
-
 g slope = hd/(sqrt(gN*25*25)/3.14)
 replace slope=0 if slope==.
 
@@ -201,35 +192,87 @@ gegen p   =  mean(pm), by(xyg)
 g garea=gN*25*25
 
 
-reg p slope  if total_buildings<=5 , cluster(xyg) robust
+gegen p_nd = mean(pm_no_dev), by(xyg)
+gegen p_d  = mean(pm_dev), by(xyg)
 
+g pdiff = p_d-p_nd
 
-egen slopeg=cut(slope), group(20)
+sum pm, detail
+global pmean = `=r(mean)'
 
-gegen mt = mean(total_buildings), by(slopeg)
-
-bys slopeg: g sgn=_n
-
-twoway scatter mt slopeg if sgn==1
-
-
-
-* reg total_buildings slope  if total_buildings<=5 & p!=., cluster(xyg) robust
-* oprobit total_buildings slope  if total_buildings<=5 , cluster(xyg) robust
+g C = $pmean if slope>0 & slope<.
+replace C = $pmean + ($pmean*.23*.25) + ($pmean*.38*.05)  if slope>.06 & slope<.12
+replace C = $pmean + ($pmean*.23*.50) + ($pmean*.38*.15)  if slope>.12 & slope<.
 
 
 
-reg p slope  if total_buildings<=5 & slope>0, cluster(xyg) robust
 
-reg total_buildings slope  if total_buildings<=5 & p!=. & slope>0, cluster(xyg) robust
+* g LC = log(C)
+* reg C slope if slope>0
+* reg pdiff slope if slope>0
+* reg C slope garea hmean
+* count if gn==1
 
-oprobit total_buildings slope  if total_buildings<=5 & p!=. & slope>0, cluster(xyg) robust
+* cmp ( total_buildings = C ) ( C = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+* eststo
+* est save ivest_c, replace
 
 
+*** CAHF 
+g CA = $pmean if slope>0 & slope<.
+replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
+replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
 
-cmp ( total_buildings = p garea) ( p = slope garea) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+cmp ( total_buildings = CA ) ( CA = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
 eststo
-est save ivest, replace
+est save ivest_ca, replace
+
+
+
+global pcahf = 336000
+g CA2 = $pcahf if slope>0 & slope<.
+replace CA2 = $pcahf + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
+replace CA2 = $pcahf + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
+
+cmp ( total_buildings = CA2 ) ( CA2 = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+eststo
+est save ivest_ca, replace
+
+
+* cmp ( total_buildings = LC ) ( LC = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+* eststo
+* est save ivest_lc, replace
+
+
+
+
+* reg pdiff slope garea if slope>0
+* reg total_buildings pdiff if slope>0
+
+* reg p_nd slope
+* reg p_d slope
+
+* reg pm_dev slope if slope>0
+* reg pm_no_dev slope
+
+
+
+* g lp=log(p)
+
+* cmp ( total_buildings = pdiff garea) ( pdiff = slope garea) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+* eststo
+* est save ivest_pd, replace
+
+
+* cmp ( total_buildings = lp garea) ( lp = slope garea) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+* eststo
+* est save ivest_log, replace
+
+
+
+* cmp ( total_buildings = p garea) ( p = slope garea) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+* eststo
+* est save ivest, replace
 
 
 

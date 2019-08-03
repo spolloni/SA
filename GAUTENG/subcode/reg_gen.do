@@ -13,12 +13,12 @@ prog define gen_LL
 
 
 	if substr("${k}",1,1)=="s" | substr("${k}",1,1)=="m" {
-		egen LL = group(sp_1 ${post_control})
+		gegen LL = group(sp_1 ${post_control})
 	}
 	else {
 	g Xs = round(X,${k}00)
 	g Ys = round(Y,${k}00)
-	egen LL = group(Xs Ys ${post_control})
+	gegen LL = group(Xs Ys ${post_control})
 	}
 
 	}
@@ -37,7 +37,7 @@ prog define gen_LL_price
 
 
 	if substr("${k}",1,1)=="s" | substr("${k}",1,1)=="m" {
-		egen LL = group(sp_1 ${post_control_price})
+		gegen LL = group(sp_1 ${post_control_price})
 	}
 	else {
 	g Xs = round(X,${k}00)
