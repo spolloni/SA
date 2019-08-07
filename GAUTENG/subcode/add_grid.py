@@ -846,6 +846,41 @@ def grid_to_elevation_points(db):
 # grid_to_elevation_points(db)
 
 
+def grid_to_undeveloped(db,undev):
+
+    print " start grid to undeveloped "
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_{};'.format(undev)) 
+    make_qry=  ''' CREATE TABLE grid_to_{} AS 
+                            SELECT A.OGC_FID , G.grid_id
+                                FROM {} as A, grid_temp_25 AS G
+                                    WHERE G.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='grid_temp_25' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
+                    '''.format(undev,undev)
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX grid_to_{}_index ON grid_to_{} (grid_id);".format(undev,undev))
+    cur.execute("CREATE INDEX {}_to_grid_index ON grid_to_{} (OGC_FID);".format(undev,undev))    
+    con.commit()
+    con.close()   
+    print " finish grid to undeveloped "
+
+    return
+
+# grid_to_undeveloped(db,'hydr_areas')
+# grid_to_undeveloped(db,'phys_landform_artific')
+# grid_to_undeveloped(db,'cult_recreational')
+# grid_to_undeveloped(db,'hydr_lines')
+
+
+# ['HYDR_AREAS','HYDR_LINES','PHYS_LANDFORM_ARTIFIC','CULT_RECREATIONAL']
 
 
 # ### CALCULATE AREA OF 250m BUFFER

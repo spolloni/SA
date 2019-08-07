@@ -8,7 +8,7 @@ main.py
 from pysqlite2 import dbapi2 as sql
 from subcode.data2sql import add_trans, add_erven, add_bonds, add_elevation, add_elevation_points
 from subcode.data2sql import shpxtract, shpmerge, add_bblu
-from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot
+from subcode.data2sql import add_cenGIS, add_census, add_gcro, add_landplot, add_undeveloped
 from subcode.dissolve import dissolve_census, dissolve_BBLU
 from subcode.placebofuns import make_gcro_all, make_gcro_full, make_gcro, make_gcro_conhulls, import_budget, make_gcro_link, projects_shp
 from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid, intersGEOMogc, full_2011_sp
@@ -179,6 +179,10 @@ if _1_c_IMPORT ==1:
 if _1_d_IMPORT ==1:
 
     print '\n'," Importing GCRO & Landplots data into SQL... ",'\n'
+
+    print '\n'," Import undeveloped areas ... ",'\n'
+    add_undeveloped(db,rawgis)
+    print 'undeveloped done!'
 
     print '\n'," Import elevation lines ... ",'\n'
     add_elevation(db,rawgis)

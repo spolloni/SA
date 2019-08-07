@@ -119,7 +119,7 @@ clear;
 	destring area_int*, replace force;
 
 	 foreach var in $outcomes {;
-	    egen `var'_s = sum(`var'), by(grid_id);
+	    gegen `var'_s = sum(`var'), by(grid_id);
 	    drop `var';
 	    ren `var'_s `var';
 	  };
@@ -146,7 +146,7 @@ append using bbluplot_grid_post;
 replace post=1 if post==.;
 
 ren id grid_id ;
-merge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}.dta" ;
+fmerge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}.dta" ;
 drop if _merge==2;
 drop _merge;
 ren grid_id id;

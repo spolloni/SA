@@ -1,0 +1,233 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs}
+% endfloat,
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+\begin{document}
+
+Assumptions :
+\begin{itemize}
+\item One household per house
+\item Preferences are identical across households
+\item Time periods are independent so developers have to choose whether to develop land independently in each period (probably accurate for shacks, but not for formal houses)
+\end{itemize}
+
+Households choose which house to live in with utility given by
+\begin{align*}
+U &= \delta_{l} - \lambda(k) - \theta R_{j,k}   + \epsilon_j  
+\end{align*}
+\noindent where $l$ indexes the location, $j$ indexes the plot, and $k$ indexes the number of houses on the plot.  $\delta_{l}$ indicates the amenity value of living in location $l$ and can vary by area (project, spillover, and other) and time (pre post).  $\lambda(k)$ captures the congestion disutility from having multiple houses on the same plot and is assumed to be increasing and convex in the number of houses, $k$.  $R_{j,k}$ is the price charged for each house.  $\epsilon_j$ is the property specific preference shock that each property receives.  Households can also choose to live outside the city and receive reservation utility, $\overline{U}$.  
+
+Developers observe household preferences and choose whether to build houses on each plot.  Profit per house is given by
+\begin{align*}
+\pi_{j,k} &= R_{j,k} - C_{j} 
+\end{align*}
+
+% \begin{align*}
+% \pi_{j,k} &= 
+% \end{align*}
+
+% \begin{align*}
+% \pi_{j,2} - \pi_{j,1} &= 2 \Bigg[ \frac{ \delta_{l} - \lambda(2) + \epsilon_j - \overline{U}}{\theta} \Bigg] - C_j - \Bigg[\frac{ \delta_{l} - \lambda(1) + \epsilon_j - \overline{U}}{\theta} - C_j \Bigg] \\
+% 0 &= \frac{ \delta_{l} + \epsilon_j - \overline{U} +  \lambda(1) - 2\lambda(2) }{\theta}    \\
+% \epsilon_j &= \overline{U}  -\delta_{l}  - \lambda(1) + 2\lambda(2)    \\
+% \theta C_{j} - \delta_{l} + \lambda(1) + \bar{U}\leq \epsilon_j &\leq \overline{U}  -\delta_{l}  - \lambda(1) + 2\lambda(2)    \\
+% \end{align*}
+
+
+% \begin{align*}
+% \pi_{j,2} - \pi_{j,1} &= 2 \Bigg[ \frac{ \delta_{l} - \lambda(2) + \epsilon_j - \overline{U}   }{\theta} - C_j \Bigg] - \Bigg[\frac{ \delta_{l} - \lambda(1) + \epsilon_j - \overline{U}}{\theta} - C_j \Bigg] \\
+% 0 &= \frac{ \delta_{l} + \epsilon_j - \overline{U}  +  \lambda(1) - 2\lambda(2) }{\theta}  - C_j    \\
+% \epsilon_j &= \overline{U}  -\delta_{l}  - \lambda(1) + 2\lambda(2) +  \theta C_j    \\
+% \theta C_{j} - \delta_{l} + \lambda(1) + \bar{U}\leq \epsilon_j &\leq \overline{U}  -\delta_{l}  - \lambda(1) + 2\lambda(2) +  \theta C_j    \\
+%  \lambda(1) \leq \epsilon_j &\leq  \lambda(2)    \\
+% \end{align*}
+
+
+\noindent where the cost of constructing each house may depend on geographic features such as land slope, $C_{j} = c + \psi S_{j}$ where land slope is given by $S_{j}$.
+
+Developers maximize profits by setting rents just high enough to ensure households are indifferent between living in or out of the city according to the following expression
+\begin{align*}
+R_{j,k}^{*} &= \frac{ \delta_{l} - \lambda(k) + \epsilon_j - \overline{U}}{\theta}
+\end{align*}
+Developers will choose to build houses indexed by $k$, on plot $j$ while they are able to earn positive rents for each house, $R^{*}_{j,k}\geq C_j$.  Total profit per plot is equal to 
+\begin{align*}
+\pi_{j} = k \Big[R_{j,k} - C_{j} \Big]
+\end{align*}
+
+The optimal number of houses, $k^{*}$ as a function of the plot-specific preference shock can be written as 
+\begin{align*}
+k^{*} &=
+\begin{cases}
+0 &\text{ if }\,\, \epsilon_j \leq H + \lambda(1)  \\
+1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
+... & \, ... \\
+k &\text{ if }\,\,  H + \Lambda(k) < \epsilon_j \leq H + \Lambda(k+1)
+\end{cases} \\
+\text{ Where }& \\
+H & = \theta C_{j} - \delta_{l}  + \bar{U} \\
+\Lambda(k) & =  k\lambda(k) - (k-1)\lambda(k-1) \\
+\lambda(0) & = 0 \,\, \text{ and } \lambda(.) \text{ is increasing and convex }
+\end{align*}
+Assuming that plot specific preferences $\epsilon_j$ are distributed normally, the probability of observing the number of houses on each plot of land is given by
+\begin{align*}
+Pr[ k^{*} =0 ] \, &= \, \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(1) + \overline{U}}{\sigma}\Bigg) \\
+Pr[ k^{*} =1 ] \, &= \, \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(2) + \overline{U}}{\sigma}\Bigg) - \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} +  \Lambda(1)  + \overline{U}}{\sigma}\Bigg) \\
+&... \\
+Pr[ k^{*} =k ] \, &= \, \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(k+1) + \overline{U}}{\sigma}\Bigg) - \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(k) + \overline{U}}{\sigma}\Bigg) \\
+\end{align*}
+where $\Phi()$ is the standard normal cumulative distribution function.  This expression fits within an ordered probit framework and can be estimated with maximum likelihood.
+
+First, we estimate the differential amenity values of being in project and spillover areas before and after scheduled construction for constructed and constructed projects.  We expand the location preference term, $\delta_j$ to include terms for each of these locations in the following way
+\begin{align*}
+\delta_l &= \textsc{\small Proj}_{l} \,\, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{l} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{l}\, +\, \alpha_4 \Big) \, + \\[.2em]
+& \, \textsc{\small Spill}_{l} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{l} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{l} \, +\, \beta_4 \Big) \, + \\[.2em]
+& \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{l} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{l}
+\end{align*}
+\noindent where $\alpha_1$ and $\beta_1$ capture the triple-difference coefficients of interest capturing the effects of housing project construction on amenity values within and nearby project.  $\Lambda(k)$ is estimated in terms of a series of cut points in the distribution of preference shocks necessary to explain building density patterns.  We also estimate a constant term which includes unobserved outside utility as well as average construction costs.  Without variation in construction costs, this specification is unable to separately identify the marginal disutility of rent, $\theta$.  The variance term, $\sigma$ captures plot-specific variation in preferences as well as possible variation in construction costs, which are not directly measured in this specification.  We also allow $\sigma$ to vary according location, $l$, interacted with time, $t$.  
+
+
+\begin{table}[h]
+\centering
+\caption{Ordered Probit Triple-Difference}\label{table:mainestfull_output}
+\vspace{-2mm}
+\begin{tabular}{lDD}
+\toprule
+\input{figures/mainestfull_output}
+% \input{figures/census_hh_DDregs_AGG}
+\input{figures/mainestfull_output_cut_points}
+\bottomrule\\[-.6em]
+\end{tabular}\\
+Standard errors are clustered at the project by location level.  
+\end{table}
+
+% https://businesstech.co.za/news/general/190002/the-size-of-your-home-in-south-africa-is-shrinking-heres-why/ BUILDING SIZE  162 m2
+% http://www.statssa.gov.za/wp-content/uploads/2016/07/Infographic_BuildingPlansPassed_v03.jpg BUILDING VALUE 6102 R per m2
+
+% http://housingfinanceafrica.org/projects/housing-and-the-economy/  
+% http://housingfinanceafrica.org/app/uploads/Benchmarking-Housing-Construction-Costs-Across-Africa-FINAL-19-May-2019.pdf
+
+% \begin{itemize}
+% 	\item 231 average
+% 	\item construction costs (38\%): 231x0.38 = 88
+% 	\item insfrastructure costs (23\%): 231x0.21 = 53
+% 	\item med slope  : [infra.] 53x0.25 + [cc.] 88x0.05 = 18
+% 	\item high slope : [infra.] 53x0.50 + [cc.] 88x0.15 = 40
+% \end{itemize}
+
+
+Second, we estimate the marginal disutility of rent, $\theta$ using an instrumental variables strategy that generates variation in construction costs, $C_j$, which are passed on to households in the form of higher rents.  We proxy for construction costs by observing that in a competitive market for land, the price difference between plots with and without houses should be equal to construction costs.  We leverage the intuition that steeply sloping land is more costly for construction.  We assume that land slope only affects demand for housing through its effect on construction costs.  This assumption would be violated if households have direct preferences for living on sloped land.   The Johannesburg metro area features a variety of ridges and plateaus creating substantial variation in land gradients.
+
+
+We construct a measure of construction costs as a function of land slope.  First, recent research on housing market dynamics in Africa suggests that construction costs are comparable to property market values consistent with a competitive market in property development (CAHF).  The average property value in our data is equal to R231,000.  To benchmark this value, civil engineers estimate construction costs to be around R3,500 per square meter of floor space for the lower end of the housing market.  Dividing construction costs by costs per square meter implies that the floor space of the average house in the low end of the housing market is around 66 m2.  This size seems reasonable given that housing project houses are constructed have 40 m2 of floor space.  CAHF also puts average construction cost for a fully serviced, 46 m2 house in Pretoria at 336,000, which is also consistent with our estimate given that we are looking at the bottom 20\% of the housing market.
+
+South African National construction guidelines indicate that constructing homes on slopes with 6\% to 12\% gradients increases infrastructure costs by 25\% and building costs by 5\% and constructing on slopes with greater than 12\% gradients increases infrastructure costs by 50\% and building costs by 15\%.  Recent research from the Center for Affordable Housing Finance in Pretoria, Gauteng estimates that out of total construction costs, 62\% is attributable to building costs while 12\% is attribute to infrastructure costs.  We create a construction cost proxy by combining average price data with data on local elevation.
+
+To measure these features, we construct 1.8$\text{km}^{2}$ squares that fall within 4 km of a housing project and are large enough to capture multiple elevation-levels necessary to calculate slope.  We measure average land gradient within a 1.8$\text{km}^{2}$ square by taking the difference between the highest and lowest recorded elevation and dividing by half of the width of each square.  To leverage this variation, we include only squares where we are able to calculate a change in slope (35\% of squares).  We exclude areas that overlap with housing project footprints for this analysis in order to focus on endogenous behavior in housing markets.  We arrive at a final sample of 1,921 squares and around 3,700,000 observations composed of 25 $\text{m}^2$ grid cells pre and post con.
+
+We estimate an instrumental variables specification according to the following 
+\begin{align*}
+\text{First Stage: Linear Regression} & \\
+C_{j} &= c + \phi S_j + \upsilon_j \\ 
+\text{Second Stage: Ordered Probit} & \\
+Pr[ k^{*} =0 ] \, &= \, \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(1) + \overline{U}}{\sigma}\Bigg) \\
+&... \\
+Pr[ k^{*} =k ] \, &= \, \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(k) + \overline{U}}{\sigma}\Bigg) - \Phi\Bigg(\dfrac{\theta C_{j} - \delta_{l} + \Lambda(k+1) + \overline{U}}{\sigma}\Bigg) \\
+\end{align*}
+
+
+
+\begin{table}[h]
+\centering
+\caption{Ordered Probit IV}\label{table:ivreg_output}
+\vspace{-2mm}
+\begin{tabular}{lD}
+\toprule
+\input{figures/ivestca_1_output}
+\input{figures/ivestca_2_output}
+\input{figures/ivestca_3_output}
+% \input{figures/census_hh_DDregs_AGG}
+% \input{figures/mainestfull_output_cut_points}
+\bottomrule\\[-.6em]
+\end{tabular}\\
+Standard errors are clustered at the project by square level.  
+\end{table}
+
+
+The coefficient on construction costs gives us $\psi$, which tells us household marginal disutility from paying rent.  We can use this coefficient to translate the amenity effects in the first step terms of rands by dividing triple difference coefficients of interest $\alpha_1$ and $\beta_1$ by $\psi$.  This exercise suggest that housing projects produce $\frac{0.4}{0.0000102} = \text{R}39,216$ in welfare gain within project areas, which is equal to around 17\% of the average housing prices.  Meanwhile, housing projects produce $\frac{0.2}{0.0000102} = \text{R}19,608$ in lost welfare within spillover areas (0-500m from project boundaries), which is equal to around 8.5\% of average housing prices and is comparable to what we found in the housing price regressions.
+
+
+
+
+%%% HARRIS NOTES 
+
+%% https://openknowledge.worldbank.org/bitstream/handle/10986/31987/WPS8921.pdf?sequence=4
+
+% slope is an amenity in his model (positive correlation with rents..)
+% but: doesn't take into account construction costs!
+% informal settlements are exogenous (and impose externalities!!); areas are segregated
+% income groups are artificially segregated 
+
+
+
+
+% Average property values our data .  
+
+
+
+
+% \begin{align*}
+% R_{j,k}^{*}   &= 
+% \begin{cases}
+% null &\text{ if }\,\, \epsilon_j \leq \theta C_{j} - \delta_{l} + \lambda(1) + \bar{U} \\
+% \frac{ \delta_{l} - \lambda(k) + \epsilon_j - \overline{U}}{\theta} &\text{ if }\,\,  \theta C_{j} - \delta_{l} + \lambda(k) + \overline{U} < \epsilon_j \leq \theta C_{j} - \delta_{l} + \lambda(k+1) + \bar{U}
+% \end{cases} 
+% \end{align*}
+
+%  R_{j,k}^{*}  &= \zeta_0 + \zeta_1 S_{j} + \upsilon \\
+
+% To measure these features, we construct 1.8$\text{km}^{2}$ squares that fall within 4 km of a housing project and are large enough to capture many housing transactions and elevation-levels.  Construction costs are measured by taking the difference between average deeds property prices for plots with houses and plots without houses in 1.8$\text{km}^{2}$ squares where houses are measured by the 2001 building census.  We find mean construction costs equal to around R45,000.  By contrast, recent research suggests that construction costs are equal to around 38\% of housing prices in South Africa, which given an average housing price of R231,000 in our data, suggests average construction costs of R88,000.  In the analysis, we include only squares where we are able to calculate construction costs (17\% of squares).
+
+
+
+\end{document}
+
+

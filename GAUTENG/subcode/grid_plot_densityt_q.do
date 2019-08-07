@@ -49,18 +49,18 @@ end;
 
 global bblu_do_analysis = $load_data ; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 0;
+global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 1;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2        = 0; /* Two spillover bins */
+global reg_triplediff2        = 1; /* Two spillover bins */
 global reg_triplediff2_type   = 0; /* Two spillover bins */
 
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
 
 
-global outcomes_pre = " total_buildings for inf_non_backyard inf_backyard  ";
+global outcomes_pre = " total_buildings for  inf  inf_non_backyard inf_backyard  ";
 
 cap program drop outcome_gen;
 prog outcome_gen;
@@ -100,7 +100,12 @@ if $bblu_do_analysis==1 {;
 
 use bbluplot_grid_${grid}.dta, clear;
 
-merge m:1 sp_1 using "temp_2001_inc.dta";
+
+fmerge m:1 id using "undeveloped_grids.dta";
+keep if _merge==1 ;
+drop _merge ;
+
+fmerge m:1 sp_1 using "temp_2001_inc.dta";
 drop if _merge==2;
 drop _merge;
 
@@ -160,12 +165,12 @@ drop dist_temp;
 sum distance_rdp;
 global max = round(ceil(`r(max)'),$bin);
 
-egen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
+gegen dists_rdp = cut(distance_rdp),at($dist_min($bin)$max);
 g drdp=dists_rdp;
 replace drdp=. if drdp>$max-$bin; 
 * replace dists_rdp = dists_rdp+`=abs($dist_min)';
 
-egen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
+gegen dists_placebo = cut(distance_placebo),at($dist_min($bin)$max); 
 g dplacebo = dists_placebo;
 replace dplacebo=. if dplacebo>$max-$bin;
 * replace dists_placebo = dists_placebo+`=abs($dist_min)';
@@ -184,13 +189,13 @@ g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.;
 
 if $many_spill == 1 { ;
 g spill2_cluster = proj_cluster==0 & spill1_cluster==0 & spill2>.5 & spill2<.;
-egen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
+gegen cj1 = group(cluster_joined proj_cluster spill1_cluster spill2_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
 if $many_spill == 0 {;
 *replace spill1_cluster = 1 if spill2_cluster==1;
-egen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
+gegen cj1 = group(cluster_joined proj_cluster spill1_cluster) ;
 drop cluster_joined ;
 ren cj1 cluster_joined ;
 };
@@ -208,7 +213,7 @@ gen_LL ;
 
 foreach v in for inf {;
 if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
-  egen `v'_m = mean(`v'),  by( LL post ) ;
+  gegen `v'_m = mean(`v'),  by( LL post ) ;
   g `v'_fe_pre=`v'-`v'_m ;
   drop `v'_m ;
   };
@@ -219,7 +224,7 @@ g `v'_fe_pre=`v' ;
 
 foreach v in for inf {;
 if ("${k}"!="none") & ($graph_plotmeans_rdpplac == 1  |  $graph_plotmeans_rawchan == 1) {;
-  egen `v'_m = mean(`v'),  by( LL  ) ;
+  gegen `v'_m = mean(`v'),  by( LL  ) ;
 g `v'_fe=`v'-`v'_m ;
   drop `v'_m ;
   };
@@ -245,15 +250,15 @@ cd $output ;
 
 if $reg_triplediff2 == 1 {;
 
-egen inc_q = cut(inc), group(4);
+gegen inc_q = cut(inc), group(4);
 replace inc_q=inc_q+1;
 
 
-regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
 rgen_q_het ;
 
-regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
 
 
@@ -273,7 +278,6 @@ regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 * rgen_dd_cc ;
 
 * regs_dd_full b_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ; 
-
 * regs_dd_cc b_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
 
@@ -309,7 +313,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     *replace `2'=. if `2'>100;
     `11' ;
     keep if post==0;
-    egen `2'_`3' = mean(`2'), by(d`3');
+    gegen `2'_`3' = mean(`2'), by(d`3');
     keep `2'_`3' d`3';
     duplicates drop d`3', force;
     ren d`3' D;
@@ -323,7 +327,7 @@ if $graph_plotmeans_rdpplac == 1 {;
     *replace `2'=. if `2'>100;
     `12' ;
     keep if post==0;
-    egen `2'_`4' = mean(`2'), by(d`4');
+    gegen `2'_`4' = mean(`2'), by(d`4');
     keep `2'_`4' d`4';
     duplicates drop d`4', force;
     ren d`4' D;
@@ -334,7 +338,7 @@ if $graph_plotmeans_rdpplac == 1 {;
 
   preserve; 
     use "${temp}pmeans_`3'_temp_`1'.dta", clear;
-    merge 1:1 D using "${temp}pmeans_`4'_temp_`1'.dta";
+    fmerge 1:1 D using "${temp}pmeans_`4'_temp_`1'.dta";
     keep if _merge==3;
     drop _merge;
 
@@ -398,14 +402,14 @@ end;
 
 
 
-plotmeans_pre_prog for 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
-plotmeans_pre_prog inf 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
+* plotmeans_pre_prog for 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
+* plotmeans_pre_prog inf 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
 
-plotmeans_pre_prog for 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
-plotmeans_pre_prog inf 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
+* plotmeans_pre_prog for 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
+* plotmeans_pre_prog inf 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
 
-plotmeans_pre_prog for 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
-plotmeans_pre_prog inf 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
+* plotmeans_pre_prog for 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
+* plotmeans_pre_prog inf 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
 
 
 
@@ -440,14 +444,14 @@ end;
     2  $load_data;
 
 
-plotmeans_pre_prog for_fe_pre 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
-plotmeans_pre_prog inf_fe_pre 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
+* plotmeans_pre_prog for_fe_pre 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
+* plotmeans_pre_prog inf_fe_pre 1 "keep if  type_rdp==1" "keep if type_placebo==1" ;
 
-plotmeans_pre_prog for_fe_pre 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
-plotmeans_pre_prog inf_fe_pre 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
+* plotmeans_pre_prog for_fe_pre 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
+* plotmeans_pre_prog inf_fe_pre 2 "keep if  type_rdp==2" "keep if type_placebo==2" ;
 
-plotmeans_pre_prog for_fe_pre 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
-plotmeans_pre_prog inf_fe_pre 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
+* plotmeans_pre_prog for_fe_pre 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
+* plotmeans_pre_prog inf_fe_pre 3 "keep if  type_rdp>=3" "keep if type_placebo>=3" ;
 
 
 
@@ -475,7 +479,7 @@ if $graph_plotmeans_rawchan == 1 {;
     keep `2' d`3' id post ;
     reshape wide `2', i(id  d`3' ) j(post);
     gen d`2' = `2'1 - `2'0;
-    egen `2'_`3' = mean(d`2'), by(d`3');
+    gegen `2'_`3' = mean(d`2'), by(d`3');
     keep `2'_`3' d`3';
     duplicates drop d`3', force;
     ren d`3' D;
@@ -487,7 +491,7 @@ if $graph_plotmeans_rawchan == 1 {;
     keep `2' d`4' id post ;
     reshape wide `2', i(id  d`4' ) j(post);
     gen d`2' = `2'1 - `2'0;
-    egen `2'_`4' = mean(d`2'), by(d`4');
+    gegen `2'_`4' = mean(d`2'), by(d`4');
     keep `2'_`4' d`4';
     duplicates drop d`4', force;
     ren d`4' D;
@@ -497,7 +501,7 @@ if $graph_plotmeans_rawchan == 1 {;
 
    preserve; 
      use "${temp}pmeans_`3'_temp_`1'.dta", clear;
-     merge 1:1 D using "${temp}pmeans_`4'_temp_`1'.dta";
+     fmerge 1:1 D using "${temp}pmeans_`4'_temp_`1'.dta";
      keep if _merge==3;
      drop _merge;
 
@@ -554,14 +558,14 @@ if $graph_plotmeans_rawchan == 1 {;
     "-500(500)${dist_max_reg}"  `"0 "0" .3125 "500" .625 "1000"  "'
     2 $load_data ;
 
-plotchanges_prog for 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
-plotchanges_prog inf 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
+* plotchanges_prog for 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
+* plotchanges_prog inf 1 "keep if type_rdp==1" "keep if type_placebo==1" ;
 
-plotchanges_prog for 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
-plotchanges_prog inf 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
+* plotchanges_prog for 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
+* plotchanges_prog inf 2 "keep if type_rdp==2" "keep if type_placebo==2" ;
 
-plotchanges_prog for 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
-plotchanges_prog inf 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
+* plotchanges_prog for 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
+* plotchanges_prog inf 3 "keep if type_rdp>2" "keep if type_placebo>2" ;
 
 
 };

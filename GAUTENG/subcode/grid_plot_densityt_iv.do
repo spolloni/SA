@@ -104,7 +104,11 @@ g area = $grid*$grid;
 
 global grid_mult = 1000000/($grid*$grid);
 
-drop if (area_int_rdp>0 & area_int_rdp<.) | (area_int_placebo>0 & area_int_placebo<.) ;
+* drop if (area_int_rdp>0 & area_int_rdp<.) | (area_int_placebo>0 & area_int_placebo<.) ;
+
+fmerge m:1 id using "undeveloped_grids.dta";
+keep if _merge==1 ;
+drop _merge ;
 
 fmerge m:1 sp_1 using "temp_2001_inc.dta";
 drop if _merge==2;
@@ -200,11 +204,9 @@ g pdiff = p_d-p_nd
 sum pm, detail
 global pmean = `=r(mean)'
 
-g C = $pmean if slope>0 & slope<.
-replace C = $pmean + ($pmean*.23*.25) + ($pmean*.38*.05)  if slope>.06 & slope<.12
-replace C = $pmean + ($pmean*.23*.50) + ($pmean*.38*.15)  if slope>.12 & slope<.
-
-
+* g C = $pmean if slope>0 & slope<.
+* replace C = $pmean + ($pmean*.23*.25) + ($pmean*.38*.05)  if slope>.06 & slope<.12
+* replace C = $pmean + ($pmean*.23*.50) + ($pmean*.38*.15)  if slope>.12 & slope<.
 
 
 * g LC = log(C)
@@ -219,24 +221,33 @@ replace C = $pmean + ($pmean*.23*.50) + ($pmean*.38*.15)  if slope>.12 & slope<.
 
 
 *** CAHF 
-g CA = $pmean if slope>0 & slope<.
-replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
-replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
+preserve 
 
-cmp ( total_buildings = CA ) ( CA = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
-eststo
-est save ivest_ca, replace
+  keep slope total_buildings xyg
+
+  replace total_buildings = 10 if total_buildings>10
+  g CA = $pmean if slope>0 & slope<.
+  replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
+  replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
+
+  cmp ( total_buildings = CA ) ( CA = slope ) if slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+  eststo
+
+  est save ivest_ca1, replace
+  * est save ivest_ca, replace
+
+restore
 
 
 
-global pcahf = 336000
-g CA2 = $pcahf if slope>0 & slope<.
-replace CA2 = $pcahf + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
-replace CA2 = $pcahf + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
+* global pcahf = 336000
+* g CA2 = $pcahf if slope>0 & slope<.
+* replace CA2 = $pcahf + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
+* replace CA2 = $pcahf + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
 
-cmp ( total_buildings = CA2 ) ( CA2 = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
-eststo
-est save ivest_ca, replace
+* cmp ( total_buildings = CA2 ) ( CA2 = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust
+* eststo
+* est save ivest_ca, replace
 
 
 * cmp ( total_buildings = LC ) ( LC = slope ) if total_buildings<=5 & slope>0, indicators($cmp_oprobit $cmp_cont ) nolrtest cluster(xyg) robust

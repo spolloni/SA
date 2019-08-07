@@ -686,6 +686,10 @@ prog define regs
 
 	global X "{\tim}"
 
+	global cells = 3
+	if "`2'"=="1" {
+		global cells = 1
+	}
 
 	lab_var
 
@@ -701,7 +705,7 @@ prog define regs
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean2001 Mean2011 r2  N ,  ///
 	 	labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
 		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
@@ -716,7 +720,7 @@ prog define regs
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean2001 Mean2011 r2  N ,  ///
 	 	labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
 		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
@@ -729,7 +733,7 @@ prog define regs
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean   N ,  ///
 	 	labels(  "Mean"    "N"  ) ///
 		    fmt( %9.2fc     %12.0fc  )   ) ///
@@ -747,7 +751,7 @@ prog define regs
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean ,  ///
 	 	labels(  "Mean"  ) ///
 		    fmt( %9.2fc       )   ) ///
@@ -761,7 +765,7 @@ prog define regs
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
 		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
@@ -885,6 +889,10 @@ prog define regs_inc
 	  
 	}
 	
+	global cells = 3
+	if "`2'"=="1" {
+		global cells = 1
+	}
 
 
 	global X "{\tim}"
@@ -906,7 +914,7 @@ prog define regs_inc
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean2001 Mean2011 r2  N ,  ///
 	 	labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
 		    fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
@@ -921,7 +929,7 @@ prog define regs_inc
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean   N ,  ///
 	 	labels(  "Mean"    "N"  ) ///
 		    fmt( %9.2fc     %12.0fc  )   ) ///
@@ -937,7 +945,7 @@ prog define regs_inc
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( Mean ,  ///
 	 	labels(  "Mean"  ) ///
 		    fmt( %9.2fc       )   ) ///
@@ -953,7 +961,7 @@ prog define regs_inc
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///
-		  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+		  cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
 		  stats( r2 , labels( "R$^2$"  ) fmt(%12.3fc   )) ///
 		  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 

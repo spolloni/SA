@@ -702,6 +702,31 @@ def add_elevation(db,source):
     return
     
 
+def add_undeveloped(db,source):
+
+    files = ['HYDR_AREAS','HYDR_LINES','PHYS_LANDFORM_ARTIFIC','CULT_RECREATIONAL']
+    for file in files:
+        print '\n'," Importing " + file + " into SQL... ",'\n'
+        shp = glob.glob(source+'*{}.shp'.format(file))[0]
+        tablename = file
+
+        # create mock table for overwrite
+        con = sql.connect(db)
+        cur = con.cursor()
+        cur.execute('''CREATE TABLE IF NOT EXISTS 
+                {} (mock INT);'''.format(tablename))
+        con.commit()
+        con.close()
+
+        # push shapefile to db
+        cmd = ['ogr2ogr -f "SQLite" -update','-t_srs http://spatialreference.org/ref/epsg/2046/',
+               db,shp,'-nlt PROMOTE_TO_MULTI','-nln {}'.format(tablename), '-overwrite']
+        subprocess.call(' '.join(cmd),shell=True)
+
+
+    return
+        
+
 
 def add_elevation_points(db,source):
 
