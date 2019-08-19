@@ -261,7 +261,7 @@ if _3_grid_define_ == 1:
     print '\n', " make grid (takes a while) ", '\n'
     add_grid(db,50)
 
-    print '\n', "finished the grid!", '\n'
+    print '\n', " finished the grid! ", '\n'
 
 #############################################
 # STEP 4:  Distance to RDP for non-RDP      #

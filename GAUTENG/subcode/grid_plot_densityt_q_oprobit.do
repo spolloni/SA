@@ -133,13 +133,15 @@ fmerge m:1 sp_1 using "temp_2001_inc.dta";
 drop if _merge==2;
 drop _merge;
 
+fmerge m:1 id using "grid_elevation.dta";
+drop if _merge==2;
+drop _merge;
+
+
 * fmerge m:1 id using "temp/grid_ghs_price.dta";
 * drop if _merge==2;
 * drop _merge;
 
-* fmerge m:1 id using "grid_elevation.dta";
-* drop if _merge==2;
-* drop _merge;
 
 * fmerge m:1 id using "grid_prices.dta";
 * drop if _merge==2;
@@ -196,45 +198,147 @@ cd $output ;
 
 #delimit cr;
 
-* g cluster_joined_1 = cluster_rdp if con==1 
-* replace cluster_joined_1 = cluster_placebo if con==0 
 
-* replace proj = 1 if proj>.5 & proj<1
-* replace proj = 0 if proj<=.5
+cap drop xg
+cap drop yg
+cap drop xyg
+cap drop gn
+cap drop gN
+cap drop hmax
+cap drop hmin
+cap drop hmean
+cap drop hd
+cap drop slope
+cap drop p
+cap drop mtb
+cap drop garea
+cap drop p_nd
+cap drop p_d
+cap drop pdiff
+cap drop CA
 
-* replace spill1 = 1 if spill1>.5 & spill1<1
-* replace spill1 = 0 if spill1<=.5
+* global gsize = 150   
+
+* PRIMARY SPEC!! 
+* global gsize = 200  * t 2.5  z 7* global gsize = 120* t 2.83 z 5.5* global gsize = 100   * t 4    z 4 * global gsize = 75    * t 3.94    z 2.32* global gsize = 50  ** 300 groups
+
+* global xsize = (-1385063+1262713)/$gsize
+
+*** 122350 by 111825
+
+global xsize = 500
+
+egen xg = cut(X), at(-1385063($xsize)-1262713)
+egen yg = cut(Y), at(2932038($xsize)3043863)
+
+gegen xyg = group(xg yg)
+
+bys xyg: g gn=_n
+bys xyg: g gN=_N
+
+count if gn==1
+
+gegen hmax = max(height), by(xyg)
+gegen hmin = min(height), by(xyg)
+gegen hmean= mean(height), by(xyg)
+
+
+g x_max_id = X if height==hmax
+gegen x_max = max(x_max_id), by(xyg)
+
+g y_max_id = Y if height==hmax
+gegen y_max = max(y_max_id), by(xyg)
+
+g x_min_id = X if height==hmin
+gegen x_min = max(x_min_id), by(xyg)
+
+g y_min_id = Y if height==hmin
+gegen y_min = max(y_min_id), by(xyg)
+
+
+g dist = sqrt( (x_max-x_min)^2  + (y_max-y_min)^2  )
+replace dist = . if xyg==.
+
+g hmean_f= hmean
+sum hmean, detail
+replace hmean_f = `=r(mean)' if hmean_f==.
+
+g hd = hmax - hmin
+
+g garea=gN*25*25
+
+* g slope = hd/sqrt(garea)
+* replace slope=0 if slope==.
+
+g slope = hd/dist
+replace slope=0 if slope==.
+
+global pmean = 231000
+
+g CA = $pmean if slope>=0 & slope<.
+replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
+replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<.
+
+
 
 set rmsg on
 
+* preserve
 
-preserve
-  set seed 4
-  * global snum = 10
-  * sample $snum
+*   global cutbuild = 10
+
+*   keep $regressors for inf inf_backyard inf_non_backyard total_buildings cluster_joined CA garea hmean_f
+*   replace for = $cutbuild if for>$cutbuild
+*   replace inf = $cutbuild if inf>$cutbuild
+*     replace inf_backyard = $cutbuild if inf_backyard>$cutbuild
+*     replace inf_non_backyard = $cutbuild if inf_non_backyard>$cutbuild
+*   replace total_buildings = $cutbuild if total_buildings>$cutbuild
+
+*   cmp ( for = $regressors CA ) ( inf = $regressors CA ), indicators($cmp_oprobit $cmp_oprobit ) nolrtest cluster(cluster_joined) robust
+*   eststo forinfcmp$cutbuild
+*   est save forinfcmp$cutbuild, replace
+
+* restore
+
+gegen inc_q = cut(inc), group(4)
+replace inc_q=inc_q+1
+
+rgen_q_het
+
+* preserve
 
   global cutbuild = 10
 
-  keep $regressors for inf total_buildings cluster_joined 
+  keep $r_q_het for inf inf_backyard inf_non_backyard total_buildings cluster_joined CA garea hmean_f
   replace for = $cutbuild if for>$cutbuild
   replace inf = $cutbuild if inf>$cutbuild
+    replace inf_backyard = $cutbuild if inf_backyard>$cutbuild
+    replace inf_non_backyard = $cutbuild if inf_non_backyard>$cutbuild
   replace total_buildings = $cutbuild if total_buildings>$cutbuild
 
-  *** RUN THE FULL ONE! ***
-  oglm total_buildings $regressors, hetero($regressors) link(probit) cluster(cluster_joined)
-  * eststo tbmain
-  * est save tbmain, replace
+  cmp ( for = $r_q_het CA ) ( inf = $r_q_het CA ), indicators(5 5) nolrtest cluster(cluster_joined) robust
+  eststo forinfcmp_q_$cutbuild
+  est save forinfcmp_q_$cutbuild, replace
 
-  oglm for $regressors, hetero($regressors) link(probit) cluster(cluster_joined)
-  * eststo formain
-  * est save formain, replace
- 
-  oglm inf $regressors, hetero($regressors) link(probit) cluster(cluster_joined)
-  * eststo infmain
-  * est save infmain, replace
+* restore
 
 
-restore
 
+
+/*
+
+bys for: g fN=_N
+replace fN=fN/_N
+bys for: g fn=_n
+
+bys inf: g iN=_N
+replace iN=iN/_N
+bys inf: g In=_n
+
+
+scatter iN inf if In==1 & inf>0 & inf<=15 || scatter fN for if fn==1 & for>0 & for<=15, ///
+ legend(order(2 "Formal Houses" 1 "Informal Houses") ///
+    ring(0) position(2) ) ytitle("Share of Observations")
+    graph export "building_hist.pdf", as(pdf) replace
 
 
