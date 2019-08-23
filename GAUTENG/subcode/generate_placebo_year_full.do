@@ -311,6 +311,22 @@ cd $output ;
 
 write "unique_budget_report_names.tex" `=_N' 1 "%12.0fc" ;
 
+
+
+use "temp/gcro_merge${flink}.dta", clear;
+
+duplicates drop ID_gcro, force;
+		merge 1:m ID_gcro using "temp/gcro${flink}.dta";
+		keep if _merge==3;
+		drop _merge;
+
+replace cost = cost/1000 if year=="04_05";
+
+sum cost, detail ; 
+
+* by plot! ; 
+disp `=r(mean)'/1600 ; 
+
 * get 422 names ; 
 
 *** PLACEBO MATCHES: ;

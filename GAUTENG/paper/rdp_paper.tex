@@ -26,6 +26,7 @@
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
 \newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{G}{>{\centering\arraybackslash}p{6em}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
 
@@ -44,7 +45,7 @@
 \begin{document}
 
 \begin{titlepage} 
-\title{{Public Housing Spillovers: Evidence from South Africa}\thanks{We are grateful to Andrew Foster, Daniel Bjorkegren, Matthew Turner, Jesse Shapiro, Brian Knight, and John Friedman for their feedback and advice.  We also thank Adelaide Steedley and the Centre for Affordable Housing and Finance in Africa as well as GeoTerraImage for generous research guidance and for providing data without which this project would not have been possible.  Any opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views of the Federal Trade Commission or its Commissioners.}}
+\title{{Public Housing Spillovers in a Developing Country}\thanks{We are grateful to Andrew Foster, Daniel Bjorkegren, Matthew Turner, Jesse Shapiro, Brian Knight, and John Friedman for their feedback and advice.  We also thank Adelaide Steedley and the Centre for Affordable Housing and Finance in Africa as well as GeoTerraImage for generous research guidance and for providing data without which this project would not have been possible.  Any opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views of the Federal Trade Commission or its Commissioners.}}
 \author{\\[3em] Benjamin Bradlow\thanks{Dept. of Sociology, Brown University, Providence, RI  E-mail: benjamin\textunderscore bradlow@brown.edu}\\
  Stefano Polloni\thanks{Dept. of Economics, Brown University, Providence, RI E-mail: stefano\textunderscore polloni@brown.edu}\\ 
   William Violette\thanks{Federal Trade Commission, Washington, DC. E-mail: william.j.violette@gmail.com} \\
@@ -59,12 +60,9 @@
 
 	%Does subsidized housing improve neighborhood quality in developing countries? 
 
+	% Public housing projects may complement local housing investments as well as substitute for existing housing, especially low-quality slums.  
 
-	Public housing projects may complement local housing investments as well as substitute for existing housing, especially low-quality slums.  We estimate the effects of large public housing projects on local formal and informal housing supply in South Africa.  
-
-	Using aerial measures of housing density, deeds records, and census data, we compare constructed projects to planned, but unconstructed projects in a difference-in-differences design.  We find that housing projects increase housing quality and quantity within their footprints.  Just outside of project footprints, we detect growth of low-quality, informal housing especially near urban centers. 
-
-
+	We estimate the spillover effects of large public housing projects in South Africa using aerial measures of housing density, property transaction records, and census data.  We compare (1) constructed projects versus planned but unconstructed projects, (2) before versus after scheduled construction, and (3) areas nearby versus far from project footprints.  Projects increase the quantity and quality of formal housing within their footprints.  Between 0 and 500 meters outside of their footprints, projects generate declines in informal housing quantity and formal housing prices especially in higher income neighborhoods.  Estimates from a structural model of housing markets suggest that projects may generate net welfare losses on the order of 6.6 million USD per project.
 
 %%%%%% MACRO THE HETEROGENEITY DISTANCE
 %Within project footprints, housing quality improves and subsidized formal structures successfully crowd-out slums. 
@@ -96,109 +94,83 @@
 
 
 
-- policymakers care about spillover effects?
-- crowd in housing growth?
+% - policymakers care about spillover effects?
+% - crowd in housing growth?
 
 
 
-Rapid urbanization has increased demand for housing in cities, especially in the developing world.\footnote{Since 2000, the share of populations living in urban areas has grown from 40 to 50\% in low and middle income countries [World Bank Databank].}  As a result, 30\% of urban populations in developing countries live in slums characterized by overcrowding, low infrastructure access, unsanitary conditions, and high crime rates. These living conditions are thought to pose long-lasting obstacles to upward mobility and local economic development \citep{marx2013slums}.  Policymakers often point to slum growth as evidence that formal markets are unable to meet rising demand for housing.\footnote{In South Africa, policy makers point to housing discrimination such as financial ``red lining,'' which has led to a ``backlog'' of ``1.8 dwellings which can be classified as inadequate housing'' \citep{bng}.}  To boost the supply of housing, many cities build large public housing projects. % [ FOOTNOTE FOR OTHER COUNTRIES, OVERVIEW (Lall / selod stuff?) ]   
+%  Breaking New Ground : 
 
-The effect of housing projects on local housing supply depends on whether these projects are substitutes or complements with nearby formal and informal housing.  Serviced public houses may provide attractive substitutes to slum dwellings.  In some cases, projects directly upgrade slum houses to project houses.  By reducing the prevalence of congested slums, this substitution may capture an additional social benefit of public housing.  Alternatively, by driving households to substitute away from formal housing towards public housing, these projects may also distort local housing markets.
-
-% may introduce an dampen any welfare gains from new public housing.  
-Housing projects may also stimulate investments in local housing supply.  Housing projects often require infrastructure upgrades such as piped water, sewers, electricity, roads, and community centers, all of which can be extended to neighboring houses.  By clearing and rezoning land around project houses, these policies may lower the cost of constructing nearby formal and informal structures.  In South Africa, \cite{Brueckner2018backyarding} document a common practice of ``backyarding,'' where households rent informal dwellings erected on the same land plots as their project houses.  Complementarities between housing projects and local housing supply may work to amplify the impact of these projects on accommodating growing urban populations.  Yet, by encouraging the growth of congested informal settlements, housing projects may also impose social costs around their footprints.  Taken together, the social welfare effects of housing projects depend on their substitution patterns with both formal and informal housing.
+%%% high rates of unemployment drive crimes
+% As a result of high rates of unemployment, housing and service provision has not kept pace with household formation, and a range of other factors have had negative impact on social coherence and crime, particularly contact crimes (comprising 40\% of all crimes). This has a human settlement dimension in that many of these crimes typically take place in private, domestic spaces where public policing has limited impact. Moreover informal settlements have been associated with high levels of crime.
 
 
-To understand the welfare effects of housing projects, we model the decision of how many houses to build on a plot of land as a function of local amenities and housing costs.  By increasing amenity quality and/or decreasing local houisng 
-
-Changes in local amenities affect as are into an estimate local housing amenities.  
-
-
-in order to connect changes in housing quantities as a result of housing projects into an estimate of the welfare .  Housing projects 
+%%% supply constraints  (market failures)
+% Delivery at scale, in both high, medium and low cost housing, has also not created a functionally balanced residential property market. The repeal of the Group Areas Act created an increased demand in historically well serviced and located neighbourhoods – fuelling demand and increasing prices and sale and property investment. By contrast, investment in large parts of the middle to lower end of the property market i.e. historically working class neighbourhoods, has declined. The consequent uneven investment in housing has skewed the growth of the residential property market – bringing windfalls to approximately 30\% of the market, whilst continued stagnation thwarted property value appreciation in marginalized areas. This has been exacerbated by the practice of “red lining” by financial institutions barring housing investment and sales in inner city areas and traditional black townships.
 
 
-- Studying property markets is especially difficult in developing countries since
-   - few countries have well developed deeds databases
-   - most transactions are informal and wouldn't be available anyways
+% Accelerating the delivery of housing as a key strategy for poverty alleviation
+% • Utilising provision of housing as a major job creation strategy
+% • Ensuring property can be accessed by all as an asset for wealth creation and
+% empowerment
+% • Leveraging growth in the economy
+% • Combating crime, promoting social cohesion and improving quality of life for the poor
+% • Supporting the functioning of the entire single residential property market to reduce
+% duality within the sector by breaking the barriers between the first economy residential
+% property boom and the second economy slump.
+% • Utilizing housing as an instrument for the development of sustainable human
+% settlements, in support of spatial restructuring.
+
+% See \citep{harari2018slum,gechter2018slums}. 
+
+30\% of urban populations in developing countries live in slums often characterized by substandard dwellings, overcrowding, unsanitary conditions, and high crime rates \citep{mdg}.  In response, many cities invest in replacing slums with large public housing projects.  These projects aim not only to improve local housing conditions, but also to spur investment in surrounding neighborhoods.\footnote{For example, the South African Department of Housing promotes ``accelerating the delivery of housing as a key strategy for poverty alleviation,'' while also ``utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}.}  By providing new formal houses and improved infrastructure, housing projects may generate positive neighborhood amenities.  Projects may also have unintended consequences by attracting growth of low-quality, informal dwellings in the backyards of project houses \citep{Brueckner2018backyarding}.  Dense backyard dwellings may recreate slum conditions and depress neighborhood property investment.  The net spillover effects of housing projects remain an empirical question that has important implications for designing place-based policies to address slum growth.
+
+This paper analyzes the spillover effects of large-scale public housing projects both within their footprints and within their surrounding neighborhoods.  We focus on South Africa's National Housing Program, which is unique among developing countries for its massive scale having allocated over 3 million houses across hundreds of projects since 1994.  This large volume of projects allows us to identify precise, spatial impacts, building on existing research which is largely limited to considering outcomes for direct project recipients.\footnote{\cite{cattaneo2009housing} estimate child health improvements from housing upgrades in Mexico, \cite{franklin2016enabled} finds greater women's employment for public housing recipients in South Africa, and \cite{galiani2017shelter} combine housing projects from throughout Latin America, finding large improvements in reported well-being of households.}  
+
+To measure these impacts, we compile detailed spatial data for the Johannesburg metro-area including aerial measures of formal and informal houses, census data, as well as deeds records of formal housing transactions.  We find that housing projects more than double the density of formal housing within their footprints and improve access to basic services like piped water.  While housing projects eradicate preexisting informal housing, they also crowd-in enough backyard houses to keep the total density of informal housing unchanged.  Our estimates show that for neighboring areas between 0 and 500 meters from project boundaries, informal housing density declines and formal housing prices drop with the strongest reductions concentrated in relatively higher income neighborhoods.
+
+In order to identify these effects, we combine three comparisons:  First, we compare constructed projects versus planned but unconstructed projects to control for how governments strategically locate projects on undeveloped land with preexisting slums.  Second, we compare projects before versus after scheduled construction to control for how neighborhoods with constructed projects often have more preexisting housing than neighborhoods with unconstructed projects.  Third, we compare areas nearby versus far from a project footprint within the same neighborhood to control for housing market trends specific to each neighborhood.  Taken together, these comparisons form a triple-differences estimator, which extends standard difference-in-differences approaches by allowing for the endogenous placement of projects within neighborhoods.\footnote{See \cite{rossi2010housing,hornbeck2017creative}, and \cite{diamond2016wants} for difference-in-differences estimators of place-based policies.}  
+
+We build an equilibrium model of housing markets that maps housing density effects into household preferences for living within and nearby housing projects.  In the model, developers choose to build houses on land plots when the value to households from renting and enjoying local amenities exceeds the construction costs.  Housing projects may affect both local construction costs as well as the quality of local amenities.  By connecting the number of houses to welfare, this approach may have useful applications in developing country settings because price data are often scarce while housing quantity measures are increasingly available through remote sensing.\footnote{ \cite{marxthere} use satellite images to measure density and improvements in the quality of roofs in a Kenyan slum.  \cite{Brueckner2018backyarding} use the same satellite data as this paper to study backyard houses in South Africa. \cite{donaldson2016view} review several research projects using building-level remote sensing data to map urban growth especially in developing countries. }  
+% Moreover, housing quantities may be especially responsive to local amenities in developing countries because informal housing can be easily built up or taken down.
+
+Structural estimates suggest that housing projects are likely to reduce aggregate welfare.  By subsidizing home construction, projects generate welfare gains for formal housing markets within their footprints; however, these gains are overwhelmed by the costs of project implementation as well as negative spillover effects on nearby formal and informal housing markets.  In total, simulation exercises estimate a net welfare loss of 6.6 million USD per project, which is economically large given implementation costs of 3.2 million USD per project.\footnote{Implementation costs are drawn from the National Treasury's Annual Budget Reports.}  Since this framework assumes that developers are able to capture all rental surplus, the distributional consequences of these policies depend on which households are also developers.  Without data on ownership over time especially for informal housing, we instead explore distributional consequences by examining effects separately by neighborhood income quartile.
+
+% to suggest that each project generates average welfare losses of around \$5 mil. in US dollars.  Formal housing markets within and around projects experience net welfare gains of \$3.2 mil. per project, which exactly offset project costs from budget reports.  Informal housing markets both within and around project footprints experience net welfare losses of \$5 mil. per project.  
+
+% LITERATURE CONTRIBUTION!
+
+% weakens parallel trends assumptions for standard differences-in-differences estimators for place-based policies.\footnote{See \cite{rossi2010housing,hornbeck2017creative}, and \cite{diamond2016wants}.}  
 
 
+% In South Africa, \cite{Brueckner2018backyarding} document a common practice of ``backyarding,'' where households rent informal dwellings erected on the same land plots as their project houses.  
 
-- Remote sensing data is increasingly available, especially in developing countries.\footnote{\cite{marxthere} use satellite images to measure density and improvements in the quality of roofs in a Kenyan slum.  \cite{Brueckner2018backyarding} use the same satellite data as this paper to study backyard houses in South Africa. \cite{donaldson2016view} review several research projects using building-level remote sensing data to map urban growth especially in developing countries.}
+% FUTURE WORK!! 
+% limitations are distribution and modeling externalities!! 
 
-
-- The quantity margin is especially relevant to developing countries (there is space for development) ; which provides additional information on local welfare effects.
-
-
-
-
-% Understanding the welfare impacts and supply impacts requires looking at both markets ...
 
 
 % The effect of housing projects on local housing supply depends on whether these projects are complements or substitutes for growth in nearby housing.  Serviced public houses may provide attractive substitutes to slum dwellings.  In some cases, projects directly upgrade slum houses to project houses. Housing projects may also stimulate growth in local housing supply.  Housing projects often require infrastructure upgrades such as piped water, sewers, electricity, roads, and community centers, all of which can be extended to neighboring houses.  By clearing and rezoning land around project houses, these policies may lower the cost of constructing nearby formal and informal structures.  In South Africa, \cite{Brueckner2018backyarding} document a common practice of ``backyarding,'' where households rent informal dwellings erected on the same land plots as their project houses.  
 
 
-% The extent to which public housing projects interact with local housing markets 
-
-%Housing projects may also provide positive amenities   UNDERSTANDING THIS IS IMPORTANT FOR POLICY?!
-
-% Family members of project beneficiaries may also move locally to maintain social ties (\cite{franklin2016enabled}).
 %Housing projects may incentivize households to substitute their slum dwellings for better quality, public houses.  In cases where 
 % --- in some cases, replacing entire slum neighborhoods with new houses  % This paper investigates whether government housing projects are complements or substitutes to local housing supply.
 %Housing projects aim to reduce slum growth by incentivizing households to substitute their slum dwellings for government-provided houses.  At the same time, these projects may spur development of low-quality, informal housing within and around their footprints.  
 %While public housing may be intended to substitute for slum living, housing projects may also stimulate growth of low-quality, informal housing.
 %Improving local infrastructure and neighborhood quality are ways in which the welfare benefits of housing projects may flow beyond their boundaries.  However, when people crowd around projects to enjoy these benefits, they may not fully internalize how their locations and investments in home quality affect their neighbors' welfare.  Population density may congest access to public goods while low-quality building materials may accelerate the spread of disease (\cite{cattaneo2009housing}).  Empirically, these negative externalities may generate lower prices for nearby formal housing despite increases in housing density and improvements in infrastructure access.
 
-This paper analyzes the impacts of large-scale public housing projects in South Africa on nearby formal and informal housing supply.  Having allocated over 3 million houses across hundreds of projects since 1994, South Africa's National Housing Program is unique among developing countries for its massive scale.  This large volume of projects allows us to precisely identify spatial impacts both within and nearby project footprints, building on previous research that has focused primarily on outcomes for recipient households.  \cite{cattaneo2009housing} estimate child health improvements from housing upgrades in Mexico, \cite{franklin2016enabled} finds greater women's employment for public housing recipients in South Africa, and \cite{galiani2017shelter} combine housing projects from throughout Latin America, finding large improvements in reported well-being of households.
-
-%Benefiting from South Africa's focus on urban planning
-
-To measure the local impacts of public housing, we compile aerial measures of formal and informal structures over time, deeds records of formal housing transactions, as well as census data for the full population of South Africa.  In contrast to recent studies that rely on cross-sectional comparisons such as \cite{harari2018slum} and \cite{baruah2017planning}, we leverage our temporal data to understand both which areas are initially chosen for projects and whether projects differentially affect housing markets in those areas.  We find that projects are often located in areas with little existing infrastructure and dense informal settlements, suggesting that these areas would have likely developed differently from areas far from projects even in the absence of project construction.  Therefore, the standard approach of estimating differential changes in outcomes near and far from projects is likely to capture preexisting trends in development rather than the causal effects of housing projects.  \cite{rossi2010housing,hornbeck2017creative}, and \cite{diamond2016wants} use this standard approach to estimate spillover effects of a variety of place-based policies. % comparing changes in areas near and far from project boundaries.
-
-To account for project placement, we implement a difference-in-differences strategy comparing changes in outcomes near \input{figures/total_cluster_rdp}constructed projects to similar changes near \input{figures/total_cluster_placebo}planned but unconstructed projects in Gauteng, South Africa.  We find that constructed projects were located in similar areas in terms of infrastructure access and housing quality to projects that were planned but never constructed.  To identify causal effects of housing projects, our approach assumes that areas near constructed projects would have evolved in the same way as areas near planned but unconstructed projects in the absence of construction.  The spatial granularity of our data allow us to estimate the impacts of housing projects both within as well as outside of their footprints.  We also hypothesize that the local impacts of public housing may be different in city centers than in suburban outskirts.  High demand for informal housing and high housing density near city centers suggest these housing markets may be most sensitive to the construction of nearby housing projects.  We test this hypothesis by examining the impacts of housing projects separately according to their distances to city centers.
-
-% \footnote{Maybe references?}
-%We leverage the spatial granularity of our data to examine changes in 
-
 % Spillover effects may account for a significant share of the total welfare impacts of housing projects.  In the US, \cite{diamond2016wants} calculate that affordable housing in low-income areas generates substantial societal benefits on surrounding areas, often exceeding the total costs of the programs. Welfare effects may be even greater in developing settings, where preexisting slums impose negative externalities on neighboring areas. At the same time, the informal housing market may respond to the improved infrastructure, thereby mitigating positive amenity spillovers.\footnote{For example, \cite{Brueckner2018backyarding} document the common practice of ``backyarding'', where households rent informal dwellings erected on the same land plots as government-sponsored houses.} 
-%At the same time, lax building codes and weak zoning laws complicate predictions about the dominant effects at play.The effects of improved infrastructure and greater housing quality may be mitigated if demand in the informal housing market responds to these amenities.  
 
+%  Housing projects do not appear to stimulate additional construction of formal or informal dwellings at all distances outside project boundaries, up to 1200 meters away. Similarly, dwelling characteristics in neighboring areas remain largely the same after project construction. % [  PARAGRAPH ]
 
-Within project footprints, we find large improvements in access to services and home quality, but mixed effects on total housing growth. Compared to unconstructed areas, households living within projects (either in subsidized formal or informal housing) are more than 10 percentage points more likely to access flush toilets, indoor water taps, and electricity.  In the city centers, large increases in formal housing are accompanied by similar increases in informal housing, especially backyard dwellings.  In the outskirts, total housing density declines as increases in formal housing are not able to offset large decreases in informal housing.
-
-%Small net effects on total housing growth mask opposing effects in city centers and in outskirts.  
-%We find greater densities of informal {\it backyard} dwellings, but not enough to offset steep declines in other types of informal housing. On the whole, these results suggest that subsidized housing projects provide positive local amenities through better house quality and improved infrastructure.
-
-Outside of the project boundaries, we detect large housing growth in the city centers and zero housing growth in the outskirts.  In the city centers, we estimate that projects stimulate large housing growth nearby that continues at least 400 meters outside their footprints.  The bulk of this housing growth is concentrated in the informal sector, which is reflected in decreases in census measures of housing quality and infrastructure over these distances.  By contrast, projects that are located in the outskirts exhibit no impact on nearby housing quantity or quality.  Leveraging the exact timing of construction, we do not detect changes in nearby formal housing prices just after construction, though the data admit a wide range of treatment effects. Finally, we provide some evidence that housing markets anticipate projects, and find no indication of residents sorting into or out of project areas, as measured by changes in the composition of dwellers. 
-
-[ ADD POLICY CONTRIBUTION PARAGRAPH! ]
-[  LIMITATION ON DISTRIBUTIONAL EFFECTS !!!!  ]
- 
-%  Housing projects do not appear to stimulate additional construction of formal or informal dwellings at all distances outside project boundaries, up to 1200 meters away. Similarly, dwelling characteristics in neighboring areas remain largely the same after project construction.  
-
-While these results may be help inform policymakers who are concerned with local housing growth, our focus on local impacts of public housing limits our ability to speak to the overall welfare impacts of these policies.  Since we do not observe  households over time, we cannot measure changes in outcomes for housing beneficiaries or their neighbors.  Similarly, we are not able to capture any effects on distant housing markets, which may also respond to large public housing projects.  For example, any increases in informal housing as a result of housing projects may be entirely offset by decreases in informal housing in other parts of the city as households abandon their previous slum dwellings to live near housing projects.
-
-% [  PARAGRAPH ]
-
-We proceed by first providing background on public housing and the South African housing program in Section~\ref{section:background}. 
-%In Section~\ref{section:model}, we develop a conceptual framework of housing supply and housing externalities to help interpret the results. 
-Section~\ref{section:data} describes the data used to measure outcomes and details our approach to identifying housing projects. Section~\ref{section:methodology} lays out the estimation strategy and identifying assumptions, which we validate with descriptive evidence in section~\ref{section:descriptives}. Section~\ref{section:results} presents and discusses our main results, and  Section~\ref{section:discussion} concludes.
-%includes a discussion of our findings and provides concluding thoughts.
-
-
+We proceed by first providing background on public housing and the South African housing program in Section~\ref{section:background}.  In Section~\ref{section:theory}, we build an equilibrium model of housing markets.  Section~\ref{section:data} describes the data used to measure outcomes and details our approach to identifying housing projects. Motivated with descriptive evidence in section~\ref{section:descriptives}, Section~\ref{section:methodology} lays out the estimation strategy and identifying assumptions. Section~\ref{section:results} presents our main results, and  Section~\ref{section:discussion} concludes.
 
 
 % Our findings do not attribute an important role to neighborhood externalities in housing markets in developing countries.  Another interpretation is that informal backyard houses negate the positive benefits from government-sponsored homes. From a policy perspective, these results suggest that spillover effects merit less emphasis than direct recipients effects in designing housing policy.  
 
 % Our analysis contributes to a recent literature focusing on the broader urban development impacts of housing policy in developing countries. \cite{baruah2017planning} study sites-and-services schemes implemented on the urban fringe of Tanzanian cities. Using comparable greenfields as counterfactuals, they find that initial infrastructure investments have long-term positive impacts on nearby housing quality. \cite{harari2018slum} examine the impacts of a slum upgrading program in Jakarta, Indonesia. The authors also use untreated comparable areas as counterfactuals, and find negative effects on land values and levels of formalization. Importantly, in a boundary discontinuity design, the authors note no evidence of spillovers from the program to neighboring areas. In ongoing work, \cite{gechter2018slums} study spillovers from formal housing development using sharp temporal changes in Mumbai's zoning laws. Through the lens of a quantitative general equilibrium model, the authors find high higher property prices,  more formal construction, and lower population density in the vicinity of targeted areas. Finally, outside of the developing world, our research draws upon an established literature on housing externalities \citep{rossi2010housing,hornbeck2017creative,diamond2016wants}. 
 
-
-
-
 %Planned but unconstructed project areas provide useful counterfactuals since governments may select unobservably worse land plots to build subsidized housing projects.  These control areas resemble treated areas at baseline across a range of measures, including preexisting housing density.  
-
-
-
-
 
 
 % The empirical analysis focuses on South Africa, which allows us to overcome data limitations that have so far constrained previous research.  While researchers have focused primarily on the impacts of housing projects for recipients  .  
@@ -249,54 +221,6 @@ Section~\ref{section:data} describes the data used to measure outcomes and detai
 
 
 
-
-% [ quick example / data summary about projects, maybe a quote about the motivation ]  
-
-% By providing subsidized formal housing, cities aim to eradicate slums and improve the social welfare of recipients.  Recent studies confirm that better housing conditions can generate improvements in child health, women's employment, and quality of life \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}.  
-
-
-% 2.5.3 RDP A mass housing programme can help generate employment, skills and economic activity, both directly and indirectly, and should help ensure peace and stability.
-
-%2.5.4 Right to housing. The RDP endorses the principle that all South Africans have a right to a secure place in which to live in peace and dignity. Housing is a human right. One of the RDP's first priorities is to provide for the homeless.
-
-
-
-% However, 
-
-
-% Governments often construct large-scale public housing projects with the understanding that 
-
-% These policies are often premised on the assumption that 
-
-
-
- 
-%  Big Statistic about public housing in developing world.  
-
-% unmet housing demand
-
-
-% Housing
-% 26. (1) Everyone has the right to have access to adequate housing.
-% (2) The state must take reasonable legislative and other measures, within its available
-% resources, to achieve the progressive realisation of this right.
-% (3) No one may be evicted from their home, or have their home demolished, without an
-% order of court made after considering all the relevant circumstances. No legislation
-% may permit arbitrary evictions. 
-
-
-% replace slums with serviced formal structures and moving local households into public housing projects (source!).  
-
-
-
-
-% We study a common policy response where governments replace slums with serviced formal structures and move slum dwellers into public housing projects. 
-
-% The promoted goals of these programs are twofold. First, policymakers stress how better housing improves household wellbeing along a variety of dimensions.\footnote{The United Nations Habitat Program articulates how improved housing can provide ``social, cultural and economic benefits in the form of improved quality of life, poverty alleviation, environmental protection and improved health and safety'' \citep{unhabitat}.} This is well supported by existing studies on direct recipient impacts, which link housing programs to improvements in child health, women's employment, and quality of life \citep{cattaneo2009housing,franklin2016enabled,galiani2017shelter}. 
-
-
-
-% A second set of policy goals pertains to broader urban development impacts, driven by spillovers to neighboring areas. For instance, subsidized housing in South Africa is proposed for ``leveraging growth in the economy, [...] combating crime, promoting social cohesion, [...] and utilizing housing as an instrument for the development of sustainable human settlements, in support of spatial restructuring'' \citep{bng}. 
 
 
 
@@ -470,86 +394,9 @@ In practice, these guidelines are loosely followed.  Recent reports point to cas
 % By design, subsidized housing in South Africa offers recipients [[[[ generous amounts of yard space ]]]], often diverted to alternative land uses. The construction of informal backyard shacks is a common occurrence within project boundaries. Recipients typically enter agreements with tenants (at times relatives) to lease the shacks for cash or in-kind payments. According to the 2011 census, backyard tenants represent 7.5\% of South African households.\footnote{This figure jumps to 12.5\% for the province of Gauteng, where our study is conducted.} Though the structures are not as durable as their government-provisioned counterparts, living conditions are typically superior to conventional informal settlements. Tenants gain indirect access to their landlord's services such as water taps, electricity connections, and toilets, and benefit from reduced eviction threats and greater personal safety \citep{beall2003social}. \cite{Brueckner2018backyarding} note that {\it backyarding} is suggestive of inefficiencies in the program delivery, and allows households to correct potential misallocations of resources. Importantly for our analysis, backyard shacks reveal that more households may benefit from subsidized housing than the listed number of direct recipients. According to the General Household Surveys (2009-2013), more than 33\% of government-provisioned homes have backyard shacks within two years of the delivery date. 
 
 
-% \section{Model of the Residential Housing Market}\label{section:theory}
-
-% We develop a simple model of residential housing markets to capture the welfare effects of local housing projects on neighboring areas.  This model builds on prior housing market models by measuring social welfare changes not only through changes in rents, but also through changes in the quantity of housing supplied.  
-
-% %%% motivate more from a broad welfare perspective
-
-% % Compare to Diamond's model! in writing;  mention time periods up front?!
-% % This model is static where households h
-% % Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
-
-% Each time period, developers choose how many houses to maintain on each plot of land as well as the level of rent for each house where each house serves up to one household.  Then households choose whether to rent a house receiving utility given by
-% \begin{align*}
-% U &= \delta_{lt} - \lambda(k_{jt}) - \theta R_{jt}   + \epsilon_{jt}  
-% \end{align*}
-% \noindent where $l$ indexes location, $j$ indexes the specific land plot within location $l$, and $t$ indexes the time period.  $\delta_{lt}$ indicates the amenity value of location, $l$ in time period, $t$.  $k_{jt}$ measures the number of houses on the land plot and  $\lambda(k_{jt})$ captures the congestion disutility from having multiple houses on the same plot and is assumed to be increasing and convex in the number of houses per plot.  $R_{jt}$ is the rent charged for each house on plot, $j$ and $\theta$ measures the marginal disutility of rent.  $\epsilon_{jt}$ is the plot and time-specific amenity shock.  Households can also choose to live outside the city and receive reservation value, $\overline{U}$.  This approach assumes that households have identical preferences across houses and locations.  
- 
-% Given household preferences, developers maximize profits by setting rents just high enough to ensure that households are indifferent between renting a house on plot $j$ and their reservation utility $\overline{U}$.  Profit-maximizing rents as a function of the number of houses on a plot is given by
-% \begin{align}
-% \label{eq:rent}
-% R_{jt}^{*}(k_{jt}) &= \frac{ \delta_{lt} - \lambda(k_{jt}) + \epsilon_{jt} - \overline{U}}{\theta}
-% \end{align}
-% From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents according to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents.  Without detailed measures of home ownership, this approach is unable to disentangle the distributional consequences of public housing policies across the population of households.
-
-% Given profit-maximizing rents, developers then choose how many houses to build on each plot by maximizing total profit per plot given by
-% \begin{align*}
-% max_{\,k_{jt}} \,\,\,\,\,\,  k_{jt} \, \Big( \, R_{jt}^{*}(k_{jt}) - C_{jt} \, \Big )
-% \end{align*}
-% \noindent where the $C_{jt}$ measures the cost of maintaining each house, which may vary based on location.
-
-% %and may depend on plot-specific features such as land slope, $C_{j} = c + \psi S_{j}$ where land slope is given by $S_{j}$.
-
-% When $\lambda(k_{jt})$ is convex, the profit-maximizing number of houses, $k^{*}_{jt}$ can be expressed as a function of the random amenity shock $\epsilon_{jt}$ given by
-% \begin{align}
-% \label{eq:housingdemand}
-% \begin{split}
-% k_{jt}^{*} &=
-% \begin{cases}
-% 0 &\text{ if }\,\, \epsilon_{jt} + V_{jt} \leq \Lambda(1)  \\
-% % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
-% k &\text{ if }\,\,  \Lambda(k) < \epsilon_{jt} + V_{jt} \leq \Lambda(k+1)
-% \end{cases} \\
-% \text{ where }& \\
-% V_{jt} & = \delta_{lt}  - \theta C_{jt}   \\
-% \Lambda(k) & =  k\lambda(k) - (k-1)\lambda(k-1) + \overline{U} \\
-% \lambda(0) & = 0 \,\, \text{ and } \lambda(.) \text{ is increasing and convex }
-% \end{split}
-% \end{align}
-% The profit-maximizing number of plots with houses and the number of houses per plot are increasing in amenity values, $\delta_{lt}$, decreasing in congestion disutility, $\Lambda(k)$, and decreasing in construction costs, $C_{jt}$.  According to this framework, observed increases in the number of plots with houses and/or the number of houses per plot indicate an improvement in welfare holding constant reservation utility.  
-
-% Given rents in equation (\ref{eq:rent}) and houses in equation (\ref{eq:housingdemand}), let the competitive price of each plot equal total profit for each plot as follows
-% \begin{align}
-% \label{eq:profits}
-% \begin{split}
-% P_{jt}^{*}  &=
-% \begin{cases}
-% 0 &\text{ if }\,\, \epsilon_{jt} + V_{jt} \leq \Lambda(1)  \\
-% % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
-% k \Big[ \frac{ \delta_{lt} - \lambda(k) + \epsilon_{jt} - \overline{U}}{\theta}  - C_{jt}\Big] &\text{ if }\,\,  \Lambda(k) < \epsilon_{jt} + V_{jt} \leq \Lambda(k+1)
-% \end{cases} 
-% \end{split}
-% \end{align}
-% Like the profit-maximizing number of houses per plot, plot prices are increasing with local amenities, decreasing in congestion disutility, and decreasing in construction costs.
-
-
-% By contrast, increases in observed average rents have ambiguous welfare implications depending on whether these changes are driven by amenity improvements or construction cost increases.  Equation (\ref{eq:rent}) indicates that optimal rents rise and fall monotonically with amenity quality, $\delta_{lt}$.  Construction costs affect optimal rents indirectly by affecting how many houses developers locate on plots.  Higher construction costs mean that developers .  Therefore, rents 
-
-% Predicts FEWER SALES?!?!?!?!??!?!!  SHOW THE SALES REPORTS!!!!!!! RENTS VERSUS PRICES?! TRICKY!!!!!!
-
-% Increases in construction costs lead to fewer developed plots, and .   
-
-% Optimal prices, ... as the change.....
-
-% Price changes capture the net result of (1) the direct effects of local amenity quality as well as (2) the indirect effects of shifts in the extent of development and the quality of lots that are developed.  Optimal rents given by equation (\ref{eq:rent}) indicate that rents respond directly to amenities, $\delta_{lt}$ and indirectly to changes in the intensity of development, $k_{jt}$, which affects prices through both the amount of crowding disutility, $\lambda(k_{jt})$ as well as the unobserved quality of plots that are developed, $\epsilon_{jt}$.  In this framework, decreases in prices can be generated not only by decreases in amenity values, but also by decreases in construction costs as lower construction costs induce development on low quality plots as well as greater congestion 
-
-
-
-
 \section{Modeling the Housing Market}\label{section:theory}
 
-We develop a simple model of residential housing markets to capture the welfare effects of local housing projects on neighboring areas.  This model builds on prior housing market models by measuring social welfare changes not only through changes in rents, but also through changes in the quantity of housing supplied.  
+We develop a simple model of residential housing markets to capture the welfare effects of local housing projects within their neighborhoods.  This model infers welfare changes not only through changes in rents, but also through changes in the quantities of housing supplied.  
 
 %%% motivate more from a broad welfare perspective
 
@@ -557,24 +404,26 @@ We develop a simple model of residential housing markets to capture the welfare 
 % This model is static where households h
 % Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
 
-Each time period, developers choose how many formal and informal houses to maintain on each plot of land as well as the level of rent for each house where each house serves up to one household.  Then households choose whether to rent a house receiving utility given by
+Each time period, developers choose how many formal and informal houses to construct and maintain on each plot of land as well as the level of rent for each house.  Each house can serve up to one household, and houses have identical quality.  Then households choose whether to rent a house receiving utility given by
 \begin{align*}
 U &= \delta_{hlt} - \lambda_{h}(k_{hjt}) - \theta R_{hjt}   + \epsilon_{hjt}  
 \end{align*}
-\noindent where $h$ indexes housing sector (either formal or informal), $l$ indexes location, $j$ indexes the specific land plot within location $l$, and $t$ indexes the time period.  $\delta_{hlt}$ indicates the amenity value of location, $l$ to housing sector, $h$ in time period, $t$.  $k_{jth}$ measures the number of houses of a sector on the land plot.  $\lambda_{h}(k_{hjt})$ captures the congestion disutility from having multiple houses of the same sector on the same plot and is assumed to be increasing and convex in the number of houses per plot.   $\lambda_{h}(k_{hjt})$ does not depend on houses from another sector, $-h$.    $R_{hjt}$ is the rent charged for each house on plot, $j$ and $\theta$ measures the marginal disutility of rent.  $\epsilon_{hjt}$ is the plot and time-specific amenity shock.  Households can also choose to live outside the city and receive reservation value, $\overline{U}$.  This approach assumes that households have identical preferences across houses and locations.  
+\noindent where $h$ indexes housing sector (either formal or informal), $l$ indexes location, $j$ indexes the specific land plot within location $l$, and $t$ indexes the time period.  $\delta_{hlt}$ indicates the amenity value of location, $l$ to housing sector, $h$ in time period, $t$.  $k_{hjt}$ measures the number of houses of a sector on the land plot.  $\lambda_{h}(k_{hjt})$ captures the congestion disutility from having multiple houses of the same sector on the same plot and is assumed to be increasing and convex in the number of houses per plot.   $\lambda_{h}(k_{hjt})$ is also assumed to be independent of the number of houses from another sector on the same plot.    $R_{hjt}$ is the rent charged for each house on plot $j$ and $\theta$ measures the marginal disutility of rent.  $\epsilon_{hjt}$ is the plot and time-specific amenity shock.  The distribution of $\epsilon_{hjt}$ may be correlated across housing sectors to capture whether land plots that are suitable for formal housing may also be suitable for informal housing.  Households can also choose to live outside the city and receive reservation value, $\overline{U}$.  
+
+This approach assumes that households have identical preferences across houses and locations, which implies that housing demand is perfectly elastic.  This assumption is consistent with households having low moving costs within the city as well as no idiosyncratic preferences for particular neighborhoods.  These assumptions may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.
  
 Given household preferences, developers maximize profits for each housing sector by setting rents just high enough to ensure that households are indifferent between renting each house on plot $j$ and their reservation utility $\overline{U}$.  Profit-maximizing rents as a function of the number of houses on a plot is given by
 \begin{align}
 \label{eq:rent}
 R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}) + \epsilon_{hjt} - \overline{U}}{\theta}
 \end{align}
-From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents according to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents.  Without detailed measures of home ownership, this approach is unable to disentangle the distributional consequences of public housing policies across the population of households.
+From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents.  Without detailed measures of home ownership, this approach is unable to disentangle the distributional consequences of public housing policies across the population of households.
 
 Given profit-maximizing rents, developers then choose how many houses to build on each plot by maximizing total profit per plot given by
 \begin{align*}
-max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big( \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big )
+max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
 \end{align*}
-\noindent where the $C_{hjt}$ measures the cost of maintaining each house, which may vary based on location.
+\noindent where the $C_{hjt}$ measures the cost of constructing and maintaining each house, which may vary based on location.
 
 %and may depend on plot-specific features such as land slope, $C_{j} = c + \psi S_{j}$ where land slope is given by $S_{j}$.
 
@@ -594,21 +443,23 @@ V_{hjt} & = \delta_{hlt}  - \theta C_{hjt}   \\
 \lambda(0) & = 0 \,\, \text{ and } \lambda(.) \text{ is increasing and convex }
 \end{split}
 \end{align}
-The profit-maximizing number of plots with houses and the number of houses per plot by sector are increasing in amenity values, $\delta_{hlt}$, decreasing in congestion disutility, $\Lambda_{h}(k)$, and decreasing in construction costs, $C_{hjt}$.  According to this framework, observed increases in the number of plots with houses and/or the number of houses per plot indicate an improvement in welfare holding constant reservation utility.  
+The profit-maximizing number of plots with houses and the number of houses per plot by sector are increasing in amenity values, $\delta_{hlt}$, decreasing in congestion disutility, $\Lambda_{h}(k)$, and decreasing in construction costs, $C_{hjt}$.  According to this framework, observed increases in the number of plots with houses and/or the number of houses per plot indicate an improvement in welfare holding constant reservation utility.  The variance of amenity shocks, $\epsilon_{hjt}$ may be interpreted as a measure of the sector-specific housing market elasticity.  
 
-Given rents in equation (\ref{eq:rent}) and houses in equation (\ref{eq:housingdemand}), let the competitive price of each plot equal total profit for each plot as follows
+Given optimal rents in equation (\ref{eq:rent}) and optimal houses in equation (\ref{eq:housingdemand}), let the price of each plot equal profit for each plot as follows
 \begin{align}
 \label{eq:profits}
 \begin{split}
 P_{hjt}^{*}  &=
-\begin{cases}
-0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
-% 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
-k \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
-\end{cases} 
+k_{hjt}^{*} \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}^{*}) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] 
 \end{split}
 \end{align}
-Like the profit-maximizing number of houses per plot, plot prices are increasing with local amenities, decreasing in congestion disutility, and decreasing in construction costs.  Changes in plot prices fully capture changes in social welfare because equilibrium rents ensure that renter utility is always equal to reservation utility, leaving landowners to accrue any additional surplus. 
+% \begin{cases}
+% 0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
+% % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
+% k \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
+% \end{cases} 
+
+Like the profit-maximizing number of houses per plot, plot prices are increasing with local amenities, decreasing in congestion disutility, and decreasing in construction costs.  Changes in plot prices fully capture changes in social welfare because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus. 
 
 
 % By contrast, increases in observed average rents have ambiguous welfare implications depending on whether these changes are driven by amenity improvements or construction cost increases.  Equation (\ref{eq:rent}) indicates that optimal rents rise and fall monotonically with amenity quality, $\delta_{lt}$.  Construction costs affect optimal rents indirectly by affecting how many houses developers locate on plots.  Higher construction costs mean that developers .  Therefore, rents 
@@ -622,48 +473,20 @@ Like the profit-maximizing number of houses per plot, plot prices are increasing
 % Price changes capture the net result of (1) the direct effects of local amenity quality as well as (2) the indirect effects of shifts in the extent of development and the quality of lots that are developed.  Optimal rents given by equation (\ref{eq:rent}) indicate that rents respond directly to amenities, $\delta_{lt}$ and indirectly to changes in the intensity of development, $k_{jt}$, which affects prices through both the amount of crowding disutility, $\lambda(k_{jt})$ as well as the unobserved quality of plots that are developed, $\epsilon_{jt}$.  In this framework, decreases in prices can be generated not only by decreases in amenity values, but also by decreases in construction costs as lower construction costs induce development on low quality plots as well as greater congestion 
 
 
+
 \subsection{Modeling Public Housing Projects}
 
-Public housing projects may affect housing costs and amenity values both within project footprints as well as nearby project footprints.  
+Public housing projects enter the model by shifting housing costs and amenity values both within as well as nearby project footprints.  Let location index $l$ indicate whether plots fall within project footprints, $w$ or nearby spillover areas, $s$.  Similarly, let housing sector index $h$ indicate whether amenities/costs apply to formal, $f$ or informal, $i$ housing sectors.
 
-Within project footprints, local developers receive subsidies to construct houses, which directly lower housing costs, $C_{hjt}$.  Project beneficiaries are assumed to participate in the residential housing market by setting profit-maximizing rents for their new project houses.  Housing projects may also improve the amenity value of living in project areas, $\delta_{hlt}$ by increasing access to quality infrastructure like water, electricity, and sewerage services.  
+Housing projects allocate subsidies to local developers to construct houses within project footprints.  These subsidies directly lower formal housing construction costs in project footprints, $C_{fwt}$.  These houses are then allocated to beneficiary households who can choose to live in these houses or rent them at efficient prices.  Housing projects also remove preexisting informal housing and rezone land for formal housing development, leaving limited land for new informal developments.  These practices may increase costs for informal housing, $C_{iwt}$ in project footprints.
 
-Just outside of project footprints, housing projects may improve local amenities, $\delta_{hlt}$  as infrastructure investments within projects spillover to benefit neighboring areas.  Local amenities may also decline if housing projects form neighborhoods that are undesirable to nearby households.
+Housing projects may also affect local amenity values for formal housing, $\delta_{fwt}$ and informal housing, $\delta_{iwt}$ within project footprints.  Housing projects may boost local amenities by increasing access to piped water, electricity, and sewerage services while providing better roads and community centers.  
 
+Housing projects may also have effects on amenities for neighboring areas just outside of project footprints.  On one hand, improvements in infrastructure in project footprints as well as greater densities of formal housing may provide positive amenities for surrounding neighborhoods, $\delta_{hst}$.  On the other hand, greater densities of backyard housing within projects as well as shifts toward lower income demographics in project areas may be perceived as negative amenities by surrounding housing markets, $\delta_{hst}$.  
 
+Collapsing these effects into amenity terms, $\delta_{hlt}$ provides a reduced-form method of capturing the spillover effects of housing projects; however, this approach implies a series of restrictions on behavior.  First, the amenity term, $\delta_{hlt}$ enters household utility linearly and independent of the number of houses per plot, which nests the assumption that the all households enjoy local amenities equally and independently of the density of neighboring housing.  This assumption does not allow for congestion costs from overusing public services.
 
-% From a structural perspective, 
-
-
-% \begin{align}
-% \label{eq:rent}
-% \Delta R_{jt}^{*}  &= \frac{ \Delta\delta_{\textsc{Spill}} - \lambda(k_{jt}) + \epsilon_{jt} - \overline{U}}{\theta}
-% \end{align}
-
-- add in housing sectors!  ?
-
-
-% Houses are then allocated to project recipient households who often rent to other households.  Given high rates of rental, 
-
-
-%  Houses are then allocated to  but would not have an effect on total surplus.  
-
-
-
-% - increasing in amenity costs
-% - construction costs enter being multiplied by theta  empirically unable to distinguish changes in construction costs ...
-
-% How does the housing project function in the model!?
-
-% Locations are divided into three areas: (1) project areas, $\textsc{\small Proj}$, defined as being inside housing project footprints; (2) spillover areas, $\textsc{\small Spill}$, located just outside of project footprints; and (3) outside areas, $\textsc{\small Outside}$ that are further away from project footprints. 
-
-
-% \begin{align*}
-% \delta_l &= \textsc{\small Proj}_{l} \,\, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{l} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{l}\, +\, \alpha_4 \Big) \, + \\[.2em]
-% & \, \textsc{\small Spill}_{l} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{l} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{l} \, +\, \beta_4 \Big) \, + \\[.2em]
-% & \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{l} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{l}
-% \end{align*}
-
+Second, this approach imposes a limited structure for amenity externalities to extend across space:  amenities in project areas are allowed to affect amenities for spillover areas while amenities in all other areas are assumed to be spatially independent of each other.  This assumption is consistent with housing projects generating large, first-order changes that precipitate across neighborhoods while each individual's development decisions produce negligible externalities across neighborhoods.  Alternative approaches that explicitly model housing externalities across space would likely suffer from multiple equilibria as well as challenges for identification in this setting.\footnote{\cite{rossi2010housing} develop a model of spatial housing externalities over a single dimension, ``housing services'' where identification draws from the functional form of the housing externalities.  Our setting would require households to consider externalities across housing quantity as well as sectors.}
 
 
 
@@ -673,14 +496,14 @@ Just outside of project footprints, housing projects may improve local amenities
 
 Understanding the local development impacts of public housing requires (1) a precise measure of the location, timing, and size of housing projects, and (2) outcomes measured at high spatial resolutions.
 
-We locate projects using a map of housing projects obtained from from the Gauteng City Regional Observatory, a research unit composed of the Gauteng Provincial Government and two Johanesburg universities.\footnote{\href{url}{www.gcro.ac.za/}} The map describes \input{figures/total_gcro}housing projects as of 2008, including notes on their completion status.  We classify \input{figures/total_con}projects with descriptions including ``current,'' ``under implementation,'' or ``complete'' as constructed projects.  We then classify \input{figures/total_uncon}projects with descriptions including ``proposed,'' ``under planning,'' ``future,'' ``investigating,'' and ``uncertain'' as planned but unconstructed projects.  The remaining \input{figures/total_other}projects either do not include descriptions or their descriptions are difficult to classify as either constructed or unconstructed.  Appendix Table~\ref{table:projectdescriptions} includes tabulations of the full list of descriptions.  
+We locate projects using a map of housing projects obtained from the Gauteng City Regional Observatory, a research unit composed of the Gauteng Provincial Government and two Johanesburg universities.\footnote{\href{url}{www.gcro.ac.za/}} The map describes \input{figures/total_gcro}housing projects as of 2008, including notes on their completion status.  We classify \input{figures/total_con}projects with descriptions including ``current,'' ``under implementation,'' or ``complete'' as constructed projects.  We then classify \input{figures/total_uncon}projects with descriptions including ``proposed,'' ``under planning,'' ``future,'' ``investigating,'' and ``uncertain'' as planned but unconstructed projects.  The remaining \input{figures/total_other}projects either do not include descriptions or their descriptions are difficult to classify as either constructed or unconstructed.  Appendix Table~\ref{table:projectdescriptions} includes tabulations of the full list of descriptions.  
 
 %Unclassified projects are more likely to be located in the northern region of the Gauteng province according to the map in Figure~\ref{figure:map}, which suggests that housing authorities in northern areas like Pretoria area may have followed different record keeping practices compared to those in the Johannesburg metro area.  
 % \input{figures/informal_other}of the unclassified projects are described as ``informal,'' which may correspond to government efforts to identify informal settlements rather than.
 
-Additional information for some projects allows us to examine the impacts of different types of housing projects.  We identify \input{figures/total_insitu}in-situ upgrading projects as those with descriptions containing the phrase ``Essential Services,'' which are linked to an aggressive demolition and rebuilding campaign launched by the Gauteng Province between 2000 and 2008 (\cite{hofmeyr2008risk}).  Likewise, we identify \input{figures/total_greenfield}greenfield projects as those with descriptions containing the phrase ``Mixed Housing Developments,'' which were designed to modernize greenfield projects by combining project houses with investments in local services (\cite{greenfield}).
+% Additional information for some projects allows us to examine the impacts of different types of housing projects.  We identify \input{figures/total_insitu}in-situ upgrading projects as those with descriptions containing the phrase ``Essential Services,'' which are linked to an aggressive demolition and rebuilding campaign launched by the Gauteng Province between 2000 and 2008 (\cite{hofmeyr2008risk}).  Likewise, we identify \input{figures/total_greenfield}greenfield projects as those with descriptions containing the phrase ``Mixed Housing Developments,'' which were designed to modernize greenfield projects by combining project houses with investments in local services (\cite{greenfield}).
 
-For constructed projects, we assign a completion date to each project according to the date when recipients received deeds to their project houses.  To recover this date, we overlay project locations onto deeds data from the South African National Deeds Office.  The deeds cover the universe of housing transactions from 2001 to 2011 in {\it affordable areas}, which are defined as census enumeration areas with 2010 mean house prices below R500,000.\footnote{These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.} Deeds include price, GPS location, plot size, buyer name, and seller name.  Although the data do not identify whether deeds belong to housing projects, we are able to infer project status according to whether the seller name includes a government or municipality when first transacted.  This project definition also excludes deeds flagged as large buildings used for commercial purposes (less than 2\% of transactions) as well as purchase prices more than R50,000 above the yearly nominal subsidy values (less than 4\% of remaining transactions), resulting in a sample of over 48,000 deeds.  Appendix Figure \ref{figure:transactionhist} plots the histogram of sale prices according to this project definition, finding substantial bunching around subsidy values for project deeds and a smooth distribution of prices for non-project deeds.  We assign a completion date according to modal year and month for deeds within each project.  Within projects, most government-sponsored properties are transacted in the same month.\footnote{Appendix \ref{appendix:histfreq} plots the distribution of subsidized and non-subsidized transactions around the modal transaction month.} 
+For constructed projects, we assign a completion date to each project according to the date when recipients received deeds to their project houses.  To recover this date, we overlay project locations onto deeds data from the South African National Deeds Office.  The deeds cover the universe of housing transactions from 2001 to 2011 in {\it affordable areas}, which are defined as census enumeration areas with 2010 mean house prices below R500,000.\footnote{These data were provided by the Affordable Land and Housing Data Centre, which tracks affordable housing markets.} Deeds include price, GPS location, plot size, buyer name, and seller name.  Although the data do not identify whether deeds belong to housing projects, we are able to infer project status according to whether the seller name includes a government or municipality when first transacted.  This project definition also excludes deeds flagged as large buildings used for commercial purposes (less than 2\% of transactions) as well as purchase prices more than R50,000 above the yearly nominal subsidy values (less than 4\% of remaining transactions), resulting in a sample of over 48,000 deeds.  Appendix Figure \ref{figure:transactionhist} plots the histogram of sale prices according to this project definition, finding substantial bunching around subsidy values for project deeds and a smooth distribution of prices for non-project deeds.  We assign a completion date according to the modal year and month for deeds within each project.  Within projects, most government-sponsored properties are transacted in the same month.\footnote{Appendix \ref{appendix:histfreq} plots the distribution of subsidized and non-subsidized transactions around the modal transaction month.} 
 
 For planned but unconstructed projects, we approximate expected completion dates by matching project names to National Treasury budget reports, which list expected project completion dates.  We digitized data for \input{figures/unique_budget_report_names}projects from budget reports spanning 2004 to 2009, which detail the name, start date, expected completion date, and cost of each housing project.  We then use a string-matching algorithm to link project names from the budget reports to the administrative maps.  Out of the 642 total project names from the administrative map, we are able to match 322 projects, including 126 constructed projects and 73 planned but unconstructed projects.  We provide further details about the digitization and string-matching algorithm in Appendix~\ref{appendix:stringmatch}.  Because of the low rate of matches, we use expected completion dates only for a subsection of the empirical analysis that focuses on estimating the immediate price impacts of housing projects.  The majority of the analysis compares outcomes in 2001 and 2011 for constructed and unconstructed projects under the assumption that these projects either were constructed or would have been constructed between 2001 and 2011.
 
@@ -694,7 +517,7 @@ For planned but unconstructed projects, we approximate expected completion dates
 \tcbox[colback=white,boxrule=.35mm,boxsep=0mm]{\includegraphics[scale=.6,trim={.9cm .4cm .9cm .4cm}]{figures/newprojectmap.pdf}}
 \end{figure}
 
-Figure \ref{figure:map} maps the sample of constructed and unconstructed projects as polygons within the Gauteng province. Importantly, Figure \ref{figure:map} also shows that the affordable areas -- the coverage area for our deeds data -- contain every project boundary. While constructed and unconstructed projects are often adjacent to each other, possibly indicating cases where authorities were unable to complete different phases of planned projects, there are also many examples of isolated projects of both types.  Projects are generally located at relatively great distances from central business districts (CBDs), suggesting that vacant or inexpensive land plots are especially targeted by housing authorities.  Despite their distance from the CBDs, housing projects are often next to arterial highways, easing commuting costs for recipients.
+Figure \ref{figure:map} maps the sample of constructed and unconstructed projects as polygons within the Gauteng province. Importantly, Figure \ref{figure:map} also shows that the affordable areas -- the coverage area for our deeds data -- contain nearly every project boundary. While constructed and unconstructed projects are often adjacent to each other, possibly indicating cases where authorities were unable to complete different phases of planned projects, there are also many examples of isolated projects of both types.  Projects are generally located at relatively great distances from central business districts (CBDs), suggesting that vacant or inexpensive land plots are targeted by housing authorities.  Despite their distance from the CBDs, housing projects are often next to arterial highways, potentially easing commuting costs for recipients.
 
 % We note that our approach is not without limitations, and may introduce measurement error insofar as we are misattributing deeds to housing projects (false-positives), or assuming a project is unconstructed when it was actually constructed (false-negatives).  
 
@@ -705,7 +528,7 @@ Figure \ref{figure:map} maps the sample of constructed and unconstructed project
 
 % \subsection{Nearby housing transactions}
 
-To examine housing price spillovers nearby projects, we include properties that are located outside of the project areas and are not sold by government housing agencies or large developers identified as sellers with more than 30 transactions.  Excluding these sellers limits the external validity of our results only to small developers and individual homeowners.  We focus on properties located within 1.5 kilometers of constructed and unconstructed housing projects, forming a sample of over 67,000 transactions.  We exclude the top 1\% of prices as well as prices below 2,500 Rand, which are likely to be composed of mismeasured prices, or titles exchanged between family members. 
+To examine housing price spillovers nearby projects, we include properties that are located outside of the project areas and are not sold by government housing agencies or large developers identified as sellers with more than 30 transactions.  Excluding these sellers limits the external validity of our results only to small developers and individual homeowners.  We focus on properties located within 1.5 kilometers of constructed and unconstructed housing projects, forming a sample of over 67,000 transactions.  We exclude the top 1\% of prices as well as prices below 2,500 Rand, which are likely to be composed of mismeasured prices or titles exchanged between family members. 
 
 
 % \subsection{Census Data}
@@ -729,12 +552,12 @@ We measure impacts on dwelling and household characteristics with the full 1996,
 % \subsection{Building Based Land Use}
 % \label{section:data:bblu}
 
-To measure housing growth, we analyze hand-coded building data derived from high-resolution aerial and satellite imagery. We obtain these data from GeoTerraImage (Pty) ltd., a local remote-sensing specialist.\footnote{\href{http://www.geoterraimage.com/}{\tt http://www.geoterraimage.com/}} The data differentiate structures across 30 categories, including formal and informal residential dwellings. Informal housing structures are easily identified from their temporary nature, often made of materials such as recycled wood and corrugated metal. In contrast, formal housing structures are permanent, generally made out of brick, and may have a pitched or a flat roof with tiles, zinc panels, or other materials. Importantly for our analysis, the data encodes backyard shacks as informal structures, but distinguishes between backyard and other types of informal buildings. We track changes in residential development by using two available survey waves in Gauteng: 2001 and 2012. As a validation exercise, we compute aggregated building counts at the census block level, and check the resulting figures against the number of households reporting to live in formal/informal housing in the census. The two data sources paint a consistent picture of housing in Gauteng, with high correlations ($\geq$ 0.85) between formal and informal building quantities in both available comparison years.\footnote{We correlate the 2001 and 2012 building surveys with the 2001 and 2011 censuses, respectively.}  To measure building density, we transform this data into 25$\times$25m grid cell aggregates, creating five measures of housing density: (1) total residential structures split between (2) formal residential structures and (3) informal residential structures, which can be further decomposed into (4) backyard informal and (5) non-backyard informal structures.  In Figure \ref{fig:bblumaps}, we provide an example of the raw data and a depiction of our griding procedure, using the 2012 data wave.
+To measure housing growth, we analyze hand-coded building data derived from high-resolution aerial and satellite imagery. We obtain these data from GeoTerraImage (Pty) ltd., a local remote-sensing specialist.\footnote{\href{http://www.geoterraimage.com/}{\tt http://www.geoterraimage.com/}} The data differentiate structures across 30 categories, including formal and informal residential dwellings. Informal housing structures are easily identified from their temporary nature, often made of materials such as recycled wood and corrugated metal. In contrast, formal housing structures are permanent, generally made out of brick, and may have a pitched or a flat roof with tiles, zinc panels, or other materials. Importantly for our analysis, the data encodes backyard shacks as informal structures, but distinguishes between backyard and other types of informal buildings. We track changes in residential development by using two available survey waves in Gauteng: 2001 and 2012. As a validation exercise, we compute aggregated building counts at the census block level, and check the resulting figures against the number of households reporting to live in formal/informal housing in the census. The two data sources paint a consistent picture of housing in Gauteng, with high correlations ($\geq$ 0.85) between formal and informal building quantities in both available comparison years.\footnote{We correlate the 2001 and 2012 building surveys with the 2001 and 2011 censuses, respectively.}  To measure building density, we transform this data into 25$\times$25m grid cell aggregates, creating five measures of housing density: (1) total residential structures split between (2) formal residential structures and (3) informal residential structures, which can be further decomposed into (4) backyard informal and (5) non-backyard informal structures.  We exclude grid cells where development is infeasible because these cells intersect with rivers, lakes, recreational locations (tennis courts, pools, basketball courts, etc.), and mining excavation areas (10\% of total grid cells).  In Figure \ref{fig:bblumaps}, we provide an example of the raw data and a depiction of our griding procedure, using the 2012 data wave.
 % These grid cells will be the main units of observations for our housing density regressions, described in section \ref{section:bbluestimates}. 
 
-We also construct a measure of construction costs as a function of land slope.  First, recent research by the Center for Affordable Housing and Finance (CAHF) suggests that construction costs in Pretoria, Gauteng for the low end of the housing market compose the majority of property market values, which is consistent with a competitive market in property development (\cite{cahfcosts}).  The average property value in our data is R231,000.  To benchmark this value, a 2016 study by AECOM engineering estimates construction costs to be around R3,500 per square meter of floor space for the lower end of the housing market (\cite{aecom}).  Dividing construction costs by costs per square meter implies that the floor space of the average house in the low end of the housing market is around 66 m2, which is comparable to the 40 m2 of floor space available for each project house.  The CAHF also estimates that the average construction cost for a fully serviced, 46 m2 house (with a 9 m2 balcony on a 120 m2 plot) in Pretoria is R336,000, which is also consistent with our estimate given that our data includes the bottom 20\% of the housing market.
+We also construct a measure of construction costs as a function of land slope.  First, recent research by the Center for Affordable Housing and Finance (CAHF) suggests that construction costs account for the majority of the value of an average property, which is consistent with a competitive market in property development (\cite{cahfcosts}).  The average property value in our data is R231,000.  To benchmark this value, a 2016 study by AECOM engineering estimates construction costs to be around R3,500 per square meter of floor space for the lower end of the housing market (\cite{aecom}).  Dividing construction costs by costs per square meter implies that the floor space of the average house in the low end of the housing market is around 66 m2, which is comparable to the 40 m2 of floor space available for each project house.  The CAHF also estimates that the average construction cost for a fully serviced, 46 m2 house (with a 9 m2 balcony on a 120 m2 plot) in Pretoria is R336,000, which is also consistent with our estimate given that our data includes the bottom 20\% of the housing market.
 
-South African construction guidelines indicate that constructing homes on slopes with 6\% to 12\% gradients increases infrastructure costs by 25\% and building costs by 5\%, and constructing on slopes with greater than 12\% gradients increases infrastructure costs by 50\% and building costs by 15\% (\cite{redbook}).  Recent research from the CAHF in Pretoria estimates that out of total construction costs, around 62\% is attributable to building costs while around 12\% is attribute to infrastructure costs (\cite{cahfcosts}).  To measure land slope, we use 200m elevation contour lines provided by the National Geo-Spatial Information component of the Department of Rural Development and Land Reform of South Africa.  We calculate a proxy for slope by finding the highest and lowest points in a 500$\text{m}^{2}$ square and dividing their elevation difference by the euclidean distance between them.  The dataset includes 9,770 squares of which 93\% have slopes of less than 6\%, 5\% have slopes between 6\% and 12\%, and the remaining 2\% have slopes greater than 12\%.
+Second, South Africa's National construction guidelines indicate that constructing homes on slopes with 6\% to 12\% gradients increases infrastructure costs by 25\% and building costs by 5\%, and constructing on slopes with greater than 12\% gradients increases infrastructure costs by 50\% and building costs by 15\% (\cite{redbook}).  Recent research from the CAHF in Pretoria estimates that out of total construction costs, around 62\% is attributable to building costs while around 12\% is attribute to infrastructure costs (\cite{cahfcosts}).  To measure land slope, we use 200m elevation contour lines provided by the National Geo-Spatial Information component of the Department of Rural Development and Land Reform of South Africa.  We calculate a proxy for slope by finding the highest and lowest points in a 500$\text{m}^{2}$ square and dividing their elevation difference by the euclidean distance between them.  The dataset includes 9,770 squares of which 93\% have slopes of less than 6\%, 5\% have slopes between 6\% and 12\%, and the remaining 2\% have slopes greater than 12\%.
 
 
 \section{Descriptive Statistics}\label{section:descriptives}
@@ -763,11 +586,11 @@ South African construction guidelines indicate that constructing homes on slopes
 % \item it is possible to do the nearby analysis conditioning on nearby incomes... maybe its fine as is....
 % \end{itemize}
 
-We provide descriptive evidence to first validate our measures of constructed and unconstructed projects.  We then examine differences between neighborhoods with constructed projects and neighborhoods with unconstructed projects.  We also examine where projects are located within neighborhoods.  Finally, we document how project areas and nearby areas evolve differentially over time.  
+We provide descriptive evidence to validate our measures of constructed and unconstructed projects.  We then examine differences between neighborhoods with constructed projects and neighborhoods with unconstructed projects.  We also examine where projects are located within neighborhoods.  Finally, we document how project areas and nearby areas evolve differentially over time.  
 
 Table~\ref{table:projectdescriptives} compares average attributes for constructed and unconstructed projects.  The first row counts the number of project houses recorded in the deeds data within constructed and unconstructed projects, providing an independent measure of which projects were constructed.  Projects categorized as constructed receive a large influx of 374 deeds project houses between 2001 and 2011, indicating that many of these projects were successfully completed in this interval.  By contrast, projects categorized as unconstructed receive just 11 deeds project houses on average, which suggests that completed projects are unlikely to be misclassified as unconstructed projects.   
 
-Housing prices within 1km of projects are lower than the average price of 252,000 Rand for areas over 1 km from projects, indicating that projects are located in neighborhoods with less expensive land.  With average land areas exceeding one km2, housing projects represent a significant change to local neighborhoods.  Size, timing, location, and nearby house prices are broadly similar between unconstructed and constructed projects.  
+Housing prices within 1 km of projects are lower than the average price of 252,000 Rand for areas over 1 km from projects, indicating that projects are located in neighborhoods with less expensive land.  With average land areas exceeding one $\text{km}^{2}$, housing projects represent a significant change in local neighborhoods.  Size, timing, location, and nearby house prices are broadly similar between unconstructed and constructed projects.  
 
 % All other attributes of housing 
 %  the location, size, and surrounding housing stock of the \input{figures/total_con_uncon}constructed and unconstructed projects.  shows that constructed projects deliver an average of 374 houses as measured by the deeds data.  By contrast, projects flagged as unconstructed only produce 11 houses on average, suggesting that 
@@ -798,8 +621,8 @@ Housing prices within 1km of projects are lower than the average price of 252,00
 
 
 % Next, we turn to household census data to assess how both types of projects differ in terms of dwelling characteristics prior to project construction. 
-
-To further assess where projects are located, Table~\ref{table:projectdescriptivescensus} uses pooled 1996 and 2001 census data to examine preexisting housing quality for project footprints before construction.  Since census blocks are often larger than housing projects, Table~\ref{table:projectdescriptivescensus} considers census blocks as pertaining to a housing project when over 50\% of the land area of the block overlaps with a project footprint.\footnote{Our census geography selection method is depicted in more detail in appendix \ref{appendix:bufferdesign}.}  Table~\ref{table:projectdescriptivescensus} compares means for household indicators aggregated at the block level based on whether the census boundaries overlap with constructed (first column) or planned but unconstructed projects (second column).  As a reference, the third column provides averages for all census blocks in the Gauteng province.
+% \footnote{Our census geography selection method is depicted in more detail in appendix \ref{appendix:bufferdesign}.} 
+To further assess where projects are located, Table~\ref{table:projectdescriptivescensus} uses pooled 1996 and 2001 census data to examine preexisting housing quality in project footprints before construction.  Since census blocks are often larger than housing projects, Table~\ref{table:projectdescriptivescensus} considers census blocks as pertaining to a housing project when over 50\% of the land area of the block overlaps with a project footprint.  Table~\ref{table:projectdescriptivescensus} compares means for household indicators aggregated at the block level based on whether the census boundaries overlap with constructed (first column) or planned but unconstructed projects (second column).  As a reference, the third column provides averages for all census blocks in the Gauteng province.
 
 \begin{table}[h!]
 	\centering
@@ -819,14 +642,6 @@ To further assess where projects are located, Table~\ref{table:projectdescriptiv
 
 
 Table \ref{table:projectdescriptivescensus} finds that before project construction, preexisting houses in project footprints are smaller and less formal with worse access to services compared to other houses in the province.  This finding is consistent with efforts by the Gauteng government to locate housing projects in inexpensive, poorer neighborhoods to both upgrade these neighborhoods as well as save costs.  Comparing preexisting houses in constructed and unconstructed projects, we do not observe systematic differences in housing attributes.  While constructed project footprints are more likely to have flush toilets, electricity, and large household sizes, households in unconstructed project footprints report having better access to formal houses and piped water in their homes.  With a small number of blocks, average characteristics are not statistically different between constructed and unconstructed project footprints except for the formal housing measure.\footnote{Statistical significance is calculated at 5\% confidence level weighted by land area.}
-
-% Despite some similarities between averages in constructed and unconstructed areas, a simple t-test rejects the null hypothesis that means are equal for every tabulated variable.  
-
-%Appendix Table~\ref{table:projectdescriptivescensushet} compares characteristics for constructed and unconstructed areas separately for projects in city centers and in suburbs, broadly similar patterns between constructed and unconstructed areas at baseline.
-% Given the low-quality of land plots that were targeted by this policy, we expect project areas to lag behind other areas, and reflect more precarious housing conditions.  
-% We find that access to sanitation, water and electricity are between 30 and 70\% lower in both types of project areas relative to the province as a whole. 
-%\footnote{Row 3 of table \ref{table:censusestimates} tests identical null hypotheses in a regression framework that allows for arbitrary correlations between observations within the same project, and cannot reject equality for all outcomes except household size.}
-
 
 
 \begin{figure*}[h!]
@@ -874,13 +689,13 @@ Table \ref{table:projectdescriptivescensus} finds that before project constructi
 % To inspect how densities change with proximity to housing projects,
 % Probably worth commenting on this gap in the pre-period inside the boundaries.
 
-The building-based land-use data complement the census data by providing a spatially precise measure of preexisting development in areas prior to project construction.  We calculate euclidean distances from the centroid of 25$\times$25m grid-cells to the nearest project boundary, assigning negative distances to grid-cells inside project footprints.  We then compute the average density at 25m intervals, reported in houses per square kilometer.  Greater negative distances exclude smaller projects in computing average densities, which may account for some of the variation in building density within projects, particularly for informal housing.  Appendix~\ref{appendix:projectcounts} illustrates this compositional change in more detail.  We exclude grid-cells that intersect with rivers, lakes, recreational locations (tennis courts, pools, basketball courts, etc.), and mining excavation areas (10\% of total grid cells).
+The building-based land-use data complement the census data by providing a spatially precise measure of preexisting development in areas prior to project construction.  We calculate euclidean distances from the centroid of 25$\times$25m grid-cells to the nearest project boundary, assigning negative distances to grid-cells inside project footprints.  We then compute the average density at 25m intervals, reported in houses per square kilometer.  Greater negative distances exclude smaller projects in computing average densities, which may account for some of the variation in building density within projects, particularly for informal housing.  Appendix~\ref{appendix:projectcounts} illustrates this compositional change in more detail.  
 
-Figures \ref{fig:prefor_raw} and \ref{fig:preinf_raw} respectively plot average preexisting densities of formal and informal houses in 2001. We find low densities of formal housing and very high densities of informal housing within both unconstructed and constructed project footprints (at negative distances).  Crossing just outside of project footprints (to positive distances), formal housing densities quickly increase while informal housing densities sharply jump downwards.  These trends are consistent with housing projects being precisely targeted within poorer neighborhoods with few existing formal dwellings.  Formal and informal housing densities gradually decay moving further from project footprints.  On average, constructed projects are located in neighborhoods with greater housing densities than unconstructed projects although housing densities following similar trends with respect to distance from project boundaries.  Informal densities within project footprints are significantly higher for constructed projects compared to unconstructed projects, which is consistent with housing authorities prioritizing project completion in neighborhoods with large slums (\cite{hofmeyr2008risk}).  
+Figures \ref{fig:prefor_raw} and \ref{fig:preinf_raw} respectively plot average preexisting densities of formal and informal houses in 2001.  We find low densities of formal housing and very high densities of informal housing within both unconstructed and constructed project footprints (at negative distances).  Crossing just outside of project footprints (to positive distances), formal housing densities quickly increase while informal housing densities sharply jump downwards.  These trends are consistent with housing projects being precisely targeted within poorer neighborhoods with few existing formal dwellings.  Formal and informal housing densities gradually decay moving further from project footprints.  On average, constructed projects are located in neighborhoods with greater housing densities than unconstructed projects although housing densities following similar trends with respect to distance from project boundaries.  Informal densities within project footprints are significantly higher for constructed projects compared to unconstructed projects, which is consistent with housing authorities prioritizing project completion in neighborhoods with large slums (\cite{hofmeyr2008risk}).  
 
-Given that housing projects appear to be located in inexpensive neighborhoods with high preexisting densities of informal housing, we next examine whether housing projects are further targeted to particular locations within neighborhoods.  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} are calculated by first subtracting the average housing density in each neighborhood from the density in each grid cell, then calculating averages over distance to project footprints.  Neighborhoods are defined according to 1,001 census 2001 subplaces, which identify suburbs, wards, villages, or informal settlements (\cite{censusmeta}).  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} can be interpreted as the difference in housing density from the neighborhood average associated with each distance from a project boundary.  
+Given that housing projects appear to be located in inexpensive neighborhoods with high preexisting densities of informal housing, we next examine whether housing projects are further targeted to particular locations within neighborhoods.  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} are calculated by first subtracting the average housing density in each neighborhood from the density in each grid cell, then calculating averages over distances to project footprints.  Neighborhoods are defined according to 1,001 census 2001 subplaces, which identify suburbs, wards, villages, or informal settlements (\cite{censusmeta}).  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} can be interpreted as the difference in housing density from the neighborhood average associated with each distance from a project boundary.  
 
-Accounting for neighborhood differences removes much of the variation in preexisting housing densities across distances to housing projects, especially outside of project footprints.  Yet, low levels of formal housing and high levels of informal housing persist just within project footprints, consistent with housing authorities targeting inexpensive, poorer plots of land for housing projects.  Similar patterns within neighborhoods for constructed and unconstructed areas suggest that both project types are located using similar criteria.  Accounting for neighborhood densities collapses average differences in densities between constructed and unconstructed projects although constructed projects have higher building densities within project footprints.  
+Accounting for neighborhood differences removes much of the variation in preexisting housing densities across distances to housing projects, especially outside of project footprints.  Yet, low levels of formal housing and high levels of informal housing persist just within project footprints, consistent with housing authorities targeting projects toward inexpensive, poorer plots of land even within neighborhoods.  Similar patterns within neighborhoods for constructed and unconstructed areas suggest that both project types are located using similar criteria.  Accounting for neighborhood densities collapses average differences in densities between constructed and unconstructed projects although constructed projects have higher building densities within project footprints.  
 
 % Appendix Table~\ref{fig:rawbblumeans_het} graphs pre-period density of formal and informal housing separately for projects in city centers and projects in suburbs.  Unconstructed project areas near city centers have slightly higher densities of informal housing and lower densities of formal housing.  In suburbs, the opposite pattern holds with constructed project areas having somewhat higher densities of formal housing and lower densities of informal housing.  Outside of project boundaries, constructed and unconstructed projects have similar informal and formal housing levels in both city and suburb areas.
 
@@ -956,10 +771,10 @@ Growth in informal housing density is higher within than outside of project foot
 \end{figure*} 
 
 
-Figure~\ref{fig:rawpricemeans} performs an analogous exercise with property transaction data from the deeds records.  These records are likely to be composed of formal houses because informal housing transactions are rarely recorded.  Since there are very few non-subsidized housing transactions within project footprints, we focus only on transactions at positive distances.  Using the date of each transaction, we group prices before and after the expected completion dates for both constructed and unconstructed projects. 
+Figure~\ref{fig:rawpricemeans} performs an analogous exercise with property transaction data from the deeds records.  These records are likely to be composed of formal houses because informal housing transactions are rarely recorded.  Since there are very few non-subsidized housing transactions within project footprints, we focus only on transactions at positive distances.  Using the date of each transaction, we group prices before and after the expected construction dates for both constructed and unconstructed projects. 
 % To make comparisons within a normalized timeline, we first residualize log purchase prices from year$\times$month and project fixed effects.
 
-Figure~\ref{fig:preprice} plots average log purchase prices before the expected completion date for both constructed and unconstructed areas with respect to distance to project footprints.  Moving from 0 to 1,500 meters from project footprints, prices increase by about 0.3 log-points or roughly 30\% for both constructed and unconstructed projects.  Low prices near project boundaries are consistent with reports of public housing officials targeting low-cost land for housing development.  Figure~\ref{fig:changeprice} graphs average changes in log-purchase prices before and after the expected completion of projects with respect to distance to project footprints.  While prices increase overall, prices near unconstructed footprints increase more than prices for constructed footprints, especially within 500 meters from footprints.  
+Figure~\ref{fig:preprice} plots average log purchase prices before the expected construction date for both constructed and unconstructed areas with respect to distance to project footprints.  Moving from 0 to 1,500 meters from project footprints, prices increase by about 0.3 log-points or roughly 30\% for both constructed and unconstructed projects.  Low prices near project boundaries are consistent with reports of public housing officials targeting low-cost land for housing development.  Figure~\ref{fig:changeprice} graphs average changes in log-purchase prices before and after the expected construction of projects with respect to distance to project footprints.  While prices increase overall, prices near unconstructed footprints increase more than prices for constructed footprints, especially within 500 meters from footprints.  
 
 
 \begin{figure*}[t!]
@@ -987,7 +802,7 @@ Figure~\ref{fig:preprice} plots average log purchase prices before the expected 
 \end{figure*} 
 
 
-Deeds data contain the exact date of each housing transaction, which allows us to examine how local housing prices vary with respect to the completion date for constructed projects and the expected completion date for unconstructed projects.  Figure~\ref{fig:pretrend_close} plots average log-prices for housing transactions between 0 and 500 meters outside project footprints from two years before and after completion date.  Within 500 meters, prices for constructed and unconstructed projects follow roughly parallel trends prior to project completion.  Prices diverge after completion with prices near unconstructed projects rising more quickly than prices near constructed projects.  Figure~\ref{fig:pretrend_far} includes the analogous plot for housing transactions located 500 to 1,500 meters from project footprints.  Again, both constructed and unconstructed prices follow parallel trends prior to completion, following similar slopes to their corresponding plots in Figure~\ref{fig:pretrend_close}.  After completion, price growth slows for areas near unconstructed projects, shrinking the gap between prices near constructed and unconstructed projects.  Taken together, Figure~\ref{fig:pretrend_close} and Figure~\ref{fig:pretrend_far} do not provide strong evidence for pretrends in prices in anticipation of project construction.  
+Deeds data contain the exact date of each housing transaction, which allows us to examine how local housing prices vary with respect to the completion date for constructed projects and the expected completion date for unconstructed projects.  Figure~\ref{fig:pretrend_close} plots average log-prices for housing transactions between 0 and 500 meters outside project footprints from two years before and after expected construction.  Within 500 meters, prices for constructed and unconstructed projects follow roughly parallel trends prior to expected construction.  Prices diverge after expected construction with prices near unconstructed projects rising more quickly than prices near constructed projects.  Figure~\ref{fig:pretrend_far} includes the analogous plot for housing transactions located 500 to 1,500 meters from project footprints.  Again, both constructed and unconstructed prices follow parallel trends prior to expected construction, following similar slopes to their corresponding plots in Figure~\ref{fig:pretrend_close}.  After expected construction, price growth slows for areas near unconstructed projects, shrinking the gap between prices near constructed and unconstructed projects.  Taken together, Figure~\ref{fig:pretrend_close} and Figure~\ref{fig:pretrend_far} do not provide strong evidence for pretrends in prices in anticipation of project construction. 
 
 % Prices within 500 meters of unconstructed projects maintain a steady, increasing trend two years before and after expected project completion.  
 
@@ -1002,9 +817,9 @@ Deeds data contain the exact date of each housing transaction, which allows us t
 \section{Empirical Methodology}\label{section:methodology}
 
 
-To estimate the local impacts of housing projects, we implement a difference-in-differences-in-differences (or triple differences) strategy comparing changes in outcomes nearby projects to areas further away from projects across constructed project areas and planned but unconstructed project areas.  This triple differences strategy overcomes limitations of two standard differences-in-differences approaches: (1) comparing changes in outcomes nearby housing projects to areas further way from projects and (2) comparing changes in outcomes for constructed projects to planned but unconstructed projects.
+To estimate the local impacts of housing projects, we implement a difference-in-differences-in-differences (or triple-differences) strategy comparing changes in outcomes nearby projects to areas further away from projects across constructed project areas and planned but unconstructed project areas.  This triple differences strategy overcomes limitations of two standard differences-in-differences approaches: (1) comparing changes in outcomes nearby housing projects to areas further way from projects and (2) comparing changes in outcomes for constructed projects to planned but unconstructed projects.
 
-First, previous research identifies housing project impacts by comparing changes in outcomes nearby projects to changes in outcomes further away from projects under two identifying assumptions: (1) project impacts dissipate with distance, and (2) areas nearby projects would have evolved in the same way as areas further away from projects in the absence of project construction (\cite{diamond2016wants,harari2018slum}).  In our context, projects are specifically located in areas with inexpensive land (Table \ref{table:projectdescriptives}) and dense, preexisting slums (Table~\ref{table:projectdescriptivescensus} and Figure~\ref{fig:preinf_raw}).  Therefore, economic shifts such as changes in labor market demand for informal workers or demand for informal housing would be likely to produce differential impacts for these nearby areas, driving differential trends in development that are unrelated to housing project construction.  Moreover, local governments may select areas for housing projects according to local trends in development, using projects to either reinvigorate deteriorating areas or build on local growth.  These factors suggest that a difference-in-differences estimator that relies on distances to projects may generate biased estimates in this context.
+First, previous research identifies housing project impacts by comparing changes in outcomes nearby projects to changes in outcomes further away from projects under two identifying assumptions: (1) project impacts dissipate with distance, and (2) areas nearby projects would have evolved in the same way as areas further away from projects in the absence of project construction (\cite{diamond2016wants,harari2018slum}).  In our context, projects are specifically located in areas with inexpensive land (Table \ref{table:projectdescriptives}) and dense, preexisting slums (Table~\ref{table:projectdescriptivescensus} and Figure~\ref{fig:preinf_raw}).  Therefore, economic shifts such as changes in labor market demand for informal workers or demand for informal housing would likely produce differential impacts for these nearby areas, driving differential trends in development that are unrelated to housing project construction.  Moreover, local governments may select areas for housing projects according to local trends in development, using projects to either reinvigorate deteriorating areas or build on local growth.  These factors suggest that a difference-in-differences estimator that relies on distances to projects may generate biased estimates in this context.
 
 Second, an alternative approach would be to compare changes in areas with constructed projects to areas with planned but unconstructed projects under the assumption that constructed project areas would have evolved in the same way as unconstructed project areas in the absence of construction.  Constructed and unconstructed project areas appear to be located according to similar criteria: both have sharply higher levels of informal housing and lower levels of formal housing compared to their immediate neighborhoods (Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe}).  Controlling for changes in outcomes for unconstructed projects may help to capture any location-specific trends that constructed projects would have experienced in the absence of construction.  However,  differences in neighborhood characteristics between constructed and unconstructed projects suggest that these projects may be exposed to differential trends at the neighborhood-level.  For example, constructed project areas have higher preexisting densities of both informal and formal housing on average (Figures \ref{fig:prefor_raw} and \ref{fig:preinf_raw}), which may make these areas more sensitive to broad housing market fluctuations than unconstructed project areas.  In fact, constructed projects experience greater growth in informal housing density than unconstructed projects, even at distances over 1 km from project boundaries where any spillover effects of project construction are likely to have dissipated (Figures \ref{fig:forchange} and \ref{fig:infchange}).  Therefore, comparing changes in outcomes between constructed and constructed project areas may conflate differential neighborhood trends with the true effect of housing construction.
 
@@ -1024,7 +839,7 @@ While our choice of buffer area is arbitrary, we aim to select a buffer area tha
 
 Interpreting coefficients on $\,\textsc{\small Proj}_{ip}$ and $\,\textsc{\small Spill}_{ip}$ terms as capturing the effect of moving from 0\% to 100\% spatial exposure requires two additional assumptions: (1) the spatial effects are proportional to spatial area, and (2) the distribution of project and spillover areas within outcome units is uncorrelated with the distribution of outcomes within these units. %\footnote{TEST THESE ASSUMPTIONS?! PROVIDE MORE EXPLANATION!?}
 
-Our coefficients of interest, $\alpha_1$ and $\beta_1$, capture differential changes in outcomes for constructed projects relative to unconstructed projects in footprints and buffer areas ($<$500m) respectively relative to areas further away from footprints (500 to 1,500m).  A causal interpretation requires the assumption that absent the completion of a housing project, changes within and nearby constructed and unconstructed areas would have evolved similarly relative to areas far away from projects.  This triple-difference framework allows for constructed and unconstructed projects to experience different trends in economic development over time as long as these trends follow similar trajectories near and far from projects.  This framework also permits differential economic trends in near and far from projects given that these differential trends are parallel between constructed and unconstructed projects.
+Our coefficients of interest, $\alpha_1$ and $\beta_1$, capture differential changes in outcomes for constructed projects relative to unconstructed projects in footprints and buffer areas ($<$500m) respectively relative to areas further away from footprints (500 to 1,500m).  A causal interpretation requires the assumption that absent the completion of a housing project, changes within and nearby constructed and unconstructed areas would have evolved similarly relative to areas far away from projects.  This triple-difference framework allows for constructed and unconstructed projects to experience different trends in economic development over time as long as these trends follow similar trajectories near and far from projects.  This framework also permits differential economic trends in areas near and far from projects given that these differential trends are parallel between constructed and unconstructed projects.
 
 Despite these advantages, this approach also has several limitations.  A central concern is that forward-looking households anticipate project construction and alter their housing investment decisions accordingly.  For example, squatter households may be more likely to construct temporary, informal structures or locate elsewhere rather than invest in long-term dwellings in areas that are likely to receive housing projects.  In this case, comparisons between constructed and uncontructed areas would overestimate the role of project construction in boosting formal housing development.  Similarly, nearby housing markets may anticipate projects by either appreciating or depreciating in advance (depending on the anticipated amenity value of the projects).  Qualitative evidence suggests that these effects may be limited by the substantial uncertainty in project location and timing due to difficulties coordinating stakeholders and sources of funding as well as a lack of transparency among housing authorities \citep{serihistory}.\footnote{\cite{diamond2016wants} also leverage uncertainty in project timing to study affordable housing in the US.} 
 
@@ -1058,7 +873,7 @@ To leverage housing cost variation, we divide housing costs into an unobserved p
 \end{align*}
 $\alpha^{Vh}_1$ and $\beta^{Vh}_1$ measure the effect of housing projects on local amenities net of unobserved housing costs by housing sector in project and spillover areas respectively.  Without direct measures of housing costs and amenities, we are unable to disentangle the relative contributions of cost and amenity changes; however, changes in amenities net of housing costs summarize the total local welfare effects of housing projects. 
 
-We assume that idiosyncratic amenity shocks, $\epsilon_{hjt}$ for formal and informal housing sectors follow a bivariate normal distribution with a two-by-two variance matrix $\Sigma$ with diagonal terms capturing the variance of formal housing, $\sigma_{for}^{2}$ and informal housing, $\sigma_{inf}^{2}$ and off-diagonal terms both capturing the correlation, $\rho$ between formal and informal amenity shocks in the same plot.  We also assume that amenity shocks are uncorrelated with all other determinants of household utility: (1) local fixed amenities net of housing costs, $\overline{V}_{hlt}$, (2) observed housing costs, $c^{o}_{j}$, (3) disamenities from crowding, $\Lambda(k)$, as well as (4) reservation utility, $\overline{U}$.   Under these assumptions, $\alpha^{Vh}_1$ and $\beta^{Vh}_1$ measure the causal effects of housing projects in an analogous way to equation (\ref{eq:main}).  $\theta$ measures the marginal utility of income from observed variation in housing costs.  As described in Section~\ref{section:data}, we proxy for observed housing costs using average land slope because steep land slopes increase the costs of home construction.  Identification of $\theta$ requires assuming that land slope only affects the number of buildings through its effect on construction and maintenance costs.  This assumption may be violated particularly in cases where households have particular preferences for living on sloped land.  Disamenities from crowding, $\Lambda(k)$ are identified from the distribution of the number of houses per plot given the bivariate normal distribution of amenity shocks.  The frequency of plots with both formal and informal housing identify the correlation term, $\rho$.  All estimates are normalized with respect to $\sigma_{for}^{2}$ and $\sigma_{inf}^{2}$, which are not separately identified in this ordered probit framework.
+We assume that idiosyncratic amenity shocks, $\epsilon_{hjt}$ for formal and informal housing sectors follow a bivariate normal distribution with a two-by-two variance matrix $\Sigma$ with diagonal terms capturing the variance of formal housing, $\sigma_{for}^{2}$ and informal housing, $\sigma_{inf}^{2}$ and off-diagonal terms both capturing the correlation, $\rho$ between formal and informal amenity shocks in the same plot.  We also assume that amenity shocks are uncorrelated with all other determinants of household utility: (1) local fixed amenities net of housing costs, $\overline{V}_{hlt}$, (2) observed housing costs, $c^{o}_{j}$, (3) disamenities from crowding, $\Lambda(k)$, as well as (4) reservation utility, $\overline{U}$.   Under these assumptions, $\alpha^{Vh}_1$ and $\beta^{Vh}_1$ measure the causal effects of housing projects in an analogous way to equation (\ref{eq:main}).  $\theta$ measures the marginal utility of income from observed variation in housing costs.  As described in Section~\ref{section:data}, we proxy for observed housing costs using average land slope because steep land slopes increase the costs of home construction.  Identification of $\theta$ requires assuming that land slope only affects the number of buildings through its effect on construction and maintenance costs.  This assumption may be violated particularly in cases where households have particular preferences for living on sloped land.  Disamenities from crowding, $\Lambda(k)$ are identified from the distribution of the number of houses per plot given the bivariate normal distribution of amenity shocks.  The frequency of plots with both formal and informal housing identify the correlation term, $\rho$.  All estimates are normalized with respect to $\sigma_{for}^{2}$ and $\sigma_{inf}^{2}$, which are not separately identified in this framework.
 
 Under these assumptions, the probability of observing a given number of formal and informal houses per plot according to equation (\ref{eq:housingdemand}) can be written in terms of a seemingly unrelated bivariate ordered probit model as follows \citep{sajaia2008maximum}
 \begin{align*}
@@ -1099,18 +914,17 @@ LL = \sum_{t=1}^{T} \sum_{j=1}^{J} \sum_{m_{for}=1}^{K_{for}} \sum_{m_{inf}=1}^{
 
 \subsection{Housing Density}\label{section:bbluestimates}
 
-We first investigate the how housing projects impact housing density within and around their footprints.  We estimate the reduced form equation (\ref{eq:main}) where the outcomes are building density measures for 25$\times$25m grid cells in 2001 and 2012 and $\textsc{\small Post}_{t}$ equals one for observations in 2012.  Table~\ref{table:bbluDDD} reports the triple-difference coefficients of interest for (1) within project footprints and (2) 0-500m outside of project footprints.\footnote{Appendix Table~\ref{table:bbluDDDfull} includes the full set of coefficients.}  Results are reported in terms of houses/$\text{km}^{2}$.  Appendix Table~\ref{table:bbluDDDhet} reports triple-difference coefficients separately by neighborhood income quartile following the specification in equation (\ref{eq:mainhet}).  
+We first investigate how housing projects impact housing density within and around their footprints.  We estimate the reduced form equation (\ref{eq:main}) where the outcomes are building density measures for 25$\times$25m grid cells in 2001 and 2012 and $\textsc{\small Post}_{t}$ equals one for observations in 2012.  Table~\ref{table:bbluDDD} reports the triple-difference coefficients of interest for (1) within project footprints and (2) 0-500m outside of project footprints.\footnote{Appendix Table~\ref{table:bbluDDDfull} includes the full set of coefficients.}  Results are reported in terms of houses/$\text{km}^{2}$.  Appendix Table~\ref{table:bbluDDDhet} reports triple-difference coefficients separately by neighborhood income quartile following the specification in equation (\ref{eq:mainhet}).
 
-Column (1)  of Table~\ref{table:bbluDDD} finds that total housing density within project footprints statistically significantly increases by 618 houses/$\text{km}^{2}$, which is over twice the baseline average of 579 houses/$\text{km}^{2}$.  This finding suggests that government housing projects are able to substantially out-pace any private housing development in similar but unconstructed project footprints.  At the same time, total housing density 0-500m outside of projects decreases by around 217 houses/$\text{km}^{2}$ with statistical significance at the 10\% level.  Given an average project area of 1.2$\text{km}^{2}$ and an average buffer area of 3$\text{km}^{2}$, the magnitudes of these estimates suggest that each project generates around 742 new houses inside project footprints while crowding out around 651 houses in nearby areas.\footnote{742 new houses per footprint is much larger the 374 houses identified as project houses within footprints using the deeds transaction data in Table~\ref{table:projectdescriptives}.  This discrepancy is likely due to under-reporting of housing projects in deeds records \citep{seriq}.}  Appendix Table~\ref{table:bbluDDDhet} includes corresponding estimates by neighborhood income quartile.  Column (1) finds that quartiles with larger increases in total housing (ie. Q2 and Q3) are also accompanied by greater decreases in housing density 0-500m outside of housing projects.  This finding provides further suggestive evidence that housing projects crowd-out nearby housing growth.
-
+Column (1) of Table~\ref{table:bbluDDD} finds that total housing density within project footprints statistically significantly increases by 618 houses/$\text{km}^{2}$, which is over twice the baseline average of 579 houses/$\text{km}^{2}$.  This finding suggests that government housing projects are able to substantially out-pace any private housing development in similar but unconstructed project footprints.  At the same time, total housing density 0-500m outside of projects decreases by around 217 houses/$\text{km}^{2}$ with statistical significance at the 10\% level.  Given an average project area of 1.2$\text{km}^{2}$ and an average buffer area of 3$\text{km}^{2}$, the magnitudes of these estimates suggest that each project generates around 742 new houses inside project footprints while crowding out around 651 houses in nearby areas.\footnote{742 new houses per footprint is much larger the 374 houses identified as project houses within footprints using the deeds transaction data in Table~\ref{table:projectdescriptives}.  This discrepancy is likely due to under-reporting of housing projects in deeds records \citep{seriq}.}  Appendix Table~\ref{table:bbluDDDhet} includes corresponding estimates by neighborhood income quartile.  Column (1) of Table~\ref{table:bbluDDDhet} finds that quartiles with larger increases in total housing (ie. Q2 and Q3) are also accompanied by greater decreases in housing density 0-500m outside of housing projects.  This finding provides further suggestive evidence that housing projects crowd-out nearby housing growth.
 
 % Backyard housing is a common phenomenon in South Africa where households erect informal dwellings within the plots of formal dwellings \citep{Brueckner2018backyarding}.  Project houses may be well-suited for backyarding because each house receives an individual landplot that is often much larger than the house itself. put this up top!!  with a discussion of the maps!!
 
-To examine the composition of housing growth, Columns (2) through (4) of Table~\ref{table:bbluDDD} disaggregate total housing into formal housing, informal non-backyard housing, and informal backyard housing.  Column (2) finds that the increase in total housing within projects is almost entirely driven by formal housing with a statistically significant, positive coefficient of 620 houses/$\text{km}^{2}$.  This finding matches earlier descriptive eividence from Figure \ref{fig:rawbblumeanschange}.  Large reductions in informal non-backyard housing (Column 3) within projects are consistent with qualitative evidence that housing authorities cleared preexisting slums before constructing new projects \citep{hofmeyr2008risk}.  Column (4) documents a statistically significant decrease of 573 informal non-backyard houses/$\text{km}^{2}$ within projects, which suggests that these slum clearance efforts were particularly aggressive given low preexisting densities of around 184 houses/$\text{km}^{2}$.  Column (5) indicates that project areas also experience substantial growth in backyard informal housing on the order of 542 houses/$\text{km}^{2}$, which almost exactly offsets reductions in informal non-backyard houses.    
+To examine the composition of housing growth, Columns (2) through (5) of Table~\ref{table:bbluDDD} disaggregate total housing into formal housing, informal non-backyard housing, and informal backyard housing.  Column (2) finds that the increase in total housing within projects is almost entirely driven by formal housing with a statistically significant, positive coefficient of 620 houses/$\text{km}^{2}$.  This finding matches earlier descriptive evidence from Figure \ref{fig:rawbblumeanschange}.  Large reductions in informal non-backyard housing (Column 4) within projects are consistent with qualitative evidence that housing authorities cleared preexisting slums before constructing new projects \citep{hofmeyr2008risk}.  Column (4) documents a statistically significant decrease of 573 informal non-backyard houses/$\text{km}^{2}$ within projects, which suggests that these slum clearance efforts were particularly aggressive given low preexisting densities of around 184 houses/$\text{km}^{2}$.  Column (5) indicates that project areas also experience substantial growth in backyard informal housing on the order of 542 houses/$\text{km}^{2}$, which almost exactly offsets reductions in informal non-backyard houses.    
 
-Appendix Table~\ref{table:bbluDDDhet} finds similarly zero net changes in informal housing within projects across all neighborhood income quartiles.  Yet, compared to richer quartiles (Q3 and Q4), poorer quartiles (Q1 and Q2) experience larger decreases in non-backyard informal housing that are offset by large increases in backyard informal housing.
+Appendix Table~\ref{table:bbluDDDhet} finds similarly zero net changes in informal housing within projects across all neighborhood income quartiles.  Yet, compared to richer quartiles (Q3 and Q4), poorer quartiles (Q1 and Q2) experience larger decreases in non-backyard informal housing that are offset by larger increases in backyard informal housing.
 
-According to Columns (2) through (5) of Table~\ref{table:bbluDDD}, total reductions in housing density 0-500m outside of project footprints are driven by decreases in informal non-backyard housing and informal backyard housing although these coefficients are statistically insignificantly different from zero.  Column (2) shows a statistically insignificant decrease in formal housing nearby housing project boundaries, which appears to contrast with descriptive evidence in Figure \ref{fig:rawbblumeanschange}.  This discrepancy is likely due to differences in observation weighting: while Figure \ref{fig:rawbblumeanschange} computes average changes in formal housing according to distance bins, Table~\ref{table:bbluDDD} reports differential changes that are spatially representative, which results in applying relatively greater weights to areas at further distances from project boundaries since further distances cover greater land areas.  These findings suggest that housing projects primarily crowd-out nearby informal housing supply with little impact on nearby formal housing supply.
+According to Columns (2) through (5) of Table~\ref{table:bbluDDD}, total reductions in housing density 0-500m outside of project footprints are driven by decreases in informal non-backyard housing and informal backyard housing although these coefficients are statistically insignificantly different from zero.  Column (2) shows a statistically insignificant decrease in formal housing nearby housing project boundaries, which appears to contrast with descriptive evidence in Figure \ref{fig:rawbblumeanschange}.  This discrepancy is likely due to differences in weighting observations: while Figure \ref{fig:rawbblumeanschange} computes average changes in formal housing according to distance bins, Table~\ref{table:bbluDDD} reports differential changes that are spatially representative, which results in applying relatively greater weights to areas at further distances from project boundaries since further distances cover greater land areas.  These findings suggest that housing projects primarily crowd-out nearby informal housing supply with little impact on nearby formal housing supply.
 
 % On net, the quantity of informal housing within projects remains roughly unchanged.
 % discuss appendix table, how the substitution is concentrated in lower income quartiles
@@ -1142,29 +956,27 @@ According to Columns (2) through (5) of Table~\ref{table:bbluDDD}, total reducti
 
 \subsection{Housing Demand}\label{section:demandestimates}
 
-Structural estimates of housing demand provide a mapping from reduced-form changes in housing density into estimates of the local welfare effects of housing projects.  We estimate equation (\ref{eq:demandll}) where the unit of analysis is a 25m$\times$25m plot in 2001 and 2011 and the outcome variables are the counts of formal and formal houses on each plot.  Outcome variables count the number of buildings from 0 to 9 with a last category indicating 10 or more buildings.\footnote{86\% of plot observations have zero formal buildings and 91\% have zero informal buildings.  Less than 0.05\% of plots have more than 10 total buildings.  Appendix Table~\ref{figure:buildhist} provides a histogram for the density of plots with at least zero formal or informal houses.}  
+Structural estimates of housing demand provide a mapping from reduced-form changes in housing density into estimates of the local welfare effects of housing projects.  We estimate equation (\ref{eq:demandll}) where the unit of analysis is a 25m$\times$25m plot in 2001 and 2012 and the outcome variables are the counts of formal and formal houses on each plot.  Outcome variables count the number of buildings from 0 to 9 with a last category indicating 10 or more buildings.  86\% of plot observations have zero formal buildings and 91\% have zero informal buildings.  Less than 0.05\% of plots have more than 10 total buildings.  Appendix Table~\ref{figure:buildhist} provides a histogram of building counts for plots with at least zero formal or informal houses.  
 
-Table~\ref{table:housingdemandestimates} includes estimates for the parameters of interest while Appendix Table~\ref{table:housingdemandestimates_full} includes the full set of estimates.  According to Table~\ref{table:housingdemandestimates}, estimates of the marginal utility of income, $\theta$, are similar across formal and informal sectors suggesting that higher costs of housing from steeply sloped land have a similar impact on housing construction across sectors.  These estimates allow us to convert net amenity effects from units of utility to units of income by dividing net amenity coefficients by $\theta$.  For this exercise, we refer to the estimate of $\theta$ for formal housing since the variation in housing costs underlying this estimate are relevant to formal housing construction (\cite{redbook}).  This exercise shows that for the formal housing sector, average net amenities increase by R\input{figures/for_proj}per plot within project areas and decrease by R\input{figures/for_spill}within spillover areas.  For the informal housing sector, average net amenities decrease by R\input{figures/inf_proj}per plot within project areas and decrease by R\input{figures/inf_spill}within spillover areas.  Given average housing prices of R231,000, these results translate into price changes of between -\input{figures/inf_proj_per}\unskip\% for informal housing in project areas to +\input{figures/for_proj_per}\unskip\% for formal housing in project areas.  Positive estimates of $\rho$ in Table~\ref{table:housingdemandestimates} indicate that unobserved plot-specific amenities for formal and informal housing are positively correlated, which is likely driven by prevalent backyard housing.
+Table~\ref{table:housingdemandestimates} includes estimates for the parameters of interest while Appendix Table~\ref{table:housingdemandestimates_full} includes the full set of estimates.  According to Table~\ref{table:housingdemandestimates}, estimates of the marginal utility of income, $\theta$, are similar across formal and informal sectors suggesting that higher costs of housing from steeply sloped land have a similar impact on housing construction across sectors.  These estimates allow us to convert net amenity effects from units of utility into units of income by dividing net amenity coefficients by $\theta$.  For this exercise, we refer to the estimate of $\theta$ for formal housing since the variation in housing costs underlying this estimate are relevant to formal housing construction (\cite{redbook}).  This exercise shows that for the formal housing sector, average net amenities increase by R\input{figures/for_proj}per plot within project areas and decrease by R\input{figures/for_spill}within spillover areas.  For the informal housing sector, average net amenities decrease by R\input{figures/inf_proj}per plot within project areas and decrease by R\input{figures/inf_spill}within spillover areas.  Given average housing prices of R231,000, these results translate into price changes of between -\input{figures/inf_proj_per}\unskip\% for informal housing in project areas to +\input{figures/for_proj_per}\unskip\% for formal housing in project areas.  
 
+Positive estimates of $\rho$ in Table~\ref{table:housingdemandestimates} indicate that unobserved plot-specific amenities for formal and informal housing are positively correlated, which is likely driven by prevalent backyard housing.  Appendix Table~\ref{table:housingdemandestimates_full} includes estimates for cut-points that determine breaks in the distribution of unobserved amenities that correspond to each equilibrium number of houses.  The lowest cut point for formal housing is slightly more negative than the lowest cut point for informal housing while the highest cut point for formal housing is substantially more positive than the highest cut point for informal housing.  These cut point estimates parallel the histogram of building counts in Appendix~\ref{appendix:histfreq}:  plots are more likely to have any formal housing than any informal housing; however, conditional on having any housing, plots are more likely to have many informal houses than many formal houses.  These findings provide suggestive evidence that the supply of informal housing is more elastic than the supply of formal housing in this context.
 
-Results for formal housing in Table~\ref{table:housingdemandestimates} mirror reduced-form results from Table~\ref{table:bbluDDD}:  project areas promote statistically significant growth of formal housing within their footprints with little change in spillover areas.  Structural estimates for informal housing contrast with reduced form results: both specifications suggest declines in informal housing nearby project footprints, but structural estimates further predict significant declines in informal housing within project areas while reduced form estimates find little change in nearby informal housing.  One explanation for this discrepancy is that structural estimates may prioritize extensive margins of whether plots have buildings while reduced-form estimates simply measure the average change in building density.  Therefore, the structural approach may interpret the compositional shift away from non-backyard toward backyard informal housing in project areas as a decline in the local net amenities enjoyed by the informal housing sector.
+Results for formal housing in Table~\ref{table:housingdemandestimates} mirror reduced-form results from Table~\ref{table:bbluDDD}.  Project areas promote statistically significant growth of formal housing within their footprints with little change in spillover areas.  Structural estimates for informal housing contrast with reduced form results: both specifications suggest declines in informal housing nearby project footprints, but structural estimates further predict significant declines in informal housing within project areas while reduced form estimates find little change in nearby informal housing.  One explanation for this discrepancy is that structural estimates may prioritize extensive margins of whether plots have buildings while reduced-form estimates simply measure the average change in building density.  Therefore, the structural approach may interpret the compositional shift away from non-backyard toward backyard informal housing in project areas as a decline in the local net amenities enjoyed by the informal housing sector.
 
-Changes in local net amenities are likely to overstate the full welfare effects of housing projects as renters substitute between project areas, spillover areas, and outside areas.  To compute the full welfare effects associated with changes in local amenities, we use estimates from Table~\ref{table:housingdemandestimates} to simulate the effect of housing projects on local building growth.  Given simulated choices, we calculate the change in net rents extracted by landlords, which fully summarize total welfare effects.  Appendix~\ref{section:appendixwelfaresim} includes details on the simulation exercise.
+We also allow for heterogeneity in housing demand by neighborhood income quartile with results presented in Appendix Table~\ref{table:housingdemandestimatesinc}.  While effects for formal housing do not appear correlated with neighborhood income quartile, informal housing markets exhibit a clear negative gradient with respect to neighborhood income: lower income neighborhoods experience improvements in local amenities while high income neighborhoods experience steep declines in local amenities in both project and spillover areas.
 
-Within housing projects, this exercise predicts that net rents from formal housing increase by R\input{figures/for_proj_w}on average per plot; at the same time, net rents from informal housing decrease by R\input{figures/inf_proj_w}on average per plot.  Together, these findings suggest that average rents per plot increase by a total of R\input{figures/full_proj_w}\unskip. High average densities of informal housing magnify the effect of declines in local informal housing amenities on welfare, almost offsetting welfare gains from formal housing.
+Changes in local net amenities are likely to overstate the full welfare effects of housing projects as renters substitute between project areas, spillover areas, and outside areas.  To compute the full welfare effects associated with changes in local amenities, we use estimates from Table~\ref{table:housingdemandestimates} to simulate the effect of housing projects on local building growth.  Given simulated choices, we calculate the change in net rents extracted by landlords, which fully summarize total welfare effects.  Appendix~\ref{section:appendixwelfaresim} includes details on the simulation exercise and Table~\ref{table:housingdemandsim} includes predicted net rental changes by housing sector, project and spillover areas, and neighborhood income quartile.
+
+Within housing projects, this exercise predicts that net rents from formal housing increase by R\input{figures/for_proj_w}on average per plot; at the same time, net rents from informal housing decrease by R\input{figures/inf_proj_w}on average per plot.  Together, these findings suggest that average rents per plot increase by a total of R\input{figures/full_proj_w}within project footprints. High average densities of informal housing magnify the effect of declines in local informal housing amenities on welfare, almost offsetting welfare gains from formal housing.  Patterns by neighborhood income quartile reflect housing demand coefficient estimates in Appendix Table~\ref{table:housingdemandestimatesinc}.
 
 In spillover areas, housing projects drive a slight decrease in nearby net rents from formal housing of R\input{figures/for_spill_w}per plot and a more substantial decrease in nearby net rents from informal housing of R\input{figures/inf_spill_w}per plot, which together lead to a total decline of R\input{figures/full_spill_w}\unskip.  Effects for spillover areas are smaller per plot than corresponding effects for project areas likely because project areas have higher overall densities of housing.
 
-To compute the overall average change in net rents per plot as a result of housing projects, we weight effects for project areas and spillover areas by their corresponding land areas (1$\text{km}^{2}$ and 2.5$\text{km}^{2}$ respectively), finding an average decline of R\input{figures/full_w}\unskip.  This effect represents around a \input{figures/full_w_per}\unskip\% decline in average housing prices.
+To compute the overall average change in net rents per plot as a result of housing projects, we weight effects for project areas and spillover areas by their corresponding land areas (1.2$\text{km}^{2}$ and 3$\text{km}^{2}$ respectively).  We compute an average decline of R\input{figures/full_w}per plot.  This change represents around a \input{figures/full_w_per}\unskip\% decline in average housing prices.  
 
-
+To provide a rough estimate of the aggregate welfare effects of housing projects, we compare changes in net rents at the project-level to project implementation costs.  Given around 6,720 plots surrounding project areas, the project-level decline in rents totals 26 million Rand (3.4 million USD).  National budget reports suggest an average cost per project of 25 million Rand (3.2 million USD).  In total, these results suggest that housing projects generate an aggregate decline in welfare of 51 million Rand (6.6 million USD).
 
 % These welfare effects contrast with Table~\ref{table:housingdemandestimates}, which predicts that net amenity increases for formal housing more than offset decreases in net amenities for informal housing in project areas.
-
-
-
-
-
 
 \begin{table}[h]
 \centering
@@ -1186,9 +998,9 @@ Correlation of amenity shocks: $\rho_{for,inf}$ & $0.620^{\text{a}}$ & \\[-.3em]
 % 0-500m outside &\input{figures/for_spill} & \input{figures/inf_spill} \\
 % \bottomrule\\[-.8em]
 \multicolumn{3}{l}{ \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
-\multicolumn{3}{l}{ \footnotesize Outcome categories include formal and informal building counts from 0 to 9  } \\[-.3em]
-\multicolumn{3}{l}{ \footnotesize  and at least 10 by plot and year.  Table~\ref{table:housingdemandestimates_full} includes the full set of coefficients. } \\[-.3em]
-\multicolumn{3}{l}{ \footnotesize Net amenities equal local amenities minus local housing costs. } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Outcome categories by plot and year include categories for formal and informal} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize  building counts from 0 to 9 and a category at least 10.  Table~\ref{table:housingdemandestimates_full} includes the full set} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize of coefficients.  Net amenities equal local amenities minus local housing costs. } \\[-.3em]
 \end{tabular}
 \end{table}
 
@@ -1227,28 +1039,26 @@ Given large shifts in quantities and types of housing within and around projects
 \end{table}
 
 
-Columns (1) to (6) of Table~\ref{table:censusestimates} capture changes in housing characteristics within and around housing project footprints.  Inside projects, the share of households living in formal housing jumps by 61 percentage points consistent with the large growth in formal housing density documented in Table~\ref{table:bbluDDD}.  The shares of households in project areas with flush toilets, piped water indoors, and/or electricity also increase by economically meaningful magnitudes although only the coefficient for access to piped water indoors is statistically significant.  The average number of rooms per house increases by 1.9 likely because new project houses are larger than informal backyard and non-backyard houses.  The coefficient for the share of household in project areas that report owning their home is positive but statistically insignificant.
+Columns (1) to (6) of Table~\ref{table:censusestimates} capture changes in housing characteristics within and around housing project footprints.  Inside projects, the share of households living in formal housing jumps by 61 percentage points consistent with the large growth in formal housing density documented in Table~\ref{table:bbluDDD}.  The shares of households in project areas with flush toilets, piped water indoors, and/or electricity also increase by economically meaningful magnitudes although only the coefficient for access to piped water indoors is statistically significant.  The average number of rooms per house increases by 1.9 likely because new project houses are often larger than informal backyard and non-backyard houses.  The coefficient for the share of households in project areas that report owning their home is positive but statistically insignificant.
 
-In spillover areas (0-500m outside of projects), the share of households that report living in formal houses (Column (1)) increases by a statistically insignificant 12 percentage points.  Any increase in the ratio of formal to informal housing nearby projects may reflect crowding-out of nearby informal housing as described by housing density estimates from Table~\ref{table:bbluDDD}.  Economically small and statistically insignificant coefficients for infrastructure access, number of rooms, and homeownership in spillover areas in Columns (2) to (5) suggests that infrastructure and housing stock investments in project areas do not spillover to surrounding neighborhoods.
+In spillover areas (0-500m outside of projects), the share of households that report living in formal houses (Column (1)) increases by a statistically insignificant 12 percentage points.  Any increase in the ratio of formal to informal housing nearby projects may reflect crowding-out of nearby informal housing as described by housing density estimates from Table~\ref{table:bbluDDD}.  Economically small and statistically insignificant coefficients for infrastructure access, number of rooms, and homeownership in spillover areas in Columns (2) to (5) suggest little scope for infrastructure and housing stock investments in project areas to spillover to surrounding neighborhoods.
 
-Complementing changes in housing characteristics, Columns (7) to (12) of Table~\ref{table:censusestimates} estimate changes in demographics within and around project footprints.  Within projects, household (``HH'') sizes increase by 0.59 people on average given a baseline average of 3.25 people per household, which is consistent with recipients of project houses inviting additional family members to live in their new houses.  Population density increases by 1,610 people per $\text{km}^{2}$, which is statistically insignificant, but economically meaningful --- this effect almost doubles the baseline average population density of 1,793.  Coefficients for average age, race, and employment status of the head of households (``HoH'') as well as household log-income are economically small and statistically insignificant, suggesting little demographic change as a result of these housing projects.  The point estimate for household income (Column (12)) suggests a 12\% increase in average household incomes in project areas although this result is statistically insignificant.  This evidence is consistent with housing authorities ensuring that preexisting slum residents are able to benefit from new project houses.  This evidence is less consistent with the hypothesis that political corruption steers project houses toward wealthier and more politically connected households \citep{seriq}.
+Complementing changes in housing characteristics, Columns (7) to (12) of Table~\ref{table:censusestimates} estimate changes in demographics within and around project footprints.  Within projects, household (``HH'') sizes increase by 0.59 people on average given a baseline average of 3.25 people per household, which is consistent with recipients of project houses inviting additional family members to live in their new houses.  Population density increases by 1,610 people per $\text{km}^{2}$, which is statistically insignificant, but economically meaningful --- this effect almost doubles the baseline average population density of 1,793.  Coefficients for average age, race, and employment status of the head of households (``HoH'') as well as household log-income are economically small and statistically insignificant, suggesting little demographic change as a result of these housing projects.  The point estimate for household income (Column (12)) suggests a 12\% increase in average household incomes in project areas although this result is statistically insignificant.  Taken together, these results are consistent with housing authorities ensuring that preexisting slum residents are able to benefit from new project houses.  The results are less consistent with the hypothesis that political corruption steers project houses toward wealthier and more politically connected households \citep{seriq}.  %%% maybe reinterpret in light of the new model...
 
 Spillover areas report positive, statistically insignificant coefficients for both household size (Column (7)) and population growth (Column (8)) that are much smaller in magnitude and significance than corresponding estimates inside projects.  Spillover estimates for household demographics in Columns (8) to (11) parallel estimates within projects by having low statistical significance and small magnitudes.  Estimates predict a large, statistically insignificant increase of 21\% in average household income.
-
-
 
 
 \subsection{Prices}\label{section:resultsprices}
 
 
-We examine how housing projects may affect the values of nearby formal housing using deeds data on housing transactions.  Because few private housing transactions occur within project footprints and because it is possible that project house allocations may be miscoded as private housing transactions, we restrict our analysis to properties located outside of project footprints.  According to this restriction, we estimate the following modification of equation (\ref{eq:main}):
+We examine how housing projects may affect the prices of nearby formal housing using deeds data on housing transactions.  Because few private housing transactions occur within project footprints and because it is possible that project house allocations may be miscoded as private housing transactions, we restrict our analysis to properties located outside of project footprints.  We estimate the following modification of equation (\ref{eq:main}):
 \begin{align}\label{eq:mainprice}
 \begin{split}
 \quad y_{ipnt} \, =& \,\, \textsc{\small Spill}_{ip} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p} \, +\, \beta_4 \Big) \, + \\[.2em]
 & \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, + \, \gamma_3 \,  \textsc{\small Proj}_{p} \, + \, \theta \, X_{ipnt} \, + \, \lambda_n \, + \, \varepsilon_{ipnt} \quad 
 \end{split}
 \end{align}
-\noindent where the unit of analysis, $i$ is a property transaction, time, $t$ is monthly, and the outcome, $y_{ipnt}$ is the log-price of each property transaction.  To utilize monthly transaction data, we limit the sample to include constructed housing projects where the month of completion is available and unconstructed housing projects where we are able to project an expected month of construction.\footnote{EVALUATE THIS SAMPLE LIMITATION?}  We refer to the completion month for constructed projects and the expected completion month for unconstructed projects jointly as the scheduled construction month.  $\textsc{\small Post}_{t}$ takes a value of one for transactions occurring after the scheduled construction month.  $\textsc{\small Spill}_{ip}$ takes a value of one for properties between 0 and 500 meters outside of their nearest project boundary.  Some specifications include additional controls, $X_{ipnt}$  for the calendar month of each transaction and up to a cubic polynomial in the plot size of each property.  All specifications control for neighborhood fixed effects, $\lambda_n$.  
+\noindent where the unit of analysis, $i$ is a property transaction, time, $t$ is monthly, and the outcome, $y_{ipnt}$ is the log-price of each property transaction.  To utilize monthly transaction data, we limit the sample to include constructed housing projects where the month of completion is available and unconstructed housing projects where we are able to project an expected month of construction.  We refer to the completion month for constructed projects and the expected completion month for unconstructed projects jointly as the scheduled construction month.  $\textsc{\small Post}_{t}$ takes a value of one for transactions occurring after the scheduled construction month.  $\textsc{\small Spill}_{ip}$ takes a value of one for properties between 0 and 500 meters outside of their nearest project boundary.  Some specifications include additional controls, $X_{ipnt}$  for the calendar month of each transaction and up to a cubic polynomial in the plot size of each property.  All specifications control for neighborhood fixed effects, $\lambda_n$.  % \footnote{EVALUATE THIS SAMPLE LIMITATION?} 
 
 To examine how price effects may vary by neighborhood income quartile, we also estimate the following modification of equation (\ref{eq:mainhet}):
 \begin{align}\label{eq:mainhetprice}
@@ -1259,7 +1069,7 @@ To examine how price effects may vary by neighborhood income quartile, we also e
 \end{align}
 \noindent where $Q_n^q$ indexes neighborhood income quartile.  
 
-Table~\ref{table:priceDDD_het} reports estimation results for all neighborhoods following equation (\ref{eq:mainprice}) and separately by neighborhood quartile following equation (\ref{eq:mainhetprice}).  Table~\ref{table:priceDDD_het} includes triple difference coefficients, $\beta_1$ and $\beta_1^q$, which capture the differential price changes for properties between 0 and 500 meters from project boundaries before and after scheduled construction for constructed versus unconstructed projects.  With log-prices as an outcome, coefficients can be interpreted as in terms of percent of transaction prices.
+Table~\ref{table:priceDDD_het} reports estimation results for all neighborhoods following equation (\ref{eq:mainprice}) and separately by neighborhood quartile following equation (\ref{eq:mainhetprice}).  Table~\ref{table:priceDDD_het} includes triple difference coefficients, $\beta_1$ which capture the differential price changes for properties between 0 and 500 meters from project boundaries before and after scheduled construction for constructed versus unconstructed projects.  With log-prices as an outcome, coefficients can be interpreted as in terms of percent of transaction prices.
 
 \begin{table}
 \small
@@ -1293,33 +1103,69 @@ To examine the dynamics of these price effects, Appendix~\ref{section:appendixpr
 
 One concern with this approach is that our method of imputing the expected month of project completion for planned, but unconstructed  may introduce noise into the estimates.  As a robustness exercise, Appendix~\ref{section:appendixpricedd} provides differences-in-differences estimates of price effects using only constructed projects and comparing properties near and far from project boundaries before and after construction.  Results from this exercise (Table~\ref{table:priceDD_het}) closely match triple-difference estimates (Table~\ref{table:priceDDD_het}).
 
-% From a structural perspective, price changes capture the net result of (1) the direct effects of local amenity quality as well as (2) the indirect effects of shifts in the extent of development and the quality of lots that are developed.  Optimal rents given by equation (\ref{eq:rent}) indicate that rents respond directly to amenities, $\delta_{lt}$ and indirectly to changes in the intensity of development, $k_{jt}$, which affects prices through both the amount of crowding disutility, $\lambda(k_{jt})$ as well as the unobserved quality of plots that are developed, $\epsilon_{jt}$.  In this framework, decreases in prices can be generated not only by decreases in amenity values, but also by decreases in construction costs as lower construction costs induce development on low quality plots as well as greater congestion 
+
+% Paragraph 
+% COMPARE PRICE ESTIMATES TO DIAMOND PLEASE!
 
 
-% \begin{align*}
-% R_{jt}^{*}(k_{jt}) &= \frac{ \delta_{lt} - \lambda(k_{jt}) + \epsilon_{jt} - \overline{U}}{\theta}
-% \end{align*}
+\section{Discussion and Conclusion}\label{section:discussion}
 
-% \begin{align}
-% \Delta R_{jt}^{*}  &= \frac{ \Delta\delta_{\textsc{Spill}} - \lambda(k_{jt}) + \epsilon_{jt} - \overline{U}}{\theta}
-% \end{align}
+Sections
+\begin{enumerate}
 
+\item Policymaker goals (especially in South Africa, but elsewhere as well)
 
-COMPARE PRICE ESTIMATES TO DIAMOND PLEASE!
+\begin{itemize}
+	\item Goal 1: Improve quality of dwellings in project footprints [quote]
+		\begin{itemize}
+			\item This was largely a success
+			\item It did not have to be: for example, areas without projects could have developed even faster (and without big backyards that invite informal settlements)
+		\end{itemize}
+	\item Goal 2: Crowd-in local housing investment [quote]
+		\begin{itemize}
+			\item Not a success; little increase in quantity or prices of formal housing outside of footprints
+			\item Possibly because formal markets interpret housing projects as negative amenities
+		\end{itemize}
+	\item Goal 3: Reduce slum growth [quote]
+		\begin{itemize}
+			\item Mixed results: no reduction in footprints because of backyarding, but decreases outside of project footprints
+			\item Welfare effects are negative so governments would have to believe in very large negative externalities from slums in order to still justify this policy
+		\end{itemize}
+\end{itemize}
 
+\item Lessons from comparing developing and developed country evaluations of place-based policies
 
+\begin{itemize}
+	\item Formal markets behave similarly between developing and developed contexts (similar results to \cite{diamond2016wants})
+	\item Informal housing grows within project areas, changing the spatial definition of ``treatment'' areas
+	\item The quantity of informal housing is also elastic and can adjust rapidly in response to place-based policies (compare to Glaeser and Gyorko?)
+\end{itemize}
 
+\item Limitations
 
+\begin{itemize}
+\item We don't have much to say about individual household outcomes and therefore, about the distributional consequences of these policies
+\item We don't look at whether these big projects also crowd-in investment/jobs (although partially in identification)
+\item We don't micro-found externalities well, especially for informal settlements
+\end{itemize}
 
-\section{Conclusion}\label{section:discussion}
+\end{enumerate}
 
-\begin{comment}
+We could also go with stuff from this ending:
 
 Our results present a puzzle: large improvements in housing quality and infrastructure access within projects do not appear to generate new investments in formal housing development, influxes of high-income residents, or increases in housing prices nearby these projects.  Additionally, we find no evidence that low-income households differentially sort into project areas or that projects increase the total supply of housing --- both mechanisms which may counteract any positive amenity effects.  We offer two partial explanations to account for this puzzle.
 
 In making housing decisions, people in South Africa may simply have weak preferences for neighborhood quality.  Given very high rates of unemployment especially in rural areas, many South Africans migrate to cities solely for employment, sending large shares of their income home to their families.  In the census data, we observe that over 43\% of our sample reports being born outside the province of Gauteng.  Young adults regularly engage in circular migration, returning periodically to rural villages to spend their leisure time.  Rather than investing in the local community and developing a strong social network, people may view their housing decision in terms of short-term access to employment.  Therefore, people may place little value on nearby neighborhood quality or other amenities, instead prioritizing low rents and short commutes. 
 
 Another explanation is that households value neighborhood quality, but higher densities of informal backyard shacks offset any improvements in formal housing quality and infrastructure.  \cite{Brueckner2018backyarding} document how households in backyard shacks often share water, electricity, and sanitation services with their landlords.  Congestion in using shared services may lead households to consume less of these services and exacerbate externalities associated with these low levels of usage.  \cite{Brueckner2018backyarding} also emphasize that backyard shacks often house young-adult, migrant workers who may be less inclined to make long-term social or economic investments in their communities.  
+
+
+
+\begin{comment}
+
+
+% Family members of project beneficiaries may also move locally to maintain social ties (\cite{franklin2016enabled}).
+
 
 These results contrast with similar findings in both developed and developing country settings. - what papers to discuss?
 
@@ -1540,27 +1386,99 @@ We then use a fuzzy-string matching algorithm with bigrams to link project names
 
 \subsection{Full Housing Demand Estimates}
 
+
+
 \begin{table}[h]
 \centering
 \caption{Full Housing Demand Estimates}\label{table:housingdemandestimates_full}
 \vspace{-2mm}
+\resizebox*{!}{.97\textheight}{
 \begin{tabular}{lDD}
 \toprule
  &  Formal &  Informal \\ \midrule 
+ net amenities: $( \delta_{hl} - \theta c^{u}_{hlt} )$ \\[.3em]
 \input{figures/forimpcmp10_1_full}[.3em]
 \input{figures/forimpcmp10_2_full}[.5em]
 \input{figures/forimpcmp10_3_1_full}
 \input{figures/forimpcmp10_3_2_full}
 \input{figures/forimpcmp10_3_3_full}
 \input{figures/forimpcmp10_3_4_full}
-\input{figures/forimpcmp10_3_5_full}[.3em]
+\input{figures/forimpcmp10_3_5_full}
+\input{figures/forimpcmp10_3_6_full}
+\input{figures/forimpcmp10_3_7_full}
+\input{figures/forimpcmp10_3_8_full}
+\input{figures/forimpcmp10_3_9_full}
+\input{figures/forimpcmp10_3_10_full}[.3em]
 % \input{figures/forimpcmp10_3_6_full}
 correlation of amenity shocks: $\rho_{for,inf}$ & $0.620^{\text{a}}$ & \\
  & (0.018) & \\[.3em]
  N & 6,143,756 & \\
 \bottomrule\\[-.6em]
-\end{tabular}\\
-Standard errors are clustered at the project by location level.  
+\multicolumn{3}{l}{ \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Outcome categories by plot and year include categories for formal and informal} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize  building counts from 0 to 9 and a category at least 10.  Table~\ref{table:housingdemandestimates_full} includes the full set} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize of coefficients.  Net amenities equal local amenities minus local housing costs. } \\[-.3em]
+\end{tabular}
+}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Housing Demand Estimates by Income Quartile}\label{table:housingdemandestimatesinc}
+\vspace{-2mm}
+\begin{tabular}{lGG}
+\toprule
+ &  Formal Housing &  Informal Housing \\ \midrule 
+Net amenities: $( \delta_{hl} - \theta c^{u}_{hlt} )$ \\[.3em]
+\input{figures/forimpcmp10_1_q1}[.3em]
+\input{figures/forimpcmp10_1_q2}[.3em]
+\input{figures/forimpcmp10_1_q3}[.3em]
+\input{figures/forimpcmp10_1_q4}[.3em]
+\input{figures/forimpcmp10_2_q}[.3em]
+\\
+Correlation of amenity shocks: $\rho_{for,inf}$ & $0.620^{\text{a}}$ & \\[-.3em]
+ & (0.018) & \\[.3em]
+ N & 6,143,756 & \\
+\bottomrule\\[-.8em]
+% Implied amenity value net of housing costs in Rands: $\frac{1}{\theta_{for}}(\delta_{hl}- \theta_{for}c^{u}_{hlt})$ & & \\
+% inside project &\input{figures/for_proj} & \input{figures/inf_proj} \\
+% 0-500m outside &\input{figures/for_spill} & \input{figures/inf_spill} \\
+% \bottomrule\\[-.8em]
+\multicolumn{3}{l}{ \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Outcome categories include formal and informal building counts from 0 to 9  } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize  and at least 10 by plot and year.  Table~\ref{table:housingdemandestimates_full} includes the full set of coefficients. } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Net amenities equal local amenities minus local housing costs. } \\[-.3em]
+\end{tabular}
+\end{table}
+
+
+
+\begin{table}[h]
+\centering
+\caption{Simulated Effects Housing Projects on Net Prices by Neighborhood Income Quartile}\label{table:housingdemandsim}
+\vspace{-2mm}
+\begin{tabular}{llDD}
+\toprule
+& Area &  Formal Housing &  Informal Housing \\ \midrule 
+All & inside project & \input{figures/for_proj_w}   & -\input{figures/inf_proj_w}   \\[.3em]
+&  0-500m outside & -\input{figures/for_spill_w}  & -\input{figures/inf_spill_w}  \\[1em]
+% By Neighborhood Income Quartile & & \\[.5em]
+Quartile \\
+\midrule
+ Q1 & inside project & \input{figures/for_proj_w_q1}   & \input{figures/inf_proj_w_q1}   \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q1}  & \input{figures/inf_spill_w_q1}  \\[.8em]
+ Q2 & inside project & \input{figures/for_proj_w_q2}   & \input{figures/inf_proj_w_q2}   \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q2}  & \input{figures/inf_spill_w_q2}  \\[.8em]
+ Q3 & inside project & \input{figures/for_proj_w_q3}   & \input{figures/inf_proj_w_q3}  \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q3}  & \input{figures/inf_spill_w_q3}  \\[.8em]
+ Q4 & inside project & \input{figures/for_proj_w_q4}   & \input{figures/inf_proj_w_q4}  \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q4}  & \input{figures/inf_spill_w_q4}  \\
+ \bottomrule\\[-1em]
+ \multicolumn{4}{l}{ \footnotesize All results are in Rands per plot.  Average housing price } \\[-.3em]
+ \multicolumn{4}{l}{ \footnotesize is 231,000 Rands.  Quartiles are measured with respect to  } \\[-.3em]
+ \multicolumn{4}{l}{ \footnotesize average neighborhood household income in the 2001 census.  } \\[-.3em]
+ \multicolumn{4}{l}{ \footnotesize Appendix~\ref{section:appendixwelfaresim} describes the simulation in more detail. } \\[-.3em]
+\end{tabular}
 \end{table}
 
 

@@ -180,11 +180,9 @@ g u1a = y1 + delta1a - theta1*C
 welfare "inf_spill_w" `=25+12'
 
 
-disp `=(1/(1+2.5))*($for_proj_w + $inf_proj_w) + (2.5/(1+2.5))*($for_spill_w + $inf_spill_w)'
+write "full_w.tex" `=abs((1.2/(1.2+3))*($for_proj_w + $inf_proj_w) + (3/(1.2+3))*($for_spill_w + $inf_spill_w))' .01 "%10.0fc"
 
-write "full_w.tex" `=abs((1/(1+2.5))*($for_proj_w + $inf_proj_w) + (2.5/(1+2.5))*($for_spill_w + $inf_spill_w))' .01 "%10.0fc"
-
-write "full_w_per.tex" `=(100/231000)*abs((1/(1+2.5))*($for_proj_w + $inf_proj_w) + (2.5/(1+2.5))*($for_spill_w + $inf_spill_w))' .01 "%10.1fc"
+write "full_w_per.tex" `=(100/231000)*abs((1.2/(1.2+3))*($for_proj_w + $inf_proj_w) + (3/(1.2+3))*($for_spill_w + $inf_spill_w))' .01 "%10.1fc"
 
 
 write "full_proj_w.tex" `=abs($for_proj_w + $inf_proj_w) ' .01 "%10.0fc"
@@ -205,15 +203,6 @@ write "full_spill_w.tex" `=abs($for_spill_w + $inf_spill_w) ' .01 "%10.0fc"
 
     g w_diff_t = welfare_t - welfare_a_t
     sum w_diff_t, detail
-
-
-
-
-/*
-
-
-
-
 
 
 * for proj
@@ -241,8 +230,6 @@ write "inf_proj_per.tex"  `=100*abs((-1*EST[1,13]/EST[1,12])/231000)'  .01 "%10.
 write "inf_spill.tex" `=abs(-1*EST[1,14]/EST[1,12])' .01 "%10.0fc"
 write "inf_spill_per.tex" `=100*abs((-1*EST[1,14]/EST[1,12])/231000)'  .01 "%10.0fc"
 
-
-/*
 
 * blist(proj_con_post "  Amenity value net of housing costs: $( \delta_{hl} - \theta c^{u}_{hlt} )$ \\[.3em]  "
 
@@ -300,7 +287,7 @@ estout  using forimpcmp10_2_full.tex, replace  style(tex) ///
       cells( b(fmt(7) star ) se(par fmt(7)) ) ///
       starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
-forvalues r = 1/5 {
+forvalues r = 1/10 {
 estout  using forimpcmp10_3_`r'_full.tex, replace  style(tex) ///
   varlabels( _cons "cut point: $\Lambda_{h}(`r')$" ) ///
     label unstack ///
@@ -313,7 +300,7 @@ estout  using forimpcmp10_3_`r'_full.tex, replace  style(tex) ///
       starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 }
 
-estout  using forimpcmp10_3_6_full.tex, replace  style(tex) ///
+estout  using forimpcmp10_3_11_full.tex, replace  style(tex) ///
   varlabels( _cons "arctan correlation of amenity shocks " ) ///
     label unstack ///
       noomitted ///
