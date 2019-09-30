@@ -1,0 +1,376 @@
+\begin{table}[h!]
+\centering
+\caption{Housing Project Areas Description}\label{table:projectdescriptives}
+\vspace{0mm}
+\begin{tabular}{l*{1}{cc}}
+\toprule
+  &Constructed & Unconstructed \\
+\midrule
+\input{figures/descriptives_tablet_4}
+\bottomrule
+%\multicolumn{3}{l}{\scriptsize Const. refers to constructed projects and unconst. refers to unconstructed projects.}\\[-.5em]
+%\multicolumn{3}{l}{\scriptsize $^*$Calculated from {\it expected} completion dates using Gauteng National Treasury budget reports.}\\[-.5em]
+\multicolumn{3}{l}{\scriptsize $^\dagger$ The USD averaged around 7.70 Rands during the 2001-2011 period.}\\[-.5em]
+\multicolumn{3}{l}{\scriptsize $^\ddagger$Measured as the average minimum distance with respect to Johannesburg and Pretoria CBDs. } \\[-.5em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[h!]
+\centering
+\caption{Mean Housing Characteristics from the 1996 and 2001 Censuses}\label{table:projectdescriptivescensus}
+\vspace{-2mm}
+\begin{tabular}{l*{1}{ccc}}
+\toprule
+& Constructed & Unconstructed & All blocks \\
+\midrule
+\input{figures/census_at_baseline_AGG_4}
+\bottomrule
+\multicolumn{4}{l}{\scriptsize ``Constructed'' and ``Unconstructed'' include census blocks with over 50\% } \\ [-.5em]
+\multicolumn{4}{l}{\scriptsize  area overlap with constructed and unconstructed projects respectively. } \\ [-.5em]
+\multicolumn{4}{l}{\scriptsize ``All''  includes all blocks.  Means are weighted by land area.}
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[hbt!]
+\small
+\centering
+\caption{Housing Density Estimates}\label{table:bbluDDD}
+\vspace{-2mm}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4)  & \small (5) \\
+ & \small Total Housing & \small Total Formal Housing & \small Total Informal Housing & \small  Informal Non-Bkyd. Housing  & \small Informal Backyard Housing  \\ \midrule
+\input{figures/b_ksp_o0_d250_500_top}
+\bottomrule\\[-.8em]
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }\\[-.3em]
+% \multicolumn{6}{l}{\footnotesize Project and spillover areas are 25$\times$25m grid cells.}\\[-.3em]
+\multicolumn{6}{l}{\footnotesize Outcomes are measure in terms of houses per $\text{km}^{2}$. }\\[-.3em]
+\multicolumn{6}{l}{\footnotesize Estimates control for 2001 census sub-place fixed effects.}\\[-.3em]
+\multicolumn{6}{l}{\footnotesize Coefficients are interactions with constructed, $\textsc{Const}_{p}$  and post, $\textsc{Post}_{t}$ indicators.}\\[-.3em]
+\multicolumn{6}{l}{\footnotesize Appendix Table~\ref{table:bbluDDDfull} includes all corresponding triple-difference coefficients.}
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[h]
+\centering
+\caption{Housing Demand Estimates}\label{table:housingdemandestimates}
+\vspace{-2mm}
+\begin{tabular}{lDD}
+\toprule
+ &  Formal Housing &  Informal Housing \\ \midrule
+Net amenities: $( \delta_{hl} - \theta c^{u}_{hlt} )$ \\[.3em]
+\input{figures/forimpcmp10_1}[.3em]
+\input{figures/forimpcmp10_2}
+\\
+Correlation of amenity shocks: $\rho_{for,inf}$ & $0.620^{\text{a}}$ & \\[-.3em]
+ & (0.018) & \\[.3em]
+ N & 6,143,756 & \\
+\bottomrule\\[-.8em]
+% Implied amenity value net of housing costs in Rands: $\frac{1}{\theta_{for}}(\delta_{hl}- \theta_{for}c^{u}_{hlt})$ & & \\
+% inside project &\input{figures/for_proj} & \input{figures/inf_proj} \\
+% 0-500m outside &\input{figures/for_spill} & \input{figures/inf_spill} \\
+% \bottomrule\\[-.8em]
+\multicolumn{3}{l}{ \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Outcome categories by plot and year include categories for formal and informal} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize  building counts from 0 to 9 and a category at least 10.  Table~\ref{table:housingdemandestimates_full} includes the full set} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize of coefficients.  Net amenities equal local amenities minus local housing costs. } \\[-.3em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+\small
+\centering
+\caption{Census Household-level Estimates}\label{table:censusestimates}
+\vspace{-2mm}
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+ & \small Is a Formal House & \small Has a Flush Toilet & \small Has Piped Water Indoors  & \small Has Electricity & \small Total Rooms  & \small Owns House  \\ \midrule
+\input{figures/ch1_ksp_o0_d250_500_bb1_top} \midrule
+ \\
+ & \small (7)  & \small (8)  & \small (9) & \small (10)  & \small (11)  & \small (12)\\
+ & \small HH Size & People per $\text{km}^{2}$ & Age HoH & HoH is African  & HoH is Employed  & HH Log Income \\ \midrule
+\input{figures/ch2_ksp_o0_d250_500_bb1_top_1}
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic in unit area by time. }\\[-.3em]
+\multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+\small
+\centering
+\caption{Triple-Difference Estimates of Log-Prices 0 to 500 Meters Outside of Housing Projects}\label{table:priceDDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule
+ \input{figures/price_temp_Tester_3d_spill_top_no_lab}\\
+By Neighborhood Income Quartile \\[.3em]
+ \input{figures/price_temp_Tester_3d_q_top}
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Estimates capture differential price effects for properties  } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize 0 to 500 meters outside of project boundaries relative to   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize properties 500 to 1,500 meters from boundaries before and   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize after scheduled construction for constructed and  unconstructed projects. } \\[-.3em]
+% \multicolumn{3}{l}{\footnotesize    } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Income quartiles are from average household 2001 incomes in } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize census 2001 subplaces.  All estimates include neighborhood fixed effects.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[ht!]
+\centering
+\caption{Project Descriptions}\label{table:projectdescriptions}
+\vspace{-2mm}
+\begin{tabular}{l*{1}{c}}
+\toprule
+ &Counts  \\
+\midrule
+\textbf{Constructed} & \\[.5em]
+\input{figures/proj_con_table}[.5em]
+\input{figures/proj_con_table_total}[.5em]
+\textbf{Unconstructed} & \\[.5em]
+\input{figures/proj_uncon_table}[.5em]
+\input{figures/proj_uncon_table_total}[.5em]
+\textbf{Other} \\[.5em]
+\input{figures/other_table}[.5em]
+\input{figures/other_table_total}[.5em]
+\midrule
+\input{figures/proj_table_total}[.5em]
+\bottomrule
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[ht!]
+\centering
+\caption{Assessing Name Matching between Budget Reports and Administrative Project Records}\label{table:stringmatch}
+\vspace{0mm}
+\begin{tabular}{l*{1}{cccc}}
+\toprule
+  & \multicolumn{2}{c}{\textbf{Matched}}& \multicolumn{2}{c}{\textbf{Unmatched}}    \\
+  &Const. & Unconst. &Const. & Unconst.  \\
+\midrule
+\input{figures/score_tablet_4}
+\bottomrule
+\multicolumn{5}{l}{\scriptsize Const. refers to constructed projects and unconst. refers to unconstructed projects.}\\[-.5em]
+\multicolumn{5}{l}{\scriptsize $^*$Calculated from {\it expected} completion dates using Gauteng National Treasury budget reports.}\\[-.5em]
+\multicolumn{5}{l}{\scriptsize $^\dagger$ The USD averaged to about 7.70 Rands during the 2001-2011 period.}\\[-.5em]
+\multicolumn{5}{l}{\scriptsize $^\ddagger$Measured as the average minimum distance with respect to Johannesburg and Pretoria CBDs. } \\[-.5em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[ht!]
+\small
+\centering
+\caption{Triple Difference Estimates of Housing Density }\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
+\input{figures/b_ksp_o0_d250_500}
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 }\\[-.3em]
+\multicolumn{6}{l}{\footnotesize Project areas are 25$\times$25m grid cells within 1,500m of project footprints.}\\[-.3em]
+\multicolumn{6}{l}{\footnotesize Housing densities are measure in terms of houses per $\text{km}^{2}$.}\\[-.3em]
+\multicolumn{6}{l}{\footnotesize ``inside'' means within project footprint.  ``constr'' means constructed.}
+\end{tabular}
+}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[ht!]
+\caption{Building Density by Neighborhood Income Quartile}\label{table:bbluDDDhet}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{lDDDDD}
+\toprule
+ & \small (1)  & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & Total Housing & Formal Housing  &Informal Housing  &Informal Non-Bkyd. Housing  &  Informal Bkyd. Housing  \\ \midrule
+\input{figures/b_q_ksp_o0_d250_500_top}
+\bottomrule
+\end{tabular}
+}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[ht!]
+\small
+\centering
+\caption{Full Census Household-level Estimates}\label{table:censusestimatesfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (1) & \small (2)  & \small (3) & \small (4)  & \small (5) & \small (6) \\
+ & \small Is a Formal House & \small Has a Flush Toilet & \small Has Piped Water Indoors  & \small Has Electricity & \small Total Rooms  & \small Owns House  \\ \midrule
+\input{figures/ch1_ksp_o0_d250_500_bb1} \midrule
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic polynomial in unit area by time. }\\[-.3em]
+\multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+\end{tabular}
+}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[ht!]
+\small
+\centering
+\caption{Full Census Household-level Estimates Cont.}\label{table:censusestimatesfull2}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{lDDDDDD}
+\toprule
+ & \small (7) & \small (8)  & \small (9)  & \small (10) & \small (11)  & \small (12)  \\
+ & \small HH Size & People per $\text{km}^{2}$ & Age HoH & HoH is African  & HoH is Employed  & HH Log Income \\ \midrule
+\input{figures/ch2_ksp_o0_d250_500_bb1}
+% \input{figures/census_hh_DDregs_AGG}
+\bottomrule\\[-.6em]
+\multicolumn{7}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Outcomes in Columns (1) to (4), (6), and (9) to (11) are indicator variables.} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Specifications include census 2001 subplace fixed effects.} \\[-.3em]
+\multicolumn{7}{l}{\footnotesize Results are weighted by unit area and control for up to a cubic polynomial in unit area by time. }\\[-.3em]
+\multicolumn{7}{l}{\footnotesize ``HH'' stands for household and ``HoH'' stands for head of household.}
+\end{tabular}
+}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[h]
+\centering
+\caption{Full Housing Demand Estimates}\label{table:housingdemandestimates_full}
+\vspace{-2mm}
+\resizebox*{!}{.97\textheight}{
+\begin{tabular}{lDD}
+\toprule
+ &  Formal &  Informal \\ \midrule
+ net amenities: $( \delta_{hl} - \theta c^{u}_{hlt} )$ \\[.3em]
+\input{figures/forimpcmp10_1_full}[.3em]
+\input{figures/forimpcmp10_2_full}[.5em]
+\input{figures/forimpcmp10_3_1_full}
+\input{figures/forimpcmp10_3_2_full}
+\input{figures/forimpcmp10_3_3_full}
+\input{figures/forimpcmp10_3_4_full}
+\input{figures/forimpcmp10_3_5_full}
+\input{figures/forimpcmp10_3_6_full}
+\input{figures/forimpcmp10_3_7_full}
+\input{figures/forimpcmp10_3_8_full}
+\input{figures/forimpcmp10_3_9_full}
+\input{figures/forimpcmp10_3_10_full}[.3em]
+% \input{figures/forimpcmp10_3_6_full}
+correlation of amenity shocks: $\rho_{for,inf}$ & $0.620^{\text{a}}$ & \\
+ & (0.018) & \\[.3em]
+ N & 6,143,756 & \\
+\bottomrule\\[-.6em]
+\multicolumn{3}{l}{ \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Outcome categories by plot and year include categories for formal and informal} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize  building counts from 0 to 9 and a category at least 10.  Table~\ref{table:housingdemandestimates_full} includes the full set} \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize of coefficients.  Net amenities equal local amenities minus local housing costs. } \\[-.3em]
+\end{tabular}
+}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[h]
+\centering
+\caption{Housing Demand Estimates by Income Quartile}\label{table:housingdemandestimatesinc}
+\vspace{-2mm}
+\begin{tabular}{lGG}
+\toprule
+ &  Formal Housing &  Informal Housing \\ \midrule
+Net amenities: $( \delta_{hl} - \theta c^{u}_{hlt} )$ \\[.3em]
+\input{figures/forimpcmp10_1_q1}[.3em]
+\input{figures/forimpcmp10_1_q2}[.3em]
+\input{figures/forimpcmp10_1_q3}[.3em]
+\input{figures/forimpcmp10_1_q4}[.3em]
+\input{figures/forimpcmp10_2_q}[.3em]
+\\
+Correlation of amenity shocks: $\rho_{for,inf}$ & $0.620^{\text{a}}$ & \\[-.3em]
+ & (0.018) & \\[.3em]
+ N & 6,143,756 & \\
+\bottomrule\\[-.8em]
+% Implied amenity value net of housing costs in Rands: $\frac{1}{\theta_{for}}(\delta_{hl}- \theta_{for}c^{u}_{hlt})$ & & \\
+% inside project &\input{figures/for_proj} & \input{figures/inf_proj} \\
+% 0-500m outside &\input{figures/for_spill} & \input{figures/inf_spill} \\
+% \bottomrule\\[-.8em]
+\multicolumn{3}{l}{ \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Outcome categories include formal and informal building counts from 0 to 9  } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize  and at least 10 by plot and year.  Table~\ref{table:housingdemandestimates_full} includes the full set of coefficients. } \\[-.3em]
+\multicolumn{3}{l}{ \footnotesize Net amenities equal local amenities minus local housing costs. } \\[-.3em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}[h]
+\centering
+\caption{Simulated Effects Housing Projects on Net Prices by Neighborhood Income Quartile}\label{table:housingdemandsim}
+\vspace{-2mm}
+\begin{tabular}{llDD}
+\toprule
+& Area &  Formal Housing &  Informal Housing \\ \midrule
+All & inside project & \input{figures/for_proj_w}   & -\input{figures/inf_proj_w}   \\[.3em]
+&  0-500m outside & -\input{figures/for_spill_w}  & -\input{figures/inf_spill_w}  \\[1em]
+% By Neighborhood Income Quartile & & \\[.5em]
+Quartile \\
+\midrule
+ Q1 & inside project & \input{figures/for_proj_w_q1}   & \input{figures/inf_proj_w_q1}   \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q1}  & \input{figures/inf_spill_w_q1}  \\[.8em]
+ Q2 & inside project & \input{figures/for_proj_w_q2}   & \input{figures/inf_proj_w_q2}   \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q2}  & \input{figures/inf_spill_w_q2}  \\[.8em]
+ Q3 & inside project & \input{figures/for_proj_w_q3}   & \input{figures/inf_proj_w_q3}  \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q3}  & \input{figures/inf_spill_w_q3}  \\[.8em]
+ Q4 & inside project & \input{figures/for_proj_w_q4}   & \input{figures/inf_proj_w_q4}  \\[.3em]
+    & 0-500m outside & \input{figures/for_spill_w_q4}  & \input{figures/inf_spill_w_q4}  \\
+ \bottomrule\\[-1em]
+ \multicolumn{4}{l}{ \footnotesize All results are in Rands per plot.  Average housing price } \\[-.3em]
+ \multicolumn{4}{l}{ \footnotesize is 231,000 Rands.  Quartiles are measured with respect to  } \\[-.3em]
+ \multicolumn{4}{l}{ \footnotesize average neighborhood household income in the 2001 census.  } \\[-.3em]
+ \multicolumn{4}{l}{ \footnotesize Appendix~\ref{section:appendixwelfaresim} describes the simulation in more detail. } \\[-.3em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+\small
+\centering
+\caption{Differences-in-Differences Estimates of Log-Prices 0 to 500 Meters Outside of Housing Projects}\label{table:priceDD_het}
+\vspace{-2mm}
+\begin{tabular}{lCC}
+\toprule
+ & \small (1) & \small (2)   \\ \midrule
+ \input{figures/price_temp_Tester_2d_spill_top_no_lab} \\
+By Neighborhood Income Quartile \\
+ \input{figures/price_temp_Tester_2d_q_top}
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Estimates capture differential price effects for properties  } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize 0 to 500 meters outside of project boundaries relative to   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize properties 500 to 1,500 meters from boundaries before and   } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize after scheduled construction. } \\[-.3em]
+% \multicolumn{3}{l}{\footnotesize    } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Income quartiles are from average household 2001 incomes in } \\[-.3em]
+\multicolumn{3}{l}{\footnotesize census 2001 subplaces.  All estimates include neighborhood fixed effects.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize Standard errors clustered at the project level in parenthesis.} \\[-.3em]
+\multicolumn{3}{l}{\footnotesize \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 } \\[-.3em]
+\end{tabular}
+\end{table}
+\efloatseparator
+ 

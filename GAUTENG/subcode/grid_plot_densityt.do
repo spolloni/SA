@@ -259,16 +259,52 @@ cd $output ;
 
 if $reg_triplediff2 == 1 {;
 
-egen inc_q = cut(inc), group(2);
+* egen inc_q = cut(inc), group(2);
 
-regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+regs3 b3_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 
-g low_inc = inc_q == 0;
-g high_inc = inc_q == 1;
+areg total_buildings $regressors3, cluster(cluster_joined) r a(sp_1)
+reg total_buildings proj_post proj post spill1_post spill1 post if con==1
 
-rgen_inc_het ;
 
-regs_inc b_inc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+* g low_inc = inc_q == 0;
+* g high_inc = inc_q == 1;
+
+* rgen_inc_het ;
+
+* regs_inc b_inc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+
+* rgen_dd_full ; 
+
+* regs3;
+
+
+
+* reg total_buildings proj_con_post proj_con con_post proj_uncon_post proj_uncon uncon_post con ///
+*                    spill1_con_post spill1_con spill1_uncon_post spill1_uncon , cluster(cluster_joined) robust 
+
+
+* g other = 1 - ( proj + spill1 )
+* replace other = 0 if other<0
+
+
+
+* g other_post = other*post
+* g other_con = other*con 
+* g other_con_post = other*con*post
+
+* reg total_buildings proj_con_post proj_con proj_post spill1_con_post spill1_con spill1_post other_con_post other_con other_post,  cluster(cluster_joined) robust 
+* reg for proj_con_post proj_con proj_post spill1_con_post spill1_con spill1_post other_con_post other_con other_post,  cluster(cluster_joined) robust 
+
+* reg inf proj_con_post proj_con proj_post spill1_con_post spill1_con spill1_post other_con_post other_con other_post,  cluster(cluster_joined) robust 
+
+
+* con_post proj_uncon_post proj_uncon uncon_post con ///
+*                    spill1_con_post spill1_con spill1_uncon_post spill1_uncon , cluster(cluster_joined) robust 
+
+
+* con_post spill1_con spill1_post_con uncon_post proj_post_uncon spill1_uncon spill1_post_uncon, cluster(cluster_joined)
 
 
 * preserve;

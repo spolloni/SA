@@ -1,0 +1,246 @@
+\begin{figure}[t!]
+\centering
+\caption{Housing Project Map}\label{figure:map}
+% \tcbox[colback=white,boxrule=.35mm,boxsep=0mm]{\includegraphics[scale=.098,trim={.9cm .4cm .9cm .4cm}]{figures/explanmap.jpg}}
+% \tcbox[colback=white,boxrule=.35mm,boxsep=0mm]{\includegraphics[scale=.6,trim={.9cm .4cm .9cm .4cm}]{figures/newprojectmap.pdf}}
+\tcbox[colback=white,boxrule=.35mm,boxsep=0mm]{\includegraphics[scale=.6,trim={.9cm .4cm .9cm .4cm}]{figures/projmap_1.png}}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure*}[t!]
+        \centering
+        \caption[ Building Data: Example Housing Project]
+        {\small Building Data: Example Housing Project }
+        \vspace{2mm}
+% \includegraphics[width=\textwidth,trim={0cm 0cm 0cm 0cm}]{figures/newbblumap1.png}
+\includegraphics[width=\textwidth,trim={0cm 0cm 0cm 0cm}]{figures/casestudy2_medium.png}
+        \label{fig:bblumaps}
+\end{figure*}
+\efloatseparator
+ 
+\begin{figure*}[h!]
+        \centering
+        \caption[ 2001 Housing Densities in Constructed and Unconstructed Projects]
+        {\small 2001 Housing Densities in Constructed and Unconstructed Projects}
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_spk.pdf}
+            \caption[Network2]%
+            {{\small Formal density}}
+            \label{fig:prefor_raw}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_spk.pdf}
+            \caption[]%
+            {{\small Informal density}}
+            \label{fig:preinf_raw}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_fe_pre_means_4_spk.pdf}
+            \caption[Network2]%
+            {{\small Formal density within neighborhood}}
+            \label{fig:prefor_fe}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_fe_pre_means_4_spk.pdf}
+            \caption[]%
+            {{\small Informal density within neighborhood}}
+            \label{fig:preinf_fe}
+        \end{subfigure}
+        \label{fig:rawbblumeans_het}
+        %\vspace{-6mm}
+   {\scriptsize Negative distances indicate areas within project boundaries while positive distances measure areas away increasingly outside of project boundaries.  Within neighborhood densities are calculated by subtracting mean densities  \\[-.5em] at the 2001 census subplace level from each 25$\times$25m grid cell.}
+    \end{figure*}
+
+% Using the building-based land-use measures described in section \ref{section:data:bblu},
+% we then examine housing densities across constructed and unconstructed project areas.
+% To inspect how densities change with proximity to housing projects,
+% Probably worth commenting on this gap in the pre-period inside the boundaries.
+
+The building-based land-use data complement the census data by providing a spatially precise measure of preexisting development in areas prior to project construction.  We calculate euclidean distances from the centroid of 25$\times$25m grid-cells to the nearest project boundary, assigning negative distances to grid-cells inside project footprints.  We then compute the average density at 25m intervals, reported in houses per square kilometer.  Greater negative distances exclude smaller projects in computing average densities, which may account for some of the variation in building density within projects, particularly for informal housing.  Appendix~\ref{appendix:projectcounts} illustrates this compositional change in more detail.
+
+Figures \ref{fig:prefor_raw} and \ref{fig:preinf_raw} respectively plot average preexisting densities of formal and informal houses in 2001.  We find low densities of formal housing and very high densities of informal housing within both unconstructed and constructed project footprints (at negative distances).  Crossing just outside of project footprints (to positive distances), formal housing densities quickly increase while informal housing densities sharply jump downwards.  These trends are consistent with housing projects being precisely targeted within poorer neighborhoods with few existing formal dwellings.  Formal and informal housing densities gradually decay moving further from project footprints.  On average, constructed projects are located in neighborhoods with greater housing densities than unconstructed projects although housing densities following similar trends with respect to distance from project boundaries.  Informal densities within project footprints are significantly higher for constructed projects compared to unconstructed projects, which is consistent with housing authorities prioritizing project completion in neighborhoods with large slums (\cite{hofmeyr2008risk}).
+
+Given that housing projects appear to be located in inexpensive neighborhoods with high preexisting densities of informal housing, we next examine whether housing projects are further targeted to particular locations within neighborhoods.  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} are calculated by first subtracting the average housing density in each neighborhood from the density in each grid cell, then calculating averages over distances to project footprints.  Neighborhoods are defined according to 1,001 census 2001 subplaces, which identify suburbs, wards, villages, or informal settlements (\cite{censusmeta}).  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} can be interpreted as the difference in housing density from the neighborhood average associated with each distance from a project boundary.
+
+Accounting for neighborhood differences removes much of the variation in preexisting housing densities across distances to housing projects, especially outside of project footprints.  Yet, low levels of formal housing and high levels of informal housing persist just within project footprints, consistent with housing authorities targeting projects toward inexpensive, poorer plots of land even within neighborhoods.  Similar patterns within neighborhoods for constructed and unconstructed areas suggest that both project types are located using similar criteria.  Accounting for neighborhood densities collapses average differences in densities between constructed and unconstructed projects although constructed projects have higher building densities within project footprints.
+
+% Appendix Table~\ref{fig:rawbblumeans_het} graphs pre-period density of formal and informal housing separately for projects in city centers and projects in suburbs.  Unconstructed project areas near city centers have slightly higher densities of informal housing and lower densities of formal housing.  In suburbs, the opposite pattern holds with constructed project areas having somewhat higher densities of formal housing and lower densities of informal housing.  Outside of project boundaries, constructed and unconstructed projects have similar informal and formal housing levels in both city and suburb areas.
+
+\begin{figure*}[t!]
+        \centering
+        \caption[ Changes in Housing Densities in Constructed and Unconstructed Projects Areas]
+        {\small Changes in Housing Densities in Constructed and Unconstructed projects }
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_rawchanges_4_spk}
+            \caption[]%
+            {{\small formal housing density change}}
+            \label{fig:forchange}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_rawchanges_4_spk}
+            \caption[]%
+            {{\small informal housing density change}}
+            \label{fig:infchange}
+        \end{subfigure}
+        \label{fig:rawbblumeanschange}
+        \vspace{-6mm}
+    \end{figure*}
+
+To examine how project areas evolve over time, Figures \ref{fig:forchange} and \ref{fig:infchange} are constructed by computing the change in building density for each grid cell from 2001 to 2012 and then averaging these changes according to distances to project boundaries.  Both formal and informal housing densities increase over this time period, reflecting rapid urbanization throughout the Guateng province.
+
+Growth in formal housing is concentrated within constructed project footprints, dropping abruptly at project boundaries (at zero distance).   This trend is consistent with housing projects producing large amounts of new, formal housing  (\cite{dhsreports}).  Sharp changes in formal housing growth at project boundaries are also consistent with having a precise measure of housing project boundaries.\footnote{In contrast, an imprecise measure that misclassifies some non-project areas as project areas (and vice versa) would predict a smooth average trend in formal housing changes across footprint boundary.}  Compared to constructed projects, unconstructed projects experience much less growth in formal housing within their footprints.  This finding confirms their status as planned, but unconstructed.  Moving from within footprints to outside of footprints, unconstructed projects observe declining formal housing growth.  Since projects are often located on undeveloped land, private housing development may crowd into these areas in the absence of housing project construction.  Moving further from project boundaries, formal housing growth decays similarly between constructed and unconstructed areas.
+
+ % Alternatively, this growth in formal housing may represent measurement error where some projects that are classified as unconstructed were actually finished between 2001 and 2012.
+
+Growth in informal housing density is higher within than outside of project footprints as shown by Figure~\ref{fig:infchange}.  This result is unsurprising for unconstructed projects:  informal settlements grow in underdeveloped, inexpensive land in the absence of project construction.  Yet, for constructed projects, this result suggests that even after authorities have cleared the existing informal housing stock to make way for housing projects, total informal housing growth still exceeds growth in unconstructed project areas.  Moving further from footprints, growth in informal housing decays with distance at a faster rate for unconstructed projects than for constructed projects.
+
+
+
+% Informal housing now!!!   We might think that informal housing should decline as areas are bulldozed!  BUT
+% DO DENSITIES TO THE CLOSEST PROJECT! ( TO SEE THE DECAY EVIDENT IN THE REGRESSIONS!!! )
+
+% The effect of the policy is clearly evidenced in figure \ref{fig:forchange}, where tall black bars at negative distances show increases in the density of formal housing of around 1,000 structures per $\text{km}^{2}$ within constructed project areas.  Compared to a baseline mean density of about 400 structures per $\text{km}^{2}$ in Figure \ref{fig:prefor}, this shift represents a nearly 250\% increase. In contrast, unconstructed areas (red bars) experience increases in formal housing density at much smaller rates.
+% %Importantly, density changes at negative distances for unconstructed areas resemble changes outside of project areas in magnitude, consistent with a broader secular expansion in housing.
+% At positive distances, both series are almost overlapping.  This result previews our empirical analysis by showing little evidence of spillover effects on neighboring formal housing markets.
+
+% In figure \ref{fig:infchange}, we observe large increases in informal density within project boundaries for both constructed and unconstructed project areas.  At some distances, unconstructed projects appear to overtake constructed areas in informal housing growth.  Outside of project boundaries, constructed areas experience larger increases in informal density than unconstructed areas. With the exception of 0-200m, these increases do not appear to be systematically different between the treated and control ares.
+% %This absence of differential trends with distance previews a similar absence of spillover effects for informal housing densities explored further in the empirical analysis.
+% Relative to baseline levels in Figure \ref{fig:preinf}, informal housing increases are large, increasing by at least 50\% across all distances and nearly doubling in some cases.
+
+
+
+\begin{figure*}[t!]
+        \centering
+        \caption[ House prices outside constructed and unconstructed projects ]
+        {\small House prices outside constructed and unconstructed projects }
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pre_means_4}
+            \caption[Network2]%
+            {{\small pre-period log-prices }}
+            \label{fig:preprice}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/price_rawchanges_4}
+            \caption[]%
+            {{\small change in log-prices}}
+            \label{fig:changeprice}
+        \end{subfigure}
+        \label{fig:rawpricemeans}
+        \vspace{-6mm}
+\end{figure*}
+\efloatseparator
+ 
+\begin{figure*}[t!]
+        \centering
+        \caption[ Average house prices before and after expected construction ]
+        {\small Average house prices before and after expected construction }
+        %\vspace{2mm}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pretrends_close__4}
+            \caption[Network2]%
+            {{\small log-prices 0 to 500m from projects}}
+            \label{fig:pretrend_close}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,trim={0.9cm .3cm 0.1cm 0cm}, clip=true]{figures/price_pretrends_far__4}
+            \caption[]%
+            {{\small log-prices 500 to 1,500m from projects}}
+            \label{fig:pretrend_far}
+        \end{subfigure}
+        \label{fig:pretrend}
+        \vspace{-6mm}
+\end{figure*}
+\efloatseparator
+ 
+\begin{figure}[t]
+\caption{Transaction Price Histogram}\label{figure:transactionhist}
+\centering
+\includegraphics[scale=.4,trim={0cm 0cm -1cm 0cm}]{figures/summary_pricedist.pdf}
+\\
+\footnotesize{Note: Transactions are censored at R100,000.}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[ht!]
+\caption{Transaction Frequency Relative to Project Construction Month}
+\centering
+\includegraphics[scale=.4 , trim={.2cm 0.2cm .2cm 0.2cm},clip]{figures/summary_densitytime.pdf}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[ht!]
+\caption{Project Counts by Distance to Project Boundary}
+\centering
+\includegraphics[scale=1.2,trim={.1cm 1.2cm .1cm 1.2cm},clip]{figures/projectcounts_4.pdf}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[!htb]
+       { \centering
+   \caption[ Log-Price Estimates by Distance to Nearest Project Boundary ]
+    {\small Log-Price Estimates by Distance to Nearest Project Boundary }\label{figure:pricesoverdistance}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q_one.pdf}
+}
+Estimates include differential changes in prices before and after (construction) for constructed relative to unconstructed project areas.  Estimates are normalized with respect to price changes in the furthest distance group --- 1,250 to 1,500 meters from project boundaries.  The y-axis is in terms of changes in log-prices.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[!htb]
+       { \centering
+   \caption[ Log-Price Estimates by Distance to Nearest Project Boundary by Neighborhood Income Quartile ]
+    {\small Log-Price Estimates by Distance to Nearest Project Boundary by Neighborhood Income Quartile}\label{figure:pricesoverdistancehet}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_dist_3d_ctrl_q_comb.pdf}
+}
+Estimates include differential changes in prices before and after scheduled construction relative to unconstructed project areas.  Estimates are normalized with respect to price changes in the furthest distance group --- 1,250 to 1,500 meters from project boundaries.  Q1 to Q4 index neighborhood income quartiles measured using the 2001 census of population and housing.  The y-axis is in terms of changes in log-prices and the x-axis measures meters outside of the nearest housing project boundary.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[!htb]
+      {  \centering
+   \caption[ Log-Prices By Months to Scheduled Construction ]
+    {\small Log-Prices By Months to Scheduled Construction }\label{figure:pricesovertime}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q_one.pdf}
+}
+Estimates capture differential changes in log-prices for properties within 500m of project boundaries compared to properties located between 500m to 1,500m from project boundaries for constructed relative to unconstructed projects.  These estimates are computed at different time periods relative to the scheduled construction month of each project with price changes in the 24 months before scheduled construction normalized to zero.   The y-axis is in terms of changes in log-prices.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[!htb]
+      {  \centering
+   \caption[ Log-Prices By Months to Scheduled Construction by Neighborhood Income Quartile ]
+    {\small Log-Prices By Months to Scheduled Construction by Neighborhood Income Quartile }\label{figure:pricesovertimehet}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/price_time_3d_ctrl_q_comb.pdf}
+}
+Estimates capture differential changes in log-prices for properties within 500m of project boundaries compared to properties located between 500m to 1,500m from project boundaries for constructed relative to unconstructed projects.  These price effects are computed at different time periods relative to the scheduled construction month of each project with price effects in the 24 months before scheduled construction normalized to zero.  Q1 to Q4 index neighborhood income quartiles measured using the 2001 census of population and housing.  The y-axis is in terms of changes in log-prices and the x-axis measures months to scheduled construction.
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[!htb]
+      {  \centering
+   \caption[ Histogram of Buildings per Plot with at least 1 Building ]
+    {\small Histogram of Buildings per Plot with at least 1 Building }\label{figure:buildhist}
+\includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/building_hist.pdf}
+Plots with zero buildings are not shown.  86\% of plots have zero formal houses, and 91\% of plots have zero informal houses.
+This figure also excludes plots with over 15 buildings, which compose less than 0.001\% of the sample.
+}
+\end{figure}
+\efloatseparator
+ 

@@ -4,6 +4,7 @@ clear
 est clear
 
 do reg_gen.do
+do reg_gen_dd.do
 
 global extra_controls = "  "
 global extra_controls_2 = "  "
@@ -54,7 +55,7 @@ global graph_plotmeans_rawchan  = 1;
 global graph_plotmeans_cntproj  = 0;
 
 global reg_triplediff2        = 1; /* Two spillover bins */
-global reg_triplediff2_type   = 0; /* Two spillover bins */
+global reg_triplediff2_dtype   = 0; /* Two spillover bins */
 
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
 
@@ -261,6 +262,13 @@ rgen_q_het ;
 regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
 
+* rgen_dd_full ;
+* rgen_dd_cc ;
+
+* regs_dd_full b_dd_full_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
+
+ 
+* regs_dd_cc b_cc_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}  ;
 
 
 
