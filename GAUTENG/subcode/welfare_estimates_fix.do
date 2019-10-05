@@ -16,7 +16,7 @@
 
 
 
-clear 
+* clear 
 
 
 cap prog drop write
@@ -25,6 +25,15 @@ prog define write
   file write newfile "`=string(round(`2',`3'),"`4'")'"
   file close newfile
 end
+
+cap prog drop write_est
+prog define write_est 
+    mat def mate = r(b)
+    mat def matv = r(V)
+    write "`1'_e.tex" `= mate[1,1]'   .1 "%12.0fc"
+    write "`1'_v.tex" `= sqrt(matv[1,1])'   .1 "%12.0fc"  
+end
+
 
 
 est clear
@@ -39,9 +48,177 @@ cd $output
 est use forinfcmp10
 est r
 
+
+
+
+* mat def mate = r(b)
+* mat def matv = r(V)
+
+* disp mate[1,1]
+* disp sqrt(matv[1,1])
+
+
+
+* global vpost = "[for]_b[proj_con_post] + [for]_b[proj_con] + [for]_b[proj_post] + [for]_b[con_post] + [for]_b[proj] + [for]_b[con] + [for]_b[post]  "
+
+* global theta = "(-1*[for]_b[CA])"
+
+* global lm0 = "[cut_1_1]_cons"
+* global cp0 = "[cut_1_1]_cons" 
+
+* forvalues r=1/10 {
+* global lm`r' = "[cut_1_`r']_cons"
+* global cp`r' =  "(([cut_1_`r']_cons - (`r'-1)*${cp`=`r'-1'} )/`r')" 
+* }
+
+
+* global seg0 = "normal(${lm1} - $vpost)"
+
+* forvalues r=1/9 {
+* global seg`r' = " (normal(${lm`=`r'+1'} - $vpost) - normal(${lm`=`r''} - $vpost)) "
+* global ch`r'  = " (chi2(1,${lm`=`r'+1'} - $vpost) - chi2(1,${lm`=`r''} - $vpost)) "
+* }
+* global seg10 = "(1-normal($lm10-$vpost))"
+* global ch`r'  = "1- chi2(1,${lm10} - $vpost)) "
+
+* disp $seg0 +  $seg1 + $seg2 + $seg3 + $seg4 + $seg5 + $seg6 + $seg7 + $seg8 + $seg9 + $seg10 
+
+
+* global full = "0"
+
+* forvalues r=1/10 {
+* global p`r' = "${seg`r'}*(`r'*($vpost - ${cp`r'} )/$theta) + `r'*${ch`r'}/$theta"
+* global full = "$full + ${p`r'}"
+* }
+
+
+
+
+cap prog drop run_g
+prog define run_g
+
+  if "`2'"=="post" {
+  global vpost = "[for]_b[`3'_con_post] + [for]_b[`3'_con] + [for]_b[`3'_post] + [for]_b[con_post] + [for]_b[`3'] + [for]_b[con] + [for]_b[post]  "
+  }
+  else {
+  global vpost = "                         [for]_b[`3'_con] + [for]_b[`3'_post] + [for]_b[con_post] + [for]_b[`3'] + [for]_b[con] + [for]_b[post]  "
+  }
+
+  global theta = "(-1*[for]_b[CA])"
+
+  global lm0 = "[cut_1_1]_cons"
+ 
+
+  forvalues r=1/10 {
+  global lm`r' = "[cut_1_`r']_cons"
+  }
+
+  global cp1 = "[cut_1_1]_cons" 
+  forvalues r=2/10 {
+  global cp`r' =  "(([cut_1_`r']_cons + (`r'-1)*${cp`=`r'-1'} )/`r')" 
+  }
+
+  global seg0 = "normal(${lm1} - $vpost)"
+
+  forvalues r=1/9 {
+  global seg`r' = " (normal(${lm`=`r'+1'} - $vpost) - normal(${lm`=`r''} - $vpost)) "
+  global ch`r'  = " (chi2(1,${lm`=`r'+1'} - $vpost) - chi2(1,${lm`=`r''} - $vpost)) "
+  }
+  global seg10 = "(1-normal($lm10-$vpost))"
+  global ch10  = "1- chi2(1,${lm10} - $vpost)) "
+  
+  global `1' = "0"
+
+  forvalues r=1/5 {
+  global p`r' = "${seg`r'}*( `r'*($vpost - ${cp`r'} + ${seg`r'} )/$theta)"
+  global `1'= "${`1'} + ${p`r'}"
+  }
+
+  global `1'_2 = "0"
+
+  forvalues r=6/10 {
+  global p`r' = "${seg`r'}*( `r'*($vpost - ${cp`r'} + ${seg`r'} )/$theta)"
+  global `1'_2= "${`1'_2} + ${p`r'}"
+  }
+
+
+end 
+
+run_g full_post post proj
+run_g full_pre pre proj
+
+* nlcom $full_post
+
+nlcom ($full_post) ($full_post_2) ($full_pre) ($full_pre_2), post
+
+
+nlcom  (_b[_nl_1] + _b[_nl_2]) - (_b[_nl_3] + _b[_nl_4])
+
+
+
+
+/*
+
+
+*  global c1 = " [cut_1_1]_cons -  $vpost "
+* global piece1 = seg1*
+* global piece1 = " 1*normal( $c1 )*($post - [cut_1_1]_cons +  normal( [cut_1_1]_cons - $vpost )/(-1*[for]_b[CA]) ) "
+* local r "3"
+
+
+
+
+
+nlcom $piece1
+
+
+
+ 
+nlcom [for]_b[proj_con_post]/(-1*[for]_b[CA])
+write_est for_proj_effect
+nlcom ([for]_b[proj] + [for]_b[con] + [for]_b[proj_con]) /(-1*[for]_b[CA])
+write_est for_proj_baseline
+
+* baseline: net amenities
+* nlcom ([for]_b[proj] + [for]_b[con] + [for]_b[proj_con]) /(-1*[for]_b[CA])
+
+nlcom [inf]_b[proj_con_post]/(-1*[for]_b[CA])
+write_est inf_proj_effect
+nlcom ([inf]_b[proj] + [inf]_b[con] + [inf]_b[proj_con]) /(-1*[for]_b[CA])
+write_est inf_proj_baseline
+
+nlcom [for]_b[spill1_con_post]/(-1*[for]_b[CA])
+write_est for_spill_effect
+nlcom ([for]_b[spill1] + [for]_b[con] + [for]_b[spill1_con]) /(-1*[for]_b[CA])
+write_est for_spill_baseline
+
+nlcom [inf]_b[spill1_con_post]/(-1*[for]_b[CA])
+write_est inf_spill_effect
+nlcom ([inf]_b[spill1] + [inf]_b[con] + [inf]_b[spill1_con]) /(-1*[for]_b[CA])
+write_est inf_spill_baseline
+
+
+
+* nlcom ([for]_b[con])/[for]_b[CA]
+* nlcom ([for]_b[proj_con_post] + [inf]_b[proj_con_post] + 1.2*[for]_b[spill1_con_post] + 1.2*[inf]_b[spill1_con_post])/[for]_b[CA]
+
+
+
+
+ * preserve
+*   set seed 1
+ *   sample .1
+*   margins,  noesample force dydx(*) predict(equation(for)) 
+ * restore
+
+
+
+
 mat def EST = e(b)
 
 mat def E = e(b)
+
+
 
 set seed 1
 clear 
@@ -85,16 +262,16 @@ prog def welfare
   g ka = 0 if u1a<E[1,$cut]
   g pa = 0 if u1a<E[1,$cut] 
 
-  forvalues r = 1/10 {
-    global rlow = `r'+$cut - 1
-    global rhigh= `r'+$cut
+  forvalues r = 2/10 {
+    global rlow = `r'+$cut - 2
+    global rhigh= `r'+$cut - 1
 
     if `r'==1 {
     global lr = `r'*E[1,$rlow]
     }
     else {
     * global lr = `r'*E[1,$rlow] - $lr
-    global lr = (E[1,$rlow] - (`r'-1)*$lr)/`r'
+    global lr = (E[1,$rlow] + (`r'-1)*$lr)/`r'
     }
     disp `r'
     disp $lr 
@@ -108,8 +285,8 @@ prog def welfare
     replace ka = `r' if  u1a>= E[1,$rlow] & u1a<=E[1,$rhigh]
     }
     *tab k
-    replace p = ( (delta1 - $lr + y1 )/(theta1) ) - C if k==`r' 
-    replace pa = ( (delta1a - $lr + y1 )/(theta1) ) - C if k==`r' 
+    replace p = ( (delta1 - $lr + y1 )/(theta1) ) if k==`r' 
+    replace pa = ( (delta1a - $lr + y1 )/(theta1) )  if k==`r' 
   }
     sum p
     sum pa
@@ -125,7 +302,7 @@ prog def welfare
     g w_diff = welfare_pre - welfare_post
     sum w_diff, detail
 
-    write "`1'.tex"  `=r(mean)'  .01 "%10.0fc"
+    * write "`1'.tex"  `=r(mean)'  .01 "%10.0fc"
 end
 
 
@@ -136,10 +313,10 @@ cap drop delta1a
 cap drop u1a
       * proj_con_post * proj_post * con_post * proj_con * post   *   proj *   con
 g delta1 = E[1,1]      + E[1,3]   + E[1,5]    + E[1,6]  + E[1,8] + E[1,9]  + E[1,11]
-g u1 = y1 + delta1 - theta1*C
+g u1 = y1 + delta1 
 
 g delta1a =              E[1,3]   + E[1,5]    + E[1,6]  + E[1,8] + E[1,9]  + E[1,11]
-g u1a = y1 + delta1a - theta1*C
+g u1a = y1 + delta1a 
 
 welfare "for_proj_w" 25
 

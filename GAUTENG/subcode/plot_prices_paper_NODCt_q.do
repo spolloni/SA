@@ -128,6 +128,9 @@ replace con_date = mo2con_placebo if con==0 ;
 
 g post = (mo2con_rdp>0 & mo2con_rdp<. & con==1) |  (mo2con_placebo>0 & mo2con_placebo<. & con==0) ;
 
+g T = mo2con_rdp if con==1;
+replace T = mo2con_placebo if con==0;
+
 g t1 = (type_rdp==1 & con==1) | (type_placebo==1 & con==0);
 g t2 = (type_rdp==2 & con==1) | (type_placebo==2 & con==0);
 g t3 = (type_rdp==. & con==1) | (type_placebo==. & con==0);
@@ -148,7 +151,7 @@ keep if distance_rdp>=0 & distance_placebo>=0 ;
 egen inc_q = cut(inc), group($group_size) ;
 replace inc_q=inc_q+1 ;
 
-
+g other=0; 
 
 rgen ${no_post} ;
 rgen_type ;
@@ -175,29 +178,251 @@ global outcomes="lprice";
 
 
 
-* egen clyrgroup = group(purch_yr cluster_joined);
-* egen latlonyr = group(purch_yr latlongroup);
+egen clyrgroup = group(purch_yr cluster_joined);
+egen latlonyr = group(purch_yr latlongroup);
 
-* global fecount = 2 ;
+global fecount = 2 ;
 
-* global rl1 = "Year-Month FE";
-* global rl2 = "Plot Size (up to cubic polynomial)";
-* *global rl3 = "Constructed Diff-in-Diff";
+global rl1 = "Year-Month FE";
+global rl2 = "Plot Size (up to cubic polynomial)";
+*global rl3 = "Constructed Diff-in-Diff";
 
-* * mat define F = (0,1,0,1
-* *                \0,1,0,1
-* *                \0,0,1,1);
+* mat define F = (0,1,0,1
+*                \0,1,0,1
+*                \0,0,1,1);
 
-* mat define F = (0,1
-*                \0,1);
+mat define F = (0,1
+               \0,1);
 
 
-* global reg_1 = " areg lprice $regressors , a(LL) cl(cluster_joined)"   ;
-* global reg_2 = " areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)"   ;
-* * global reg_3 = " areg lprice $regressors if  con==1, a(LL) cl(cluster_joined)"   ;
-* * global reg_4 = " areg lprice $regressors i.purch_yr#i.purch_mo erf_size* if  con==1, a(LL) cl(cluster_joined)"   ;
 
-* price_regs_o price_temp_Tester_3d ;
+
+global reg_1 = " areg lprice $regressors , a(LL) cl(cluster_joined)"   ;
+global reg_2 = " areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)"   ;
+
+price_regs_o price_temp_Tester_3d ;
+
+
+
+cap drop T1
+cap drop T2
+cap drop T3
+
+g T1 = T>0  & T<=24 
+g T2 = T>24 & T<=48
+g T3 = T>48 & T<.
+
+
+
+lab var spill1_con_post "Post All "
+
+global regressors_time " spill1_con spill1  con "
+
+	foreach r in T1 T2 T3 {
+	global regressors_time = " $regressors_time `r' "
+	foreach var of varlist spill1_con  spill1  con {
+
+	cap drop `var'_`r'
+	g `var'_`r' = `var'*`r'
+	global regressors_time = " $regressors_time `var'_`r' "
+	}
+	}
+
+lab var spill1_con_T1 "Post 0-2 yrs "
+lab var spill1_con_T2 "Post 2-4 yrs "
+lab var spill1_con_T3 "Post over 4 yrs "
+
+
+ areg lprice $regressors_time , a(LL) cl(cluster_joined)
+
+
+
+
+ areg lprice $regressors, a(LL) cl(cluster_joined)
+ eststo time_1
+ estadd local ctrl1 ""
+ estadd local ctrl2 ""
+
+  areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)
+ eststo time_2
+ estadd local ctrl1 "\checkmark"
+ estadd local ctrl2 "\checkmark"
+
+
+
+ areg lprice $regressors_time , a(LL) cl(cluster_joined)
+ eststo time_3
+ estadd local ctrl1 ""
+ estadd local ctrl2 ""
+
+ areg lprice $regressors_time i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)
+ eststo time_4
+ estadd local ctrl1 "\checkmark"
+ estadd local ctrl2 "\checkmark"
+
+
+
+	estout  time_3 time_4 using "price_time.tex", replace  style(tex) ///
+	keep(   spill1_con_T1 spill1_con_T2 spill1_con_T3  )  ///
+	varlabels(, el(  spill1_con_T1 "[0.5em]" spill1_con_T2 "[0.5em]" spill1_con_T3 "[0.5em]"   )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( ctrl1 ctrl2 r2 N ,  ///
+ 	labels( "$rl1" "$rl2"  "R2"  "N"  ) /// 
+	    fmt( %18s %18s  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+	estout  time_1 time_2  time_3 time_4  using "price_time_full.tex", replace  style(tex) ///
+	keep(   spill1_con_post spill1_con_T1 spill1_con_T2 spill1_con_T3  )  ///
+	varlabels(, el( spill1_con_post "[0.5em]" spill1_con_T1 "[0.3em]" spill1_con_T2 "[0.3em]" spill1_con_T3 "[0.3em]"   )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( ctrl1 ctrl2 r2 N ,  ///
+ 	labels( "$rl1" "$rl2"  "R2"  "N"  ) /// 
+	    fmt( %18s %18s  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+
+
+
+
+
+
+cap drop T1
+cap drop T2
+cap drop T3
+cap drop T4
+cap drop T5
+cap drop T6
+cap drop T7
+cap drop T8
+cap drop T9
+
+* g T1 = T<=-48 
+* g T2 = T>-48 & T<=-24
+* g T3 = T>0 & T<=24
+* g T4 = T>24 & T<=48
+* g T5 = T>48
+
+g T1 = 		   T<=-48 
+g T2 = T>-48 & T<=-36
+g T3 = T>-36 & T<=-24
+g T4 = T>-24 & T<=-12
+g T5 = T>0   & T<=12
+g T6 = T>12  & T<=24
+g T7 = T>24  & T<=36
+g T8 = T>36  & T<=48
+g T9 = T>48 
+
+
+
+
+global regressors_time " spill1_con spill1  con "
+
+	foreach r in T1 T2 T3 T4 T5 T6 T7 T8 T9 {
+	global regressors_time = " $regressors_time `r' "
+	foreach var of varlist spill1_con  spill1  con {
+
+	cap drop `var'_`r'
+	g `var'_`r' = `var'*`r'
+	global regressors_time = " $regressors_time `var'_`r' "
+	}
+	}
+
+
+lab var spill1_con_T1 "Pre over 4 yrs "
+lab var spill1_con_T2 "Pre 4-3 yrs "
+lab var spill1_con_T3 "Pre 3-2 yrs "
+lab var spill1_con_T4 "Pre 2-1 yrs "
+
+lab var spill1_con_T5 "Post 0-1 yrs "
+lab var spill1_con_T6 "Post 1-2 yrs "
+lab var spill1_con_T7 "Post 2-3 yrs "
+lab var spill1_con_T8 "Post 3-4 yrs "
+lab var spill1_con_T9 "Post over 4 yrs "
+
+
+ * areg lprice $regressors_time , a(LL) cl(cluster_joined)
+
+ 
+
+
+ * areg lprice $regressors, a(LL) cl(cluster_joined)
+ * eststo time_1
+ * estadd local ctrl1 ""
+ * estadd local ctrl2 ""
+
+ *  areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)
+ * eststo time_2
+ * estadd local ctrl1 "\checkmark"
+ * estadd local ctrl2 "\checkmark"
+
+
+
+ areg lprice $regressors_time, a(LL) cl(cluster_joined) r
+ eststo time_1
+ estadd local ctrl1 ""
+ estadd local ctrl2 ""
+ estadd local ctrl3 ""
+
+
+ areg lprice $regressors_time i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined) r
+ eststo time_2
+ estadd local ctrl1 "\checkmark"
+ estadd local ctrl2 "\checkmark"
+ estadd local ctrl3 ""
+
+ areg lprice $regressors_time  if con==1, a(LL) cl(cluster_joined) r
+ eststo time_3
+ estadd local ctrl1 ""
+ estadd local ctrl2 ""
+ estadd local ctrl3 "\checkmark"
+
+ areg lprice $regressors_time i.purch_yr#i.purch_mo erf_size* if con==1, a(LL) cl(cluster_joined) r
+ eststo time_4
+ estadd local ctrl1 "\checkmark"
+ estadd local ctrl2 "\checkmark"
+ estadd local ctrl3 "\checkmark"
+
+
+	estout time_1 time_2 time_3 time_4 using "price_time_robustness.tex", replace  style(tex) ///
+	keep(   spill1_con_T1 spill1_con_T2 spill1_con_T3  spill1_con_T4 spill1_con_T5 spill1_con_T6 spill1_con_T7 spill1_con_T8 spill1_con_T9 )  ///
+	varlabels(, el( spill1_con_T1 "[0.5em]" spill1_con_T2 "[0.5em]" spill1_con_T3 "[0.5em]"  spill1_con_T4 "[0.5em]"  spill1_con_T5 "[0.5em]"  spill1_con_T6  "[0.5em]"  spill1_con_T7 "[0.5em]"   spill1_con_T8 "[0.5em]"  spill1_con_T9 "[0.5em]"   )) ///
+	label ///
+	  noomitted ///
+	  mlabels(,none)  ///
+	  collabels(none) ///
+	  cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	  stats( ctrl1 ctrl2 ctrl3 r2 N ,  ///
+ 	labels( "$rl1" "$rl2" "Diff-in-Diff for Constructed Areas"  "R2"  "N"  ) /// 
+	    fmt( %18s %18s %18s  %12.2fc  %12.0fc  )   ) ///
+	  starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+	* estout  time_1 time_2  time_3 time_4  using "price_time_full.tex", replace  style(tex) ///
+	* keep(   spill1_con_post spill1_con_T1 spill1_con_T2 spill1_con_T3  )  ///
+	* varlabels(, el( spill1_con_post "[0.5em]" spill1_con_T1 "[0.3em]" spill1_con_T2 "[0.3em]" spill1_con_T3 "[0.3em]"   )) ///
+	* label ///
+	*   noomitted ///
+	*   mlabels(,none)  ///
+	*   collabels(none) ///
+	*   cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+	*   stats( ctrl1 ctrl2 r2 N ,  ///
+ * 	labels( "$rl1" "$rl2"  "R2"  "N"  ) /// 
+	*     fmt( %18s %18s  %12.2fc  %12.0fc  )   ) ///
+	*   starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
 
 
 * global reg_1 = " areg lprice $r_q_het , a(LL) cl(cluster_joined)"   ;
@@ -229,30 +454,30 @@ global outcomes="lprice";
 
     
 
-global a_pre = "";
-global a_ll = "";
-if "${k}"!="none" {;
-global a_pre = "a";
-global a_ll = "a(LL)";
-};
+* global a_pre = "";
+* global a_ll = "";
+* if "${k}"!="none" {;
+* global a_pre = "a";
+* global a_ll = "a(LL)";
+* };
 
 
-#delimit cr;
+* #delimit cr;
 
 
 
 
-global dist_bins = 250
-global key_fe = "LL"
-global month_window = 48
+* global dist_bins = 250
+* global key_fe = "LL"
+* global month_window = 48
 
 
-*global D_shift = 100
-*   (1) name                  (2) type    (3) round var         (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside  (10) dshift
+* *global D_shift = 100
+* *   (1) name                  (2) type    (3) round var         (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside  (10) dshift
 
-pf "price_dist_3d_ctrl_q"       "dist"          $dist_bins              ""                   0              1         1       "$key_fe"      0    100
+* pf "price_dist_3d_ctrl_q"       "dist"          $dist_bins              ""                   0              1         1       "$key_fe"      0    100
 
-pf "price_time_3d_ctrl_q"       "time"             24               $month_window             0             1         1      "$key_fe"        0  6
+* pf "price_time_3d_ctrl_q"       "time"             24               $month_window             0             1         1      "$key_fe"        0  6
 
 
 *   (1) name                  (2) type    (3) round var   (4) time thresh   (5) post yr    (6) DDD    (7) controls  (8) fe  (9) inside   (10) dshift

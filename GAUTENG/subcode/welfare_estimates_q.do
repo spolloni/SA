@@ -1,5 +1,5 @@
 
-clear 
+* clear 
 
 
 cap prog drop write
@@ -10,7 +10,7 @@ prog define write
 end
 
 
-est clear
+* est clear
 
 if $LOCAL==1 {
 	cd ..
@@ -24,7 +24,7 @@ est r
 
 
 
-
+/*
 
 mat def EST = e(b)
 

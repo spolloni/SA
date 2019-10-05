@@ -281,24 +281,30 @@ replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<
 
 
 
+
+
 set rmsg on
 
 * preserve
 
-*   global cutbuild = 10
+  global cutbuild = 10
 
-*   keep $regressors for inf inf_backyard inf_non_backyard total_buildings cluster_joined CA garea hmean_f
-*   replace for = $cutbuild if for>$cutbuild
-*   replace inf = $cutbuild if inf>$cutbuild
-*     replace inf_backyard = $cutbuild if inf_backyard>$cutbuild
-*     replace inf_non_backyard = $cutbuild if inf_non_backyard>$cutbuild
-*   replace total_buildings = $cutbuild if total_buildings>$cutbuild
+  keep $regressors for inf inf_backyard inf_non_backyard total_buildings cluster_joined CA garea hmean_f
+  replace for = $cutbuild if for>$cutbuild
+  replace inf = $cutbuild if inf>$cutbuild
+    replace inf_backyard = $cutbuild if inf_backyard>$cutbuild
+    replace inf_non_backyard = $cutbuild if inf_non_backyard>$cutbuild
+  replace total_buildings = $cutbuild if total_buildings>$cutbuild
 
-*   cmp ( for = $regressors CA ) ( inf = $regressors CA ), indicators($cmp_oprobit $cmp_oprobit ) nolrtest cluster(cluster_joined) robust
-*   eststo forinfcmp$cutbuild
-*   est save forinfcmp$cutbuild, replace
+  cmp ( for = $regressors CA ) ( inf = $regressors CA ), indicators(5 5) nolrtest cluster(cluster_joined) robust
+  eststo forinfcmp_new$cutbuild
+  est save forinfcmp_new$cutbuild, replace
+  * eststo forinfcmp$cutbuild
+  * est save forinfcmp$cutbuild, replace
 
 * restore
+
+/*
 
 gegen inc_q = cut(inc), group(4)
 replace inc_q=inc_q+1

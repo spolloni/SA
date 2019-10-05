@@ -1,7 +1,7 @@
 
-clear 
+* clear 
 
-est clear
+* est clear
 
 if $LOCAL==1 {
 	cd ..
@@ -11,6 +11,8 @@ cd ../..
 cd $output 
 
 est use mainestfull
+
+/*
 
 estout using mainestfull_output.tex, replace  style(tex) ///
   varlabels( _cons "Estimate"  ///

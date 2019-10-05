@@ -93,7 +93,6 @@ end
 cap prog drop rgen
 	prog define rgen
 
-
 	cap drop proj_con
 	g proj_con = proj*con 
 	cap drop spill1_con
@@ -2094,6 +2093,9 @@ lab_var_top
 
 
 end
+
+
+
 
 
 

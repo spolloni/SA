@@ -442,18 +442,25 @@ rgen_q_het_cen ;
 * global outcomes " toilet_flush toilet_flush_for_id toilet_flush_bkyd_id toilet_flush_n_bkyd_id "  ; 
 * regs_q toilet_flush_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q  ;
 
+* global outcomes "
+*   formal 
+*   toilet_flush 
+*   water_inside 
+*   electricity
+*   tot_rooms
+*   owner
+*   ";
+
 global outcomes "
-  formal 
-  toilet_flush 
   water_inside 
+  toilet_flush 
   electricity
   tot_rooms
-  owner
   ";
 
 regs ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
-regs_q_cen ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
+* regs_q_cen ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
 
 global outcomes "
   hh_size
@@ -466,7 +473,7 @@ global outcomes "
 
 regs ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
 
-regs_q_cen ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
+* regs_q_cen ch2_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area}_q ;
 
 
 * global outcomes "

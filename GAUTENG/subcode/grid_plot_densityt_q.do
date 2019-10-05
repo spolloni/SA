@@ -50,8 +50,8 @@ end;
 
 global bblu_do_analysis = $load_data ; /* do analysis */
 
-global graph_plotmeans_rdpplac  = 1;   /* plots means: 2) placebo and rdp same graph (pre only) */
-global graph_plotmeans_rawchan  = 1;
+global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
+global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
 global reg_triplediff2        = 1; /* Two spillover bins */
@@ -257,9 +257,13 @@ replace inc_q=inc_q+1;
 
 regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
-rgen_q_het ;
+global outcomes = "total_buildings_new for_new inf_new ";
+regs b_3out_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
-regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
+
+* rgen_q_het ;
+
+* regs_q b_q_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
 
 * rgen_dd_full ;
