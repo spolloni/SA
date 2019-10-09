@@ -3,6 +3,14 @@
 clear 
 est clear
 
+cap prog drop write
+prog define write
+  file open newfile using "`1'", write replace
+  file write newfile "`=string(round(`2',`3'),"`4'")'"
+  file close newfile
+end
+
+
 do reg_gen.do
 
 global extra_controls = "  "
@@ -97,6 +105,8 @@ cd Generated/Gauteng;
 ********* ANALYZE DATA  ************************;
 ************************************************;
 if $bblu_do_analysis==1 {;
+
+
 
 use bbluplot_grid_${grid}.dta, clear;
 
@@ -198,6 +208,20 @@ cd $output ;
 
 #delimit cr;
 
+preserve
+  import delimited using "erf_size_avg.csv", clear
+  global erf_size = v1[1]
+  import_delimited using "purch_price.csv", clear
+  global purch_price = v1[1]
+
+  global pmean = $purch_price / ( $erf_size/(25*25) )
+  write "pmean.csv" $pmean .1 "%12.1g"
+  write "pmean.tex" $pmean .1 "%12.0fc"
+
+  write "erf_size.tex" $erf_size .1 "%12.0fc"
+  write "purch_price.tex" $purch_price .1 "%12.0fc"
+
+restore
 
 cap drop xg
 cap drop yg
@@ -273,7 +297,9 @@ g garea=gN*25*25
 g slope = hd/dist
 replace slope=0 if slope==.
 
-global pmean = 231000
+* global pmean = 231000
+
+
 
 g CA = $pmean if slope>=0 & slope<.
 replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>.06 & slope<.12
@@ -282,23 +308,71 @@ replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>.12 & slope<
 
 
 
+*** COUNT NUMBER OF PROJECTS ***
+
+g cj = cluster_rdp if con==1 
+replace cj = cluster_placebo if con==0 
+
+bys cj: g cn=_n
+
+count if cn==1 & con==1
+global con_num = `=r(N)'
+
+count if proj==1 & post==1 & con==1 
+global plot_per_proj = `=r(N)'/$con_num
+
+count if spill1==1 & post==1 & con==1
+global plot_per_spill = `=r(N)'/$con_num
+
+write "con_proj_count.tex" $con_num .1 "%12.0fc"
+write "con_proj_count.csv" $con_num .1 "%12.0g"
+
+write "plot_per_proj.tex" $plot_per_proj .1 "%12.0fc"
+write "plot_per_proj.csv" $plot_per_proj .1 "%12.1g"
+
+write "plot_per_spill.tex" $plot_per_spill .1 "%12.0fc"
+write "plot_per_spill.csv" $plot_per_spill .1 "%12.1g"
+
+
+
+
+
+/*
 
 set rmsg on
 
 * preserve
 
-  global cutbuild = 10
+  * global cutbuild = 10
 
-  keep $regressors for inf inf_backyard inf_non_backyard total_buildings cluster_joined CA garea hmean_f
-  replace for = $cutbuild if for>$cutbuild
-  replace inf = $cutbuild if inf>$cutbuild
-    replace inf_backyard = $cutbuild if inf_backyard>$cutbuild
-    replace inf_non_backyard = $cutbuild if inf_non_backyard>$cutbuild
-  replace total_buildings = $cutbuild if total_buildings>$cutbuild
+  * keep $regressors for inf inf_backyard inf_non_backyard total_buildings cluster_joined CA garea hmean_f
+  * replace for = $cutbuild if for>$cutbuild
+  * replace inf = $cutbuild if inf>$cutbuild
+  *   replace inf_backyard = $cutbuild if inf_backyard>$cutbuild
+  *   replace inf_non_backyard = $cutbuild if inf_non_backyard>$cutbuild
+  * replace total_buildings = $cutbuild if total_buildings>$cutbuild
 
-  cmp ( for = $regressors CA ) ( inf = $regressors CA ), indicators(5 5) nolrtest cluster(cluster_joined) robust
-  eststo forinfcmp_new$cutbuild
-  est save forinfcmp_new$cutbuild, replace
+  *   cmp ( for = $regressors CA ) ( inf = $regressors CA ), indicators(5 5) nolrtest cluster(cluster_joined) robust
+  *   eststo forinfcmp_b
+  *   est save forinfcmp_b, replace
+
+
+/*
+
+
+set seed 10
+
+forvalues r=1/10 {
+  preserve
+    bsample, cluster(cluster_joined)
+    cmp ( for = $regressors CA ) ( inf = $regressors CA ), indicators(5 5) nolrtest cluster(cluster_joined) robust
+    eststo forinfcmp_b_`r'
+    est save forinfcmp_b_`r', replace
+  restore
+}
+
+
+
   * eststo forinfcmp$cutbuild
   * est save forinfcmp$cutbuild, replace
 

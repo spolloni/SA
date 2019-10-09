@@ -8,6 +8,15 @@ do reg_gen.do
 
 do reg_gen_price_new.do
 
+cap prog drop write
+prog define write
+  file open newfile using "`1'", write replace
+  file write newfile "`=string(round(`2',`3'),"`4'")'"
+  file close newfile
+end
+
+
+
 
 set more off
 set scheme s1mono
@@ -169,6 +178,13 @@ save "price_regs${V}.dta", replace;
 
 
 use "price_regs${V}.dta", clear ;
+
+sum erf_size, detail; 
+write "erf_size_avg.csv" `=r(mean)' .001 "%12.2g"; 
+
+sum purch_price, detail;
+write "purch_price.csv" `=r(mean)' .001 "%12.2g"; 
+
 
 
 

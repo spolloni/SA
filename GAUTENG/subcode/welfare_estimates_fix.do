@@ -122,11 +122,9 @@ prog define run_g
 
   forvalues r=1/9 {
   global seg`r' = " (normal(${lm`=`r'+1'} - $vpost) - normal(${lm`=`r''} - $vpost)) "
-  global ch`r'  = " (chi2(1,${lm`=`r'+1'} - $vpost) - chi2(1,${lm`=`r''} - $vpost)) "
   }
   global seg10 = "(1-normal($lm10-$vpost))"
-  global ch10  = "1- chi2(1,${lm10} - $vpost)) "
-  
+
   global `1' = "0"
 
   forvalues r=1/5 {
