@@ -22,15 +22,15 @@ do  reg_gen_dd.do
 *   y1996_t2 y1996_con_t2 y1996_proj_t2 y1996_spill1_t2 y1996_proj_con_t2 y1996_spill1_con_t2 
 *   y1996_t1 y1996_con_t1 y1996_proj_t1 y1996_spill1_t1 y1996_proj_con_t1 y1996_spill1_con_t1 [pweight = buildings] ";
 
-global extra_controls = 
-" area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3     ";
-global extra_controls_2 = 
-" area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3    ";
-
 * global extra_controls = 
-* "    ";
+* " area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3     ";
 * global extra_controls_2 = 
-* "    ";
+* " area area_2 area_3  y1996_area post_area y1996_area_2 post_area_2 y1996_area_3 post_area_3    ";
+
+global extra_controls = 
+"   ";
+global extra_controls_2 = 
+"   ";
 
 
 if $type_area == 1 {;
@@ -451,11 +451,14 @@ rgen_q_het_cen ;
 *   owner
 *   ";
 
+
+
 global outcomes "
   water_inside 
   toilet_flush 
   electricity
   tot_rooms
+  pop_density
   ";
 
 regs ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_area} ;
@@ -464,7 +467,6 @@ regs ch1_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2}_bb${type_ar
 
 global outcomes "
   hh_size
-  pop_density
   age
   african
   emp

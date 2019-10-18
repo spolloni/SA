@@ -129,12 +129,12 @@ def buffer_area_int(db,buffer1,buffer2):
 
     print 'gcro type tables done .'
 
-    for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3','ea_2011','ea_2001','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id','OGC_FID','OGC_FID']):
+    # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3','ea_2011','ea_2001','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id','OGC_FID','OGC_FID']):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
     # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
     # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
     # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
-    # for name,fid in zip(['grid_temp_25'],['grid_id']):
+    for name,fid in zip(['grid_temp_25'],['grid_id']):
     # for name,fid in zip(['ea_2001'],['OGC_FID']):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
         table= name + '_area'
@@ -246,7 +246,7 @@ def buffer_area_int(db,buffer1,buffer2):
 
 # buffer_area_int(db,100,200)
 # buffer_area_int(db,250,500)
-# buffer_area_int(db,400,800)
+buffer_area_int(db,400,800)
 
 
 

@@ -6,6 +6,13 @@ est clear
 do reg_gen.do
 do reg_gen_dd.do
 
+cap prog drop write
+prog define write
+  file open newfile using "`1'", write replace
+  file write newfile "`=string(round(`2',`3'),"`4'")'"
+  file close newfile
+end
+
 global extra_controls = "  "
 global extra_controls_2 = "  "
 global grid = 25
@@ -18,9 +25,10 @@ set more off
 set scheme s1mono
 *set matsize 11000
 *set maxvar 32767
+grstyle init
+grstyle set imesh, horizontal
 #delimit;
-grstyle init;
-grstyle set imesh, horizontal;
+
 
 ***************************************;
 *  PROGRAMS TO OMIT VARS FROM GLOBAL  *;
@@ -50,11 +58,12 @@ end;
 
 global bblu_do_analysis = $load_data ; /* do analysis */
 
+global graph_plotmeans_int      = 0;
 global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same graph (pre only) */
 global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2        = 1; /* Two spillover bins */
+global reg_triplediff2         = 0; /* Two spillover bins */
 global reg_triplediff2_dtype   = 0; /* Two spillover bins */
 
 global reg_triplediff2_fd     = 0; /* Two spillover bins */
@@ -306,6 +315,171 @@ regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
 ************************************************;
 ************************************************;
 ************************************************;
+
+
+#delimit cr;
+
+if $graph_plotmeans_int == 1 {
+
+
+
+  * cap program drop plotmeans_pre
+  * program plotmeans_pre
+
+
+  * if `10'==1 {
+  * preserve
+  *   `11' 
+  *   replace d`3' = -250 - $bin/2 if d`3'<0
+  *   keep if post==0
+  *   gegen `2'_`3' = mean(`2'), by(d`3')
+  *   keep `2'_`3' d`3'
+  *   duplicates drop d`3', force
+  *   ren d`3' D
+  *   save "${temp}pmeans_`3'_temp_`1'.dta", replace
+  * restore
+
+  * preserve
+  *   `12' 
+  *   replace d`4' = -250 - $bin/2 if d`4'<0
+  *   keep if post==0
+  *   gegen `2'_`4' = mean(`2'), by(d`4')
+  *   keep `2'_`4' d`4'
+  *   duplicates drop d`4', force
+  *   ren d`4' D
+  *   save "${temp}pmeans_`4'_temp_`1'.dta", replace
+  * restore
+
+  * }
+
+  * preserve
+  *   use "${temp}pmeans_`3'_temp_`1'.dta", clear
+  *   fmerge 1:1 D using "${temp}pmeans_`4'_temp_`1'.dta"
+  *   keep if _merge==3
+  *   drop _merge
+
+  *   replace D = D + $bin/2
+
+  *   twoway ///
+  *   (connected `2'_`4' D if D>=0, ms(o) msiz(medium) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin)) ///
+  *   (connected `2'_`3' D if D>=0, ms(d) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin))  ///
+  *   (scatter `2'_`4' D if D<0, ms(o) msiz(large) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin)) ///
+  *   (scatter `2'_`3' D if D<0, ms(d) msiz(large) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin))  ///
+  *   , ///
+  *   xtitle("      Distance outside project border (meters)",height(5)) ///
+  *   ytitle("Average 2001 density (buildings per km{superscript:2})",height(3)si(medsmall)) ///
+  *   xlabel(`7' , tp(c) labs(medium)  ) ///
+  *   ylabel(`8' , tp(c) labs(medium)  ) ///
+  *   plotr(lw(medthick )) ///
+  *   legend(order(2 "`5'" 1 "`6'"  ) symx(6) ///
+  *   ring(0) position(`9') bm(medium) rowgap(small) col(1) ///
+  *   colgap(small) size(medsmall) region(lwidth(none))) ///
+  *   aspect(.7)
+  *   graph export "`1'.pdf", as(pdf) replace
+  * restore
+
+  * end
+
+
+
+  * global yl = "2(1)7"
+
+
+  *   * plotmeans_pre    bblu_for_pre_int for rdp placebo "Constructed" "Unconstructed"  `"-100 "inside project" 0(500)${dist_max_reg}"'   `"0 "0" .3125 "500" .625 "1000"  "'  2 $load_data 
+
+
+  *   plotmeans_pre    bblu_for_pre_int for rdp placebo "Constructed" "Unconstructed"  `"-500 " " -250 "inside proj." 0(500)${dist_max_reg}"'   `"0 "0" .3125 "500" .625 "1000"  "'  2  0
+
+  *   plotmeans_pre    bblu_inf_pre_int inf rdp placebo "Constructed" "Unconstructed"  `"-500 " " -250 "inside proj." 0(500)${dist_max_reg}"'   `"0 "0" .3125 "500" .625 "1000"  "'  2  0
+
+
+    * plotmeans_pre     bblu_inf_pre_int inf rdp placebo    "Constructed" "Unconstructed"   "-500(500)${dist_max_reg}"   `"0 "0" .3125 "500" .625 "1000"  "'   2 $load_data 
+
+
+
+
+
+
+  cap program drop plotmeans_pre_outside
+  program plotmeans_pre_outside
+
+
+  if `10'==1 {
+  preserve
+    `11' 
+    drop if d`3'<0
+    keep if post==0
+    gegen `2'_`3' = mean(`2'), by(d`3')
+    keep `2'_`3' d`3'
+    duplicates drop d`3', force
+    ren d`3' D
+    save "${temp}pmeans_`3'_temp_`1'.dta", replace
+  restore
+
+  preserve
+    `12' 
+    drop if d`4'<0
+    replace d`4' = -250 - $bin/2 if d`4'<0
+    keep if post==0
+    gegen `2'_`4' = mean(`2'), by(d`4')
+    keep `2'_`4' d`4'
+    duplicates drop d`4', force
+    ren d`4' D
+    save "${temp}pmeans_`4'_temp_`1'.dta", replace
+  restore
+
+  }
+
+  preserve
+    use "${temp}pmeans_`3'_temp_`1'.dta", clear
+    fmerge 1:1 D using "${temp}pmeans_`4'_temp_`1'.dta"
+    keep if _merge==3
+    drop _merge
+
+    replace D = D + $bin/2
+
+    twoway ///
+    (connected `2'_`4' D if D>=0, ms(o) msiz(medium) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin)) ///
+    (connected `2'_`3' D if D>=0, ms(d) msiz(small) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin))  ///
+    (scatter `2'_`4' D if D<0, ms(o) msiz(large) lp(none)  mlc(maroon) mfc(white) lc(maroon) lw(medthin)) ///
+    (scatter `2'_`3' D if D<0, ms(d) msiz(large) mlc(gs0) mfc(gs0) lc(gs0) lp(none) lw(medthin))  ///
+    , ///
+    xtitle("      Distance outside project border (meters)",height(5)) ///
+    ytitle("Average 2001 density (buildings per km{superscript:2})",height(3)si(medsmall)) ///
+    xlabel(`7' , tp(c) labs(medium)  ) ///
+    ylabel(`8' , tp(c) labs(medium)  ) ///
+    plotr(lw(medthick )) ///
+    legend(order(2 "`5'" 1 "`6'"  ) symx(6) ///
+    ring(0) position(`9') bm(medium) rowgap(small) col(1) ///
+    colgap(small) size(medsmall) region(lwidth(none))) ///
+    aspect(.7)
+    graph export "`1'.pdf", as(pdf) replace
+  restore
+
+  end
+
+  global yl = "2(1)7"
+
+    plotmeans_pre_outside    bblu_for_pre_out for rdp placebo "Constructed" "Unconstructed"  `"0(500)${dist_max_reg}"'   `"0 "0" .1875 "300" .375 "600"  "'  2  0
+
+    plotmeans_pre_outside    bblu_inf_pre_out inf rdp placebo "Constructed" "Unconstructed"  `"0(500)${dist_max_reg}"'   `"0 "0" .1875 "300" .375 "600"  "'  2  0
+
+
+  qui sum inf if post==0 & drdp<0, detail
+    write "inf_con_pre.tex" `=r(mean)*1600' .1 "%12.0fc"
+  qui sum inf if post==0 & dplacebo<0, detail
+    write "inf_uncon_pre.tex" `=r(mean)*1600' .1 "%12.0fc"
+  qui sum for if post==0 & drdp<0, detail
+    write "for_con_pre.tex" `=r(mean)*1600' .1 "%12.0fc"
+  qui sum for if post==0 & dplacebo<0, detail
+    write "for_uncon_pre.tex" `=r(mean)*1600' .1 "%12.0fc"
+
+}
+
+
+#delimit;
+
+
 
 ************************************************;
 * 1.2 * MAKE MEAN GRAPHS HERE PRE rdp/placebo **;

@@ -34,7 +34,7 @@ end;
 
 
 local qry = " 
-SELECT * FROM grid_temp_${grid}_buffer_area_int_250_500
+SELECT * FROM grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2}
 ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 

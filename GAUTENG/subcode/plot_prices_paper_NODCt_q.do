@@ -259,7 +259,8 @@ lab var spill1_con_T3 "Post over 4 yrs "
  estadd local ctrl1 ""
  estadd local ctrl2 ""
 
-  areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)
+
+ areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)
  eststo time_2
  estadd local ctrl1 "\checkmark"
  estadd local ctrl2 "\checkmark"
@@ -270,7 +271,7 @@ lab var spill1_con_T3 "Post over 4 yrs "
  eststo time_3
  estadd local ctrl1 ""
  estadd local ctrl2 ""
-
+  
  areg lprice $regressors_time i.purch_yr#i.purch_mo erf_size*, a(LL) cl(cluster_joined)
  eststo time_4
  estadd local ctrl1 "\checkmark"
