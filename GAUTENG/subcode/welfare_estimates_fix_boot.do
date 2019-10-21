@@ -164,12 +164,93 @@ global scale = 1000000
 
 est use forinfcmp_b
 
+estout  using forimpcmp10_1.tex, replace  style(tex) ///
+  varlabels(  proj_con_post " inside project" spill1_con_post "0-500m outside"    ) ///
+    label  unstack ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      eqlabels(none) ///
+       keep(  proj_con_post spill1_con_post ) ///
+      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+estout  using forimpcmp10_2.tex, replace  style(tex) ///
+  varlabels(  CA "  Marginal utility of income: $ -\theta_{h} $  " ) ///
+    label  unstack ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      eqlabels(none) ///
+       keep(  CA ) ///
+      cells( b(fmt(7) star ) se(par fmt(7)) ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+estout  using forimpcmp10_1_full.tex, replace  style(tex) ///
+  varlabels(    proj "\textsc{Proj}" con "\textsc{Constr}" proj_con "\textsc{Proj} $\times$ \textsc{Constr}" ///
+ proj_post "\textsc{Proj} $\times$ \textsc{Post} " con_post "\textsc{Constr} $\times$ \textsc{Post} " ///
+ proj_con_post "\textsc{Proj} $\times$ \textsc{Constr} $\times$ \textsc{Post} " ///
+ spill1_con "\textsc{Spill} $\times$ \textsc{Constr}" ///
+ spill1 "\textsc{Spill} " /// 
+  spill1_post "\textsc{Spill}  $\times$ \textsc{Post} " ///
+ spill1_con_post "\textsc{Spill}  $\times$ \textsc{Constr}  $\times$ \textsc{Post} " ///
+ post "\textsc{Post}" ///
+  CA " marginal utility of income " ) ///
+    label  unstack ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      eqlabels(none) ///
+       keep( for: inf: ) ///
+       drop(CA) ///
+      cells( b(fmt(2) star ) se(par fmt(2)) ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+estout  using forimpcmp10_2_full.tex, replace  style(tex) ///
+  varlabels(  CA "  Marginal Utility of Income: $ -\theta $  " ) ///
+    label  unstack ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      eqlabels(none) ///
+       keep(  CA ) ///
+      cells( b(fmt(7) star ) se(par fmt(7)) ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+forvalues r = 1/10 {
+estout  using forimpcmp10_3_`r'_full.tex, replace  style(tex) ///
+  varlabels( _cons "Cut Point: $\Lambda_{h}(`r')$" ) ///
+    label unstack ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      eqlabels(none) ///
+       keep(  cut_1_`r': cut_2_`r': ) ///
+      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+}
+
+estout  using forimpcmp10_3_11_full.tex, replace  style(tex) ///
+  varlabels( _cons "arctan correlation of amenity shocks " ) ///
+    label unstack ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      eqlabels(none) ///
+       keep(  atanhrho_12: ) ///
+      cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+            stats( N , fmt(%10.0fc) ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
 set seed 1
 
 define_vars
 compute_welfare est
 
-disp $pmean*($plot_per_spill)/$scale
+* disp $pmean*($plot_per_spill)/$scale
 
 
 
@@ -217,9 +298,10 @@ disp ($for_spill1_est+$inf_spill1_est)/(($for_spill1_pre*$plot_per_spill/$scale)
 
 
 
-/*
 
-forvalues r=1/5 {
+global boot_number = 10
+
+forvalues r=1/10 {
   est use forinfcmp_b_`r'
   set seed `=`r'+10'
 
@@ -238,16 +320,59 @@ clear
 set obs 20
 
 g sd =.
-forvalues r=1/5 {
+g sd_total_per_proj = .
+g sd_for_proj = .
+g sd_inf_proj = .
+g sd_for_spill1 = .
+g sd_inf_spill1 = .
+
+forvalues r=1/10 {
   replace sd = ${total_`r'} in `r'
+  replace sd_total_per_proj = ${total_per_proj_`r'} in `r'
+  replace sd_for_proj = ${for_proj_`r'} in `r'
+  replace sd_inf_proj = ${inf_proj_`r'} in `r'
+  replace sd_for_spill1 = ${for_spill1_`r'} in `r'
+  replace sd_inf_spill1 = ${inf_spill1_`r'} in `r'
 }
 
-global sd = `= r(sd)  '
+
+sum sd, detail
+disp  `=($total_est + 1.96*`=r(sd)')/1000'
+
+write_results  total_welfare_ub  `=($total_est + 1.96*`=r(sd)')/1000'
+write_results  total_welfare_ub_dollars  `=($total_est + 1.96*`=r(sd)')/(1000*7.7)'
+
+write_results  total_welfare_lb  `=($total_est - 1.96*`=r(sd)')/1000'
+write_results  total_welfare_lb_dollars  `=($total_est - 1.96*`=r(sd)')/(1000*7.7)'
 
 
-disp $total_est + 1.96*$sd
+sum sd_total_per_proj, detail
+write_results sd_total_per_proj `=r(sd)'
 
-disp $total_est + -1.96*$sd
+sum sd_for_proj, detail
+write_results sd_for_proj `=r(sd)'
+
+sum sd_inf_proj, detail
+write_results sd_inf_proj `=r(sd)'
+
+
+sum sd_for_spill1, detail
+write_results sd_for_spill1 `=r(sd)'
+
+sum sd_inf_spill1, detail
+write_results sd_inf_spill1 `=r(sd)'
+
+
+
+
+
+/*
+
+
+* sum sd, detail
+* global sd = `= r(sd)  '
+* disp $total_est + 1.96*$sd
+* disp $total_est + -1.96*$sd
 
 
 

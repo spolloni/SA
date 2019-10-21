@@ -450,39 +450,66 @@ end
 
 
 
+* cap prog drop lab_var
+* prog define lab_var
+
+* 	global all_label = "\textbf{All Projects} \\"
+
+* 	lab var proj "inside"
+
+* 	lab var con "constr"
+* 	lab var proj_con "inside $\times$ constr"
+* 	lab var proj_post "inside $\times$ post"
+
+* 	lab var con_post "constr $\times$ post"
+* 	lab var proj_con_post "inside $\times$ constr $\times$ post"
+
+* 	if $many_spill == 0 {
+* 	lab var spill1_con "0-${dist_break_reg2}m away $\times$ constr"
+* 	lab var spill1 "0-${dist_break_reg2}m away"
+* 	lab var spill1_post "0-${dist_break_reg2}m away $\times$ post"
+* 	lab var spill1_con_post "0-${dist_break_reg2}m away $\times$ constr $\times$ post"
+* 	}
+
+* 	if $many_spill == 1 {
+* 	lab var spill1_con "0-${dist_break_reg1}m away $\times$ constr"
+* 	lab var spill1 "0-${dist_break_reg1}m away"
+* 	lab var spill1_post "0-${dist_break_reg1}m away $\times$ post"
+* 	lab var spill1_con_post "0-${dist_break_reg1}m away $\times$ constr $\times$ post"
+
+* 	lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m away"
+* 	lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr"
+* 	lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ post"
+* 	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr $\times$ post"
+* 	}
+* end
+
+
+
 cap prog drop lab_var
 prog define lab_var
 
-	global all_label = "\textbf{All Projects} \\"
 
-	lab var proj "inside"
+	order proj_con_post proj_post proj_con proj    spill1_con_post spill1_post spill1_con spill1    con_post post con 
 
-	lab var con "constr"
-	lab var proj_con "inside $\times$ constr"
-	lab var proj_post "inside $\times$ post"
+	lab var proj_con_post "\hspace{2em} \textsc{Constructed} $\times$ \textsc{Post}"
+	lab var proj_post "\hspace{2em} \textsc{Post}"
+	lab var proj_con "\hspace{2em} \textsc{Constructed}"
+	lab var proj "\hspace{2em} \textsc{Constant}"
 
-	lab var con_post "constr $\times$ post"
-	lab var proj_con_post "inside $\times$ constr $\times$ post"
+	lab var spill1_con_post "\hspace{2em} \textsc{Constructed} $\times$ \textsc{Post}"
+	lab var spill1_post "\hspace{2em} \textsc{Post}"
+	lab var spill1_con "\hspace{2em} \textsc{Constructed}"
+	lab var spill1 "\hspace{2em} \textsc{Constant}"
 
-	if $many_spill == 0 {
-	lab var spill1_con "0-${dist_break_reg2}m away $\times$ constr"
-	lab var spill1 "0-${dist_break_reg2}m away"
-	lab var spill1_post "0-${dist_break_reg2}m away $\times$ post"
-	lab var spill1_con_post "0-${dist_break_reg2}m away $\times$ constr $\times$ post"
-	}
+	lab var con_post "\textsc{Constructed} $\times$ \textsc{Post}"
+	lab var post "\textsc{Post} "
+	lab var con "\textsc{Constructed}"
 
-	if $many_spill == 1 {
-	lab var spill1_con "0-${dist_break_reg1}m away $\times$ constr"
-	lab var spill1 "0-${dist_break_reg1}m away"
-	lab var spill1_post "0-${dist_break_reg1}m away $\times$ post"
-	lab var spill1_con_post "0-${dist_break_reg1}m away $\times$ constr $\times$ post"
 
-	lab var spill2 "${dist_break_reg1}-${dist_break_reg2}m away"
-	lab var spill2_con "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr"
-	lab var spill2_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ post"
-	lab var spill2_con_post "${dist_break_reg1}-${dist_break_reg2}m away $\times$ constr $\times$ post"
-	}
 end
+
+
 
 
 
@@ -889,12 +916,12 @@ prog define regs
 
 	if $many_spill == 0 {
 		estout $outcomes using "`1'.tex", replace  style(tex) ///
-		keep(  proj_con_post spill1_con_post  proj_post spill1_post  ///
-		    con_post proj_con spill1_con  proj spill1  con $add_post  )  ///
-		varlabels(,  el(     proj_con_post "[0.01em]" spill1_con_post "[0.05em]"  ///
-		   proj_post "[0.01em]"  spill1_post "[0.05em]"  ///
-		    con_post "[0.5em]" proj_con "[0.01em]" spill1_con  "[0.05em]"  ///
-		     proj "[0.01em]" spill1 "[0.01em]"  con "[0.1em]" $add_post  ))  label ///
+		order( proj_con_post proj_post proj_con proj    spill1_con_post spill1_post spill1_con spill1    con_post post con ) ///
+		keep(  proj_con_post proj_post proj_con proj    spill1_con_post spill1_post spill1_con spill1    con_post post con  )  ///
+		varlabels(, blist( proj_con_post "\textsc{Footprint}$\times$ \\[.5em]" spill1_con_post "\textsc{0-500m Outside}$\times$ \\[.5em]") ///
+		el(     proj_con_post "[0.3em]" proj_post "[0.3em]" proj_con "[0.3em]" proj "[1em]"   ///
+		 		spill1_con_post "[0.3em]" spill1_post "[0.3em]" spill1_con "[0.3em]" spill1 "[1em]" ///
+		   		con_post "[0.3em]" post "[0.3em]" con "[0.5em]"  ))  label ///
 		  noomitted ///
 		  mlabels(,none)  ///
 		  collabels(none) ///

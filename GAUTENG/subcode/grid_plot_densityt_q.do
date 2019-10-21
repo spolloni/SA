@@ -63,10 +63,10 @@ global graph_plotmeans_rdpplac  = 0;   /* plots means: 2) placebo and rdp same g
 global graph_plotmeans_rawchan  = 0;
 global graph_plotmeans_cntproj  = 0;
 
-global reg_triplediff2         = 0; /* Two spillover bins */
-global reg_triplediff2_dtype   = 0; /* Two spillover bins */
+global reg_triplediff2          = 1; /* Two spillover bins */
 
-global reg_triplediff2_fd     = 0; /* Two spillover bins */
+global reg_triplediff2_dtype    = 0; /* Two spillover bins */
+global reg_triplediff2_fd       = 0; /* Two spillover bins */
 
 
 
@@ -115,9 +115,9 @@ fmerge m:1 id using "undeveloped_grids.dta";
 keep if _merge==1 ;
 drop _merge ;
 
-fmerge m:1 sp_1 using "temp_2001_inc.dta";
-drop if _merge==2;
-drop _merge;
+* fmerge m:1 sp_1 using "temp_2001_inc.dta";
+* drop if _merge==2;
+* drop _merge;
 
 * go to working dir;
 cd ../..;
@@ -125,7 +125,7 @@ cd $output ;
 
 g area = $grid*$grid;
 
-global grid_mult = 1000000/($grid*$grid);
+global grid_mult = 1000000/($grid*$grid) ;
 
 ren rdp_cluster cluster_rdp;
 ren placebo_cluster cluster_placebo;
@@ -158,6 +158,8 @@ if $type_area == 0 {;
   g con    = distance_rdp!=. ;
 };
 
+
+
 if $type_area>=1 {;
   rgen_area ;
 };
@@ -170,6 +172,8 @@ g distance_rdp = dist_temp if con==1;
 drop distance_placebo;
 g distance_placebo = dist_temp if con==0;
 drop dist_temp;
+
+
 
 
 sum distance_rdp;
@@ -186,7 +190,8 @@ replace dplacebo=. if dplacebo>$max-$bin;
 * replace dists_placebo = dists_placebo+`=abs($dist_min)';
 
 
-
+cap drop other;
+g other = 1;
 
 rgen ${no_post};
 
@@ -219,6 +224,8 @@ foreach v in $outcomes_pre {;
 };
 
 gen_LL ;
+
+
 
 
 foreach v in for inf {;
@@ -260,14 +267,187 @@ cd $output ;
 
 if $reg_triplediff2 == 1 {;
 
-gegen inc_q = cut(inc), group(4);
-replace inc_q=inc_q+1;
+* gegen inc_q = cut(inc), group(4);
+* replace inc_q=inc_q+1;
+
+#delimit  cr;
+
+* regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 
 
 
-regs b_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
-global outcomes = "total_buildings_new for_new inf_new ";
-regs b_3out_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
+
+
+* global outcomes = " total_buildings_new for_new inf_new "
+* regs b_3out_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 
+* cap drop spill__*
+
+* global regressors_add = " proj_con_post proj_post con_post post proj con "
+* global dset = "100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400"
+* global bset = 100
+
+
+* global regressors_add = " $regressors "
+* global dset = " 600 700 800 900 1000 "
+* global bset = 100
+
+global regressors_add = " $regressors "
+global dset = " 750 1000 "
+global bset = 250
+
+foreach r in $dset {
+global regressors_add = " $regressors_add spill__`r'_con_post "
+}
+
+foreach r in $dset {
+global regressors_add = " $regressors_add spill__`r' spill__`r'_con spill__`r'_post "
+}
+
+foreach r in $dset {  
+g spill__`r' = (distance_rdp>`r'-$bset & distance_rdp<=`r' & con==1) |  (distance_placebo>`r'-$bset & distance_placebo<=`r' & con==0) 
+replace spill__`r' = 0 if spill1>0 & spill1<.
+g spill__`r'_con      = spill__`r'*con
+g spill__`r'_post     = spill__`r'*post
+g spill__`r'_con_post = spill__`r'*con*post
+}
+
+
+
+global dist_robust=0
+
+if $dist_robust==1 {
+est clear
+
+foreach var of varlist $outcomes {
+
+    areg `var' $regressors_add , cl(cluster_joined) a(LL) r
+    eststo  `var'
+
+    g temp_var = e(sample)==1
+
+    mean `var' $ww if temp_var==1 & post ==0 
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : `var'
+
+    mean `var' $ww if temp_var==1 & post ==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : `var'
+
+    mean `var' $ww if temp_var==1
+    mat def E=e(b)
+    estadd scalar Mean = E[1,1] : `var'
+
+    count if temp_var==1 & (spill1==1 | spill2==1) & !proj==1
+    estadd scalar hhspill = `=r(N)' : `var'
+    count if temp_var==1 & proj==1
+    estadd scalar hhproj = `=r(N)' : `var'
+
+    preserve
+      keep if temp_var==1
+      quietly tab cluster_rdp
+      global projectcount = `=r(r)'
+      quietly tab cluster_placebo
+      global projectcount = $projectcount + `=r(r)'
+    restore
+
+    estadd scalar projcount = $projectcount : `var'
+
+    drop temp_var
+
+    estimates save dist_robust, append
+    
+  }
+
+}
+
+est use dist_robust
+
+  global X "{\tim}"
+
+  global cells = 1
+
+  lab var spill1_con_post  "\textsc{0-500m}"
+  lab var spill__750_con_post  "\textsc{500-750m}"
+  lab var spill__1000_con_post  "\textsc{750-1000m}"
+
+
+    estout using "dist_robust.tex", replace  style(tex) ///
+    keep( spill1_con_post  spill__750_con_post spill__1000_con_post )  ///
+    varlabels(, el( spill1_con_post "[0.55em]"  spill__750_con_post "[0.55em]"  spill__1000_con_post "[0.55em]"  )) ///
+    label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( Mean2001 Mean2011 r2  N ,  ///
+    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
+      starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+
+/*
+
+
+
+
+global regressors_new " proj_con_post spill1_con_post spill3_con_post  spill4_con_post    proj_post spill1_post  spill3_post spill4_post  con_post proj_con spill1_con spill3_con spill4_con  proj spill1 spill3 spill4 con "
+  
+
+g spill3 = (distance_rdp>500 & distance_rdp<=750 & con==1) |  (distance_placebo>500 & distance_placebo<=750 & con==0) 
+g spill3_con      = spill3*con
+g spill3_post     = spill3*post
+g spill3_con_post = spill3*con*post
+
+g spill4 = (distance_rdp>750 & distance_rdp<=1000 & con==1) |  (distance_placebo>750 & distance_placebo<=1000 & con==0) 
+g spill4_con      = spill4*con
+g spill4_post     = spill4*post
+g spill4_con_post = spill4*con*post
+
+g spill5 = (distance_rdp>1000 & distance_rdp<=1250 & con==1) |  (distance_placebo>1000 & distance_placebo<=1250 & con==0) 
+g spill5_con      = spill5*con
+g spill5_post     = spill5*post
+g spill5_con_post = spill5*con*post
+
+
+g spill6 = (distance_rdp>1250 & distance_rdp<=1500 & con==1) |  (distance_placebo>1250 & distance_placebo<=1500 & con==0) 
+g spill6_con      = spill6*con
+g spill6_post     = spill6*post
+g spill6_con_post = spill6*con*post
+
+
+* global regressors_new " proj_con_post spill1_con_post spill2_con_post  spill3_con_post  spill4_con_post spill5_con_post spill6_con_post   proj_post spill1_post spill2_post spill3_post spill4_post spill5_post spill6_post con_post proj_con spill1_con spill2_con spill3_con spill4_con spill5_con spill6_con proj spill1 spill2 spill3 spill4 spill5 spill6 con "
+
+* global regressors_new " proj_con_post spill1_con_post spill2_con_post  spill3_con_post  spill4_con_post spill5_con_post   proj_post spill1_post spill2_post spill3_post spill4_post spill5_post con_post proj_con spill1_con spill2_con spill3_con spill4_con spill5_con proj spill1 spill2 spill3 spill4 spill5 con "
+  
+global regressors_new " proj_con_post spill1_con_post spill3_con_post  spill4_con_post    proj_post spill1_post  spill3_post spill4_post  con_post proj_con spill1_con spill3_con spill4_con  proj spill1 spill3 spill4 con "
+  
+areg total_buildings_new $regressors_add  , cl(cluster_joined) a(LL) r
+
+* areg for_new $regressors_new , cl(cluster_joined) a(LL) r
+
+* areg inf_new $regressors_new , cl(cluster_joined) a(LL) r
+
+* * drop spill_new*
+
+* g spill_new = spill1
+* replace spill_new=1 if spill1==0 & (distance_rdp>0 & distance_rdp<=1000 & con==1) |  (distance_rdp>0 & distance_placebo<=1000 & con==0) 
+
+* g spill_new_con      = spill_new*con
+* g spill_new_post     = spill_new*post
+* g spill_new_con_post = spill_new*con*post
+
+* global regressors_new1 " proj_con_post spill_new_con_post   proj_post spill_new_post con_post proj_con spill_new_con  proj spill_new con "
+    
+* areg total_buildings_new $regressors_new1, cl(cluster_joined) a(LL) r
+
+* areg for_new $regressors_new1 , cl(cluster_joined) a(LL) r
+
+* areg inf_new $regressors_new , cl(cluster_joined) a(LL) r
+
+
+* areg total_buildings_new $regressors, cl(cluster_joined) a(LL) r
 
 
 * rgen_q_het ;
@@ -303,21 +483,18 @@ regs b_3out_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 1 ;
 
 
 
-};
+}
 
 
-if $reg_triplediff2_type == 1 {;
+if $reg_triplediff2_type == 1 {
 
-regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} ;
+regs_type b_t_k${k}_o${many_spill}_d${dist_break_reg1}_${dist_break_reg2} 
 
-};
+}
 
 ************************************************;
 ************************************************;
 ************************************************;
-
-
-#delimit cr;
 
 if $graph_plotmeans_int == 1 {
 

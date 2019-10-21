@@ -219,6 +219,8 @@ global reg_2 = " areg lprice $regressors i.purch_yr#i.purch_mo erf_size*, a(LL) 
 price_regs_o price_temp_Tester_3d ;
 
 
+#delimit cr;
+
 
 cap drop T1
 cap drop T2
@@ -230,7 +232,7 @@ g T3 = T>48 & T<.
 
 
 
-lab var spill1_con_post "Post All "
+lab var spill1_con_post "\textsc{All years post}"
 
 global regressors_time " spill1_con spill1  con "
 
@@ -244,9 +246,9 @@ global regressors_time " spill1_con spill1  con "
 	}
 	}
 
-lab var spill1_con_T1 "Post 0-2 yrs "
-lab var spill1_con_T2 "Post 2-4 yrs "
-lab var spill1_con_T3 "Post over 4 yrs "
+lab var spill1_con_T1 "\textsc{0-2 years post} "
+lab var spill1_con_T2 "\textsc{2-4 years post} "
+lab var spill1_con_T3 "\textsc{Over 4 years post} "
 
 
  areg lprice $regressors_time , a(LL) cl(cluster_joined)
@@ -357,16 +359,16 @@ global regressors_time " spill1_con spill1  con "
 	}
 
 
-lab var spill1_con_T1 "Pre over 4 yrs "
-lab var spill1_con_T2 "Pre 4-3 yrs "
-lab var spill1_con_T3 "Pre 3-2 yrs "
-lab var spill1_con_T4 "Pre 2-1 yrs "
+lab var spill1_con_T1 "\textsc{Pre over 4 yrs}"
+lab var spill1_con_T2 "\textsc{Pre 4-3 yrs } "
+lab var spill1_con_T3 "\textsc{Pre 3-2 yrs } "
+lab var spill1_con_T4 "\textsc{Pre 2-1 yrs } "
 
-lab var spill1_con_T5 "Post 0-1 yrs "
-lab var spill1_con_T6 "Post 1-2 yrs "
-lab var spill1_con_T7 "Post 2-3 yrs "
-lab var spill1_con_T8 "Post 3-4 yrs "
-lab var spill1_con_T9 "Post over 4 yrs "
+lab var spill1_con_T5 "\textsc{Post 0-1 yrs }  "
+lab var spill1_con_T6 "\textsc{Post 1-2 yrs } "
+lab var spill1_con_T7 "\textsc{Post 2-3 yrs } "
+lab var spill1_con_T8 "\textsc{Post 3-4 yrs } "
+lab var spill1_con_T9 "\textsc{Post over 4 yrs } "
 
 
  * areg lprice $regressors_time , a(LL) cl(cluster_joined)

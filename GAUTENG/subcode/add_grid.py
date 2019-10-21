@@ -246,7 +246,7 @@ def buffer_area_int(db,buffer1,buffer2):
 
 # buffer_area_int(db,100,200)
 # buffer_area_int(db,250,500)
-buffer_area_int(db,400,800)
+# buffer_area_int(db,400,800)
 
 
 
