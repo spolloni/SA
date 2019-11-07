@@ -27,6 +27,18 @@ set scheme s1mono
 *set maxvar 32767
 grstyle init
 grstyle set imesh, horizontal
+
+
+local qry = "SELECT D.*, R.cluster, R.rdp FROM distance_grid_temp_3_gcro_full AS D JOIN (SELECT placebo_cluster.cluster, 0 AS rdp FROM placebo_cluster UNION SELECT rdp_cluster.cluster, 1 AS rdp FROM rdp_cluster) AS R ON R.cluster = D.target_id"
+  odbc query "gauteng"
+  odbc load, exec("`qry'")
+
+
+
+
+/*
+
+
 #delimit;
 
 
@@ -98,57 +110,286 @@ if $LOCAL==1 {;
 	cd ..;
 };
 
-cd ../..;
-cd Generated/Gauteng;
 
 
 
 ************************************************;
 ********* ANALYZE DATA  ************************;
 ************************************************;
-if $bblu_do_analysis==1 {;
-
-use bbluplot_grid_${grid}.dta, clear;
+* if $bblu_do_analysis==1 {;
 
 
-fmerge m:1 id using "undeveloped_grids.dta";
-keep if _merge==1 ;
-drop _merge ;
-
-* fmerge m:1 sp_1 using "temp_2001_inc.dta";
-* drop if _merge==2;
-* drop _merge;
-
-* go to working dir;
 cd ../..;
-cd $output ;
-
-g area = $grid*$grid;
-
-global grid_mult = 1000000/($grid*$grid) ;
-
-ren rdp_cluster cluster_rdp;
-ren placebo_cluster cluster_placebo;
-ren rdp_distance distance_rdp;
-ren placebo_distance distance_placebo;
-
-replace distance_placebo=-distance_placebo if area_int_placebo>.5 & area_int_placebo<. ;
-replace distance_rdp=-distance_rdp if area_int_rdp>.5 & area_int_rdp<. ;
-drop area_int_rdp area_int_placebo;
+cd Generated/Gauteng;
 
 
-replace distance_placebo = . if distance_rdp<0 ;
-replace distance_rdp     = . if distance_placebo<0;
-
-replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
-replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 ;
-
-replace distance_placebo=. if distance_placebo>${dist_max} ;
-replace distance_rdp=. if distance_rdp>${dist_max} ;
+#delimit cr;
 
 
 
-drop if distance_rdp==. & distance_placebo==. ; 
+use bbluplot_grid_${grid}.dta, clear
+
+
+fmerge m:1 id using "undeveloped_grids.dta"
+keep if _merge==1 
+drop _merge 
+
+
+
+global grid_mult = 1000000/($grid*$grid) 
+
+
+ren rdp_cluster cluster_rdp
+ren placebo_cluster cluster_placebo
+ren rdp_distance distance_rdp
+ren placebo_distance distance_placebo
+
+
+replace distance_placebo = -1*distance_placebo if area_int_placebo >0 & area_int_placebo<=1 
+replace distance_rdp     = -1*distance_rdp if area_int_rdp >0 & area_int_rdp<=1
+
+g con = 0
+replace con = 1 if (distance_rdp<=0) | (distance_rdp<distance_placebo) 
+
+g proj      = (distance_rdp<0 & con==1) | (distance_placebo<0  & con==0)
+g spill1    = (distance_rdp>=0 & distance_rdp<=500 & con==1) | (distance_placebo>=0 & distance_placebo<=500  & con==0)
+
+
+  cap drop proj_con
+  g proj_con = proj*con 
+  cap drop spill1_con
+  g spill1_con = spill1*con 
+
+g cluster_joined = cluster_rdp if con==1 
+replace cluster_joined = cluster_placebo if con==0 
+
+g proj_cluster = proj>.5 & proj<.
+g spill1_cluster = proj_cluster==0 & spill1>.5 & spill1<.
+
+gegen cj1 = group(cluster_joined proj_cluster spill1_cluster) 
+drop cluster_joined 
+ren cj1 cluster_joined
+
+
+  foreach var of varlist proj_con spill1_con proj spill1 con {
+  cap drop `var'_post 
+  g `var'_post = `var'*post
+  }
+
+
+global outcomes=""
+foreach v in $outcomes_pre {
+   g `v'_new=`v'*$grid_mult
+   global outcomes = " $outcomes `v'_new " 
+}
+
+
+cap drop xr
+cap drop yr
+cap drop xyg
+cap drop xn
+
+g xr = round(X,10000) 
+g yr = round(Y,10000) 
+gegen xyg = group(xr yr)
+
+bys xyg: g xn=_n
+count if xn==1
+
+gegen xygp = group(xyg post)
+
+  gegen wd_g = group(wd_1 post)
+
+
+
+
+global bsize = 100
+global blow = 100
+global bhigh = 1800
+
+global regs_b1 = " "
+global regs_c1 = " "
+
+forvalues b = $blow($bsize)$bhigh {
+  cap drop spi_`b'
+  g spi_`b'   = (distance_rdp>`b'-100 & distance_rdp<=`b' & con==1) | (distance_placebo>`b'-100  & distance_placebo<=`b' & con==0)
+  cap drop spi_`b'_post
+  g spi_`b'_post = spi_`b'*post
+  cap drop spi_`b'_con 
+  g spi_`b'_con = spi_`b'*con
+  cap drop spi_`b'_con_post
+  g spi_`b'_con_post = spi_`b'*con*post
+
+  global regs_b1 = " $regs_b1 spi_`b'_con_post "
+  global regs_c1 = " $regs_c1 spi_`b'_con_post  "
+}
+
+global regs_b2 = " "
+global regs_c2 = " "
+
+forvalues b =$blow($bsize)$bhigh {
+global regs_b2 = " $regs_b2 spi_`b' spi_`b'_post spi_`b'_con "
+global regs_c2 = " $regs_c2 spi_`b' spi_`b'_post spi_`b'_con "
+}
+
+global regs_b  = " proj_con_post proj_con proj_post proj con post $regs_b1 $regs_b2 "
+global regs_c  = " proj_con_post proj_con proj_post proj $regs_c1 $regs_c2 " 
+
+
+
+preserve
+  keep  if distance_rdp<=1000 | distance_placebo<=1000
+  keep total_buildings_new $regs_c wd_g cluster_joined
+  areg total_buildings_new  $regs_c , a(wd_g)  cluster(cluster_joined) robust
+restore 
+
+
+reg total_buildings_new  $regs_b , cluster(cluster_joined) robust
+
+
+
+areg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if distance_rdp<=1000 | distance_placebo<=1000,  a(wd_g)  cluster(cluster_joined) robust
+
+
+
+
+areg total_buildings_new  $regs_b , cluster(cluster_joined) robust a(wd_g)
+
+
+
+
+areg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if distance_rdp<1000 | distance_placebo<1000,  a(xygp)  cluster(cluster_joined) robust
+
+
+areg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if (spill1==1 | proj==1),  a(xygp)  cluster(cluster_joined) robust
+
+
+areg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if (spill1==1 | proj==1),  a(wd_g)  cluster(cluster_joined) robust
+
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if distance_rdp<1000 | distance_placebo<1000, cluster(cluster_joined) robust
+
+
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if spill1==1, cluster(cluster_joined) robust
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if proj==1, cluster(cluster_joined) robust
+
+
+
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if distance_rdp<1500 | distance_placebo<1500, cluster(cluster_joined) robust
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if spill1==1 | proj==1, cluster(cluster_joined) robust
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if spill1==1 | spill1==0, cluster(cluster_joined) robust
+
+
+
+reg total_buildings_new proj_con_post spill1_con_post proj_post spill1_post ///
+       con_post proj_con spill1_con ///
+        post proj spill1  con if proj==1 & spill1==0, cluster(cluster_joined) robust
+
+
+
+
+  * foreach var of varlist cluster_int_rdp cluster_int_placebo b1_int_rdp b1_int_placebo b2_int_rdp b2_int_placebo {
+  *   replace `var'=0 if `var'==.
+  * }
+
+
+
+
+/*
+
+cd ../..
+cd $output 
+
+
+
+/*
+
+
+
+
+
+count if area_int_placebo!=cluster_int_placebo
+
+browse   area_int_placebo    cluster_int_placebo 
+
+
+browse if cluster_int_rdp>0 & cluster_int_rdp<. & cluster_int_placebo>0 & cluster_int_placebo<.
+
+
+
+
+
+replace distance_placebo=-distance_placebo if area_int_placebo>.5 & area_int_placebo<. 
+replace distance_rdp=-distance_rdp if area_int_rdp>.5 & area_int_rdp<. 
+drop area_int_rdp area_int_placebo
+
+
+replace distance_placebo = . if distance_rdp<0 
+replace distance_rdp     = . if distance_placebo<0
+
+replace distance_placebo = . if distance_placebo>distance_rdp   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 
+replace distance_rdp     = . if distance_rdp>=distance_placebo   & distance_placebo<. & distance_placebo>=0 & distance_rdp<.  & distance_rdp>=0 
+
+replace distance_placebo=. if distance_placebo>${dist_max} 
+replace distance_rdp=. if distance_rdp>${dist_max} 
+
+drop if distance_rdp==. & distance_placebo==. 
+
+
+  g area_int_rdp  =  cluster_int_rdp 
+  g area_int_placebo = cluster_int_placebo 
+
+
+  g area_b1_rdp = (b2_int_rdp - cluster_int_rdp)
+  g area_b1_placebo = (b2_int_placebo - cluster_int_placebo)
+
+  g area_b2_rdp = (b2_int_rdp - b1_int_rdp)
+  g area_b2_placebo = (b2_int_placebo - b1_int_placebo)
+
+  g con = 0
+  replace con=1 if area_int_rdp>0 & area_int_rdp>area_int_placebo  &  area_int_rdp<. & area_int_placebo<.
+  replace con=1 if distance_rdp<=distance_placebo & con==0 & distance_rdp<.
+
+  g proj = area_int_rdp  if con==1 
+  replace proj = area_int_placebo if con==0 
+  replace proj = 0 if proj==.
+
+  g spill1 = area_b1_rdp if con==1
+  replace spill1 = area_b1_placebo if con==0
+  replace spill1 = 0 if spill1==.
+
+
 
 
 if $type_area == 0 {;

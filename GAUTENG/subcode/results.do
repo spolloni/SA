@@ -41,7 +41,7 @@ global far = "Suburb"
 * DENSITY PARAMETERS
 
 
-global grid = 25
+global grid = 3000
 * global size     = 50
 * global sizesq   = $size*$size
 global dist_min = -500

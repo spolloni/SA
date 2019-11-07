@@ -336,6 +336,30 @@ def grid_sal(db,table,input_file,idvar):
 # grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
 
 
+def grid_ward(db,table,input_file,idvar):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.wd_code AS wd_1, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS  area_int 
+                FROM {} AS G, {} AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                            GROUP BY G.{} ;
+
+                '''.format(table,idvar,input_file,'wd_2001',input_file,idvar))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+    print 'all set with ward_1 !'
+
+# grid_ward(db,'grid_25_w2001','grid_temp_25','grid_id')
+
+
+
 
 def grid_ea(db,table,input_file,idvar):
     print ' new ea intersection is runningggggggg '
@@ -724,6 +748,8 @@ def add_grid(db,grid_size):
     print 'done !! :)'
     return
 
+
+add_grid(db,500)
 
 # add_grid(db,25)
 # add_grid(db,50)

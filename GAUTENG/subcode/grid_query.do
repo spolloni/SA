@@ -33,9 +33,7 @@ prog outcome_gen;
 end;
 
 
-local qry = " 
-SELECT * FROM grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2}
-";
+local qry = " SELECT * FROM grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
 
@@ -65,7 +63,7 @@ clear;
 
 	BP.distance AS placebo_distance, BP.target_id AS placebo_cluster, IP.area_int AS area_int_placebo, 
 
- 	GT.type AS type_rdp, GTP.type AS type_placebo, SA.sal_1, SA.sp_1
+ 	GT.type AS type_rdp, GTP.type AS type_placebo, SA.sal_1, SA.sp_1, SW.wd_1
 
 	FROM grid_temp_${grid} AS AA 
 
@@ -103,6 +101,10 @@ clear;
 		(SELECT * FROM grid_${grid}_s2001 AS G GROUP BY G.grid_id HAVING G.area_int==max(G.area_int))  
 		AS SA ON SA.grid_id = AA.grid_id
 
+		LEFT JOIN 
+		(SELECT * FROM grid_${grid}_w2001 AS G GROUP BY G.grid_id HAVING G.area_int==max(G.area_int))  
+		AS SW ON SW.grid_id = AA.grid_id
+
 	";
 
 
@@ -131,7 +133,6 @@ clear;
 	  ren grid_id id  ;
 
 	  save bbluplot_grid_`1', replace  ;
-
 end;
 
 

@@ -11,20 +11,22 @@ set scheme s1mono
 
 
 
-global load_for_grid = 0;
+global load_for_grid = 1;
 
 
 if $load_for_grid == 1 {;
 local qry = "
-  SELECT A.grid_id, B.height FROM grid_to_elevation_points AS A JOIN elevation  AS B ON A.fid = B.OGC_FID
+  SELECT A.grid_id, B.height FROM grid_to_elevation_points_100 AS A JOIN elevation  AS B ON A.fid = B.OGC_FID
   ";
 
 
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
 
-cd ../..;
-if $LOCAL==1{;cd ..;};
+cd ../.. ;
+
+*** if $LOCAL==1{;cd ..;};
+
 cd Generated/GAUTENG ;
 ren grid_id id;
 
@@ -34,12 +36,13 @@ drop heightm;
 duplicates drop id, force;
 
 
-save "grid_elevation.dta", replace;
+save "grid_elevation_100.dta", replace;
 
 
 };
 
 
+/*
 
 
 global load_ele = 0;
@@ -68,6 +71,7 @@ use "grid_to_erven.dta", clear;
 
 };
 
+/*
 
 merge 1:m property_id using "gradplot_admin${V}.dta";
 drop if _merge==2;
