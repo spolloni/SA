@@ -12,11 +12,13 @@ if $LOCAL==1 {;
 	cd ..;
 };
 
-global load_grids = 0;
+global load_buffer_1 	= 0;
+global load_grids 		= 0;
+global load_buffer_2 	= 1;
 
 global grid = "100";
 global dist_break_reg1 = "500";
-global dist_break_reg2 = "1000";
+global dist_break_reg2 = "3000";
 
 global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
 
@@ -37,18 +39,29 @@ prog outcome_gen;
 end;
 
 
-local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area FROM 
+if $load_buffer_1 == 1 {;
+
+local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
+ B.cluster_b3_area, B.cluster_b4_area,
+  B.cluster_b5_area, B.cluster_b6_area 
+FROM 
 grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
 
 destring *, replace force ; 
-ren cluster_area cluster_int_area;
-ren cluster_b1_area b1_int_area;
-ren cluster_b2_area b2_int_area;
+* ren cluster_area cluster_int_area;
+* ren cluster_b1_area b1_int_area;
+* ren cluster_b2_area b2_int_area;
+* ren cluster_b3_area b3_int_area;
+* ren cluster_b4_area b4_int_area;
+* ren cluster_b5_area b5_int_area;
+* ren cluster_b6_area b6_int_area;
 
-foreach var of varlist cluster_int b1_int b2_int  {;
+
+
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
 forvalues r=0/1 {;
 
 if `r'==1 {;
@@ -59,26 +72,28 @@ else  {;
 };
 
 g `var'_`name'=`var' if rdp==`r';
-egen `var'_tot_`name'  = sum(`var'_`name'), by(grid_id);
-egen `var'_`name'_max  = max(`var'_`name'), by(grid_id);
+gegen `var'_tot_`name'  = sum(`var'_`name'), by(grid_id);
+gegen `var'_`name'_max  = max(`var'_`name'), by(grid_id);
 
 g `var'_`name'_id_max = cluster if `var'_`name'_max == `var'_`name' & `var'_`name'!=.;
-egen `var'_`name'_id = max(`var'_`name'_id_max), by(grid_id);
+gegen `var'_`name'_id = max(`var'_`name'_id_max), by(grid_id);
 
-g `var'_`name'_shr   = `var'_tot_`name'/`var'_area;
+* g `var'_`name'_shr   = `var'_tot_`name'/`var'_area;
 
-drop `var'_`name' `var'_tot_`name' `var'_`name'_id_max `var'_`name'_max ;
+drop `var'_`name' `var'_`name'_id_max `var'_`name'_max ;
 
 };
 };
 
-keep grid_id *_id *_shr;
+
+
+keep grid_id *_id *_tot_* *_area ;
 duplicates drop grid_id, force;
 
 
 save "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta", replace;
 
-
+};
 
 
 if $load_grids == 1 {;
@@ -127,7 +142,7 @@ end;
 grid_query pre ;
 grid_query post  " AND A.cf_units = 'High' "; 
 
-};
+
 
 use bbluplot_grid_pre_overlap, clear;
 
@@ -143,6 +158,140 @@ drop _merge;
 ren grid_id id;
 
 save bbluplot_grid_${grid}_overlap, replace;
+
+};
+
+
+
+if $load_buffer_2 == 1 {;
+
+
+use bbluplot_grid_${grid}_overlap, clear;
+
+
+g   proj_rdp = cluster_int_tot_rdp / cluster_area;
+replace proj_rdp = 1 if proj_rdp>1 & proj_rdp<.;
+g   proj_placebo = cluster_int_tot_placebo / cluster_area;
+replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.;
+
+g cluster_joined = .;
+replace cluster_joined = cluster_int_placebo_id if (cluster_int_tot_placebo>  cluster_int_tot_rdp ) & cluster_joined==.;
+replace cluster_joined = cluster_int_rdp_id if (cluster_int_tot_placebo<  cluster_int_tot_rdp ) & cluster_joined==.;
+
+keep if post==0;
+keep if proj_rdp==1 | proj_placebo==1;
+gegen tbm = mean(total_buildings), by(cluster_joined);
+keep if tbm ==0;
+
+keep cluster_joined;
+duplicates drop cluster_joined, force;
+save "zeros.dta", replace;
+
+
+
+local qry = " SELECT OGC_FID AS cluster_joined, name, descriptio AS des FROM gcro_publichousing";
+
+odbc query "gauteng";
+odbc load, exec("`qry'") clear;
+
+duplicates drop cluster_joined, force;
+
+replace des = lower(des);
+g mixed = regexm(des,"mixed")==1;
+keep if mixed==1;
+keep cluster_joined;
+
+save "mixed.dta", replace;
+
+
+
+
+local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
+ B.cluster_b3_area, B.cluster_b4_area,
+  B.cluster_b5_area, B.cluster_b6_area 
+FROM 
+grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
+JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force ; 
+
+
+ren cluster cluster_joined;
+merge m:1 cluster_joined using "mixed.dta";
+	g mixed = _merge==3;
+	drop if _merge==2;
+	drop _merge;
+ren cluster_joined cluster;
+
+
+ren cluster cluster_joined;
+merge m:1 cluster_joined using "zeros.dta";
+	g zeros = _merge==3;
+	drop if _merge==2;
+	drop _merge;
+ren cluster_joined cluster;
+
+
+
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
+forvalues r=0/1 {;
+foreach het in "" "_mixed" "_zeros" {;
+
+if `r'==1 {;
+	local name "rdp";
+};
+else {;
+	local name "placebo";
+};
+
+local khet "";
+if "`het'"=="_mixed" {;
+	local khet " & mixed==1 ";
+};
+if "`het'"=="_zeros" {;
+	local khet " & zeros==1 ";
+};
+
+
+g `var'_`name'`het'=`var' if rdp==`r' `khet';
+gegen `var'_tot_`name'`het'  = sum(`var'_`name'`het'), by(grid_id);
+gegen `var'_`name'`het'_max  = max(`var'_`name'`het'), by(grid_id);
+
+g `var'_`name'`het'_id_max = cluster if `var'_`name'`het'_max == `var'_`name'`het' & `var'_`name'`het'!=.;
+gegen `var'_`name'`het'_id = max(`var'_`name'`het'_id_max), by(grid_id);
+
+drop `var'_`name'`het' `var'_`name'`het'_id_max `var'_`name'`het'_max ;
+
+};
+};
+};
+
+keep grid_id *_id *_tot_* *_area ;
+duplicates drop grid_id, force;
+
+
+save "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap_het.dta", replace;
+
+
+};
+
+
+use bbluplot_grid_pre_overlap, clear;
+
+g post=0;
+
+append using bbluplot_grid_post_overlap;
+replace post=1 if post==.;
+
+ren id grid_id ;
+fmerge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap_het.dta" ;
+drop if _merge==2;
+drop _merge;
+ren grid_id id;
+
+save "bbluplot_grid_${grid}_overlap_full_het.dta", replace;
 
 
 * erase  bbluplot_grid_pre_overlap.dta;

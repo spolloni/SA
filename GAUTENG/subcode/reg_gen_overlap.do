@@ -125,6 +125,75 @@ end
 
 
 
+cap prog drop generate_variables_het
+prog define generate_variables_het
+
+
+
+g   proj_rdp_`1' = cluster_int_tot_rdp_`1' / cluster_area
+replace proj_rdp_`1' = 1 if proj_rdp_`1'>1 & proj_rdp_`1'<.
+g   proj_placebo_`1' = cluster_int_tot_placebo_`1' / cluster_area
+replace proj_placebo_`1' = 1 if proj_placebo_`1'>1 & proj_placebo_`1'<.
+
+foreach v in rdp placebo {
+  if "`v'"=="rdp" {
+    local v1 "R"
+  }
+  else {
+    local v1 "P"
+  }
+g sp_a_2_`v1'_`1' = (b2_int_tot_`v'_`1' - cluster_int_tot_`v'_`1')/(cluster_b2_area-cluster_area)
+  replace sp_a_2_`v1'_`1'=1 if sp_a_2_`v1'_`1'>1 & sp_a_2_`v1'_`1'<.
+
+foreach r in 4 6 {
+g sp_a_`r'_`v1'_`1' = (b`r'_int_tot_`v'_`1' - b`=`r'-2'_int_tot_`v'_`1')/(cluster_b`r'_area - cluster_b`=`r'-2'_area )
+  replace sp_a_`r'_`v1'_`1'=1 if sp_a_`r'_`v1'_`1'>1 & sp_a_`r'_`v1'_`1'<.
+}
+}
+
+foreach var of varlist sp_a*_`1' {
+  g `var'_tP = `var'*proj_placebo
+  g `var'_tR = `var'*proj_rdp
+}
+
+foreach var of varlist proj_*_`1' sp_*_`1' {
+  g `var'_post = `var'*post 
+}
+
+
+foreach v in rdp placebo {
+  if "`v'"=="rdp" {
+    local v1 "R"
+  }
+  else {
+    local v1 "P"
+  }
+g s1p_a_1_`v1'_`1' = (b1_int_tot_`v'_`1' - cluster_int_tot_`v'_`1')/(cluster_b1_area-cluster_area)
+  replace s1p_a_1_`v1'_`1'=1 if s1p_a_1_`v1'_`1'>1 & s1p_a_1_`v1'_`1'<.
+
+forvalues r= 2/6 {
+g s1p_a_`r'_`v1'_`1' = (b`r'_int_tot_`v'_`1' - b`=`r'-1'_int_tot_`v'_`1')/(cluster_b`r'_area - cluster_b`=`r'-1'_area )
+  replace s1p_a_`r'_`v1'_`1'=1 if s1p_a_`r'_`v1'_`1'>1 & s1p_a_`r'_`v1'_`1'<.
+}
+}
+
+foreach var of varlist s1p_a*_`1' {
+  g `var'_tP = `var'*proj_placebo_`1'
+  g `var'_tR = `var'*proj_rdp_`1'
+}
+
+foreach var of varlist s1p_*_`1' {
+  g `var'_post = `var'*post 
+}
+
+
+
+end
+
+
+
+
+
 cap prog drop regs
 
 prog define regs

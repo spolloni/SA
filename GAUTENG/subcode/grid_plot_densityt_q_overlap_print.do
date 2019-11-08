@@ -45,19 +45,7 @@ cd Generated/Gauteng;
 #delimit cr; 
 
 
-
-local qry = " SELECT OGC_FID AS cluster_joined, name, descriptio AS des FROM gcro_publichousing"
-
-odbc query "gauteng"
-odbc load, exec("`qry'") clear
-
-duplicates drop cluster, force
-save "gcro_names.dta", replace
-
-
-
-
-use "bbluplot_grid_${grid}_overlap.dta", clear
+use "bbluplot_grid_${grid}_overlap_full_het.dta", clear
 
 
 
@@ -67,135 +55,13 @@ foreach var of varlist $outcomes {
 
 generate_variables
 
-merge m:1 cluster_joined using "gcro_names.dta"
-drop if _merge==2
-drop _merge
+generate_variables_het mixed
 
-replace des = lower(des)
-
-g mixed = regexm(des,"mixed")==1
+generate_variables_het zeros
 
 
 cd ../..
 cd $output
-
-cap drop in_both
-g in_both_id = (proj_rdp>0 & s1p_a_1_P>0) | (proj_placebo>0 & s1p_a_1_R>0)
-
-gegen in_both = max(in_both_id), by(cluster_joined)
-
-* reg total_buildings  proj_rdp_post proj_rdp  proj_placebo_post  proj_placebo post  s1p_a*, r cluster(cluster_joined)
-* reg for post  s1p_a_*_R s1p_a_*_R_post s1p_a_*_P s1p_a_*_P_post ///
-*   if proj_rdp==0 & proj_placebo==0, r cluster(cluster_joined)
-* reg inf post  s1p_a_*_R s1p_a_*_R_post s1p_a_*_P s1p_a_*_P_post ///
-*   if proj_rdp==0 & proj_placebo==0, r cluster(cluster_joined)
-* reg total_buildings  proj_rdp_post proj_rdp  proj_placebo_post  proj_placebo post  ///
-*   s1p_a_1* s1p_a_2* s1p_a_3* s1p_a_4*  ///
-*   if proj_rdp==0 & proj_placebo==0, r cluster(cluster_joined)
-
-g pp = 1 if  proj_rdp>.5 & proj_placebo==0 & post==0 
-replace pp = 0 if  proj_placebo>.5 & proj_rdp==0 & post==0 
-
-g tb_pre = total_buildings if pp!=. & post==0
-g for_pre = for            if pp!=. & post==0
-g inf_pre = inf            if pp!=. & post==0
-
-
-gegen tbm = mean(tb_pre), by(cluster_joined)
-gegen fbm = mean(for_pre), by(cluster_joined)
-gegen ibm = mean(inf_pre), by(cluster_joined)
-gegen rdp = max(pp), by(cluster_joined)
-
-g tbm_2 = tbm*tbm
-g tbm_0 = tbm==0
-
-g fbm_2 = fbm*fbm
-g fbm_0 = fbm==0
-
-g ibm_2 = ibm*ibm
-g ibm_0 = ibm==0
-
-
-bys cluster_joined: g cjn=_n
-
-
-g tbm0 = tbm 
-
-
-* hist ibm if cjn==1, by(rdp)
-* hist fbm if cjn==1 & ibm<500, by(rdp)
-
-
-
-* sum total_buildings if post==0 & proj_rdp==1
-* sum total_buildings if post==0 & proj_placebo==1
-
-
-* keep if cjn==1
-
-
-
-* g mixed = regexm(des,"mixed")==1
-
-
-* sum tbm if mixed==0 & rdp==1
-* sum tbm if mixed==0  & rdp==0
-
-* sum tbm if mixed==1 & rdp==1
-* sum tbm if mixed==1  & rdp==0
-
-
-* g       t = "mixed" if regexm(des,"mixed")==1
-* replace t = "ghf"   if regexm(des,"ghf")==1
-* replace t = "gdoh"   if regexm(des,"gdoh")==1
-* replace t = "essential"   if regexm(des,"essential")==1
-* replace t = "php"   if regexm(des,"php")==1 |  regexm(des,"people")==1
-* replace t = "project"   if regexm(des,"project")==1
-
-
-* tab t, g(T_)
-
-* forvalues r=1/5 {
-*   tab t if T_`r'==1
-*   disp "with treat"
-*   sum tbm if T_`r'==1 & rdp==1
-*   sum tbm if T_`r'==1  & rdp==0
-*   disp "other"
-*   sum tbm if T_`r'==0 & rdp==1
-*   sum tbm if T_`r'==0  & rdp==0
-* }
-
-*   sum tbm if t=="" & rdp==1
-*   sum tbm if t==""  & rdp==0
-
-
-
-
-* forvalues r
-
-* cap drop ess
-
-* g ess = regexm(des,"gdoh")==1
-
-* sum tbm if ess==0 & rdp==1
-* sum tbm if ess==0  & rdp==0
-
-* sum tbm if ess==1 & rdp==1
-* sum tbm if ess==1  & rdp==0
-
-
-
-* cap drop ess
-
-* g ess = regexm(des,"13")==1 | regexm(des,"22")==1 | regexm(des,"ghf")==1
-
-* sum tbm if ess==0 & rdp==1
-* sum tbm if ess==0  & rdp==0
-
-* sum tbm if ess==1 & rdp==1
-* sum tbm if ess==1  & rdp==0
-
-
 
 
 preserve
@@ -300,6 +166,65 @@ g PR_conPR = conPR*PR
 g PR_post = PR*post
 g post_conPR=post*conPR
 g PR_post_conPR = PR_post*conPR
+
+
+g conPR_mixed = 1       if proj_rdp_mixed>0 &  proj_rdp_mixed<.
+replace conPR_mixed = 0 if conPR_mixed==.
+
+g PR_mixed = proj_rdp_mixed if conPR_mixed==1
+replace PR_mixed =  proj_placebo_mixed if conPR_mixed==0
+
+g PR_conPR_mixed = conPR_mixed*PR_mixed
+g PR_post_mixed = PR_mixed*post
+g post_conPR_mixed=post*conPR_mixed
+g PR_post_conPR_mixed = PR_post_mixed*conPR_mixed
+
+
+
+
+g conPR_zeros = 1       if proj_rdp_zeros>0 &  proj_rdp_zeros<.
+replace conPR_zeros = 0 if conPR_zeros==.
+
+g PR_zeros = proj_rdp_zeros if conPR_zeros==1
+replace PR_zeros =  proj_placebo_zeros if conPR_zeros==0
+
+g PR_conPR_zeros = conPR_zeros*PR_zeros
+g PR_post_zeros = PR_zeros*post
+g post_conPR_zeros=post*conPR_zeros
+g PR_post_conPR_zeros = PR_post_zeros*conPR_zeros
+
+
+
+
+g proj_rdp_other = proj_rdp - proj_rdp_mixed - proj_rdp_zeros
+g proj_placebo_other = proj_placebo - proj_placebo_mixed - proj_placebo_zeros
+
+
+g conPR_other = 1       if proj_rdp_other>0 &  proj_rdp_other<.
+replace conPR_other = 0 if conPR_other==.
+
+g PR_other = proj_rdp_other if conPR_other==1
+replace PR_other =  proj_placebo_other if conPR_other==0
+
+g PR_conPR_other = conPR_other*PR_other
+g PR_post_other = PR_other*post
+g post_conPR_other=post*conPR_other
+g PR_post_conPR_other = PR_post_other*conPR_other
+
+
+
+  reg total_buildings post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+ 
+  reg total_buildings post PR_mixed PR_conPR_mixed PR_post_mixed PR_post_conPR_mixed , r cluster(cluster_joined)
+ 
+  reg total_buildings post PR_zeros PR_conPR_zeros PR_post_zeros PR_post_conPR_zeros , r cluster(cluster_joined)
+
+
+  reg total_buildings post PR PR_conPR PR_post PR_post_conPR ///
+                      PR_mixed PR_conPR_mixed PR_post_mixed PR_post_conPR_mixed ///
+                      PR_zeros PR_conPR_zeros PR_post_zeros PR_post_conPR_zeros , r cluster(cluster_joined)
+
+
 
 
 global weight = ""
