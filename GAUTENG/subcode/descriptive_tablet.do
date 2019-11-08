@@ -13,6 +13,8 @@ prog define write
 	file close newfile
 end
 
+
+
 cap prog drop write_line
 prog define write_line
 	file write newfile "`1'  & `=string(round(`2',`3'),"`4'")' \\"

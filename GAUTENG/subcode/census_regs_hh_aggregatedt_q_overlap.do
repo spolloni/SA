@@ -87,6 +87,9 @@ global cells = 3
 global weight = "  [pweight = area]   "
 
 
+
+
+
 global outcomes "  water_inside   toilet_flush  electricity  tot_rooms  pop_density "
 
 regs census_overlap

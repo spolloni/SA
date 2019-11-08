@@ -1,15 +1,64 @@
 
 
 
+
+cap prog drop write
+prog define write
+	file open newfile using "`1'", write replace
+	file write newfile "`=string(round(`2',`3'),"`4'")'"
+	file close newfile
+end
+
+
+
+cap prog drop write_line
+prog define write_line
+	file write newfile "`1'  & `=string(round(`2',`3'),"`4'")' \\"
+end
+
+cap prog drop in_stat
+program in_stat 
+        qui sum `2' `6', detail 
+        local value=string(`=r(`3')',"`4'")
+        if `5'==0 {
+            file write `1' " & `value' "
+        }
+        if `5'==1 {
+            file write  `1' " & [`value'] "
+        }       
+end
+
+cap prog drop print_1
+program print_1
+    file write newfile " `1' "
+    forvalues r=1/$cat_num {
+        in_stat newfile `2' `3' `4' "0" "${cat`r'}"
+        }      
+    file write newfile " \\[.3em] " _n
+end
+
+
+
+
+
+
 cap prog drop generate_variables
 prog define generate_variables
 
 
 g cluster_joined = .
-foreach var of varlist  *_id {
-  replace cluster_joined = `var' if cluster_joined==.
+replace cluster_joined = cluster_int_placebo_id if (cluster_int_tot_placebo>  cluster_int_tot_rdp ) & cluster_joined==.
+replace cluster_joined = cluster_int_rdp_id if (cluster_int_tot_placebo<  cluster_int_tot_rdp ) & cluster_joined==.
+forvalues r=1/6 {
+  replace cluster_joined = b`r'_int_placebo_id if (b`r'_int_tot_placebo >  b`r'_int_tot_rdp  ) & cluster_joined==.
+  replace cluster_joined = b`r'_int_rdp_id     if (b`r'_int_tot_placebo <  b`r'_int_tot_rdp  ) & cluster_joined==.
 }
-replace cluster_joined=0 if cluster_joined==.
+replace cluster_joined = 0 if cluster_joined==.
+* g cluster_joined = .
+* foreach var of varlist  *_id {
+*   replace cluster_joined = `var' if cluster_joined==.
+* }
+* replace cluster_joined=0 if cluster_joined==.
 
 
 g   proj_rdp = cluster_int_tot_rdp / cluster_area

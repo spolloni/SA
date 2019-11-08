@@ -2,8 +2,7 @@
 clear 
 est clear
 
-do reg_gen.do
-do reg_gen_dd.do
+do reg_gen_overlap.do
 
 cap prog drop write
 prog define write
@@ -31,8 +30,9 @@ grstyle set imesh, horizontal
 
 
 global cells = 1; 
+global weight="";
 
-global outcomes_pre = " total_buildings for  inf  inf_non_backyard inf_backyard  ";
+global outcomes = " total_buildings for  inf  inf_non_backyard inf_backyard  ";
 
 
 if $LOCAL==1 {;
@@ -46,6 +46,14 @@ cd Generated/Gauteng;
 
 
 
+local qry = " SELECT OGC_FID AS cluster_joined, name, descriptio AS des FROM gcro_publichousing"
+
+odbc query "gauteng"
+odbc load, exec("`qry'") clear
+
+duplicates drop cluster, force
+save "gcro_names.dta", replace
+
 
 
 
@@ -53,82 +61,28 @@ use "bbluplot_grid_${grid}_overlap.dta", clear
 
 
 
-cd ../..
-cd $output
-
 foreach var of varlist $outcomes {
   replace `var' = `var'*1000000/($grid*$grid)
 }
 
+generate_variables
 
-g cluster_joined = .
-foreach var of varlist  *_id {
-  replace cluster_joined = `var' if cluster_joined==.
-}
-replace cluster_joined=0 if cluster_joined==.
+merge m:1 cluster_joined using "gcro_names.dta"
+drop if _merge==2
+drop _merge
 
+replace des = lower(des)
 
-g   proj_rdp = cluster_int_tot_rdp / cluster_area
-replace proj_rdp = 1 if proj_rdp>1 & proj_rdp<.
-g   proj_placebo = cluster_int_tot_placebo / cluster_area
-replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.
-
-foreach v in rdp placebo {
-  if "`v'"=="rdp" {
-    local v1 "R"
-  }
-  else {
-    local v1 "P"
-  }
-g sp_a_2_`v1' = (b2_int_tot_`v' - cluster_int_tot_`v')/(cluster_b2_area-cluster_area)
-  replace sp_a_2_`v1'=1 if sp_a_2_`v1'>1 & sp_a_2_`v1'<.
-
-foreach r in 4 6 {
-g sp_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-2'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-2'_area )
-  replace sp_a_`r'_`v1'=1 if sp_a_`r'_`v1'>1 & sp_a_`r'_`v1'<.
-}
-}
-
-foreach var of varlist sp_a* {
-  g `var'_tP = `var'*proj_placebo
-  g `var'_tR = `var'*proj_rdp
-}
-
-foreach var of varlist proj_* sp_* {
-  g `var'_post = `var'*post 
-}
-
-reg total_buildings  proj_rdp_post proj_rdp  proj_placebo_post  proj_placebo   ///
-                    post, r cluster(cluster_joined)
+g mixed = regexm(des,"mixed")==1
 
 
+cd ../..
+cd $output
 
-foreach v in rdp placebo {
-  if "`v'"=="rdp" {
-    local v1 "R"
-  }
-  else {
-    local v1 "P"
-  }
-g s1p_a_1_`v1' = (b1_int_tot_`v' - cluster_int_tot_`v')/(cluster_b1_area-cluster_area)
-  replace s1p_a_1_`v1'=1 if s1p_a_1_`v1'>1 & s1p_a_1_`v1'<.
+cap drop in_both
+g in_both_id = (proj_rdp>0 & s1p_a_1_P>0) | (proj_placebo>0 & s1p_a_1_R>0)
 
-forvalues r= 2/6 {
-g s1p_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-1'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-1'_area )
-  replace s1p_a_`r'_`v1'=1 if s1p_a_`r'_`v1'>1 & s1p_a_`r'_`v1'<.
-}
-}
-
-foreach var of varlist s1p_a* {
-  g `var'_tP = `var'*proj_placebo
-  g `var'_tR = `var'*proj_rdp
-}
-
-foreach var of varlist s1p_* {
-  g `var'_post = `var'*post 
-}
-
-
+gegen in_both = max(in_both_id), by(cluster_joined)
 
 * reg total_buildings  proj_rdp_post proj_rdp  proj_placebo_post  proj_placebo post  s1p_a*, r cluster(cluster_joined)
 * reg for post  s1p_a_*_R s1p_a_*_R_post s1p_a_*_P s1p_a_*_P_post ///
@@ -139,62 +93,201 @@ foreach var of varlist s1p_* {
 *   s1p_a_1* s1p_a_2* s1p_a_3* s1p_a_4*  ///
 *   if proj_rdp==0 & proj_placebo==0, r cluster(cluster_joined)
 
+g pp = 1 if  proj_rdp>.5 & proj_placebo==0 & post==0 
+replace pp = 0 if  proj_placebo>.5 & proj_rdp==0 & post==0 
+
+g tb_pre = total_buildings if pp!=. & post==0
+g for_pre = for            if pp!=. & post==0
+g inf_pre = inf            if pp!=. & post==0
+
+
+gegen tbm = mean(tb_pre), by(cluster_joined)
+gegen fbm = mean(for_pre), by(cluster_joined)
+gegen ibm = mean(inf_pre), by(cluster_joined)
+gegen rdp = max(pp), by(cluster_joined)
+
+g tbm_2 = tbm*tbm
+g tbm_0 = tbm==0
+
+g fbm_2 = fbm*fbm
+g fbm_0 = fbm==0
+
+g ibm_2 = ibm*ibm
+g ibm_0 = ibm==0
+
+
+bys cluster_joined: g cjn=_n
+
+
+g tbm0 = tbm 
+
+
+* hist ibm if cjn==1, by(rdp)
+* hist fbm if cjn==1 & ibm<500, by(rdp)
+
+
+
+* sum total_buildings if post==0 & proj_rdp==1
+* sum total_buildings if post==0 & proj_placebo==1
+
+
+* keep if cjn==1
+
+
+
+* g mixed = regexm(des,"mixed")==1
+
+
+* sum tbm if mixed==0 & rdp==1
+* sum tbm if mixed==0  & rdp==0
+
+* sum tbm if mixed==1 & rdp==1
+* sum tbm if mixed==1  & rdp==0
+
+
+* g       t = "mixed" if regexm(des,"mixed")==1
+* replace t = "ghf"   if regexm(des,"ghf")==1
+* replace t = "gdoh"   if regexm(des,"gdoh")==1
+* replace t = "essential"   if regexm(des,"essential")==1
+* replace t = "php"   if regexm(des,"php")==1 |  regexm(des,"people")==1
+* replace t = "project"   if regexm(des,"project")==1
+
+
+* tab t, g(T_)
+
+* forvalues r=1/5 {
+*   tab t if T_`r'==1
+*   disp "with treat"
+*   sum tbm if T_`r'==1 & rdp==1
+*   sum tbm if T_`r'==1  & rdp==0
+*   disp "other"
+*   sum tbm if T_`r'==0 & rdp==1
+*   sum tbm if T_`r'==0  & rdp==0
+* }
+
+*   sum tbm if t=="" & rdp==1
+*   sum tbm if t==""  & rdp==0
+
+
+
+
+* forvalues r
+
+* cap drop ess
+
+* g ess = regexm(des,"gdoh")==1
+
+* sum tbm if ess==0 & rdp==1
+* sum tbm if ess==0  & rdp==0
+
+* sum tbm if ess==1 & rdp==1
+* sum tbm if ess==1  & rdp==0
+
+
+
+* cap drop ess
+
+* g ess = regexm(des,"13")==1 | regexm(des,"22")==1 | regexm(des,"ghf")==1
+
+* sum tbm if ess==0 & rdp==1
+* sum tbm if ess==0  & rdp==0
+
+* sum tbm if ess==1 & rdp==1
+* sum tbm if ess==1  & rdp==0
+
+
+
+
+preserve
+  keep if cjn==1
+  psmatch2 rdp fbm_0 fbm fbm_2  ibm_0 ibm ibm_2
+  keep cluster_joined _pscore
+  drop if _pscore==.
+  save "temp_pscore.dta", replace
+restore
+
+
+merge m:1 cluster_joined using "temp_pscore.dta"
+  drop if _merge==2
+  drop _merge
 
 
 
 
 
+sum tbm if pp ==0 & post==0 , detail
+g c = tbm<=`=r(max)'
+g c0 = tbm==0
+g c1000 = tbm<1000
 
 
 
-cap prog drop regs
+bys cluster_joined pp post: g cn=_n
 
-prog define regs
-  eststo clear
-
-  foreach var of varlist $outcomes {
-
-    reg `var' post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
-
-    eststo  `var'
-
-    g temp_var = e(sample)==1
-    mean `var' $ww if temp_var==1 & post ==0 
-    mat def E=e(b)
-    estadd scalar Mean2001 = E[1,1] : `var'
-    mean `var' $ww if temp_var==1 & post ==1
-    mat def E=e(b)
-    estadd scalar Mean2011 = E[1,1] : `var'
-    drop temp_var
-    
-  }
-
-  global X "{\tim}"
-
-  global cells = 1
-
-  lab var post "\textsc{Post}"
-  lab var PR "\hspace{2em}  \textsc{Constant}"
-  lab var PR_post_conPR "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
-  lab var PR_post "\hspace{2em}  \textsc{Post}"
-  lab var PR_conPR "\hspace{2em}  \textsc{Constructed}"
+hist tbm if cn==1 & post==0, by(pp)
 
 
-    estout $outcomes using "`1'.tex", replace  style(tex) ///
-    order(  PR_post_conPR PR_conPR PR_post PR   post _cons  ) ///
-    keep(  PR_post_conPR PR_conPR PR_post PR   post _cons   )  ///
-    varlabels( _cons "\textsc{Constant}" , blist( PR_post_conPR  "\textsc{\% Footprint Overlap with Project} $\times$ \\[1em]" ) ///
-    el(    PR_post_conPR "[0.3em]"  PR_conPR "[0.3em]"  PR_post "[0.3em]"  PR  "[1em]" post "[.3em]" _cons "[.5em]"  ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
-      stats( Mean2001 Mean2011 r2  N ,  ///
-    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
-        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
-end
+*** JUST DO ONE TO ONE MATCHING ON 
+
+tab tbm pp if cn==1
+
+
+
+
+
+reg rdp tbm if cjn==1
+
+
+
+cap drop treat
+cap drop treat_R
+cap drop treat_P
+g treat_R = 1 if proj_rdp==1 & proj_placebo==0 & post==0 
+replace treat_R=2 if s1p_a_1_R>=.1 & s1p_a_1_R<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
+replace treat_R=3 if s1p_a_1_R>=.01 & s1p_a_1_R<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g treat_P=1 if proj_placebo==1 & proj_rdp==0 & post==0
+replace treat_P=2 if s1p_a_1_P>=.1 & s1p_a_1_P<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
+replace treat_P=3 if s1p_a_1_P>=.01 & s1p_a_1_P<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g treat=1 if s1p_a_1_P==0 & s1p_a_1_P==0 & proj_rdp==0 & proj_placebo==0 & post==0
+
+global cat1 = " if treat_R==1"
+global cat2 = " if treat_P==1"
+global cat3 = " if treat_R==2"
+global cat4 = " if treat_P==2"
+global cat5 = " if treat_R==3"
+global cat6 = " if treat_P==3"
+global cat7 = " if treat==1"
+
+ global cat_num=7
+
+    file open newfile using "pre_table_bblu.tex", write replace
+          print_1 "Formal Houses per $\text{km}^{2}$" for "mean" "%10.0fc"
+          print_1 "Informal Houses per $\text{km}^{2}$" inf "mean" "%10.0fc"
+          print_1 "N"                 total_buildings "N" "%10.0fc"
+    file close newfile
+
+
+
+* global cat1 = " if treat_R==1 & in_both==1"
+* global cat2 = " if treat_P==1 & in_both==1"
+* global cat3 = " if treat_R==2 & in_both==1"
+* global cat4 = " if treat_P==2 & in_both==1"
+* global cat5 = " if treat_R==3 & in_both==1"
+* global cat6 = " if treat_P==3 & in_both==1"
+* global cat7 = " if treat==1   & in_both==1"
+
+
+*     file open newfile using "pre_table_bblu_in_both.tex", write replace
+*           print_1 "Formal Houses per $\text{km}^{2}$" for "mean" "%10.0fc"
+*           print_1 "Informal Houses per $\text{km}^{2}$" inf "mean" "%10.0fc"
+*           print_1 "N"                 total_buildings "N" "%10.0fc"
+*     file close newfile
+
+
+
 
 
 g conPR = 1       if proj_rdp>0 & proj_rdp<.
@@ -209,6 +302,31 @@ g post_conPR=post*conPR
 g PR_post_conPR = PR_post*conPR
 
 
+global weight = ""
+regs bblu_overlap
+
+global weight = "[pweight = _pscore]"
+regs bblu_overlap_ps
+
+preserve 
+keep if mixed==1
+regs bblu_overlap_mixed
+restore
+
+
+
+
+    reg total_buildings post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+
+    reg total_buildings post PR PR_conPR PR_post PR_post_conPR if c==1, r cluster(cluster_joined)
+
+    reg total_buildings post PR PR_conPR PR_post PR_post_conPR if c0==1, r cluster(cluster_joined)
+
+    reg total_buildings post PR PR_conPR PR_post PR_post_conPR if c1000==1, r cluster(cluster_joined)
+
+
+
+
 * regs bblu_overlap
 
 
@@ -218,60 +336,6 @@ g PR_post_conPR = PR_post*conPR
 
 
 
-
-
-
-
-cap prog drop regs_spill
-
-prog define regs_spill
-  eststo clear
-
-  foreach var of varlist $outcomes {
-
-      * reg `var' post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
-
-  reg `var'  post SP SP_conSP SP_post SP_post_conSP , r cluster(cluster_joined)
-
-
-    eststo  `var'
-
-    g temp_var = e(sample)==1
-    mean `var' $ww if temp_var==1 & post ==0 
-    mat def E=e(b)
-    estadd scalar Mean2001 = E[1,1] : `var'
-    mean `var' $ww if temp_var==1 & post ==1
-    mat def E=e(b)
-    estadd scalar Mean2011 = E[1,1] : `var'
-    drop temp_var
-    
-  }
-
-  global X "{\tim}"
-
-  global cells = 1
-
-  lab var post "\textsc{Post}"
-  lab var SP "\hspace{2em}  \textsc{Constant}"
-  lab var SP_post_conSP "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
-  lab var SP_post "\hspace{2em} \textsc{Post}"
-  lab var SP_conSP "\hspace{2em} \textsc{Constructed}"
-
-    estout $outcomes using "`1'.tex", replace  style(tex) ///
-    order(  SP_post_conSP SP_conSP SP_post SP   post _cons  ) ///
-    keep(  SP_post_conSP SP_conSP SP_post SP   post _cons   )  ///
-    varlabels( _cons "\textsc{Constant}" , blist( SP_post_conSP  "\textsc{\% 0-500m Buffer Overlap with Project} $\times$ \\[1em]" ) ///
-    el(    SP_post_conSP "[0.3em]"  SP_conSP "[0.3em]"  SP_post "[0.3em]"  SP  "[1em]" post "[.3em]" _cons "[.5em]"  ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
-      stats( Mean2001 Mean2011 r2  N ,  ///
-    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
-        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-end
 
 
 
@@ -292,8 +356,53 @@ g SP_post_conSP = SP_post*conSP
 
   * reg total_buildings post SP SP_conSP SP_post SP_post_conSP , r cluster(cluster_joined)
 
-* regs_spill bblu_spill_overlap
+global weight = ""
+regs_spill bblu_spill_overlap
 
+global weight = "[pweight = _pscore]"
+regs_spill bblu_spill_overlap_ps
+
+
+preserve 
+keep if mixed==1
+regs_spill bblu_overlap_spill_mixed
+restore
+
+
+
+/*
+
+
+* preserve 
+*   keep if c==1
+*   regs bblu_overlap_c
+* restore
+
+* preserve
+*   keep if c0==1
+*   regs bblu_overlap_c0
+* restore
+
+* preserve
+*   keep if c1000==1
+*   regs bblu_overlap_c1000
+* restore
+
+
+* preserve 
+*   keep if c==1
+*   regs_spill bblu_spill_overlap_c
+* restore
+
+* preserve
+*   keep if c0==1
+*   regs_spill bblu_spill_overlap_c0
+* restore
+
+* preserve
+*   keep if c1000==1
+*   regs_spill bblu_spill_overlap_c1000
+* restore
 
 
 

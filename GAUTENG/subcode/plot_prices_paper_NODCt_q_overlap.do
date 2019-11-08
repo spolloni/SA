@@ -141,6 +141,9 @@ g P = lprice if lprice>`=r(p1)' & lprice<`=r(p99)'
 
 
 
+
+
+
   * reg  lprice post SP SP_conSP SP_post SP_post_conSP [pweight = erf_size]  , r cluster(cluster_joined)
   * reg  P post SP SP_conSP SP_post SP_post_conSP [pweight = erf_size]  , r cluster(cluster_joined)
 
