@@ -14,7 +14,7 @@ from subcode.placebofuns import make_gcro_all, make_gcro_full, make_gcro, make_g
 from subcode.distfuns import selfintersect, intersGEOM, intersGEOMgrid, intersGEOMogc, full_2011_sp
 from subcode.distfuns import fetch_data, dist_calc, hulls_coordinates, fetch_coordinates
 from subcode.distfuns import push_distNRDP2db, push_distBBLU2db, push_distCENSUS2db
-from subcode.add_grid import buffer_area_int, buffer_area_int, census_xy, census_1996_xy, grid_xy, grid_sal, grid_sal_point
+# from subcode.add_grid import buffer_area_int, buffer_area_int, census_xy, census_1996_xy, grid_xy, grid_sal, grid_sal_point
 
 from subcode.distfuns_admin import dist, intersPOINT, areaGEOM
 
@@ -74,6 +74,7 @@ _4_d_DISTS_ = 0  # EA distance
 _4_e_DISTS_ = 0  # EA distance for 1996
 _4_f_DISTS_ = 0  # small area distance for 2011 with holes plugged 
 _4_g_DISTS_ = 0  # GRID DISTANCE!
+_4_h_DISTS_ = 1  # GRID DISTANCE! 100!
 
 _4_xy_          = 0  # make xy coordinate tables for all the fixed effects
 _4_buffer_area_ = 0  # calculate areas of intersection with a bunch of buffers
@@ -347,6 +348,20 @@ if _4_g_DISTS_ ==1:
                                 FROM  {} AS  p '''.format(grid_name)
         # dist(db,hull,'grid_temp_3',import_script,dist_threshold)
         dist(db,hull,'grid_temp_25',import_script,dist_threshold)
+        print '\n'," -- Grid Distance ", '\n'
+        intersGEOMgrid(db,hull,grid_name) 
+        print '\n'," -- grid: done!", '\n'
+
+
+if _4_h_DISTS_ ==1:
+    grid_name = 'grid_temp_100'
+    print '\n'," Distance part F: distances for grids... ",'\n'        
+    for hull in hulls:
+        import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.grid_id
+                                FROM  {} AS  p '''.format(grid_name)
+        # dist(db,hull,'grid_temp_3',import_script,dist_threshold)
+        dist(db,hull,'grid_temp_100',import_script,dist_threshold)
         print '\n'," -- Grid Distance ", '\n'
         intersGEOMgrid(db,hull,grid_name) 
         print '\n'," -- grid: done!", '\n'

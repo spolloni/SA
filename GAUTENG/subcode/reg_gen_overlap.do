@@ -28,6 +28,20 @@ program in_stat
         }       
 end
 
+
+cap prog drop in_statw
+program in_statw
+        qui mean `2' `6' 
+        mat def tm = e(b)
+        local value=string(`=tm[1,1]',"`4'")
+        if `5'==0 {
+            file write `1' " & `value' "
+        }
+        if `5'==1 {
+            file write  `1' " & [`value'] "
+        }       
+end
+
 cap prog drop print_1
 program print_1
     file write newfile " `1' "
@@ -38,12 +52,18 @@ program print_1
 end
 
 
+cap prog drop print_mw
+program print_mw
+    file write newfile " `1' "
+    forvalues r=1/$cat_num {
+        in_statw newfile `2' `3' `4' "0" "${cat`r'}"
+        }      
+    file write newfile " \\[.3em] " _n
+end
 
 
-
-
-cap prog drop generate_variables
-prog define generate_variables
+cap prog drop gen_cj
+prog define gen_cj
 
 
 g cluster_joined = .
@@ -54,6 +74,23 @@ forvalues r=1/6 {
   replace cluster_joined = b`r'_int_rdp_id     if (b`r'_int_tot_placebo <  b`r'_int_tot_rdp  ) & cluster_joined==.
 }
 replace cluster_joined = 0 if cluster_joined==.
+
+end
+
+
+
+cap prog drop generate_variables
+prog define generate_variables
+
+
+* g cluster_joined = .
+* replace cluster_joined = cluster_int_placebo_id if (cluster_int_tot_placebo>  cluster_int_tot_rdp ) & cluster_joined==.
+* replace cluster_joined = cluster_int_rdp_id if (cluster_int_tot_placebo<  cluster_int_tot_rdp ) & cluster_joined==.
+* forvalues r=1/6 {
+*   replace cluster_joined = b`r'_int_placebo_id if (b`r'_int_tot_placebo >  b`r'_int_tot_rdp  ) & cluster_joined==.
+*   replace cluster_joined = b`r'_int_rdp_id     if (b`r'_int_tot_placebo <  b`r'_int_tot_rdp  ) & cluster_joined==.
+* }
+* replace cluster_joined = 0 if cluster_joined==.
 * g cluster_joined = .
 * foreach var of varlist  *_id {
 *   replace cluster_joined = `var' if cluster_joined==.
@@ -201,7 +238,7 @@ prog define regs
 
   foreach var of varlist $outcomes {
 
-    reg `var' post PR PR_conPR PR_post PR_post_conPR $weight , r cluster(cluster_joined)
+    reg `var' post PR`2' PR_conPR`2' PR_post`2' PR_post_conPR`2' $weight , r cluster(cluster_joined)
 
     eststo  `var'
 
@@ -221,17 +258,17 @@ prog define regs
 
 
   lab var post "\textsc{Post}"
-  lab var PR "\hspace{2em}  \textsc{Constant}"
-  lab var PR_post_conPR "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
-  lab var PR_post "\hspace{2em}  \textsc{Post}"
-  lab var PR_conPR "\hspace{2em}  \textsc{Constructed}"
+  lab var PR`2' "\hspace{2em}  \textsc{Constant}"
+  lab var PR_post_conPR`2' "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
+  lab var PR_post`2' "\hspace{2em}  \textsc{Post}"
+  lab var PR_conPR`2' "\hspace{2em}  \textsc{Constructed}"
 
 
     estout $outcomes using "`1'.tex", replace  style(tex) ///
-    order(  PR_post_conPR PR_conPR PR_post PR   post _cons  ) ///
-    keep(  PR_post_conPR PR_conPR PR_post PR   post _cons   )  ///
-    varlabels( _cons "\textsc{Constant}" , blist( PR_post_conPR  "\textsc{\% Footprint Overlap with Project} $\times$ \\[1em]" ) ///
-    el(    PR_post_conPR "[0.3em]"  PR_conPR "[0.3em]"  PR_post "[0.3em]"  PR  "[1em]" post "[.3em]" _cons "[.5em]"  ))  label ///
+    order(  PR_post_conPR`2' PR_conPR`2' PR_post`2' PR`2'   post _cons  ) ///
+    keep(  PR_post_conPR`2' PR_conPR`2' PR_post`2' PR`2'   post _cons   )  ///
+    varlabels( _cons "\textsc{Constant}" , blist( PR_post_conPR`2'  "\textsc{\% Footprint Overlap with Project} $\times$ \\[1em]" ) ///
+    el(    PR_post_conPR`2' "[0.3em]"  PR_conPR`2' "[0.3em]"  PR_post`2' "[0.3em]"  PR`2'  "[1em]" post "[.3em]" _cons "[.5em]"  ))  label ///
       noomitted ///
       mlabels(,none)  ///
       collabels(none) ///
@@ -257,7 +294,7 @@ prog define regs_spill
 
       * reg `var' post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
 
-  reg `var'  post SP SP_conSP SP_post SP_post_conSP $weight , r cluster(cluster_joined)
+  reg `var'  post SP`2' SP_conSP`2' SP_post`2' SP_post_conSP`2' $weight , r cluster(cluster_joined)
 
 
     eststo  `var'
@@ -277,16 +314,16 @@ prog define regs_spill
 
 
   lab var post "\textsc{Post}"
-  lab var SP "\hspace{2em}  \textsc{Constant}"
-  lab var SP_post_conSP "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
-  lab var SP_post "\hspace{2em} \textsc{Post}"
-  lab var SP_conSP "\hspace{2em} \textsc{Constructed}"
+  lab var SP`2' "\hspace{2em}  \textsc{Constant}"
+  lab var SP_post_conSP`2' "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
+  lab var SP_post`2' "\hspace{2em} \textsc{Post}"
+  lab var SP_conSP`2' "\hspace{2em} \textsc{Constructed}"
 
     estout $outcomes using "`1'.tex", replace  style(tex) ///
-    order(  SP_post_conSP SP_conSP SP_post SP   post _cons  ) ///
-    keep(  SP_post_conSP SP_conSP SP_post SP   post _cons   )  ///
-    varlabels( _cons "\textsc{Constant}" , blist( SP_post_conSP  "\textsc{\% 0-500m Buffer Overlap with Project} $\times$ \\[1em]" ) ///
-    el(    SP_post_conSP "[0.3em]"  SP_conSP "[0.3em]"  SP_post "[0.3em]"  SP  "[1em]" post "[.3em]" _cons "[.5em]"  ))  label ///
+    order(  SP_post_conSP`2' SP_conSP`2' SP_post`2' SP`2'   post _cons  ) ///
+    keep(  SP_post_conSP`2' SP_conSP`2' SP_post`2' SP`2'   post _cons   )  ///
+    varlabels( _cons "\textsc{Constant}" , blist( SP_post_conSP`2'  "\textsc{\% 0-500m Buffer Overlap with Project} $\times$ \\[1em]" ) ///
+    el(    SP_post_conSP`2' "[0.3em]"  SP_conSP`2' "[0.3em]"  SP_post`2' "[0.3em]"  SP`2'  "[1em]" post "[.3em]" _cons "[.5em]"  ))  label ///
       noomitted ///
       mlabels(,none)  ///
       collabels(none) ///
@@ -297,6 +334,119 @@ prog define regs_spill
     starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
 end
+
+
+
+
+
+
+
+
+
+cap prog drop regs_lag
+
+prog define regs_lag
+  eststo clear
+
+  foreach var of varlist $outcomes {
+
+  		ren `var'_lag lag
+
+    reg `var'_ch PR_post PR_post_conPR lag $weight , r cluster(cluster_joined)
+
+    eststo  `var'
+
+    g temp_var=e(sample)
+    mean `var' $ww if temp_var==1 & post ==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : `var'
+    drop temp_var
+   
+       	ren lag `var'_lag 
+  }
+
+  global X "{\tim}"
+
+
+
+  lab var post "\textsc{Post}"
+  lab var PR "\hspace{2em}  \textsc{Constant}"
+  lab var PR_post_conPR "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
+  lab var PR_post "\hspace{2em}  \textsc{Post}"
+  lab var PR_conPR "\hspace{2em}  \textsc{Constructed}"
+
+
+    estout $outcomes using "`1'.tex", replace  style(tex) ///
+    order(  PR_post_conPR PR_post   lag _cons  ) ///
+    keep(  PR_post_conPR PR_post  lag _cons   )  ///
+    varlabels( lag "\textsc{Pre Outcome}" _cons "\textsc{Constant}" , blist( PR_post_conPR  "\textsc{\% Footprint Overlap with Project} $\times$ \\[1em]" ) ///
+    el(    PR_post_conPR "[0.3em]"   PR_post "[0.3em]"   _cons "[.5em]"  ))  label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats(Mean2011 r2  N ,  ///
+    labels(   "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+end
+
+
+
+
+
+
+cap prog drop regs_spill_lag
+
+prog define regs_spill_lag
+  eststo clear
+
+  foreach var of varlist $outcomes {
+
+
+  		ren `var'_lag lag
+
+    reg `var'_ch SP_post SP_post_conSP lag $weight , r cluster(cluster_joined)
+
+    eststo  `var'
+
+    g temp_var=e(sample)
+    mean `var' $ww if temp_var==1 & post ==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : `var'
+    drop temp_var
+   
+       	ren lag `var'_lag 
+  }
+
+  global X "{\tim}"
+
+
+  lab var post "\textsc{Post}"
+  lab var SP "\hspace{2em}  \textsc{Constant}"
+  lab var SP_post_conSP "\hspace{2em}  \textsc{Post} $\times$ \textsc{Constructed}"
+  lab var SP_post "\hspace{2em} \textsc{Post}"
+  lab var SP_conSP "\hspace{2em} \textsc{Constructed}"
+
+    estout $outcomes using "`1'.tex", replace  style(tex) ///
+    order(  SP_post_conSP SP_post   lag _cons  ) ///
+    keep(  SP_post_conSP SP_post  lag _cons   )  ///
+    varlabels( lag "\textsc{Pre Outcome}" _cons "\textsc{Constant}" , blist( SP_post_conSP  "\textsc{\% 0-500m Buffer Overlap with Project} $\times$ \\[1em]" ) ///
+    el(    SP_post_conSP "[0.3em]"   SP_post "[0.3em]"   _cons "[.5em]"  ))  label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( Mean2001 Mean2011 r2  N ,  ///
+    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+end
+
+
+
 
 
 

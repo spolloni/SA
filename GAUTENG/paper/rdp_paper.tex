@@ -411,36 +411,9 @@ To examine housing price spillovers nearby projects, we include property transac
 
 
 \section{Descriptive Statistics}\label{section:descriptives}
-% As mentioned in section \ref{section:data}, 
-% Validate measures :
-% \begin{itemize}
-% 	\item delivered houses are way higher in constructed, but there's a little room for slippage
-% \end{itemize}
-% Balance/identification discussion : 
-% \begin{itemize}
-% 	\item everything else is really balanced, which is good for identification
-% \end{itemize}
 
-% Spatial targeting
-
-% Unconstructed and constructed Differences
-
-% Which types of neighborhoods receive unconstructed and constructed projects and where are projects located within neighborhoods
-
-
-% Note! :
-
-% \begin{itemize}
-% \item first, hh 2001 subplaces do not intersect perfectly with project area, so average incomes include project areas in the pre-period, which actually might be fine
-% \item second, quartiles defined for prices may be different than quartiles defined for 
-% \item it is possible to do the nearby analysis conditioning on nearby incomes... maybe its fine as is....
-% \end{itemize}
 
 We provide descriptive evidence to validate our project measures and to understand which types of neighborhoods receive projects.
-
-% examine baseline differences between neighborhoods with constructed projects and neighborhoods with unconstructed projects.  
-% Finally, we examine where projects are located within neighborhoods.  
-% Finally, we document how project areas and nearby areas evolve differentially over time.  
 
 Table~\ref{table:projectdescriptives} compares average attributes for constructed and unconstructed projects.  The first row finds that constructed projects receive 374 deeds houses while unconstructed projects only receive 11 deeds houses on average from 2001 to 2011.  Since deeds houses provide an independent measure of project construction, this finding suggests that few unconstructed projects are misclassified as constructed projects.  Housing prices within 1 km of both constructed and unconstructed projects are lower than for areas over 1 km from projects, indicating that housing authorities locate projects in neighborhoods with inexpensive land.  Size, timing, location, and nearby house prices are broadly similar between unconstructed and constructed projects.  Housing projects cover over 1 $\text{km}^{2}$, which represents a significant development in local neighborhoods.  Using census data, Appendix Table \ref{table:projectdescriptivescensus} finds that before project construction, houses in project footprints are smaller and have worse access to services compared to other houses.  
 
@@ -489,14 +462,18 @@ Table~\ref{table:projectdescriptives} compares average attributes for constructe
 \begin{tabular}{l*{1}{ccccccc}}
 \toprule
 \\[-.5em]
- &\multicolumn{2}{C}{Footprint Overlap 100\%} &\multicolumn{2}{G}{Buffer Overlap 10-100\%}  &\multicolumn{2}{G}{Buffer Overlap 1-10\%} & \multicolumn{1}{G}{No Overlap} \\[3em]
-  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
+&\multicolumn{2}{C}{Footprint Overlap 50-100\%} &\multicolumn{2}{G}{Buffer Overlap 10-100\%}  &\multicolumn{2}{C}{Buffer Overlap 1-10\%} & \multicolumn{1}{G}{No Overlap} \\[3em]
+Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
 \midrule
 \\[-.5em]
-Building data \\[1em]
+\textbf{Building data} \\[1em]
 \input{figures/pre_table_bblu}
-\\
-\input{figures/pre_table_bblu_in_both}
+% \textbf{Building data pscore} \\[1em]
+% \input{figures/pre_table_bblu_pscore}
+% \textbf{Building data mixed} \\[1em]
+% \input{figures/pre_table_bblu_mixed}
+% \textbf{Building data zeros} \\[1em]
+% \input{figures/pre_table_bblu_zeros}
 \bottomrule
 \end{tabular}
 \end{table} 
@@ -504,19 +481,24 @@ Building data \\[1em]
 
 
 
-% Next, we turn to household census data to assess how both types of projects differ in terms of dwelling characteristics prior to project construction. 
-% \footnote{Our census geography selection method is depicted in more detail in appendix \ref{appendix:bufferdesign}.} 
-% To further assess where projects are located, Appendix Table~\ref{table:projectdescriptivescensus} uses pooled 1996 and 2001 census data to examine preexisting housing quality in project footprints before construction.  Since census blocks are often larger than housing projects, Table~\ref{table:projectdescriptivescensus} considers census blocks as pertaining to a housing project when over 50\% of the land area of the block overlaps with a project footprint.  Table~\ref{table:projectdescriptivescensus} compares means for household indicators aggregated at the block level based on whether the census boundaries overlap with constructed (first column) or planned but unconstructed projects (second column).  As a reference, the third column provides averages for all census blocks in the Gauteng province.
+\vspace{0mm}
+\begin{table}[h!]
+\centering
+\caption{Housing Project Areas Description ZEROS APPENDIX APPENDIX}\label{table:projectdescriptives}
+\vspace{0mm}
+\begin{tabular}{l*{1}{ccccccc}}
+\toprule
+\\[-.5em]
+&\multicolumn{2}{C}{Footprint Overlap 50-100\%} &\multicolumn{2}{G}{Buffer Overlap 10-100\%}  &\multicolumn{2}{C}{Buffer Overlap 1-10\%} & \multicolumn{1}{G}{No Overlap} \\[3em]
+Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
+\midrule
+\\[-.5em]
+\textbf{Building data} \\[1em]
+\input{figures/pre_table_bblu_zeros}
+\bottomrule
+\end{tabular}
+\end{table} 
 
- % Comparing preexisting houses in constructed and unconstructed projects, we do not observe systematic differences in housing attributes.  
-
-% While constructed project footprints are more likely to have flush toilets, electricity, and large household sizes, households in unconstructed project footprints report having better access to formal houses and piped water in their homes.  With a small number of blocks, average characteristics are not statistically different between constructed and unconstructed project footprints except for the formal housing measure.\footnote{Statistical significance is calculated at 5\% confidence level weighted by land area.}
-
-
-% Using the building-based land-use measures described in section \ref{section:data:bblu}, 
-% we then examine housing densities across constructed and unconstructed project areas.  
-% To inspect how densities change with proximity to housing projects,
-% Probably worth commenting on this gap in the pre-period inside the boundaries.
 
 Aerial building data provide spatially precise measures of preexisting development in areas prior to project construction.  We calculate euclidean distances from the centroid of 25m by 25m plots to the nearest project boundary and compute housing densities per $\text{km}^{2}$ at 25m intervals.  Figures \ref{fig:prefor_raw} and \ref{fig:preinf_raw} respectively plot average densities of formal and informal houses before project construction.  According to both figures, informal and formal housing densities are greater nearby constructed projects than nearby planned, but unconstructed projects.  This finding may suggest that project construction is targeted toward areas with denser preexisting development.  
 
@@ -528,69 +510,6 @@ Parallel patterns across constructed and unconstructed projects in both Figures 
 
 
 
-
-
-
-
-
-% \begin{figure*}[h!]
-%         \centering
-%         \caption[ Pre-Period Housing Densities outside of Constructed and Unconstructed Projects]
-%         {\small Pre-Period Housing Densities outside of Constructed and Unconstructed Projects} 
-%         %\vspace{2mm}
-%         \begin{subfigure}[b]{0.495\textwidth}
-%             \centering
-%             % \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_means_4_spk.pdf}
-%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_pre_out.pdf}
-%             \caption[Network2]%
-%             {{\small Formal housing density}}    
-%             \label{fig:prefor_raw}
-%         \end{subfigure}
-%         \hfill
-%         \begin{subfigure}[b]{0.495\textwidth}  
-%             \centering 
-%             % \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_means_4_spk.pdf}
-%             \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_pre_out.pdf}
-%             \caption[]%
-%             {{\small Informal housing density}}    
-%             \label{fig:preinf_raw}
-%         \end{subfigure}
-%         % \begin{subfigure}[b]{0.495\textwidth}
-%         %     \centering
-%         %     \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_for_fe_pre_means_4_spk.pdf}
-%         %     \caption[Network2]%
-%         %     {{\small Formal density within neighborhood}}    
-%         %     \label{fig:prefor_fe}
-%         % \end{subfigure}
-%         % \hfill
-%         % \begin{subfigure}[b]{0.495\textwidth}  
-%         %     \centering 
-%         %     \includegraphics[width=\textwidth,trim={0.3cm .3cm 0.1cm 0cm}, clip=true]{figures/bblu_inf_fe_pre_means_4_spk.pdf}
-%         %     \caption[]%
-%         %     {{\small Informal density within neighborhood}}    
-%         %     \label{fig:preinf_fe}
-%         % \end{subfigure}
-%         \label{fig:rawbblumeans_het}
-%         %\vspace{-6mm}
-%    % {\scriptsize Negative distances indicate areas within project boundaries while positive distances measure areas away increasingly outside of project boundaries.} % Within neighborhood densities are calculated by subtracting mean densities  \\[-.5em] at the 2001 census subplace level from each 25$\times$25m plot.
-%     \end{figure*} 
-
-
-
-% FIX THIS DISCUSSION!
-% We find low densities of formal housing and very high densities of informal housing within both unconstructed and constructed project footprints (at negative distances).  Crossing just outside of project footprints (to positive distances), 
-
-% formal housing densities quickly increase while informal housing densities sharply jump downwards.  These trends are consistent with housing projects being precisely targeted within poorer neighborhoods with few existing formal dwellings.  Formal and informal housing densities gradually decay moving further from project footprints.  On average, constructed projects are located in neighborhoods with greater housing densities than unconstructed projects although housing densities following similar trends with respect to distance from project boundaries.  Informal densities within project footprints are significantly higher for constructed projects compared to unconstructed projects, which 
-
-% , assigning negative distances to plots inside project footprints.
-% Greater negative distances exclude smaller projects in computing average densities, which may account for some of the variation in building density within projects, particularly for informal housing.  Appendix~\ref{appendix:projectcounts} illustrates this compositional change in more detail.  
-
-
-% Given that housing projects appear to be located in inexpensive neighborhoods with high preexisting densities of informal housing, we next examine whether housing projects are further targeted to particular locations within neighborhoods.  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} are calculated by first subtracting the average housing density in each neighborhood from the density in each plot, then calculating averages over distances to project footprints.  Neighborhoods are defined according to 1,001 census 2001 subplaces, which identify suburbs, wards, villages, or informal settlements (\cite{censusmeta}).  Figures \ref{fig:prefor_fe} and \ref{fig:preinf_fe} can be interpreted as the difference in housing density from the neighborhood average associated with each distance from a project boundary.  
-
-% Accounting for neighborhood differences removes much of the variation in preexisting housing densities across distances to housing projects, especially outside of project footprints.  Yet, low levels of formal housing and high levels of informal housing persist just within project footprints, consistent with housing authorities targeting projects toward inexpensive, poorer plots of land even within neighborhoods.  Similar patterns within neighborhoods for constructed and unconstructed areas suggest that both project types are located using similar criteria.  Accounting for neighborhood densities collapses average differences in densities between constructed and unconstructed projects although constructed projects have higher building densities within project footprints.  
-
-% Appendix Table~\ref{fig:rawbblumeans_het} graphs pre-period density of formal and informal housing separately for projects in city centers and projects in suburbs.  Unconstructed project areas near city centers have slightly higher densities of informal housing and lower densities of formal housing.  In suburbs, the opposite pattern holds with constructed project areas having somewhat higher densities of formal housing and lower densities of informal housing.  Outside of project boundaries, constructed and unconstructed projects have similar informal and formal housing levels in both city and suburb areas.
 
 
 
@@ -621,15 +540,6 @@ To estimate project impacts, we use a difference-in-differences-in-differences (
 \noindent where $y_{ipt}$ is the outcome for observation $i$ --- a 25m by 25m plot, a census block, or a housing transaction --- observed at time $t$ assigned to its nearest project $p$.  $\textsc{\small Post}_{t}$ equals one in time periods after scheduled construction and zero otherwise.  $\textsc{\small Const}_{p}$ equals one if project $p$ is ever constructed and zero otherwise.  $\,\textsc{\small Footprint}_{ip}$ equals one if the observation lies within project $p$'s footprint and zero otherwise.  Likewise, $\,\textsc{\small 0-500m Outside}_{ip}$ equals one if the observation lies between 0 and 500m outside of project $p$'s footprint and zero otherwise.  In some cases, plots and census blocks may partially overlap with project footprints or outside areas.  In these cases, $\,\textsc{\small Footprint}_{ip}$ and $\,\textsc{\small 0-500m Outside}_{ip}$ record the share of each observation $i$'s area that overlaps with the footprint or outside area.  We assume that all spillover effects of projects are contained within 500m, which is consistent with similar research on place-based policies.\footnote{\cite{diamond2016wants} and \cite{rossi2010housing} find that main effects are concentrated within similar radii.  We also test alternative buffer definitions.}  Areas 0 to 500m outside projects cover 3 $\text{km}^{2}$ while project footprints cover 1.2 $\text{km}^{2}$ on average.  We also only include observations within 1,500m of the nearest project.  To capture neighborhood fixed effects, $\lambda_{n}$ includes indicators for Census 2001 ``sub-places,'' which identify suburbs, wards, villages, or informal settlements.\footnote{See \cite{censusmeta} for details.  Samples include up to 1,069 neighborhoods with each containing on average 2,873 plots, 14 census blocks, and 13 property transactions.}  $X_{ipt}$ includes a vector of additional controls and $\varepsilon_{ipt}$ is the idiosyncratic error term.  
 
 
-% We assume that observations between 500m and 1,500m of projects are likely to control for broad economic or housing market trends that may also affect observations within 500m of projects.  
-
-% We define spillover areas from 0 to 500m outside of project footprints with the goal of ensuring that these areas are sufficiently wide to capture any potential spillover effects of housing projects.  Spillover areas cover 3 $\text{km}^{2}$ on average, making them 2.5 times larger than average project footprints.   under the assumption that these properties 
-
-
-% Since each project includes two treatment groups (project and spillover) and one set of control observations (from 500m to 1,500m), we cluster all standard errors at the project-by-group level.  
-
-% under the assumption that spillover effects from housing projects are likely to have dissipated by this distance
-
 
 Our coefficients of interest, $\alpha_1$ and $\beta_1$, capture differential changes in outcomes for constructed projects versus unconstructed projects in footprints and outside areas (0-500m) relative to areas farther away from footprints (500 to 1,500m).  A causal interpretation requires the assumption that absent housing project construction, changes nearby constructed and unconstructed projects would have evolved similarly relative to changes farther away from projects.  
 
@@ -637,99 +547,6 @@ This framework allows for constructed and unconstructed projects to experience d
 
 This framework does not allow for trends that are correlated with location and whether projects are constructed.  For example, forward-looking households may anticipate project construction on specific plots of land and alter their housing investment decisions accordingly.  Qualitative evidence suggests that it would be difficult for households to anticipate construction in this context due to substantial uncertainty in project location and timing.  Project managers face difficulties coordinating stakeholders and sourcing funding while housing authorities are rarely transparent about project planning \citep{serihistory}.\footnote{\cite{diamond2016wants} also leverage uncertainty in project timing to study affordable housing in the US.} 
 
-
-
-% In other words, $\alpha_1$ computes how much outcomes change between constructed and unconstructed footprints compared to the same change in areas far from footprints.  Although pro
-
-% \begin{figure*}[t!]
-%         \centering
-%         \caption[ Example Housing Project]
-%         {\small Example Housing Project } 
-%         \vspace{2mm}
-% % \includegraphics[width=\textwidth,trim={0cm 0cm 0cm 0cm}]{figures/newbblumap1.png}
-% \begin{tikz}
-% \includegraphics[width=.95\textwidth,trim={0cm 0cm 0cm 0cm}]{figures/casestudy6_medium.png}
-% \end{tikz}
-%         \label{fig:bblumaps}
-%         \small
-% \end{figure*}
-
-% % % south west
-
-% \tikzstyle{mybox} = [draw=white, fill=white, thin,
-%     rectangle, rounded corners, inner sep=1pt, inner ysep=1pt]
-
-
-
-% \begin{tikzpicture}[      
-%         every node/.style={anchor=south west,inner sep=0pt},
-%         x=1cm, y=1cm,
-%       ]   
-%      \node (fig1) at (0,0)
-%        {\includegraphics[width=1\textwidth,height=1\textheight,keepaspectratio]{figures/casestudy7_medium.png}};
-
-% % \node [mybox] (box) at (3.8,8.6) {%
-% %     \begin{pbox}{5cm}
-% %        { \scriptsize $\textsc{Const}$ }
-% %     \end{pbox}};
-% % \node [mybox] (box) at (5,7) {%
-% %     \begin{pbox}{5cm}
-% %        { \scriptsize $\textsc{Spill}\times\textsc{Const}$ }
-% %     \end{pbox}};
-% % \node [mybox] (box) at (5.9,5.5) {%
-% %     \begin{pbox}{1cm}
-% %        { \scriptsize $\textsc{Proj}\times\textsc{Const}$ }
-% %     \end{pbox}};
-
-% % \node [mybox] (box) at (8.5,7.5) {%
-% %     \begin{pbox}{5cm}
-% %        { \scriptsize $\textsc{Spill}$ }
-% %     \end{pbox}};
-% % \node [mybox] (box) at (8.1,6.3) {%
-% %     \begin{pbox}{1cm}
-% %        { \scriptsize $\textsc{Proj}$ }
-% %     \end{pbox}};
-
-
-% % \node[align=center] at (2.8,7.6)  { \text{\footnotesize  $\overline{\eta}^{1}_{1,L} $}};
-
-% \end{tikzpicture}
-
-
-
-
-% Moreover, building densities follow relatively smooth trends with distance from housing projects at 500m and further as indicated by Figures~\ref{fig:prefor_raw} and \ref{fig:preinf_raw}.
-
-
-
-% the control group to areas between 500m to 1,500m  This control group provides a useful way to control for any economic or housing market trends that may affect these neighborhoods.  
-
-
-
-
-
-% Descriptive evidence shows that  Figures~\ref{fig:prefor_raw} and \ref{fig:preinf_raw}
-
-
-
-
-% While the choice of buffer area is arbitrary, we aim to select a buffer area that is sufficiently wide to capture any potential spillover effects of housing projects.  
-
-% With average areas of 3 $\text{km}^{2}$, buffers from 0 to 500m are 2.5 times larger than average project footprints.  To the extent that spillover effects dissipate across space, these buffers are likely to include spillover effects.\footnote{As shown in Figures~\ref{fig:prefor_raw} and \ref{fig:preinf_raw}, pre-period differences in building density are uncorrelated with distance to project footprint at 500m and greater.  This finding suggests that any preexisting spillover effects from living near project areas disappear by 500m.}  
-
-
-
-% Observations are weighted according to their spatial area to ensure that project effects are representative across space.
-
-% The terms $\textsc{\small Post}_{t}$, $\,\textsc{\small Const}_{p}$, and $\textsc{\small Post}_{t}\times\textsc{\small Const}_{p}$ represent a standard differences-in-differences framework, controlling for differential changes for constructed and unconstructed projects before and after construction.  
-
-% We augment this standard framework by also estimating differential changes nearby project footprints (0 to 500m) relative to further away from footprints (500m to 1,500m).  $\,\textsc{\small Proj}_{ip}$ measures the percentage of unit $i$'s area that overlaps with the footprint of project $p$.  
-
-% When unit $i$ is measured in terms of GPS points such as the deeds data, $\,\textsc{\small Proj}_{ip}$ is either one (if unit $i$ is within footprint $p$) or zero (if unit $i$ is outside footprint $p$).  
-
-
-
-% Interpreting coefficients on $\,\textsc{\small Proj}_{ip}$ and $\,\textsc{\small Spill}_{ip}$ terms as capturing the effect of moving from 0\% to 100\% spatial exposure requires two additional assumptions: (1) the spatial effects are proportional to spatial area, and (2) the distribution of project and spillover areas within outcome units is uncorrelated with the distribution of outcomes within these units. %\footnote{TEST THESE ASSUMPTIONS?! PROVIDE MORE EXPLANATION!?}
 
 
 
@@ -777,34 +594,7 @@ In the absence of project construction, housing growth in footprints out-paces a
 \begin{tabular}{lCCCCC}
 \toprule
 & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
- \\[-.5em]
-\input{figures/b_ksp_o0_d250_500_final_1}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-\begin{table}[hbt!]
-\small
-\centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
  \\[-.5em]
 \input{figures/bblu_overlap}
 \bottomrule
@@ -821,121 +611,8 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
 \end{table}
 
 
-\begin{table}
-\small
-\centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates PSCORE WEIGHTING}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
- \\[-.5em]
-\input{figures/bblu_overlap_ps}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
 
 \begin{table}
-\small
-\centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates ONLY ZEROS}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
- \\[-.5em]
-\input{figures/bblu_overlap_c0}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-
-
-
-\begin{table}
-\small
-\centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates MIXED}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
- \\[-.5em]
-\input{figures/bblu_overlap_mixed}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-
-% \begin{table}
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates LESS THAN 1000}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_overlap_c1000}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
-
-
-
-\begin{table}[hbt!]
 \small
 \centering
 \caption{Housing Density per $\text{km}^{2}$ Estimates}\label{table:bbluDDDfull}
@@ -945,7 +622,7 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
 \begin{tabular}{lCCCCC}
 \toprule
 & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing & \small Informal Backyard Housing  \\ \midrule
  \\[-.5em]
 \input{figures/bblu_spill_overlap}
 \bottomrule
@@ -963,20 +640,46 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
 
 
 
-
 \begin{table}
 \small
 \centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates TRIM TOP}\label{table:bbluDDDfull}
+\caption{Housing Density per $\text{km}^{2}$ Estimates ZEROES APPENDIX}\label{table:bbluDDDfull}
 \vspace{-2mm}
 \resizebox{1\linewidth}{!}{
 \begin{threeparttable}
 \begin{tabular}{lCCCCC}
 \toprule
 & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
  \\[-.5em]
-\input{figures/bblu_spill_overlap_c}
+\input{figures/bblu_overlap_zeros}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 25m by 25m plots within 1,500m of project footprints.
+Estimates control for 2001 census sub-place fixed effects.
+Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Housing Density per $\text{km}^{2}$ Estimates SPILL ZEROES APPENDIX}\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
+ \\[-.5em]
+\input{figures/bblu_overlap_spill_zeros}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -992,19 +695,47 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
 
 
 
+
 \begin{table}
 \small
 \centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates MIXED}\label{table:bbluDDDfull}
+\caption{Housing Density per $\text{km}^{2}$ Estimates LAG APPENDIX}\label{table:bbluDDDfull}
 \vspace{-2mm}
 \resizebox{1\linewidth}{!}{
 \begin{threeparttable}
 \begin{tabular}{lCCCCC}
 \toprule
 & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
  \\[-.5em]
-\input{figures/bblu_overlap_spill_mixed}
+\input{figures/bblu_overlap_lag}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 25m by 25m plots within 1,500m of project footprints.
+Estimates control for 2001 census sub-place fixed effects.
+Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Housing Density per $\text{km}^{2}$ Estimates SPILL LAG APPENDIX}\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
+ \\[-.5em]
+\input{figures/bblu_spill_overlap_lag}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -1021,59 +752,6 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
 
 
 
-\begin{table}
-\small
-\centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates ONLY ZEROS}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
- \\[-.5em]
-\input{figures/bblu_spill_overlap_c0}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-
-\begin{table}
-\small
-\centering
-\caption{Housing Density per $\text{km}^{2}$ Estimates LESS THAN 1000}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
- \\[-.5em]
-\input{figures/bblu_spill_overlap_c1000}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
 
 
 

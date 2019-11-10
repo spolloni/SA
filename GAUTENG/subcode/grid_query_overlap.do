@@ -13,7 +13,7 @@ if $LOCAL==1 {;
 };
 
 global load_buffer_1 	= 0;
-global load_grids 		= 0;
+global load_grids 		= 1;
 global load_buffer_2 	= 1;
 
 global grid = "100";
@@ -104,9 +104,26 @@ prog define grid_query;
 
 clear;
 	local qry = "
-	SELECT  AA.grid_id, C.OGC_FID, C.s_lu_code, C.t_lu_code
+	SELECT  AA.grid_id, C.OGC_FID, C.s_lu_code, C.t_lu_code,
+
+	B.distance AS rdp_distance, B.target_id AS rdp_cluster, B.count AS rdp_count,
+	BP.distance AS placebo_distance, BP.target_id AS placebo_cluster, BP.count AS placebo_count
 
 	FROM grid_temp_${grid} AS AA 
+
+	LEFT JOIN 
+	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
+	          FROM distance_grid_temp_100_gcro_full AS D
+	          JOIN rdp_cluster AS R ON R.cluster = D.target_id
+	          GROUP BY D.input_id  HAVING D.distance == MIN(D.distance) 
+	        ) AS B ON AA.grid_id=B.input_id
+
+	LEFT JOIN 
+	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
+	          FROM distance_grid_temp_100_gcro_full AS D
+	          JOIN placebo_cluster AS R ON R.cluster = D.target_id
+	          GROUP BY D.input_id  HAVING D.distance == MIN(D.distance) 
+	        ) AS BP ON AA.grid_id=BP.input_id  
 
 	LEFT JOIN grid_bblu_`1'grid_temp_${grid} AS A  ON A.grid_id=AA.grid_id
 

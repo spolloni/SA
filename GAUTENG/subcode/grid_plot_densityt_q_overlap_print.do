@@ -64,9 +64,39 @@ cd ../..
 cd $output
 
 
+g pp = 1 if  proj_rdp>.5 & proj_placebo==0 & post==0 
+replace pp = 0 if  proj_placebo>.5 & proj_rdp==0 & post==0 
+
+g tb_pre = total_buildings if pp!=. & post==0
+g for_pre = for            if pp!=. & post==0
+g inf_pre = inf            if pp!=. & post==0
+
+
+gegen tbm = mean(tb_pre), by(cluster_joined)
+gegen fbm = mean(for_pre), by(cluster_joined)
+gegen ibm = mean(inf_pre), by(cluster_joined)
+gegen rdp = max(pp), by(cluster_joined)
+
+g tbm_2 = tbm*tbm
+g tbm_0 = tbm==0
+
+g fbm_2 = fbm*fbm
+g fbm_0 = fbm==0
+
+g ibm_2 = ibm*ibm
+g ibm_0 = ibm==0
+
+bys cluster_joined: g cjn=_n
+
+
+
+
 preserve
   keep if cjn==1
-  psmatch2 rdp fbm_0 fbm fbm_2  ibm_0 ibm ibm_2
+  egen fbg = cut(fbm), group(20)
+  egen ibg = cut(ibm), group(20)
+  psmatch2 rdp i.fbg i.ibg
+  keep if _support==1
   keep cluster_joined _pscore
   drop if _pscore==.
   save "temp_pscore.dta", replace
@@ -80,44 +110,18 @@ merge m:1 cluster_joined using "temp_pscore.dta"
 
 
 
-
-sum tbm if pp ==0 & post==0 , detail
-g c = tbm<=`=r(max)'
-g c0 = tbm==0
-g c1000 = tbm<1000
-
-
-
-bys cluster_joined pp post: g cn=_n
-
-hist tbm if cn==1 & post==0, by(pp)
-
-
-
-*** JUST DO ONE TO ONE MATCHING ON 
-
-tab tbm pp if cn==1
-
-
-
-
-
-reg rdp tbm if cjn==1
-
-
-
 cap drop treat
 cap drop treat_R
 cap drop treat_P
-g treat_R = 1 if proj_rdp==1 & proj_placebo==0 & post==0 
+g treat_R = 1 if proj_rdp>=.5 & proj_placebo==0 & post==0 
 replace treat_R=2 if s1p_a_1_R>=.1 & s1p_a_1_R<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
 replace treat_R=3 if s1p_a_1_R>=.01 & s1p_a_1_R<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
 
-g treat_P=1 if proj_placebo==1 & proj_rdp==0 & post==0
+g treat_P=1 if proj_placebo>=.5 & proj_rdp==0 & post==0
 replace treat_P=2 if s1p_a_1_P>=.1 & s1p_a_1_P<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
 replace treat_P=3 if s1p_a_1_P>=.01 & s1p_a_1_P<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
 
-g treat=1 if s1p_a_1_P==0 & s1p_a_1_P==0 & proj_rdp==0 & proj_placebo==0 & post==0
+g treat=1 if s1p_a_1_R==0 & s1p_a_1_P==0 & proj_rdp==0 & proj_placebo==0 & post==0
 
 global cat1 = " if treat_R==1"
 global cat2 = " if treat_P==1"
@@ -136,21 +140,108 @@ global cat7 = " if treat==1"
     file close newfile
 
 
+* global cat1 = " [pweight = _pscore] if treat_R==1"
+* global cat2 = " [pweight = _pscore] if treat_P==1"
+* global cat3 = " [pweight = _pscore] if treat_R==2"
+* global cat4 = " [pweight = _pscore] if treat_P==2"
+* global cat5 = " [pweight = _pscore] if treat_R==3"
+* global cat6 = " [pweight = _pscore] if treat_P==3"
+* global cat7 = " [pweight = _pscore] if treat==1"
 
-* global cat1 = " if treat_R==1 & in_both==1"
-* global cat2 = " if treat_P==1 & in_both==1"
-* global cat3 = " if treat_R==2 & in_both==1"
-* global cat4 = " if treat_P==2 & in_both==1"
-* global cat5 = " if treat_R==3 & in_both==1"
-* global cat6 = " if treat_P==3 & in_both==1"
-* global cat7 = " if treat==1   & in_both==1"
+*  global cat_num=7
 
-
-*     file open newfile using "pre_table_bblu_in_both.tex", write replace
-*           print_1 "Formal Houses per $\text{km}^{2}$" for "mean" "%10.0fc"
-*           print_1 "Informal Houses per $\text{km}^{2}$" inf "mean" "%10.0fc"
-*           print_1 "N"                 total_buildings "N" "%10.0fc"
+*     file open newfile using "pre_table_bblu_pscore.tex", write replace
+*           print_mw "Formal Houses per $\text{km}^{2}$" for "mean" "%10.0fc"
+*           print_mw "Informal Houses per $\text{km}^{2}$" inf "mean" "%10.0fc"
+*           * print_1 "N"                 total_buildings "N" "%10.0fc"
 *     file close newfile
+
+
+
+
+**** MIXED! ****
+
+cap drop treat
+cap drop treat_R
+cap drop treat_P
+g treat_R = 1 if proj_rdp_mixed>=.5 & proj_placebo==0 & post==0 
+replace treat_R=2 if s1p_a_1_R_mixed>=.1 & s1p_a_1_R_mixed<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
+replace treat_R=3 if s1p_a_1_R_mixed>=.01 & s1p_a_1_R_mixed<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g treat_P=1 if proj_placebo_mixed>=.5 & proj_rdp==0 & post==0
+replace treat_P=2 if s1p_a_1_P_mixed>=.1 & s1p_a_1_P_mixed<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
+replace treat_P=3 if s1p_a_1_P_mixed>=.01 & s1p_a_1_P_mixed<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g treat=1 if s1p_a_1_R==0 & s1p_a_1_P==0 & proj_rdp==0 & proj_placebo==0 & post==0
+
+global cat1 = " if treat_R==1"
+global cat2 = " if treat_P==1"
+global cat3 = " if treat_R==2"
+global cat4 = " if treat_P==2"
+global cat5 = " if treat_R==3"
+global cat6 = " if treat_P==3"
+global cat7 = " if treat==1"
+
+sum total_buildings if treat_R==1 & post==0
+sum total_buildings if treat_P==1 & post==0
+
+
+sum for if treat_R==1 & post==0
+sum for if treat_P==1 & post==0
+
+
+ global cat_num=7
+
+    file open newfile using "pre_table_bblu_mixed.tex", write replace
+          print_1 "Formal Houses per $\text{km}^{2}$" for "mean" "%10.0fc"
+          print_1 "Informal Houses per $\text{km}^{2}$" inf "mean" "%10.0fc"
+          print_1 "N"                 total_buildings "N" "%10.0fc"
+    file close newfile
+
+
+
+
+**** ZEROS! ****
+
+cap drop treat
+cap drop treat_R
+cap drop treat_P
+g treat_R = 1 if proj_rdp_zeros==1 & proj_placebo_zeros==0 & post==0 
+replace treat_R=2 if s1p_a_1_R_zeros>=.1 & s1p_a_1_R_zeros<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
+replace treat_R=3 if s1p_a_1_R_zeros>=.01 & s1p_a_1_R_zeros<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g treat_P=1 if proj_placebo_zeros==1 & proj_rdp_zeros==0 & post==0
+replace treat_P=2 if s1p_a_1_P_zeros>=.1 & s1p_a_1_P_zeros<=1 & proj_rdp==0 & proj_placebo==0 & post==0 
+replace treat_P=3 if s1p_a_1_P_zeros>=.01 & s1p_a_1_P_zeros<.1 & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g treat=1 if s1p_a_1_R==0 & s1p_a_1_P==0 & proj_rdp==0 & proj_placebo==0 & post==0
+
+global cat1 = " if treat_R==1"
+global cat2 = " if treat_P==1"
+global cat3 = " if treat_R==2"
+global cat4 = " if treat_P==2"
+global cat5 = " if treat_R==3"
+global cat6 = " if treat_P==3"
+global cat7 = " if treat==1"
+
+ global cat_num=7
+
+    file open newfile using "pre_table_bblu_zeros.tex", write replace
+          print_1 "Formal Houses per $\text{km}^{2}$" for "mean" "%10.0fc"
+          print_1 "Informal Houses per $\text{km}^{2}$" inf "mean" "%10.0fc"
+          print_1 "N"                 total_buildings "N" "%10.0fc"
+    file close newfile
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -166,6 +257,33 @@ g PR_conPR = conPR*PR
 g PR_post = PR*post
 g post_conPR=post*conPR
 g PR_post_conPR = PR_post*conPR
+
+
+
+sort id post
+foreach var of varlist $outcomes {
+    cap drop `var'_ch
+    cap drop `var'_lag
+    cap drop `var'_lag_2
+  by id: g `var'_ch = `var'[_n]-`var'[_n-1]
+  by id: g `var'_lag = `var'[_n-1]
+  g `var'_lag_2 = `var'_lag*`var'_lag
+}
+
+
+reg total_buildings_ch post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+
+reg total_buildings_ch total_buildings_lag post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+
+reg total_buildings_ch total_buildings_lag* post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+
+
+
+reg total_buildings_ch post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+
+reg total_buildings_ch total_buildings_lag post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+
+reg total_buildings_ch total_buildings_lag* post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
 
 
 g conPR_mixed = 1       if proj_rdp_mixed>0 &  proj_rdp_mixed<.
@@ -196,34 +314,9 @@ g PR_post_conPR_zeros = PR_post_zeros*conPR_zeros
 
 
 
-g proj_rdp_other = proj_rdp - proj_rdp_mixed - proj_rdp_zeros
-g proj_placebo_other = proj_placebo - proj_placebo_mixed - proj_placebo_zeros
-
-
-g conPR_other = 1       if proj_rdp_other>0 &  proj_rdp_other<.
-replace conPR_other = 0 if conPR_other==.
-
-g PR_other = proj_rdp_other if conPR_other==1
-replace PR_other =  proj_placebo_other if conPR_other==0
-
-g PR_conPR_other = conPR_other*PR_other
-g PR_post_other = PR_other*post
-g post_conPR_other=post*conPR_other
-g PR_post_conPR_other = PR_post_other*conPR_other
-
-
-
-  reg total_buildings post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
- 
-  reg total_buildings post PR_mixed PR_conPR_mixed PR_post_mixed PR_post_conPR_mixed , r cluster(cluster_joined)
- 
-  reg total_buildings post PR_zeros PR_conPR_zeros PR_post_zeros PR_post_conPR_zeros , r cluster(cluster_joined)
-
-
-  reg total_buildings post PR PR_conPR PR_post PR_post_conPR ///
-                      PR_mixed PR_conPR_mixed PR_post_mixed PR_post_conPR_mixed ///
-                      PR_zeros PR_conPR_zeros PR_post_zeros PR_post_conPR_zeros , r cluster(cluster_joined)
-
+  * reg total_buildings post PR PR_conPR PR_post PR_post_conPR , r cluster(cluster_joined)
+  * reg total_buildings post PR_mixed PR_conPR_mixed PR_post_mixed PR_post_conPR_mixed , r cluster(cluster_joined)
+  * reg total_buildings post PR_zeros PR_conPR_zeros PR_post_zeros PR_post_conPR_zeros , r cluster(cluster_joined)
 
 
 
@@ -279,7 +372,34 @@ g post_conSP=post*conSP
 g SP_post_conSP = SP_post*conSP
 
 
+g conSP_mixed = 1 if  s1p_a_1_P_mixed==0 & proj_rdp==0 & proj_placebo==0
+replace conSP_mixed = 0 if s1p_a_1_R_mixed==0 & proj_rdp==0 & proj_placebo==0
+
+g SP_mixed = s1p_a_1_R_mixed if conSP_mixed==1
+replace SP_mixed = s1p_a_1_P_mixed if conSP_mixed==0
+
+g SP_conSP_mixed = conSP_mixed*SP_mixed
+g SP_post_mixed = SP_mixed*post
+g post_conSP_mixed=post*conSP_mixed
+g SP_post_conSP_mixed = SP_post_mixed*conSP_mixed
+
+
+g conSP_zeros = 1 if  s1p_a_1_P_zeros==0 & proj_rdp==0 & proj_placebo==0
+replace conSP_zeros = 0 if s1p_a_1_R_zeros==0 & proj_rdp==0 & proj_placebo==0
+
+g SP_zeros = s1p_a_1_R_zeros if conSP_zeros==1
+replace SP_zeros = s1p_a_1_P_zeros if conSP_zeros==0
+
+g SP_conSP_zeros = conSP_zeros*SP_zeros
+g SP_post_zeros = SP_zeros*post
+g post_conSP_zeros=post*conSP_zeros
+g SP_post_conSP_zeros = SP_post_zeros*conSP_zeros
+
+
   * reg total_buildings post SP SP_conSP SP_post SP_post_conSP , r cluster(cluster_joined)
+  * reg total_buildings post SP_mixed SP_conSP_mixed SP_post_mixed SP_post_conSP_mixed , r cluster(cluster_joined)
+  * reg total_buildings post SP_zeros SP_conSP_zeros SP_post_zeros SP_post_conSP_zeros , r cluster(cluster_joined)
+
 
 global weight = ""
 regs_spill bblu_spill_overlap
