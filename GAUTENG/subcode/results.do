@@ -117,16 +117,9 @@ global many_spill 	= 0
 global spatial  	= 0
 global other_print 	= 0
 
-if $many_spill == 0 {
-	global dist_break_reg1 = 250 
-	global dist_break_reg2 = 500
-}
-if $many_spill == 1 {
-	global dist_break_reg1 = 250 
-	global dist_break_reg2 = 500
-	* global dist_break_reg1 = 400 
-	* global dist_break_reg2 = 800
-}
+	global dist_break_reg1 = 500 
+	global dist_break_reg2 = 3000
+
 
 global analysis_now = 0
 global k = "sp"   /* determines fixed effect size */

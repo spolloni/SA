@@ -468,8 +468,8 @@ Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
 \\[-.5em]
 \textbf{Building data} \\[1em]
 \input{figures/pre_table_bblu}
-% \textbf{Building data pscore} \\[1em]
-% \input{figures/pre_table_bblu_pscore}
+\textbf{Building data DISTANCE} \\[1em]
+\input{figures/pre_table_bblu_dist}
 % \textbf{Building data mixed} \\[1em]
 % \input{figures/pre_table_bblu_mixed}
 % \textbf{Building data zeros} \\[1em]
@@ -479,25 +479,70 @@ Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
 \end{table} 
 
 
-
+\vspace{0mm}
+\begin{table}[h!]
+\centering
+\caption{Footprint Description}\label{table:projectdescriptives}
+\vspace{0mm}
+\begin{tabular}{l*{1}{ccc}}
+\toprule
+\\[-.5em]
+&Constructed &Unconstructed  &Outside Footprints \\[.5em]
+\midrule
+\\[-.5em]
+\textbf{Building data} \\[1em]
+\input{figures/pre_table_footprint}
+% \textbf{Building data mixed} \\[1em]
+% \input{figures/pre_table_bblu_mixed}
+% \textbf{Building data zeros} \\[1em]
+% \input{figures/pre_table_bblu_zeros}
+\bottomrule
+\end{tabular}
+\end{table} 
 
 \vspace{0mm}
 \begin{table}[h!]
 \centering
-\caption{Housing Project Areas Description ZEROS APPENDIX APPENDIX}\label{table:projectdescriptives}
+\caption{Spillover Description}\label{table:projectdescriptives}
 \vspace{0mm}
-\begin{tabular}{l*{1}{ccccccc}}
+\resizebox{1\linewidth}{!}{
+\begin{tabular}{l*{1}{ccccccccc}}
 \toprule
 \\[-.5em]
-&\multicolumn{2}{C}{Footprint Overlap 50-100\%} &\multicolumn{2}{G}{Buffer Overlap 10-100\%}  &\multicolumn{2}{C}{Buffer Overlap 1-10\%} & \multicolumn{1}{G}{No Overlap} \\[3em]
-Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
+% &\multicolumn{2}{C}{Footprint Overlap 50-100\%} &\multicolumn{2}{G}{Buffer Overlap 10-100\%}  &\multicolumn{2}{C}{Buffer Overlap 1-10\%} & \multicolumn{1}{G}{No Overlap} \\[3em]
+% Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
+&\multicolumn{4}{c}{Constructed} &\multicolumn{4}{c}{Unconstructed}  \\[.5em]
+& 0-.5 & .5-1 & 1-1.5 & 1.5-2  & 0-.5 & .5-1 & 1-1.5 & 1.5-2  \\[.3em]
 \midrule
 \\[-.5em]
-\textbf{Building data} \\[1em]
-\input{figures/pre_table_bblu_zeros}
+\textbf{Building data SHARES} \\[1em]
+\input{figures/pre_table_bblu_spill_shares}
+\textbf{Building data DIST} \\[1em]
+\input{figures/pre_table_bblu_spill_dist}
 \bottomrule
 \end{tabular}
+}
 \end{table} 
+
+
+
+% \vspace{0mm}
+% \begin{table}[h!]
+% \centering
+% \caption{Housing Project Areas Description ZEROS APPENDIX APPENDIX}\label{table:projectdescriptives}
+% \vspace{0mm}
+% \begin{tabular}{l*{1}{ccccccc}}
+% \toprule
+% \\[-.5em]
+% &\multicolumn{2}{C}{Footprint Overlap 50-100\%} &\multicolumn{2}{G}{Buffer Overlap 10-100\%}  &\multicolumn{2}{C}{Buffer Overlap 1-10\%} & \multicolumn{1}{G}{No Overlap} \\[3em]
+% Construction Status  &Con & Uncon   &Con & Uncon  &Con & Uncon   & \\[.3em]
+% \midrule
+% \\[-.5em]
+% \textbf{Building data} \\[1em]
+% \input{figures/pre_table_bblu_zeros}
+% \bottomrule
+% \end{tabular}
+% \end{table} 
 
 
 Aerial building data provide spatially precise measures of preexisting development in areas prior to project construction.  We calculate euclidean distances from the centroid of 25m by 25m plots to the nearest project boundary and compute housing densities per $\text{km}^{2}$ at 25m intervals.  Figures \ref{fig:prefor_raw} and \ref{fig:preinf_raw} respectively plot average densities of formal and informal houses before project construction.  According to both figures, informal and formal housing densities are greater nearby constructed projects than nearby planned, but unconstructed projects.  This finding may suggest that project construction is targeted toward areas with denser preexisting development.  
@@ -680,6 +725,120 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
  \\[-.5em]
 \input{figures/bblu_overlap_spill_zeros}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 25m by 25m plots within 1,500m of project footprints.
+Estimates control for 2001 census sub-place fixed effects.
+Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+
+
+
+
+\begin{table}
+\small
+\centering
+\caption{NEW TOP Housing Density per $\text{km}^{2}$ Estimates LAG APPENDIX}\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small $\Delta$ Total Housing & \small $\Delta$ Formal Housing & \small $\Delta$ Informal Housing & \small $\Delta$ Informal Non-Bkyd. Housing  & \small $\Delta$ Informal Backyard Housing\\ \midrule
+ \\[-.5em]
+\input{figures/bblu_spill_test_new_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 25m by 25m plots within 1,500m of project footprints.
+Estimates control for 2001 census sub-place fixed effects.
+Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{NEW TOP CENSUS Estimates LAG APPENDIX}\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small $\Delta$ Pop Density & \small $\Delta$ Water Inside & \small $\Delta$ Flush Toilet & \small $\Delta$ Electricity  & \small $\Delta$ Rooms\\ \midrule
+ \\[-.5em]
+\input{figures/census_spill_test_new_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 25m by 25m plots within 1,500m of project footprints.
+Estimates control for 2001 census sub-place fixed effects.
+Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+
+
+\begin{table}
+\small
+\centering
+\caption{NEW Housing Density per $\text{km}^{2}$ Estimates LAG APPENDIX}\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
+ \\[-.5em]
+\input{figures/bblu_spill_test_new}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 25m by 25m plots within 1,500m of project footprints.
+Estimates control for 2001 census sub-place fixed effects.
+Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{NEW CENSUS Estimates LAG APPENDIX}\label{table:bbluDDDfull}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ & \small Pop Density & \small Water Inside & \small Flush Toilet & \small Electricity  & \small Rooms\\ \midrule
+ \\[-.5em]
+\input{figures/census_spill_test_new}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}

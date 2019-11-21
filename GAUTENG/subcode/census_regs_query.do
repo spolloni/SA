@@ -37,7 +37,7 @@ global data_load_place = 0;
 global full_data_1996 = 0;
 global full_data_2001 = 0;
 global full_data_2011 = 0;
-global aggregate      = 1;
+global aggregate      = 0;
 
 
 
@@ -46,8 +46,11 @@ global full_data_pers_2001 = 0;
 global full_data_pers_2011 = 0;
 global aggregate_pers      = 0;
 
+global add_grids = 0;
 
-global merge_place    = 1;
+global merge_place    = 0;
+
+
 
 
 
@@ -99,7 +102,7 @@ local qry = "
 
       1996 AS year, EA.OGC_FID AS area_code,  XY.X, XY.Y, 
 
-      SP.sp_1
+      SP.sp_1, SP.sal_1, SP.area_int
 
     FROM ea_1996 AS EA
 
@@ -155,7 +158,7 @@ local qry = "
 
       2001 AS year, SP.OGC_FID AS area_code,  XY.X, XY.Y, 
 
-      SP.sp_code AS sp_1
+      SP.sp_code AS sp_1, SP.sal_code AS sal_1, 1 AS area_int
 
     FROM (SELECT sal_code AS SAL FROM sal_2001) AS A  
 
@@ -212,7 +215,7 @@ local qry = "
 
       2011 AS year, A.OGC_FID AS area_code,  XY.X, XY.Y, 
 
-      SP.sp_1
+      SP.sp_1, SP.sal_1, SP.area_int
 
     FROM (SELECT OGC_FID FROM sal_ea_2011) AS A  
 
@@ -509,9 +512,9 @@ gen room_on_shared_prop = (dwelling_type == 9 & year==1996)|(dwelling_type == 8 
 * lab var shack_non_bkyd "Shack Non-Backyard";
 
 foreach var of varlist house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop {;
-egen `var'_dens = sum(`var'), by(area_code year) ;
+gegen `var'_dens = sum(`var'), by(area_code year) ;
 g `var'_hh = `var'*hh_size ;
-egen `var'_dens_pers = sum(`var'_hh), by(area_code year) ;
+gegen `var'_dens_pers = sum(`var'_hh), by(area_code year) ;
 drop `var'_hh;
 };
 
@@ -538,13 +541,13 @@ lab var hh_size "Household Size";
 
 * household density;
 g o = 1;
-egen  hh_pop = sum(o), by(area_code year);
+gegen  hh_pop = sum(o), by(area_code year);
 *g hh_density = (hh_pop/area)*1000000;
 *lab var hh_density "Households per km2";
 drop o;
 
 * pop density;
-egen  person_pop = sum(hh_size), by(area_code year);
+gegen  person_pop = sum(hh_size), by(area_code year);
 *g pop_density = (person_pop/area)*1000000;
 *lab var pop_density "People per km2";
 
@@ -569,7 +572,7 @@ fcollapse
   (mean) 
       toilet_flush* water_inside* water_yard* water_utility*
       electricity* electric_cooking* electric_heating* electric_lighting*
-      owner* tot_rooms* hh_size*  age* sex*  emp* african*  inc* ln_inc*    ten_rented* ten_owned* ten_free* ten_debt*
+      owner*  tot_rooms* hh_size*  age* sex*  emp* african*  inc* ln_inc*    ten_rented* ten_owned* ten_free* ten_debt*
       formal informal   house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop  
   (firstnm) 
       hh_pop person_pop  house_dens traditional_dens flat_dens duplex_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens room_on_shared_prop_dens
@@ -797,6 +800,33 @@ erase "DDcensus_pers_full_2011_admin${V}.dta";
 
 
 
+if $add_grids == 1 {;
+
+local qry = " 
+
+    SELECT  *, 1996 as year FROM ea_1996_grid 
+    UNION
+    SELECT  *, 2001 as year FROM sal_2001_grid 
+    UNION
+    SELECT  *, 2011 as year FROM sal_2011_grid 
+     ;
+";
+
+
+odbc query "gauteng" ;
+odbc load, exec("`qry'") clear ; 
+
+
+merge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta" ;
+keep if _merge==3;
+drop _merge;
+
+save "census_grid_link.dta", replace;
+
+};
+
+
+
 
 if $merge_place == 1 {;
 
@@ -824,11 +854,18 @@ drop _merge;
 
 replace hh_pop=0 if hh_pop==.;
 replace person_pop=0 if person_pop==.;
+save "temp_censushh_agg${V}.dta", replace;
+
 cd ../..;
 cd $output;
 save "temp_censushh_agg${V}.dta", replace;
 
 };
+
+
+
+
+
 
 
 

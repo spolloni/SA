@@ -13,8 +13,10 @@ if $LOCAL==1 {;
 };
 
 global load_buffer_1 	= 0;
-global load_grids 		= 1;
-global load_buffer_2 	= 1;
+global load_grids 		= 0;
+global load_buffer_2 	= 0;
+global merge_all  		= 0;
+global undev   			= 1;
 
 global grid = "100";
 global dist_break_reg1 = "500";
@@ -295,6 +297,8 @@ save "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap_het.dta", replac
 };
 
 
+if $merge_all== 1 {;
+
 use bbluplot_grid_pre_overlap, clear;
 
 g post=0;
@@ -310,6 +314,36 @@ ren grid_id id;
 
 save "bbluplot_grid_${grid}_overlap_full_het.dta", replace;
 
+};
+
+
+
+if $undev == 1 {;
+
+local qry = " 
+SELECT * FROM grid_100_to_cult_recreational 
+UNION
+SELECT * FROM grid_100_to_hydr_areas
+UNION
+SELECT * FROM grid_100_to_phys_landform_artific
+";
+
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force;
+
+gegen asum = sum(area_int), by(grid_id);
+
+keep if asum>5000;
+
+keep grid_id;
+duplicates drop grid_id, force;
+ren grid_id id;
+
+save "undev_100.dta", replace;
+
+};
 
 * erase  bbluplot_grid_pre_overlap.dta;
 * erase  bbluplot_grid_post_overlap.dta;

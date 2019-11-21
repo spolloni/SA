@@ -84,9 +84,93 @@ g post_conPR=post*conPR
 g PR_post_conPR = PR_post*conPR
 
 global cells = 3
-global weight = "  [pweight = area]   "
+global weight  =  "  [pweight = area]   "
 
 
+*** DEAL WITH AREA OUTLIERS! 
+
+
+gegen area_int_max = max(area_int), by(sal_1 year)
+keep if area_int_max==area_int
+
+sort sal_1 year
+by sal_1: g sN=_N
+keep if sN==3
+
+
+foreach var of varlist proj_rdp proj_placebo {
+g `var'_1_id = `var' if year==2001
+gegen `var'_1 = max(`var'_1_id), by(sal_1)
+drop `var'_1_id
+}
+
+g conPR_1 = 1       if proj_rdp_1>0 & proj_rdp_1<.
+replace conPR_1 = 0 if conPR_1==.
+
+g PR_1 = proj_rdp_1 if conPR_1==1
+replace PR_1 =  proj_placebo_1 if conPR_1==0
+
+g PR_1_conPR_1 = conPR_1*PR_1
+g PR_1_post = PR_1*post
+g post_conPR_1=post*conPR_1
+g PR_post_conPR_1 = PR_post*conPR_1
+
+
+sort sal_1 year
+reg  water_inside post PR_1 PR_1_conPR_1 PR_1_post PR_post_conPR_1   , cluster(cluster_joined) r
+
+
+
+reg  water_inside post PR PR_conPR PR_post PR_post_conPR [pweight=area] if area<200000   , cluster(cluster_joined) r
+
+reg  water_inside post PR PR_conPR PR_post PR_post_conPR [pweight=area] if area<600000   , cluster(cluster_joined) r
+
+
+/*
+
+
+forvalues r=1/6 {
+  cap drop s1p_a_`r'_C 
+  cap drop s1p_a_`r'_C_con
+  cap drop s1p_a_`r'_C_post 
+  cap drop s1p_a_`r'_C_con_post
+  g s1p_a_`r'_C = s1p_a_`r'_R if s1p_a_`r'_R> s1p_a_`r'_P
+  replace s1p_a_`r'_C  = s1p_a_`r'_P if s1p_a_`r'_P>s1p_a_`r'_R
+  replace s1p_a_`r'_C=0 if s1p_a_`r'_C ==.
+  
+  g s1p_a_`r'_C_con = s1p_a_`r'_C if  s1p_a_`r'_R>s1p_a_`r'_P
+  replace s1p_a_`r'_C_con=0  if s1p_a_`r'_C_con==.
+
+  g s1p_a_`r'_C_post = s1p_a_`r'_C*post
+  g s1p_a_`r'_C_con_post = s1p_a_`r'_C_con*post
+}
+
+
+
+
+gegen area_int_max = max(area_int), by(sal_1 year)
+
+
+
+
+g salgroup = area_int_max ==area_int
+
+keep if salgroup==1
+
+
+sort sal_1 year
+by sal_1: g water_inside_ch = water_inside[_n]- water_inside[_n-1]
+
+
+reg  water_inside_ch s1p_*_C*    if proj_rdp==0 & proj_placebo==0 , cluster(cluster_joined) r
+
+reg  water_inside s1p_*_C*    if proj_rdp==0 & proj_placebo==0 , cluster(cluster_joined) r
+
+
+
+
+
+/*
 
 
 

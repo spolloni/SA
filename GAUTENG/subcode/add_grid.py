@@ -24,6 +24,37 @@ db = gendata+'gauteng.db'
 
 
 
+# def link_2001(db,table,input_file,idvar):
+
+#     con = sql.connect(db)
+#     cur = con.cursor()
+#     con.enable_load_extension(True)
+#     con.execute("SELECT load_extension('mod_spatialite');")
+#     con.execute("DROP TABLE IF EXISTS {};".format(table))
+#     con.execute('''
+#                 CREATE TABLE {} AS
+#                 SELECT G.{}, A.sal_code AS sal_1, A.sp_code AS sp_1, A.mp_code AS mp_1, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS  area_int 
+#                 FROM {} AS G, {} AS A
+#                             WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+#                                             WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+#                                             AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+#                                             GROUP BY G.{} ;
+
+#                 '''.format(table,idvar,input_file,'sal_2001',input_file,idvar))
+#     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+#     print 'all set with sp_1 !'
+
+# grid_sal(db,'grid_25_s2001','grid_temp_25','grid_id')
+# grid_sal(db,'sal_2011_s2001','sal_2011','sal_code')
+# grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
+# grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
+
+
+
+
+
+
+
 
 def buffer_tester(db):
     print 'buffer time starting ...'

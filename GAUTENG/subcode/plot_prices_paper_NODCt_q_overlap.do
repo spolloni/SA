@@ -141,7 +141,39 @@ g P = lprice if lprice>`=r(p1)' & lprice<`=r(p99)'
 
 
 
+**** NOT EXCLUSIVE
+forvalues r=1/6 {
+  cap drop s1p_a_`r'_C 
+  cap drop s1p_a_`r'_C_con
+  cap drop s1p_a_`r'_C_post 
+  cap drop s1p_a_`r'_C_con_post
+  g s1p_a_`r'_C = s1p_a_`r'_R if s1p_a_`r'_R> s1p_a_`r'_P
+  replace s1p_a_`r'_C  = s1p_a_`r'_P if s1p_a_`r'_P>s1p_a_`r'_R
+  replace s1p_a_`r'_C=0 if s1p_a_`r'_C ==.
+  
+  g s1p_a_`r'_C_con = s1p_a_`r'_C if  s1p_a_`r'_R>s1p_a_`r'_P
+  replace s1p_a_`r'_C_con=0  if s1p_a_`r'_C_con==.
 
+  g s1p_a_`r'_C_post = s1p_a_`r'_C*post
+  g s1p_a_`r'_C_con_post = s1p_a_`r'_C_con*post
+}
+
+
+egen lat_g = cut(latitude), group(200)
+egen lon_g = cut(longitude), group(200)
+
+egen new_g = group(lat_g lon_g)
+
+
+bys new_g: g NN= _N
+bys new_g: g nn=_n
+
+
+count if nn==1
+
+
+
+* longitude
 
 
   * reg  lprice post SP SP_conSP SP_post SP_post_conSP [pweight = erf_size]  , r cluster(cluster_joined)
@@ -150,6 +182,12 @@ g P = lprice if lprice>`=r(p1)' & lprice<`=r(p99)'
 
   * areg  lprice post s1p_a_* i.purch_yr#i.purch_mo , r cluster(cluster_joined) a(sp_1)
 
+
+  areg  lprice post s1p*C* i.purch_yr#i.purch_mo if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined) a(sp_1)
+
+
+
+/*
 
   areg  lprice post s1p_a_1_* i.purch_yr#i.purch_mo , r cluster(cluster_joined) a(sp_1)
 

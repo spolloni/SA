@@ -22,6 +22,78 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+def grid_to_undeveloped(db,undev):
+
+    print " start grid to undeveloped " + undev
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    cur.execute('DROP TABLE IF EXISTS grid_100_to_{};'.format(undev)) 
+    make_qry=  ''' CREATE TABLE grid_100_to_{} AS 
+                            SELECT A.OGC_FID , G.grid_id, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS area_int
+                                FROM {} as A, grid_temp_100 AS G
+                                    WHERE G.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='grid_temp_100' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
+                    '''.format(undev,undev)
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX grid_100_to_{}_index ON grid_100_to_{} (grid_id);".format(undev,undev))
+    cur.execute("CREATE INDEX {}_to_grid_100_index ON grid_100_to_{} (OGC_FID);".format(undev,undev))    
+    con.commit()
+    con.close()   
+    print " finish grid to undeveloped "
+
+    return
+
+# grid_to_undeveloped(db,'hydr_areas')
+# grid_to_undeveloped(db,'phys_landform_artific')
+# grid_to_undeveloped(db,'cult_recreational')
+
+# grid_to_undeveloped(db,'hydr_lines')
+
+
+
+
+
+def link_census_grid(db,table,input_file,idvar):
+
+    print ' Start the grid intersection ... '
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.{}, A.grid_id, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS  area_int 
+                FROM {} AS G, grid_temp_100 AS A
+                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+                                            GROUP BY A.grid_id 
+                                            HAVING 
+                                              st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) == 
+                                              max(st_area(st_intersection(A.GEOMETRY,G.GEOMETRY))) ;
+                '''.format(table,idvar,input_file,input_file))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+    cur.execute("CREATE INDEX {}_index_grid_id ON {} (grid_id);".format(table,table))
+    print 'all set with grid intersection !'
+
+# link_census_grid(db,'sal_2011_grid','sal_2011','OGC_FID')
+# link_census_grid(db,'ea_1996_grid','ea_1996','OGC_FID')
+# link_census_grid(db,'sal_2001_grid','sal_2001','OGC_FID')
+
+
+# grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
+# grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
+
+
+
 
 
 
@@ -724,7 +796,7 @@ def buffer_area_int_full(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6):
 
 # buffer_area_int_full(db,250,500,750,1000,1250,1500)
 
-buffer_area_int_full(db,500,1000,1500,2000,2500,3000)
+# buffer_area_int_full(db,500,1000,1500,2000,2500,3000)
 
 
 
