@@ -74,6 +74,7 @@ g pop_density  = (1000000)*(person_pop/area)
 replace pop_density=. if pop_density>200000
 
 
+
 drop *mixed*
 
 foreach var of varlist $outcomes {
@@ -196,7 +197,6 @@ g SP1_post_con_S1 = SP1_post*con_S1
 
 
 
-
 g SPA1 = dist_rdp==500 if con_S1==1
 replace SPA1 = dist_placebo==500 if con_S1==0
 
@@ -237,28 +237,110 @@ forvalues r=1/6 {
 }
 
 
-global regset = "(rdp_distance<3000 | placebo_distance<3000) & proj_rdp==0 & proj_placebo==0"
+* global regset = "(rdp_distance<3000 | placebo_distance<3000) & proj_rdp==0 & proj_placebo==0"
 
 
 cd ../..
 cd $output
 
 
+* keep if distance_rdp<3000 | distance_placebo<3000
 
-reg  total_buildings_ch s1p_*_C s1p_a*_C_con   if $regset , cluster(cluster_joined) r
 
-
-foreach var of varlist s1p_*_C s1p_a*_C_con {
+foreach var of varlist s1p_*_C s1p_a*_C_con s1p_a_*_R s1p_a_*_P S2_*_post  {
   replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
 }
-
-
 
 g proj_C = proj_rdp
 replace proj_C = proj_placebo if proj_C==0 & proj_placebo>0
 g proj_C_con = proj_rdp
 
-reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con   , cluster(cluster_joined) r
+
+
+
+
+
+
+
+
+reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con , cluster(cluster_joined) r
+
+est sto t1
+
+reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con for_lag inf_lag, cluster(cluster_joined) r
+
+est sto t2
+
+forvalues r=1/6 {
+  ren s1p_a_`r'_C s1p_a_`r'_C_temp
+  ren S2_`r'_post s1p_a_`r'_C
+
+  ren s1p_a_`r'_C_con s1p_a_`r'_C_con_temp
+  ren S2_`r'_con_S2_post s1p_a_`r'_C_con
+  } 
+
+* reg total_buildings_ch
+* est sto t3
+
+reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con  , cluster(cluster_joined) r
+
+est sto t3
+
+reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con for_lag inf_lag , cluster(cluster_joined) r
+
+est sto t4
+
+forvalues r=1/6 {
+  ren s1p_a_`r'_C S2_`r'_post 
+  ren s1p_a_`r'_C_temp s1p_a_`r'_C
+
+  ren s1p_a_`r'_C_con S2_`r'_con_S2_post 
+  ren s1p_a_`r'_C_con_temp s1p_a_`r'_C_con
+  } 
+
+    lab var s1p_a_1_C "\hspace{2em} \textsc{0-500m}"
+    lab var s1p_a_1_C_con "\hspace{2em} \textsc{0-500m}"  
+    lab var s1p_a_2_C "\hspace{2em} \textsc{500-1000m}"
+    lab var s1p_a_2_C_con "\hspace{2em} \textsc{500-1000m}"  
+    lab var s1p_a_3_C "\hspace{2em} \textsc{1000-1500m}"
+    lab var s1p_a_3_C_con "\hspace{2em} \textsc{1000-1500m}"  
+    lab var s1p_a_4_C "\hspace{2em} \textsc{1500-2000m}"
+    lab var s1p_a_4_C_con "\hspace{2em} \textsc{1500-2000m}"  
+    lab var s1p_a_5_C "\hspace{2em} \textsc{2000-2500m}"
+    lab var s1p_a_5_C_con "\hspace{2em} \textsc{2000-2500m}"  
+    lab var s1p_a_6_C "\hspace{2em} \textsc{2500-3000m}"
+    lab var s1p_a_6_C_con "\hspace{2em} \textsc{2500-3000m}"  
+
+
+    lab var proj_C_con "\textsc{\% Overlap with Project}"
+
+    lab var proj_C  "\textsc{\% Overlap with Project}"
+
+    lab var for_lag "Formal Housing in 2001"
+    lab var inf_lag "Informal Housing in 2001"
+
+    estout t1 t2 t3 t4  using "comparison.tex", replace  style(tex) ///
+    order( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con ///
+           proj_C s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C for_lag inf_lag ) ///
+    keep( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con ///
+           proj_C s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C  for_lag inf_lag  )  ///
+    varlabels( , blist( proj_C_con "\textsc{Constructed} $\times$ \\[.5em] \hspace{.5em} " s1p_a_1_C_con  "\textsc{ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{Distance Metric :  }  \\[1em]" ///
+                        s1p_a_1_C  " \textsc{Distance Metric :  }  \\[1em]" ) ///
+    el(  proj_C_con  "[.5em]"  s1p_a_1_C  "[0.3em]"  s1p_a_2_C  "[0.3em]"  s1p_a_3_C  "[0.3em]"  s1p_a_4_C   "[0.3em]"  s1p_a_5_C  "[0.3em]"  s1p_a_6_C  "[1em]"  ///
+         proj_C  "[.5em]" s1p_a_1_C_con  "[0.3em]"  s1p_a_2_C_con  "[0.3em]"  s1p_a_3_C_con  "[0.3em]"  s1p_a_4_C_con   "[0.3em]"  s1p_a_5_C_con  "[0.3em]"  s1p_a_6_C_con  "[1em]"  for_lag "[.3em]" inf_lag "[1em]"  ))  label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt(1) star ) se(par fmt(1)) ) ///
+      stats( r2  N ,  ///
+    labels(   "R$^2$"   "N"  ) ///
+        fmt(   %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+* reg  total_buildings_ch proj_C proj_C_con S2_*_post for_lag inf_lag , cluster(cluster_joined) r
+* reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con   , cluster(cluster_joined) r
 
 
 
@@ -391,6 +473,88 @@ foreach var of varlist $outcomes_census {
 global outcomes = "$outcomes_census"
 
 regs_spill_full census_spill_test_new
+
+
+
+
+
+
+
+
+
+
+
+cap prog drop regs_spill_sep
+
+prog define regs_spill_sep
+  eststo clear
+
+  foreach var of varlist $outcomes {
+    
+    reg  `var'_ch proj_rdp proj_placebo   s1p_a_*_R  s1p_a_*_P  for_lag inf_lag , cluster(cluster_joined) r
+
+    eststo  `var'
+
+    g temp_var = e(sample)==1
+    mean `var'_lag $ww if temp_var==1
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : `var'
+    mean `var' $ww if temp_var==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : `var'
+    drop temp_var
+    }
+
+  global X "{\tim}"
+
+    lab var s1p_a_1_R "\hspace{2em} \textsc{0-500m}"
+    lab var s1p_a_1_P "\hspace{2em} \textsc{0-500m}"  
+    lab var s1p_a_2_R "\hspace{2em} \textsc{500-1000m}"
+    lab var s1p_a_2_P "\hspace{2em} \textsc{500-1000m}"  
+    lab var s1p_a_3_R "\hspace{2em} \textsc{1000-1500m}"
+    lab var s1p_a_3_P "\hspace{2em} \textsc{1000-1500m}"  
+    lab var s1p_a_4_R "\hspace{2em} \textsc{1500-2000m}"
+    lab var s1p_a_4_P "\hspace{2em} \textsc{1500-2000m}"  
+    lab var s1p_a_5_R "\hspace{2em} \textsc{2000-2500m}"
+    lab var s1p_a_5_P "\hspace{2em} \textsc{2000-2500m}"  
+    lab var s1p_a_6_R "\hspace{2em} \textsc{2500-3000m}"
+    lab var s1p_a_6_P "\hspace{2em} \textsc{2500-3000m}"  
+
+    lab var proj_rdp "\textsc{Constructed}  $\times$  \textsc{\% Overlap  with Project} "
+    lab var proj_placebo " \textsc{Unconstructed} $\times$  \textsc{\% Overlap  with Project}"
+
+    lab var for_lag "Formal Housing in 2001"
+    lab var inf_lag "Informal Housing in 2001"
+
+    estout $outcomes using "`1'.tex", replace  style(tex) ///
+    order( proj_rdp s1p_a_1_R s1p_a_2_R s1p_a_3_R s1p_a_4_R s1p_a_5_R s1p_a_6_R ///
+          proj_placebo  s1p_a_1_P s1p_a_2_P s1p_a_3_P s1p_a_4_P s1p_a_5_P s1p_a_6_P for_lag inf_lag) ///
+    keep(  proj_rdp  s1p_a_1_R s1p_a_2_R s1p_a_3_R s1p_a_4_R s1p_a_5_R s1p_a_6_R ///
+        proj_placebo  s1p_a_1_P s1p_a_2_P s1p_a_3_P s1p_a_4_P s1p_a_5_P s1p_a_6_P   for_lag inf_lag)  ///
+    varlabels( , blist( s1p_a_1_R  "\textsc{ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ///
+                        s1p_a_1_P  "\textsc{ Unconstructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ) ///
+    el(  proj_rdp "[1em]" s1p_a_1_R  "[0.3em]"  s1p_a_2_R  "[0.3em]"  s1p_a_3_R  "[0.3em]"  s1p_a_4_R   "[0.3em]"  s1p_a_5_R  "[0.3em]"  s1p_a_6_R  "[1em]"  ///
+         proj_placebo "[1em]"  s1p_a_1_P  "[0.3em]"  s1p_a_2_P  "[0.3em]"  s1p_a_3_P  "[0.3em]"  s1p_a_4_P   "[0.3em]"  s1p_a_5_P  "[0.3em]"  s1p_a_6_P  "[1em]" ///
+          for_lag "[.3em]" inf_lag "[1em]" ))  label ///
+      noomitted ///
+      mlabels(,none)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( Mean2001 Mean2011 r2  N ,  ///
+    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+end
+
+
+
+global outcomes = " total_buildings for  inf  inf_non_backyard inf_backyard  "
+global cells = 1
+
+regs_spill_sep bblu_sep
+
+
 
 
 
@@ -1309,6 +1473,90 @@ reg total_buildings post  PR3 PR3_con PR3_post PR3_post_con ///
 
 
 
+
+
+* cap prog drop regs_spill_sep
+
+* prog define regs_spill_sep
+*   eststo clear
+
+*   foreach var of varlist $outcomes {
+    
+*     reg  `var'_ch proj_rdp proj_placebo   s1p_a_*_R s1p_a_*_R_post s1p_a_*_P s1p_a_*_P_post  for_lag inf_lag , cluster(cluster_joined) r
+
+*     eststo  `var'
+
+*     g temp_var = e(sample)==1
+*     mean `var'_lag $ww if temp_var==1
+*     mat def E=e(b)
+*     estadd scalar Mean2001 = E[1,1] : `var'
+*     mean `var' $ww if temp_var==1
+*     mat def E=e(b)
+*     estadd scalar Mean2011 = E[1,1] : `var'
+*     drop temp_var
+*     }
+
+*   global X "{\tim}"
+
+*     lab var s1p_a_1_R_post "\hspace{2em} \textsc{0-500m}"
+*     lab var s1p_a_1_P_post "\hspace{2em} \textsc{0-500m}"  
+*     lab var s1p_a_2_R_post "\hspace{2em} \textsc{500-1000m}"
+*     lab var s1p_a_2_P_post "\hspace{2em} \textsc{500-1000m}"  
+*     lab var s1p_a_3_R_post "\hspace{2em} \textsc{1000-1500m}"
+*     lab var s1p_a_3_P_post "\hspace{2em} \textsc{1000-1500m}"  
+*     lab var s1p_a_4_R_post "\hspace{2em} \textsc{1500-2000m}"
+*     lab var s1p_a_4_P_post "\hspace{2em} \textsc{1500-2000m}"  
+*     lab var s1p_a_5_R_post "\hspace{2em} \textsc{2000-2500m}"
+*     lab var s1p_a_5_P_post "\hspace{2em} \textsc{2000-2500m}"  
+*     lab var s1p_a_6_R_post "\hspace{2em} \textsc{2500-3000m}"
+*     lab var s1p_a_6_P_post "\hspace{2em} \textsc{2500-3000m}"  
+
+*     lab var s1p_a_1_R "\hspace{2em} \textsc{0-500m}"
+*     lab var s1p_a_1_P "\hspace{2em} \textsc{0-500m}"  
+*     lab var s1p_a_2_R "\hspace{2em} \textsc{500-1000m}"
+*     lab var s1p_a_2_P "\hspace{2em} \textsc{500-1000m}"  
+*     lab var s1p_a_3_R "\hspace{2em} \textsc{1000-1500m}"
+*     lab var s1p_a_3_P "\hspace{2em} \textsc{1000-1500m}"  
+*     lab var s1p_a_4_R "\hspace{2em} \textsc{1500-2000m}"
+*     lab var s1p_a_4_P "\hspace{2em} \textsc{1500-2000m}"  
+*     lab var s1p_a_5_R "\hspace{2em} \textsc{2000-2500m}"
+*     lab var s1p_a_5_P "\hspace{2em} \textsc{2000-2500m}"  
+*     lab var s1p_a_6_R "\hspace{2em} \textsc{2500-3000m}"
+*     lab var s1p_a_6_P "\hspace{2em} \textsc{2500-3000m}"  
+
+*     lab var proj_rdp "\textsc{\% Overlap  with Project} $\times$\textsc{Constructed}"
+*     lab var proj_placebo "\textsc{\% Overlap  with Project} $\times$\textsc{Unconstructed}"
+
+*     lab var for_lag "Formal Housing in 2001"
+*     lab var inf_lag "Informal Housing in 2001"
+
+*     estout $outcomes using "`1'.tex", replace  style(tex) ///
+*     order(  s1p_a_1_R_post s1p_a_2_R_post s1p_a_3_R_post s1p_a_4_R_post s1p_a_5_R_post s1p_a_6_R_post ///
+*             s1p_a_1_P_post s1p_a_2_P_post s1p_a_3_P_post s1p_a_4_P_post s1p_a_5_P_post s1p_a_6_P_post ///
+*             s1p_a_1_R s1p_a_2_R s1p_a_3_R s1p_a_4_R s1p_a_5_R s1p_a_6_R ///
+*             s1p_a_1_P s1p_a_2_P s1p_a_3_P s1p_a_4_P s1p_a_5_P s1p_a_6_P for_lag inf_lag) ///
+*     keep(  s1p_a_1_R_post s1p_a_2_R_post s1p_a_3_R_post s1p_a_4_R_post s1p_a_5_R_post s1p_a_6_R_post ///
+*             s1p_a_1_P_post s1p_a_2_P_post s1p_a_3_P_post s1p_a_4_P_post s1p_a_5_P_post s1p_a_6_P_post  ///
+*             s1p_a_1_R s1p_a_2_R s1p_a_3_R s1p_a_4_R s1p_a_5_R s1p_a_6_R ///
+*           s1p_a_1_P s1p_a_2_P s1p_a_3_P s1p_a_4_P s1p_a_5_P s1p_a_6_P   for_lag inf_lag)  ///
+*     varlabels( , blist( s1p_a_1_R_post  "\textsc{ Post $\times$ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ///
+*                         s1p_a_1_P_post  "\textsc{ Post $\times$ Unconstructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ///
+*                         s1p_a_1_R  "\textsc{ Post $\times$ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ///
+*                         s1p_a_1_P  "\textsc{ Post $\times$ Unconstructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]") ///
+*     el(   s1p_a_1_R_post  "[0.3em]"  s1p_a_2_R_post  "[0.3em]"  s1p_a_3_R_post  "[0.3em]"  s1p_a_4_R_post   "[0.3em]"  s1p_a_5_R_post  "[0.3em]"  s1p_a_6_R_post  "[1em]"  ///
+*           s1p_a_1_P_post  "[0.3em]"  s1p_a_2_P_post  "[0.3em]"  s1p_a_3_P_post  "[0.3em]"  s1p_a_4_P_post   "[0.3em]"  s1p_a_5_P_post  "[0.3em]"  s1p_a_6_P_post  "[1em]"  ///
+*           s1p_a_1_R  "[0.3em]"  s1p_a_2_R  "[0.3em]"  s1p_a_3_R  "[0.3em]"  s1p_a_4_R   "[0.3em]"  s1p_a_5_R  "[0.3em]"  s1p_a_6_R  "[1em]"  ///
+*           s1p_a_1_P  "[0.3em]"  s1p_a_2_P  "[0.3em]"  s1p_a_3_P  "[0.3em]"  s1p_a_4_P   "[0.3em]"  s1p_a_5_P  "[0.3em]"  s1p_a_6_P  "[1em]"  for_lag "[.3em]" inf_lag "[1em]" ))  label ///
+*       noomitted ///
+*       mlabels(,none)  ///
+*       collabels(none) ///
+*       cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+*       stats( Mean2001 Mean2011 r2  N ,  ///
+*     labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+*         fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
+*     starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+* end
 
 
 
