@@ -156,6 +156,7 @@ forvalues r=1/6 {
 
   g s1p_a_`r'_C_post = s1p_a_`r'_C*post
   g s1p_a_`r'_C_con_post = s1p_a_`r'_C_con*post
+
 }
 
 
@@ -171,10 +172,7 @@ bys new_g: g nn=_n
 
 count if nn==1
 
-
-
 * longitude
-
 
   * reg  lprice post SP SP_conSP SP_post SP_post_conSP [pweight = erf_size]  , r cluster(cluster_joined)
   * reg  P post SP SP_conSP SP_post SP_post_conSP [pweight = erf_size]  , r cluster(cluster_joined)
@@ -183,7 +181,108 @@ count if nn==1
   * areg  lprice post s1p_a_* i.purch_yr#i.purch_mo , r cluster(cluster_joined) a(sp_1)
 
 
-  areg  lprice post s1p*C* i.purch_yr#i.purch_mo if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined) a(sp_1)
+  lab var s1p_a_1_C_con_post "\textsc{0-500m}"
+  lab var s1p_a_2_C_con_post "\textsc{500-1000m}"
+  lab var s1p_a_3_C_con_post "\textsc{1000-1500m}"
+  lab var s1p_a_4_C_con_post "\textsc{1500-2000m}"
+  lab var s1p_a_5_C_con_post "\textsc{2000-2500m}"
+  lab var s1p_a_6_C_con_post "\textsc{2500-3000m}"
+
+
+  areg  lprice post s1p*_C*                       if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined) a(sp_1)
+
+  est sto p1
+  estadd local ctrl1 ""
+  estadd local ctrl2 "\checkmark"
+
+  areg  lprice post s1p*_C* i.purch_yr#i.purch_mo if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined) a(sp_1)
+
+  est sto p2
+  estadd local ctrl1 "\checkmark"
+  estadd local ctrl2 "\checkmark"
+
+  estout p1 p2  using "price.tex", replace  style(tex) ///
+  keep(   s1p_a_1_C_con_post s1p_a_2_C_con_post  s1p_a_3_C_con_post s1p_a_4_C_con_post s1p_a_5_C_con_post s1p_a_6_C_con_post )  ///
+  varlabels(, bl(s1p_a_1_C_con_post "\textsc{ Post} $\times$ \textsc{Constructed} $\times$ \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ) el(s1p_a_1_C_con_post "[.5em]" s1p_a_2_C_con_post "[.5em]" s1p_a_3_C_con_post "[.5em]" s1p_a_4_C_con_post "[.5em]" s1p_a_5_C_con_post "[.5em]" s1p_a_6_C_con_post "[.5em]" )) ///
+  label ///
+    noomitted ///
+    mlabels(,none)  ///
+    collabels(none) ///
+    cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+    stats( ctrl1 ctrl2  r2 N ,  ///
+  labels( "Year-Month FE" "Neighborhood FE"   "R2"  "N"  ) /// 
+      fmt( %18s %18s   %12.2fc    )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+
+
+
+
+g post_1 = ( mo2con_rdp>0 & mo2con_rdp<=12 & rdp==1 ) | ( mo2con_placebo>0 & mo2con_placebo<=12 & rdp==0 )
+g post_2 = ( mo2con_rdp>12 & mo2con_rdp<24 & rdp==1 ) | ( mo2con_placebo>12 & mo2con_placebo<24 & rdp==0 )
+g post_3 = ( mo2con_rdp>24 & mo2con_rdp<.  & rdp==1 ) | ( mo2con_placebo>24 & mo2con_placebo<.  & rdp==0 )
+
+forvalues r=1/6 {
+
+  cap drop s1p_a_`r'_PC
+  cap drop s1p_a_`r'_PC_con
+
+  g s1p_a_`r'_PC = s1p_a_`r'_R if s1p_a_`r'_R> s1p_a_`r'_P
+  replace s1p_a_`r'_PC  = s1p_a_`r'_P if s1p_a_`r'_P>s1p_a_`r'_R
+  replace s1p_a_`r'_PC=0 if s1p_a_`r'_PC ==.
+  g s1p_a_`r'_PC_con = s1p_a_`r'_PC if  s1p_a_`r'_R>s1p_a_`r'_P
+  replace s1p_a_`r'_PC_con=0  if s1p_a_`r'_PC_con==.
+
+  forvalues z=1/3 {
+  cap drop s1p_a_`r'_PC_post_`z'
+  cap drop s1p_a_`r'_PC_con_post_`z'
+  g s1p_a_`r'_PC_post_`z' = s1p_a_`r'_PC*post_`z'
+  g s1p_a_`r'_PC_con_post_`z' = s1p_a_`r'_PC_con*post_`z'
+  }
+}
+
+
+  lab var s1p_a_1_PC_con_post_1 "0-12"
+  lab var s1p_a_1_PC_con_post_2 "12-24"
+  lab var s1p_a_1_PC_con_post_3 "Over 24"
+
+
+
+  * reg  lprice post s1p*_C* if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined)
+  * reg  lprice post s1p*_C* i.purch_yr#i.purch_mo if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined)
+
+
+  est clear
+
+  areg  lprice post s1p*PC* if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined) a(sp_1)
+
+  est sto p1
+  estadd local ctrl1 ""
+  estadd local ctrl2 "\checkmark"
+
+  areg  lprice post s1p*PC* i.purch_yr#i.purch_mo if proj_rdp==0 & proj_placebo==0 , r cluster(cluster_joined) a(sp_1)
+
+  est sto p2
+  estadd local ctrl1 "\checkmark"
+  estadd local ctrl2 "\checkmark"
+
+
+  estout p1 p2  using "price_time.tex", replace  style(tex) ///
+  keep(   s1p_a_1_PC_con_post_1 s1p_a_1_PC_con_post_2 s1p_a_1_PC_con_post_3 )  ///
+  varlabels(, bl(s1p_a_1_PC_con_post_1 "\textsc{ \% Buffer 0-500m Overlap with Project } $\times$ \\[.5em] \hspace{.5em} \textsc{Constructed} $\times$ \\[.5em] \hspace{.5em} \textsc{Months Post Sched. Const. :  }  \\[1em]" ) ///
+   el(  s1p_a_1_PC_con_post_1 "[.5em]" s1p_a_1_PC_con_post_2 "[.5em]" s1p_a_1_PC_con_post_3 "[.5em]"  )) ///
+  label ///
+    noomitted ///
+    mlabels(,none)  ///
+    collabels(none) ///
+    cells( b(fmt(3) star ) se(par fmt(3)) ) ///
+    stats( ctrl1 ctrl2  r2 N ,  ///
+  labels( "Year-Month FE" "Neighborhood FE"   "R2"  "N"  ) /// 
+      fmt( %18s %18s  %12.2fc    )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
 
 
 

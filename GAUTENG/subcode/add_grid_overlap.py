@@ -669,6 +669,138 @@ def buffer_area_int_new(db,buffer1,buffer2):
 
 
 
+def buffer_area_int_full8(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buffer7,buffer8):
+    print 'buffer time starting ...'
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    def drop_full_table(name):
+        chec_qry = '''
+                   SELECT type,name from SQLite_Master
+                   WHERE type="table" AND name ="{}";
+                   '''.format(name)
+        drop_qry = '''
+                   SELECT DisableSpatialIndex('{}','GEOMETRY');
+                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
+                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
+                   DROP TABLE IF EXISTS {};
+                   '''.format(name,name,name,name)
+        cur.execute(chec_qry)
+        result = cur.fetchall()
+        if result:
+            cur.executescript(drop_qry)
+
+    def add_index(name,index_var):
+        cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'MULTIPOLYGON','XY');".format(name))
+        cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
+        if index_var!='none':
+            cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
+
+
+    # # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3','ea_2011','ea_2001','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id','OGC_FID','OGC_FID']):
+    # # for name,fid in zip(['ea_2011'],['OGC_FID']):
+    # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
+    # # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
+    # # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
+    for name,fid in zip(['grid_temp_100'],['grid_id']):
+    
+    # for name,fid in zip(['ea_2001'],['OGC_FID']):
+    # for name,fid in zip(['ea_2011'],['OGC_FID']):
+    # for name,fid in zip(['landplots_near'],['plot_id']):
+
+        table= name + '_area'
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                    CREATE TABLE {} AS
+                    SELECT A.{}, ST_AREA(A.GEOMETRY) AS area
+                    FROM {} AS A ;
+                    '''.format(table,fid,name))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+        print 'generate area table '+name
+
+        for tag in ['rdp','placebo']:
+            table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)+'_'+tag
+            con.execute("DROP TABLE IF EXISTS {};".format(table))
+            con.execute('''
+                    CREATE TABLE {} AS
+                    SELECT A.{},
+                            ST_AREA(ST_INTERSECTION(A.GEOMETRY,G.GEOMETRY))  as  cluster_int,
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b1_int,
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b2_int, 
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b3_int,
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b4_int, 
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b5_int,
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b6_int, 
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b7_int,
+                            ST_AREA(ST_INTERSECTION(ST_BUFFER(A.GEOMETRY,{}),G.GEOMETRY))  as  b8_int, 
+                            G.OGC_FID AS cluster
+
+                    FROM {} AS A, 
+                    gcro_publichousing AS G JOIN (SELECT cluster FROM {}_cluster) AS J ON J.cluster=G.OGC_FID
+                            WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
+                                                WHERE f_table_name='{}' AND search_frame=ST_BUFFER(G.GEOMETRY,{}))
+                                                AND st_intersects(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{})) ;
+                    '''.format(table,   fid,  buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buffer7,buffer8, name, tag, name,buffer8,buffer8))
+            cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+            print 'done all '+tag+' '+name
+
+
+        table_full=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)
+        con.execute("DROP TABLE IF EXISTS {};".format(table_full))
+        con.execute('''
+                CREATE TABLE {} AS
+                SELECT *, 1 AS rdp FROM {} 
+                UNION
+                SELECT *, 0 AS rdp FROM {}     ;
+                '''.format(table_full, table_full+'_rdp',table_full+'_placebo'  ))
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table_full,table_full,fid))
+
+
+        for tag in ['rdp','placebo']:
+            table=name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)+'_'+tag
+            con.execute("DROP TABLE IF EXISTS {};".format(table))
+
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+
+        if str(fid)=="grid_id":
+            table='buffer_area_'+str(buffer1)+'_'+str(buffer8)
+        else:
+            table='buffer_area_'+str(buffer1)+'_'+str(buffer8)+'_'+str(name)
+
+        con.execute("DROP TABLE IF EXISTS {};".format(table))
+        con.execute('''
+                        CREATE TABLE {} AS
+                        SELECT G.{}, 
+                                ST_AREA(G.GEOMETRY) as cluster_area, 
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b1_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b2_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b3_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b4_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b5_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b6_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b7_area,
+                                ST_AREA(ST_BUFFER(G.GEOMETRY,{}))  as  cluster_b8_area                                
+                        FROM {} AS G
+                                 ;
+                        '''.format(table,fid,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buffer7,buffer8,name))
+        print 'done ' + ' ' + name 
+        cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,fid))
+
+    
+
+    print ' all set ! :D '
+
+
+
+buffer_area_int_full8(db,500,1000,1500,2000,2500,3000,3500,4000)
+
+
+
+
+
 
 
 def buffer_area_int_full(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6):

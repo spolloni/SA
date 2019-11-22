@@ -1306,6 +1306,101 @@ We develop a simple model of residential housing markets to capture the welfare 
 % This model is static where households h
 % Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
 
+
+\begin{align*}
+U &= \delta_{hlt} - \frac{\lambda}{2} (\overline{k}_{hj} + k_{hjt}) - \theta R_{hjt}   + \epsilon_{hjt}  
+\end{align*}
+
+\begin{align*}
+\label{eq:rent}
+R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \frac{\lambda}{2} (\overline{k}_{hj} + k_{hjt}) + \epsilon_{hjt} - \overline{U}}{\theta}
+\end{align*}
+
+
+\begin{align*}
+max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
+\end{align*}
+
+
+\begin{align*}
+k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{\lambda} \,\, - \frac{\theta}{\lambda}C + \frac{\epsilon_{hjt}}{\lambda}
+\end{align*}
+
+\begin{align*}
+% \label{eq:profits1}
+% \begin{split}
+P_{hjt}^{*}  &= \frac{1}{2} \Big [ \frac{\delta + \epsilon - \overline{U} }{\theta}  + C \Big ] 
+% \end{split}
+\end{align*}
+
+
+
+% \begin{align*}
+% U &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} - \theta R_{hjt}   + \epsilon_{hjt}  
+% \end{align*}
+
+% \begin{align*}
+% \label{eq:rent}
+% R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \frac{\lambda}{2} k_{hjt} + \epsilon_{hjt} - \overline{U}}{\theta}
+% \end{align*}
+
+
+% \begin{align*}
+% max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
+% \end{align*}
+
+
+% \begin{align*}
+% k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{\lambda} \,\, - \frac{\theta}{\lambda}C + \frac{\epsilon_{hjt}}{\lambda}
+% \end{align*}
+
+% \begin{align*}
+% % \label{eq:profits1}
+% % \begin{split}
+% P_{hjt}^{*}  &= \frac{1}{2} \Big [ \frac{\delta + \epsilon - \overline{U} }{\theta}  + C \Big ] 
+% % \end{split}
+% \end{align*}
+
+
+
+
+
+
+
+% \begin{align*}
+% U &= \delta_{hlt} - \lambda k_{hjt} - \theta R_{hjt}   + \epsilon_{hjt}  
+% \end{align*}
+
+% \begin{align}
+% \label{eq:rent}
+% R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda k_{hjt} + \epsilon_{hjt} - \overline{U}}{\theta}
+% \end{align}
+
+
+% \begin{align*}
+% max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
+% \end{align*}
+
+
+% \begin{align}
+% \label{eq:housingdemand}
+% k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{2\lambda} \,\, - \frac{\theta}{2\lambda}C + \frac{\epsilon_{hjt}}{2\lambda}
+% \end{align}
+
+
+% \begin{align}
+% \label{eq:housingdemand}
+% k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{2\lambda} \,\, - \frac{\theta}{2\lambda}C + \frac{\epsilon_{hjt}}{2\lambda}
+% \end{align}
+
+
+% \begin{align}
+% \label{eq:profits1}
+% \begin{split}
+% P_{hjt}^{*}  &= \frac{\delta + \epsilon - \overline{U} }{2\theta}  + \frac{C}{2}
+% \end{split}
+% \end{align}
+
 Each time period, developers choose how many formal and informal houses to construct and maintain on each plot of land as well as the level of rent for each house.  Each house serves up to one household, and houses have identical quality.  Households then choose whether to rent a house receiving utility given by
 \begin{align*}
 U &= \delta_{hlt} - \lambda_{h}(k_{hjt}) - \theta R_{hjt}   + \epsilon_{hjt}  
