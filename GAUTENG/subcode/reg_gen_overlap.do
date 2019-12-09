@@ -69,7 +69,7 @@ prog define gen_cj
 g cluster_joined = .
 replace cluster_joined = cluster_int_placebo_id if (cluster_int_tot_placebo>  cluster_int_tot_rdp ) & cluster_joined==.
 replace cluster_joined = cluster_int_rdp_id if (cluster_int_tot_placebo<  cluster_int_tot_rdp ) & cluster_joined==.
-forvalues r=1/6 {
+forvalues r=1/$rset {
   replace cluster_joined = b`r'_int_placebo_id if (b`r'_int_tot_placebo >  b`r'_int_tot_rdp  ) & cluster_joined==.
   replace cluster_joined = b`r'_int_rdp_id     if (b`r'_int_tot_placebo <  b`r'_int_tot_rdp  ) & cluster_joined==.
 }
@@ -103,30 +103,30 @@ replace proj_rdp = 1 if proj_rdp>1 & proj_rdp<.
 g   proj_placebo = cluster_int_tot_placebo / cluster_area
 replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.
 
-foreach v in rdp placebo {
-  if "`v'"=="rdp" {
-    local v1 "R"
-  }
-  else {
-    local v1 "P"
-  }
-g sp_a_2_`v1' = (b2_int_tot_`v' - cluster_int_tot_`v')/(cluster_b2_area-cluster_area)
-  replace sp_a_2_`v1'=1 if sp_a_2_`v1'>1 & sp_a_2_`v1'<.
+* foreach v in rdp placebo {
+*   if "`v'"=="rdp" {
+*     local v1 "R"
+*   }
+*   else {
+*     local v1 "P"
+*   }
+* g sp_a_2_`v1' = (b2_int_tot_`v' - cluster_int_tot_`v')/(cluster_b2_area-cluster_area)
+*   replace sp_a_2_`v1'=1 if sp_a_2_`v1'>1 & sp_a_2_`v1'<.
 
-foreach r in 4 6 {
-g sp_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-2'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-2'_area )
-  replace sp_a_`r'_`v1'=1 if sp_a_`r'_`v1'>1 & sp_a_`r'_`v1'<.
-}
-}
+* foreach r in 4 6 {
+* g sp_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-2'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-2'_area )
+*   replace sp_a_`r'_`v1'=1 if sp_a_`r'_`v1'>1 & sp_a_`r'_`v1'<.
+* }
+* }
 
-foreach var of varlist sp_a* {
-  g `var'_tP = `var'*proj_placebo
-  g `var'_tR = `var'*proj_rdp
-}
+* foreach var of varlist sp_a* {
+*   g `var'_tP = `var'*proj_placebo
+*   g `var'_tR = `var'*proj_rdp
+* }
 
-foreach var of varlist proj_* sp_* {
-  g `var'_post = `var'*post 
-}
+* foreach var of varlist proj_* sp_* {
+*   g `var'_post = `var'*post 
+* }
 
 
 foreach v in rdp placebo {
@@ -139,7 +139,7 @@ foreach v in rdp placebo {
 g s1p_a_1_`v1' = (b1_int_tot_`v' - cluster_int_tot_`v')/(cluster_b1_area-cluster_area)
   replace s1p_a_1_`v1'=1 if s1p_a_1_`v1'>1 & s1p_a_1_`v1'<.
 
-forvalues r= 2/6 {
+forvalues r= 2/$rset {
 g s1p_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-1'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-1'_area )
   replace s1p_a_`r'_`v1'=1 if s1p_a_`r'_`v1'>1 & s1p_a_`r'_`v1'<.
 }

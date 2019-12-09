@@ -12,17 +12,21 @@ if $LOCAL==1 {;
 	cd ..;
 };
 
+global gcro_over 		= 0;
 global load_buffer_1 	= 0;
-global load_grids 		= 0;
+global load_grids 		= 1;
 global load_buffer_2 	= 0;
 global merge_all  		= 0;
-global undev   			= 1;
+global undev   			= 0;
 
 global grid = "100";
 global dist_break_reg1 = "500";
-global dist_break_reg2 = "3000";
+global dist_break_reg2 = "4000";
 
-global outcomes = " total_buildings for inf inf_backyard inf_non_backyard ";
+* global dist_break_reg1 = "250";
+* global dist_break_reg2 = "2000";
+
+global outcomes = " total_buildings for inf inf_backyard inf_non_backyard other ";
 
 
 cd ../..;
@@ -38,16 +42,76 @@ prog outcome_gen;
   g inf_backyard  = t_lu_code == "7.2.3";
   g inf_non_backyard  = inf_b==0 & inf==1;
 
+  g other = s_lu_code != "7.1" & s_lu_code != "7.2";
+
 end;
+
+
+if $gcro_over  == 1 {;
+
+local qry = " SELECT * FROM gcro_over ";
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force ; 
+
+
+g shr_1 = area_int/AREA_1;
+g shr_2 = area_int/AREA_2;
+
+* browse if shr_1 >.5 | shr_2>.5;
+* drop dp_1 dp_2;
+
+g dp_1 = shr_1>.75 & rdp_1 == 0;
+g dp_2 = shr_2>.75 & rdp_2 == 0;
+
+replace dp_1 = 1 if dp_1==0 & rdp_1 == rdp_2 & shr_1 > shr_2 & shr_1>.5;
+replace dp_2 = 1 if dp_2==0 & rdp_1 == rdp_2 & shr_2 > shr_1 & shr_2>.5;
+
+g dp_1 = shr_1>.75 & rdp_1 == 0 & shr_2<.25;
+g dp_2 = shr_1<.25 & shr_2>.75  & rdp_2 == 0;
+
+preserve ;
+	keep if dp_1 == 1;
+	keep OGC_FID_1;
+	ren OGC_FID_1 OGC_FID;
+	save "over_1.dta", replace;
+restore;
+
+preserve ;
+	keep if dp_2 == 1;
+	keep OGC_FID_2;
+	ren OGC_FID_2 OGC_FID;
+	save "over_2.dta", replace;
+restore;
+
+use "over_1.dta", clear;
+append using "over_2.dta";
+duplicates drop OGC_FID, force;
+
+g dp = 1;
+
+odbc exec("DROP TABLE IF EXISTS gcro_over_list;"), dsn("gauteng");
+	odbc insert, table("gcro_over_list") create;
+odbc exec("CREATE INDEX gcro_over_index ON gcro_over_list (OGC_FID) ;"), dsn("gauteng");
+
+};
+
+
+
+
+
 
 
 if $load_buffer_1 == 1 {;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area 
+  B.cluster_b5_area, B.cluster_b6_area,   B.cluster_b7_area, B.cluster_b8_area 
 FROM 
-grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
+(SELECT A.* FROM grid_temp_100_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
+LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
+WHERE G.dp IS NULL) AS A
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
@@ -63,7 +127,7 @@ destring *, replace force ;
 
 
 
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int b7_int b8_int  {;
 forvalues r=0/1 {;
 
 if `r'==1 {;
@@ -109,36 +173,52 @@ clear;
 	SELECT  AA.grid_id, C.OGC_FID, C.s_lu_code, C.t_lu_code,
 
 	B.distance AS rdp_distance, B.target_id AS rdp_cluster, B.count AS rdp_count,
-	BP.distance AS placebo_distance, BP.target_id AS placebo_cluster, BP.count AS placebo_count
+	P.distance AS placebo_distance, P.target_id AS placebo_cluster, P.count AS placebo_count,
+
+	Y.cbd_dist AS cbd_dist_r, Z.cbd_dist AS cbd_dist_p,
+	R.road_dist AS road_dist_r, Q.road_dist AS road_dist_p
 
 	FROM grid_temp_${grid} AS AA 
 
 	LEFT JOIN 
 	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
 	          FROM distance_grid_temp_100_gcro_full AS D
-	          JOIN rdp_cluster AS R ON R.cluster = D.target_id
-	          GROUP BY D.input_id  HAVING D.distance == MIN(D.distance) 
-	        ) AS B ON AA.grid_id=B.input_id
+	          JOIN (SELECT R.* FROM rdp_cluster AS R LEFT JOIN gcro_over_list AS G ON  R.cluster =                           
+                       G.OGC_FID WHERE G.dp IS NULL ) AS R ON R.cluster = D.target_id   		
+	          GROUP BY D.input_id HAVING D.distance == MIN(D.distance ) ) AS B ON AA.grid_id=B.input_id
 
 	LEFT JOIN 
 	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
 	          FROM distance_grid_temp_100_gcro_full AS D
-	          JOIN placebo_cluster AS R ON R.cluster = D.target_id
-	          GROUP BY D.input_id  HAVING D.distance == MIN(D.distance) 
-	        ) AS BP ON AA.grid_id=BP.input_id  
+	          JOIN (SELECT R.* FROM placebo_cluster AS R LEFT JOIN gcro_over_list AS G ON  R.cluster =                           
+                       G.OGC_FID WHERE G.dp IS NULL ) AS R ON R.cluster = D.target_id   		
+	          GROUP BY D.input_id HAVING D.distance == MIN(D.distance ) )  AS P ON AA.grid_id=P.input_id  
 
 	LEFT JOIN grid_bblu_`1'grid_temp_${grid} AS A  ON A.grid_id=AA.grid_id
-
-	LEFT JOIN (SELECT A.* FROM  bblu_`1' AS A WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) `2') 
+	LEFT JOIN (SELECT A.* FROM  bblu_`1' AS A `2') 
 	      AS C ON A.OGC_FID = C.OGC_FID
+
+
+	LEFT JOIN cbd_dist AS Y ON Y.cluster = B.target_id
+	LEFT JOIN cbd_dist AS Z ON Z.cluster = P.target_id
+
+	LEFT JOIN road_dist AS R ON R.OGC_FID = B.target_id
+	LEFT JOIN road_dist AS Q ON Q.OGC_FID = P.target_id
 
 	";
 
+
+	* LEFT JOIN cbd_dist AS CB ON AA.distance_ = CB.grid_id;
+	* LEFT JOIN road_dist_grid AS RD ON AA.grid_id = RD.grid_id;
+
+* WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) ;
 
 	odbc query "gauteng";
 	odbc load, exec("`qry'");
 
 	outcome_gen;
+
+	destring cbd_dist* road_dist*, replace force;
 
 	drop s_lu_code t_lu_code;
 
@@ -159,7 +239,8 @@ end;
 
 
 grid_query pre ;
-grid_query post  " AND A.cf_units = 'High' "; 
+* grid_query post  " AND A.cf_units = 'High' "; 
+grid_query post  "  WHERE A.cf_units = 'High' "; 
 
 
 
@@ -176,9 +257,12 @@ drop if _merge==2;
 drop _merge;
 ren grid_id id;
 
-save bbluplot_grid_${grid}_overlap, replace;
+save bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap, replace;
 
 };
+
+
+
 
 
 
@@ -227,9 +311,11 @@ save "mixed.dta", replace;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area 
+  B.cluster_b5_area, B.cluster_b6_area, B.cluster_b7_area, B.cluster_b8_area 
 FROM 
-grid_temp_${grid}_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
+(SELECT A.* FROM grid_temp_100_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
+LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
+WHERE G.dp IS NULL)
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
@@ -254,7 +340,7 @@ ren cluster_joined cluster;
 
 
 
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  b7_int b8_int  {;
 forvalues r=0/1 {;
 foreach het in "" "_mixed" "_zeros" {;
 

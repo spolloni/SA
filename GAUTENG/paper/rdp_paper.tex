@@ -1307,13 +1307,16 @@ We develop a simple model of residential housing markets to capture the welfare 
 % Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
 
 
+
 \begin{align*}
-U &= \delta_{hlt} - \frac{\lambda}{2} (\overline{k}_{hj} + k_{hjt}) - \theta R_{hjt}   + \epsilon_{hjt}  
+U &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} - R_{hjt}   + \epsilon_{hjt}  
 \end{align*}
+
+Set $\overline{U}$ equal to zero 
 
 \begin{align*}
 \label{eq:rent}
-R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \frac{\lambda}{2} (\overline{k}_{hj} + k_{hjt}) + \epsilon_{hjt} - \overline{U}}{\theta}
+R_{hjt}^{*}(k_{hjt}) &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} + \epsilon_{hjt}
 \end{align*}
 
 
@@ -1323,48 +1326,30 @@ max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt}
 
 
 \begin{align*}
-k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{\lambda} \,\, - \frac{\theta}{\lambda}C + \frac{\epsilon_{hjt}}{\lambda}
+k_{hjt}^{*} &= \frac{\delta_{hlt}}{\lambda} \,\, - \frac{C}{\lambda} + \frac{\epsilon_{hjt}}{\lambda}
 \end{align*}
 
 \begin{align*}
 % \label{eq:profits1}
 % \begin{split}
-P_{hjt}^{*}  &= \frac{1}{2} \Big [ \frac{\delta + \epsilon - \overline{U} }{\theta}  + C \Big ] 
+P_{hjt}^{*}  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
 % \end{split}
 \end{align*}
 
 
 
-% \begin{align*}
-% U &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} - \theta R_{hjt}   + \epsilon_{hjt}  
-% \end{align*}
 
-% \begin{align*}
-% \label{eq:rent}
-% R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \frac{\lambda}{2} k_{hjt} + \epsilon_{hjt} - \overline{U}}{\theta}
-% \end{align*}
-
-
-% \begin{align*}
-% max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
-% \end{align*}
+\begin{align*}
+% \label{eq:profits1}
+% \begin{split}
+P_{hjt}^{*}(\delta_{1}) \, - \, P_{hjt}^{*}(\delta_{0})  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda} - \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
+% \end{split}
+\end{align*}
 
 
-% \begin{align*}
-% k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{\lambda} \,\, - \frac{\theta}{\lambda}C + \frac{\epsilon_{hjt}}{\lambda}
-% \end{align*}
-
-% \begin{align*}
-% % \label{eq:profits1}
-% % \begin{split}
-% P_{hjt}^{*}  &= \frac{1}{2} \Big [ \frac{\delta + \epsilon - \overline{U} }{\theta}  + C \Big ] 
-% % \end{split}
-% \end{align*}
-
-
-
-
-
+\begin{align*}
+\delta = Exposure \, (\alpha_0 \,  \,  +  \, \alpha_2 \, Con )
+\end{align*}
 
 
 % \begin{align*}

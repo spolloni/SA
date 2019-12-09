@@ -22,6 +22,39 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+def gcro_over(db,table):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT G.OGC_FID AS OGC_FID_1, st_area(G.GEOMETRY) AS AREA_1, G.rdp AS rdp_1,
+                       H.OGC_FID AS OGC_FID_2,  st_area(H.GEOMETRY) AS AREA_2, H.rdp AS rdp_2,
+                       st_area(st_intersection(G.GEOMETRY,H.GEOMETRY)) AS  area_int 
+                FROM 
+                (SELECT G.GEOMETRY, G.OGC_FID, R.rdp FROM gcro_publichousing AS G JOIN 
+                (SELECT cluster, 1 AS rdp FROM rdp_cluster UNION SELECT cluster, 0 AS rdp FROM placebo_cluster) AS R ON R.cluster = G.OGC_FID) AS G , 
+                (SELECT H.GEOMETRY, H.OGC_FID, R.rdp FROM gcro_publichousing AS H JOIN 
+                (SELECT cluster, 1 AS rdp FROM rdp_cluster UNION SELECT cluster, 0 AS rdp FROM placebo_cluster) AS R ON R.cluster = H.OGC_FID) AS H
+                       WHERE  st_area(st_intersection(G.GEOMETRY,H.GEOMETRY))>0 
+                       AND    G.OGC_FID != H.OGC_FID   ;
+
+                '''.format(table))
+    # cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+    print ' all set ! '
+
+
+# gcro_over(db,'gcro_over')
+
+
+ # WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+ #                                            WHERE f_table_name='gcro_publichousing' AND search_frame=H.GEOMETRY)
+ #                                            AND st_intersects(G.GEOMETRY,H.GEOMETRY)
+
+
 def grid_to_undeveloped(db,undev):
 
     print " start grid to undeveloped " + undev
@@ -795,8 +828,9 @@ def buffer_area_int_full8(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buf
 
 
 
-buffer_area_int_full8(db,500,1000,1500,2000,2500,3000,3500,4000)
+# buffer_area_int_full8(db,500,1000,1500,2000,2500,3000,3500,4000)
 
+# buffer_area_int_full8(db,250,500,750,1000,1250,1500,1750,2000)
 
 
 
