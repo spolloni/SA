@@ -15,9 +15,12 @@ if $LOCAL==1 {;
 global gcro_over 		= 0;
 global load_buffer_1 	= 0;
 global load_grids 		= 1;
+
 global load_buffer_2 	= 0;
 global merge_all  		= 0;
 global undev   			= 0;
+global elev   			= 0;
+
 
 global grid = "100";
 global dist_break_reg1 = "500";
@@ -26,7 +29,11 @@ global dist_break_reg2 = "4000";
 * global dist_break_reg1 = "250";
 * global dist_break_reg2 = "2000";
 
-global outcomes = " total_buildings for inf inf_backyard inf_non_backyard other ";
+global outcomes = 
+" total_buildings for inf inf_backyard 
+inf_non_backyard other shops shops_inf
+util util_water util_energy util_refuse
+community health school";
 
 
 cd ../..;
@@ -43,6 +50,18 @@ prog outcome_gen;
   g inf_non_backyard  = inf_b==0 & inf==1;
 
   g other = s_lu_code != "7.1" & s_lu_code != "7.2";
+
+  g shops = regexm(s_lu_code,"11.")==1;
+  g shops_inf =  regexm(s_lu_code,"11.6")==1;
+
+  g util        = regexm(s_lu_code,"6.")==1;
+  g util_water  = regexm(s_lu_code,"6.1")==1;
+  g util_energy = regexm(s_lu_code,"6.2")==1;
+  g util_refuse = regexm(s_lu_code,"6.3")==1;
+  
+  g community = regexm(s_lu_code,"8.")==1;
+  g health = regexm(s_lu_code,"9.")==1;
+  g school = regexm(s_lu_code,"10.")==1;
 
 end;
 
@@ -109,7 +128,7 @@ local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area,
  B.cluster_b3_area, B.cluster_b4_area,
   B.cluster_b5_area, B.cluster_b6_area,   B.cluster_b7_area, B.cluster_b8_area 
 FROM 
-(SELECT A.* FROM grid_temp_100_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
+(SELECT A.* FROM grid_temp_100_4000_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
 LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
 WHERE G.dp IS NULL) AS A
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
@@ -176,25 +195,27 @@ clear;
 	P.distance AS placebo_distance, P.target_id AS placebo_cluster, P.count AS placebo_count,
 
 	Y.cbd_dist AS cbd_dist_r, Z.cbd_dist AS cbd_dist_p,
-	R.road_dist AS road_dist_r, Q.road_dist AS road_dist_p
+	R.road_dist AS road_dist_r, Q.road_dist AS road_dist_p,
 
-	FROM grid_temp_${grid} AS AA 
+	V.X AS XX , V.Y AS YY
+
+	FROM grid_temp_${grid}_4000 AS AA 
 
 	LEFT JOIN 
 	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-	          FROM distance_grid_temp_100_gcro_full AS D
+	          FROM distance_grid_temp_100_4000_gcro_full AS D
 	          JOIN (SELECT R.* FROM rdp_cluster AS R LEFT JOIN gcro_over_list AS G ON  R.cluster =                           
                        G.OGC_FID WHERE G.dp IS NULL ) AS R ON R.cluster = D.target_id   		
 	          GROUP BY D.input_id HAVING D.distance == MIN(D.distance ) ) AS B ON AA.grid_id=B.input_id
 
 	LEFT JOIN 
 	        (SELECT D.input_id, D.distance, D.target_id, COUNT(D.input_id) AS count
-	          FROM distance_grid_temp_100_gcro_full AS D
+	          FROM distance_grid_temp_100_4000_gcro_full AS D
 	          JOIN (SELECT R.* FROM placebo_cluster AS R LEFT JOIN gcro_over_list AS G ON  R.cluster =                           
                        G.OGC_FID WHERE G.dp IS NULL ) AS R ON R.cluster = D.target_id   		
 	          GROUP BY D.input_id HAVING D.distance == MIN(D.distance ) )  AS P ON AA.grid_id=P.input_id  
 
-	LEFT JOIN grid_bblu_`1'grid_temp_${grid} AS A  ON A.grid_id=AA.grid_id
+	LEFT JOIN grid_bblu_`1'grid_temp_${grid}_4000 AS A  ON A.grid_id=AA.grid_id
 	LEFT JOIN (SELECT A.* FROM  bblu_`1' AS A `2') 
 	      AS C ON A.OGC_FID = C.OGC_FID
 
@@ -205,6 +226,7 @@ clear;
 	LEFT JOIN road_dist AS R ON R.OGC_FID = B.target_id
 	LEFT JOIN road_dist AS Q ON Q.OGC_FID = P.target_id
 
+	LEFT JOIN grid_xy_100_4000 AS V ON V.grid_id = AA.grid_id
 	";
 
 
@@ -249,7 +271,7 @@ use bbluplot_grid_pre_overlap, clear;
 g post=0;
 
 append using bbluplot_grid_post_overlap;
-replace post=1 if post==.;
+replace post = 1 if post==. ;
 
 ren id grid_id ;
 fmerge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta" ;
@@ -407,11 +429,11 @@ save "bbluplot_grid_${grid}_overlap_full_het.dta", replace;
 if $undev == 1 {;
 
 local qry = " 
-SELECT * FROM grid_100_to_cult_recreational 
+SELECT * FROM grid_100_4000_to_cult_recreational 
 UNION
-SELECT * FROM grid_100_to_hydr_areas
+SELECT * FROM grid_100_4000_to_hydr_areas
 UNION
-SELECT * FROM grid_100_to_phys_landform_artific
+SELECT * FROM grid_100_4000_to_phys_landform_artific
 ";
 
 odbc query "gauteng";
@@ -427,9 +449,37 @@ keep grid_id;
 duplicates drop grid_id, force;
 ren grid_id id;
 
-save "undev_100.dta", replace;
+save "undev_100_4000.dta", replace;
 
 };
+
+
+
+if $elev == 1 {;
+
+local qry = " 
+SELECT E.grid_id, F.height
+ FROM grid_to_elevation_points_100_4000 AS E 
+ JOIN elevation AS F ON E.fid = F.OGC_FID
+";
+
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; g
+
+destring *, replace force;
+
+gegen height_m = max(height), by(grid_id);
+replace height=height_m;
+keep grid_id height;
+duplicates drop grid_id, force;
+ren grid_id id;
+
+save "grid_elevation_100_4000.dta", replace;
+
+};
+
+
+
 
 * erase  bbluplot_grid_pre_overlap.dta;
 * erase  bbluplot_grid_post_overlap.dta;

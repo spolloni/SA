@@ -780,7 +780,7 @@ def add_grid(db,grid_size):
     return
 
 
-add_grid(db,500)
+# add_grid(db,500)
 
 # add_grid(db,25)
 # add_grid(db,50)
@@ -788,14 +788,14 @@ add_grid(db,500)
 
 
 
-def grid_xy(db,gridtype):
+def grid_xy(db,gridtype,gridnumber):
 
     con = sql.connect(db)
     cur = con.cursor()
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
     name =gridtype
-    table='grid_xy'
+    table='grid_xy_'+gridnumber
     con.execute("DROP TABLE IF EXISTS {};".format(table))
     con.execute('''
                 CREATE TABLE {} AS
@@ -805,7 +805,10 @@ def grid_xy(db,gridtype):
     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'grid_id'))
 
 
-# grid_xy(db,'grid_temp_25')
+# grid_xy(db,'grid_temp_100','100')
+
+
+# grid_xy(db,'grid_temp_25','25')
 
 
 def grid_to_erven(db):

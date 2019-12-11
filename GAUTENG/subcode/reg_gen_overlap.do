@@ -229,6 +229,73 @@ end
 
 
 
+cap prog drop generate_slope
+prog define generate_slope
+
+
+    global xsize = 500
+
+    sum XX, detail
+    egen xg = cut(XX), at(`=r(min)'($xsize)`=r(max)')
+    sum YY, detail
+    egen yg = cut(YY), at(`=r(min)'($xsize)`=r(max)')
+
+    gegen xyg = group(xg yg)
+
+    * bys xyg: g gn=_n
+    * bys xyg: g gN=_N
+    * count if gn==1
+
+    gegen hmax = max(height), by(xyg)
+    gegen hmin = min(height), by(xyg)
+    gegen hmean= mean(height), by(xyg)
+
+    g x_max_id = XX if height==hmax
+      gegen x_max = max(x_max_id), by(xyg)
+    g y_max_id = YY if height==hmax
+      gegen y_max = max(y_max_id), by(xyg)
+    g x_min_id = XX if height==hmin
+      gegen x_min = max(x_min_id), by(xyg)
+    g y_min_id = YY if height==hmin
+      gegen y_min = max(y_min_id), by(xyg)
+
+    g dist = sqrt( (x_max-x_min)^2  + (y_max-y_min)^2  )
+    replace dist = . if xyg==.
+
+    g hmean_f= hmean
+    sum hmean, detail
+    replace hmean_f = `=r(mean)' if hmean_f==.
+
+    g hd = hmax - hmin
+
+    * replace hd = hd/1000
+
+    g slope = hd/dist
+    replace slope=0 if slope==.
+
+    * preserve
+    *   import delimited using "erf_size_avg.csv", clear
+    *   global erf_size = v1[1]
+    *   import_delimited using "purch_price.csv", clear
+    *   global purch_price = v1[1]
+    *   * global pmean = $purch_price / ( $erf_size/(100*100) )
+    *   global pmean = $purch_price 
+    *   write "pmean.csv" $pmean .1 "%12.1g"
+    *   write "pmean.tex" $pmean .1 "%12.0fc"
+    *   write "erf_size.tex" $erf_size .1 "%12.0fc"
+    *   write "purch_price.tex" $purch_price .1 "%12.0fc"
+    * restore
+
+    global pmean = 225475 
+    * global pmean = 336000
+
+    g CA       = $pmean if slope>=0 & slope<.
+    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+    * replace CA = CA/100000
+end
+
+
 
 
 cap prog drop regs

@@ -130,6 +130,28 @@ def cbd_gen_full():
 
 
 
+# def cbd_gen_grid():
+#     print 'running ...'
+#     con = sql.connect(db)
+#     cur = con.cursor()
+#     con.enable_load_extension(True)
+#     con.execute("SELECT load_extension('mod_spatialite');")
+
+#     cur.execute("DROP TABLE IF EXISTS cbd_dist_grid;")
+#     con.execute('''
+#         CREATE TABLE cbd_dist_grid AS
+#         SELECT MIN(ST_distance(A.GEOMETRY,ST_Centroid(B.GEOMETRY)))/1000 AS cbd_dist, B.grid_id
+#         FROM cbd_centroids AS A, grid_temp_100 AS B
+#         GROUP BY B.grid_id
+#                 ''')
+#     cur.execute("CREATE INDEX cbd_dist_grid_id ON cbd_dist_grid (grid_id);")
+#     con.close()
+#     print 'finished :)'
+
+# cbd_gen_grid()
+
+
+
 def cbd_gen_grid():
     print 'running ...'
     con = sql.connect(db)
@@ -141,15 +163,12 @@ def cbd_gen_grid():
     con.execute('''
         CREATE TABLE cbd_dist_grid AS
         SELECT MIN(ST_distance(A.GEOMETRY,ST_Centroid(B.GEOMETRY)))/1000 AS cbd_dist, B.grid_id
-        FROM cbd_centroids AS A, grid_temp_100 AS B
+        FROM cbd_centroids AS A, grid_temp_100_4000 AS B
         GROUP BY B.grid_id
                 ''')
     cur.execute("CREATE INDEX cbd_dist_grid_id ON cbd_dist_grid (grid_id);")
     con.close()
     print 'finished :)'
 
-# cbd_gen_grid()
-
-
-
+cbd_gen_grid()
 

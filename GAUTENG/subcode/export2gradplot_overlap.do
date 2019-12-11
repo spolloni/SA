@@ -42,7 +42,8 @@ local qry = "
         BA.cluster_area, 
         BA.cluster_b1_area, BA.cluster_b2_area, 
         BA.cluster_b3_area, BA.cluster_b4_area,
-        BA.cluster_b5_area, BA.cluster_b6_area
+        BA.cluster_b5_area, BA.cluster_b6_area,
+        BA.cluster_b7_area, BA.cluster_b8_area
 
   FROM 
 
@@ -67,7 +68,7 @@ destring *, replace force ;
 
 
 
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int b7_int b8_int  {;
 forvalues r=0/1 {;
 
 if `r'==1 {;
@@ -118,7 +119,7 @@ local qry = "
          A.munic_name, A.mun_code, A.purch_yr, A.purch_mo, A.purch_day,
          A.purch_price, A.trans_id, A.property_id, A.seller_name,
 
-         B.erf_size, B.latitude, B.longitude, B.bblu_pre, LN.plot_id,
+         B.erf_size, B.latitude, B.longitude, B.bblu_pre, LN.plot_id, G.grid_id,
 
         SP.sp_1
 
@@ -127,6 +128,8 @@ local qry = "
   JOIN landplots_near AS LN ON LN.property_id = A.property_id
 
   LEFT JOIN erven_s2001 AS SP ON SP.property_id = A.property_id
+
+  LEFT JOIN grid_to_landplots_near_100_4000 AS G ON G.plot_id = LN.plot_id
 
   ";
 
@@ -149,7 +152,7 @@ keep if cluster_int_tot_rdp==0 & cluster_int_tot_placebo==0
 
 g cluster_joined = .
 g rdp=.
-forvalues r=1/6 {
+forvalues r=1/8 {
   replace cluster_joined = b`r'_int_placebo_id if (b`r'_int_tot_placebo >  b`r'_int_tot_rdp  ) & cluster_joined==.
   replace rdp=0                                if (b`r'_int_tot_placebo >  b`r'_int_tot_rdp  ) & rdp==.
   replace cluster_joined = b`r'_int_rdp_id     if (b`r'_int_tot_placebo <  b`r'_int_tot_rdp  ) & cluster_joined==.
@@ -229,6 +232,8 @@ gen erf_size3 = erf_size^3
       
 * save data;
 save "gradplot_admin${V}_overlap.dta", replace
+
+
 
 
 

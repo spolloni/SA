@@ -74,7 +74,10 @@ _4_d_DISTS_ = 0  # EA distance
 _4_e_DISTS_ = 0  # EA distance for 1996
 _4_f_DISTS_ = 0  # small area distance for 2011 with holes plugged 
 _4_g_DISTS_ = 0  # GRID DISTANCE!
-_4_h_DISTS_ = 1  # GRID DISTANCE! 100!
+_4_h_DISTS_ = 0  # GRID DISTANCE! 100!
+_4_i_DISTS_ = 0  # GRID DISTANCE! 100 4000!  takes 1000 sec!
+
+
 
 _4_xy_          = 0  # make xy coordinate tables for all the fixed effects
 _4_buffer_area_ = 0  # calculate areas of intersection with a bunch of buffers
@@ -362,6 +365,19 @@ if _4_h_DISTS_ ==1:
                                 FROM  {} AS  p '''.format(grid_name)
         # dist(db,hull,'grid_temp_3',import_script,dist_threshold)
         dist(db,hull,'grid_temp_100',import_script,dist_threshold)
+        print '\n'," -- Grid Distance ", '\n'
+        intersGEOMgrid(db,hull,grid_name) 
+        print '\n'," -- grid: done!", '\n'
+
+
+if _4_i_DISTS_ ==1:
+    grid_name = 'grid_temp_100_4000'
+    print '\n'," Distance part F: distances for grids... ",'\n'        
+    for hull in hulls:
+        import_script = '''SELECT st_x(st_centroid(p.GEOMETRY)) AS x, 
+                                st_y(st_centroid(p.GEOMETRY)) AS y, p.grid_id
+                                FROM  {} AS  p '''.format(grid_name)
+        dist(db,hull,'grid_temp_100_4000',import_script,dist_threshold)
         print '\n'," -- Grid Distance ", '\n'
         intersGEOMgrid(db,hull,grid_name) 
         print '\n'," -- grid: done!", '\n'

@@ -22,6 +22,26 @@ figures = project + 'CODE/GAUTENG/paper/figures/'
 db = gendata+'gauteng.db'
 
 
+def grid_xy(db,gridtype,gridnumber):
+
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+    name =gridtype
+    table='grid_xy_'+gridnumber
+    con.execute("DROP TABLE IF EXISTS {};".format(table))
+    con.execute('''
+                CREATE TABLE {} AS
+                SELECT grid_id, ST_X(ST_CENTROID(GEOMETRY)) AS X, ST_Y(ST_CENTROID(GEOMETRY)) AS Y
+                FROM {};
+                '''.format(table,name))
+    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'grid_id'))
+
+
+# grid_xy(db,'grid_temp_100','100')
+
+
 def gcro_over(db,table):
 
     con = sql.connect(db)
@@ -48,6 +68,7 @@ def gcro_over(db,table):
 
 
 # gcro_over(db,'gcro_over')
+
 
 
  # WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
@@ -540,10 +561,12 @@ def add_grid(db,grid_size):
     return
 
 
+# add_grid(db,100)
+
+
 # add_grid(db,3000)
 
 
-# add_grid(db,100)
 
 # add_grid(db,500)
 # add_grid(db,25)
@@ -738,11 +761,11 @@ def buffer_area_int_full8(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buf
     # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
     # # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
     # # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
-    for name,fid in zip(['grid_temp_100'],['grid_id']):
+    # for name,fid in zip(['grid_temp_100'],['grid_id']):
     
     # for name,fid in zip(['ea_2001'],['OGC_FID']):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
-    # for name,fid in zip(['landplots_near'],['plot_id']):
+    for name,fid in zip(['landplots_near'],['plot_id']):
 
         table= name + '_area'
         con.execute("DROP TABLE IF EXISTS {};".format(table))
@@ -827,6 +850,8 @@ def buffer_area_int_full8(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buf
     print ' all set ! :D '
 
 
+
+# buffer_area_int_full8(db,500,1000,1500,2000,2500,3000,3500,4000)
 
 # buffer_area_int_full8(db,500,1000,1500,2000,2500,3000,3500,4000)
 
@@ -967,7 +992,7 @@ def buffer_area_int_full(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6):
 
 
 def prop_set(db):
-    print 'buffer time starting ...'
+    print 'generate nearest landplots to property starting ...'
     con = sql.connect(db)
     cur = con.cursor()
     con.enable_load_extension(True)
@@ -1018,8 +1043,8 @@ def prop_set(db):
                     erven_set AS A, 
                     gcro_publichousing AS G 
                             WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                                                WHERE f_table_name='erven_set' AND search_frame=ST_BUFFER(G.GEOMETRY,3000))
-                                                AND st_intersects(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,3000)) GROUP BY A.property_id ; ''')
+                                                WHERE f_table_name='erven_set' AND search_frame=ST_BUFFER(G.GEOMETRY,4000))
+                                                AND st_intersects(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,4000)) GROUP BY A.property_id ; ''')
 
     cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'POINT','XY');".format('erven_set_near'))
     cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format('erven_set_near'))
@@ -1169,6 +1194,39 @@ def buffer_area_int_prop(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6):
 
 
 
+
+def grid_to_landplots_near(db):
+
+    print "start grid to landplots_near"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_landplots_near_100;') 
+    make_qry=  ''' CREATE TABLE grid_to_landplots_near_100 AS 
+                            SELECT A.plot_id , G.grid_id
+                                FROM landplots_near as A, grid_temp_100 AS G
+                                    WHERE A.ROWID IN 
+                                        (SELECT ROWID FROM SpatialIndex 
+                                            WHERE f_table_name='landplots_near' AND search_frame=G.GEOMETRY)
+                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) 
+                                            GROUP BY G.grid_id HAVING
+                                             st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) == max(st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)))
+                                              ;
+                    '''
+    cur.execute(make_qry) 
+
+    cur.execute("CREATE INDEX grid_to_landplots_near_100_index ON grid_to_landplots_near_100 (grid_id);")
+    cur.execute("CREATE INDEX landplots_near_id_to_grid_100_index ON grid_to_landplots_near_100 (plot_id);")    
+    con.commit()
+    con.close()   
+    print "finish grid to landplots_near"
+
+    return
+
+grid_to_landplots_near(db)
 
 
 

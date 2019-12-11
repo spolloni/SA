@@ -82,12 +82,30 @@ ren OGC_FID area_code
   drop if _merge==2
   drop _merge
 
-g pop_density  = (1000000)*(person_pop/area)
-replace pop_density=. if pop_density>200000
+g pop_density  = (10000)*(person_pop/area)
+replace pop_density=. if pop_density>2000
 
-foreach var of varlist $outcomes {
-  replace `var' = `var'*1000000/($grid*$grid)
-}
+
+
+fmerge m:1 id using "grid_elevation_100_4000.dta"
+drop if _merge==2
+drop _merge
+
+* ren id grid_id
+*   fmerge m:1 grid_id using "temp/grid_price.dta"
+*   drop if _merge==2
+*   drop _merge
+* ren grid_id id
+
+*** GENERATE ELEVATION ***  !!!!
+
+* g pop_density  = (1000000)*(person_pop/area)
+* replace pop_density=. if pop_density>200000
+
+* foreach var of varlist $outcomes {
+*   replace `var' = `var'*1000000/($grid*$grid)
+* }
+
 
 sort id post
 foreach var of varlist $outcomes  other {
@@ -99,6 +117,8 @@ foreach var of varlist $outcomes  other {
 gen_cj
 
 generate_variables
+
+generate_slope 
 
 
   ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ******
@@ -144,8 +164,6 @@ forvalues r=1/$rset {
 * hist distance_rdp if dist_rdp==500 & proj_rdp==0
 * sum distance_rdp if s1p_a_1_R>0 & s1p_a_1_R<. & proj_rdp==0
 * hist distance_rdp if s1p_a_1_R>.6 & s1p_a_1_R<. & proj_rdp==0
-
-
 * sum distance_rdp if s1p_a_2_R>0 & s1p_a_1_R>0 & s1p_a_3_R==0 & proj_rdp==0, detail
 
 
@@ -213,29 +231,6 @@ forvalues r = 1/$rset {
    
 }
 
-
-**** NOT EXCLUSIVE
-* forvalues r=1/$rset {
-*   cap drop s1p_a_`r'_C 
-*   cap drop s1p_a_`r'_C_con
-*   cap drop s1p_a_`r'_C_post 
-*   cap drop s1p_a_`r'_C_con_post
-*   g s1p_a_`r'_C = s1p_a_`r'_R if s1p_a_`r'_R> s1p_a_`r'_P
-*   replace s1p_a_`r'_C  = s1p_a_`r'_P if s1p_a_`r'_P>s1p_a_`r'_R
-*   replace s1p_a_`r'_C=0 if s1p_a_`r'_C ==.
-  
-*   g s1p_a_`r'_C_con = s1p_a_`r'_C if  s1p_a_`r'_R>s1p_a_`r'_P
-*   replace s1p_a_`r'_C_con=0  if s1p_a_`r'_C_con==.
-
-*   g s1p_a_`r'_C_post = s1p_a_`r'_C*post
-*   g s1p_a_`r'_C_con_post = s1p_a_`r'_C_con*post
-* }
-
-* foreach var of varlist s1p_*_C s1p_a*_C_con s1p_a_*_R s1p_a_*_P S2_*_post  {
-*   replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
-* }
-
-
 *** ALTERNATIVE 
 forvalues r=1/$rset {
   cap drop s1p_a_`r'_C 
@@ -252,34 +247,26 @@ forvalues r=1/$rset {
   g s1p_a_`r'_C_con_post = s1p_a_`r'_C_con*post
 }
 
-foreach var of varlist s1p_*_C s1p_a*_C_con s1p_a_*_R s1p_a_*_P S2_*_post  {
+foreach var of varlist s1p_*_C* s1p_a_*_R s1p_a_*_P S2_*_post  {
   replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
 }
 
 g proj_C = proj_rdp
 replace proj_C = proj_placebo if proj_C==0 & proj_placebo>0
+g proj_C_post = proj_C*post
 g proj_C_con = proj_rdp
+g proj_C_con_post = proj_rdp*post
 
 
 
-* global regset = "(rdp_distance<3000 | placebo_distance<3000) & proj_rdp==0 & proj_placebo==0"
+* global outcomes_census =  "  pop_density water_inside   toilet_flush  electricity  tot_rooms  emp inc "
+* global cells = 3
 
-
-cd ../..
-cd $output
-
-
- * keep if distance_rdp<3000 | distance_placebo<3000
-
-
-global outcomes_census =  "  pop_density water_inside   toilet_flush  electricity  tot_rooms  emp inc "
-global cells = 3
-
-sort id year
-foreach var of varlist $outcomes_census {
-  cap drop `var'_ch
-   by id: g `var'_ch = `var'[_n]-`var'[_n-1]
-}
+* sort id year
+* foreach var of varlist $outcomes_census {
+*   cap drop `var'_ch
+*    by id: g `var'_ch = `var'[_n]-`var'[_n-1]
+* }
 
 
 g cD = cbd_dist_r if rD < pD 
@@ -287,10 +274,6 @@ replace cD = cbd_dist_p if rD>pD
 
 g roadD = road_dist_r if rD < pD 
 replace roadD = road_dist_p if rD>pD 
-
-
-  reg for_ch proj_C proj_C_con s1p_a_*_C s1p_a_*_C_con , cluster(cluster_joined) r
-
 
 
 global pct = .10
@@ -312,6 +295,517 @@ forvalues r=1/8 {
   replace d_r = `r' if s1p10_a_`r'_R==1
   replace d_p = `r' if s1p10_a_`r'_P==1
 }
+
+
+
+* global regset = "(rdp_distance<3000 | placebo_distance<3000) & proj_rdp==0 & proj_placebo==0"
+* keep if distance_rdp<3000 | distance_placebo<3000
+
+
+cd ../..
+cd $output
+
+
+
+    global pmean = 225475
+    cap drop CA
+    g CA       = $pmean if slope>=0 & slope<.
+    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+
+
+
+foreach var of varlist shops shops_inf util util_water util_energy util_refuse community health school {
+  sort id post
+  by id: g `var'_ch = `var'[_n]-`var'[_n-1]
+}
+
+
+
+
+
+foreach var of varlist shops shops_inf util util_water util_energy util_refuse community health school {
+ reg `var'_ch proj_C*post s1p_a_*_C*post, cluster(cluster_joined) r 
+}
+
+
+
+
+ reg shops_ch proj_C*post s1p_a_*_C*post, cluster(cluster_joined) r
+
+ reg shops_inf_ch proj_C*post s1p_a_*_C*post, cluster(cluster_joined) r
+
+ reg shops proj_C* s1p_a_*_C*  CA cD rD, cluster(cluster_joined) r 
+
+ reg shops_inf proj_C* s1p_a_*_C*  CA cD rD, cluster(cluster_joined) r 
+
+
+reg pop_density proj_C* s1p_a_*_C*  CA cD rD, cluster(cluster_joined) r 
+
+
+
+
+qui reg for proj_C* s1p_a_*_C*  CA cD rD, cluster(cluster_joined) r 
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+
+g pp_pre  = ((_b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
+sum pp_pre, detail
+disp (`=r(mean)'*_N/166)/1000000
+
+
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+
+g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+g diff = (pp_post - pp_pre)
+
+sum diff, detail
+disp (`=r(mean)'*_N/166)/1000000
+
+
+
+qui reg inf proj_C* s1p_a_*_C*  CA cD rD , cluster(cluster_joined) r 
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+
+g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post - _b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
+g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+g diff = (pp_post - pp_pre)
+
+sum diff, detail
+disp (`=r(mean)'*_N/166)/1000000
+
+
+
+
+
+
+** 68 
+
+
+/*
+
+
+
+*** WELFARE IS SQUARED FOR SOME REASON!?
+
+disp (6.63^2)/(2*.00006)
+disp ((6.63^2)/(2*.00006))*22428/150
+
+* disp 54,770,297 (cost of the project)
+
+
+
+
+* in footprints
+disp 9/.00006
+* 150000
+count if proj_rdp>.1 & post==0
+disp 150000*22428/150
+
+
+** WITH IV APPROACH ! 
+disp 9/.00012
+* 75000
+count if proj_rdp>.1 & post==0
+disp 75000*22428/150
+
+disp 6.6*22428/150
+disp 987*220000
+
+* equals about 22 million, which is chill!
+
+disp 6.87/.00006
+* 114500
+sum s1p_a_1_C_con_post if post==1
+disp 114500*(350000*.01)/150
+
+* equals about 2.6 million
+
+
+* 150000 per project plot
+
+
+    global pmean =  225475 
+
+    cap drop CA
+    g CA       = $pmean if slope>=0 & slope<.
+    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+
+
+reg inf     proj_C*       s1p_a_*_C*   CA   , cluster(cluster_joined) r 
+
+
+* reg for     proj_C*       s1p_a_*_C*   CA  cD rD , cluster(cluster_joined) r 
+
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_se
+predict pp_se, stdp
+
+set seed 10
+
+
+cap drop er1
+cap drop er2
+* g er1 = rnormal(0,sqrt(pp_se))
+* g er2 = rnormal(0,sqrt(pp_se))
+
+g er1=0
+g er2=0
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+g pp_pre  = ((pp + er1 - _b[proj_C_con_post]*proj_C_con_post - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+g pp_post = ((pp + er2  )^2)/(-_b[CA]*2)  if post==1
+
+* g pp_pre  = ((pp + er1  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+* g pp_post = ((pp + er2  )^2)/(-_b[CA]*2)  if post==1
+
+
+g diff = (pp_post - pp_pre)
+
+
+sum diff, detail
+disp `=r(mean)'*_N/150
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+reg total_buildings_ch proj_C proj_C_con s1p_a_*_C s1p_a_*_C_con  s2p*, cluster(cluster_joined) r
+
+coefplot, vertical keep(*con)
+
+
+
+reg for_ch proj_C proj_C_con s1p_a_*_C s1p_a_*_C_con s2p*, cluster(cluster_joined) r
+reg inf_ch proj_C proj_C_con s1p_a_*_C s1p_a_*_C_con , cluster(cluster_joined) r
+
+
+
+reg total_buildings_ch ///
+            proj_C proj_C_con s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C  ///
+            s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con, ///
+            cluster(cluster_joined) r
+
+reg for_ch ///
+            proj_C proj_C_con s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C  ///
+            s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con, ///
+            cluster(cluster_joined) r
+
+reg inf_ch ///
+            proj_C proj_C_con s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C  ///
+            s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con, ///
+            cluster(cluster_joined) r
+
+
+
+
+
+
+reg inf_ch proj_C proj_C_con s1p_a_*_C s1p_a_*_C_con , cluster(cluster_joined) r
+
+
+reg P slope
+
+g s1 = slope>=.06 & slope<=.12
+g s2 = slope>.12 & slope<.
+
+
+g P1 = P/total_buildings
+
+
+reg P1 s1 s2  if post==0
+
+
+reg P1 s1 s2 cD rD if post==0
+
+
+reg P s1 s2  if post==0
+
+
+
+reg P s1 s2 cD rD if post==0, cluster(xyg) r
+
+
+
+* first 17%
+* second 22%
+
+* .03 + .031 = .061
+* .06 + .093 = .153
+
+
+    * g CA       = $pmean if slope>=0 & slope<.
+    * replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    * replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+
+
+
+
+
+* reg P1 s1 s2 if for>0 & inf==0
+* reg P1 s1 s2 if for==0 & inf>0
+
+* reg P s1 s2 if post==0
+* reg P s1 s2 for inf if post==0
+* reg P for inf
+
+    *  global pmean = 25000
+    *  global pmean = 336000
+    * global pmean =  225475 
+    * cap drop CA
+    * g CA       = $pmean if slope>=0 & slope<.
+    * replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    * replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+
+
+
+    cap drop CA
+    g CA       =  30000 if slope>=0 & slope<.
+    replace CA =  30000 + 2*15456 if slope>=.06 & slope<.12
+    replace CA =  30000 + 2*24000 if slope>=.12 & slope<.
+
+
+
+    global pmean = 336000
+    cap drop CA
+    g CA       = $pmean if slope>=0 & slope<.
+    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+
+
+reg P  CA
+
+
+
+reg for     proj_C*       s1p_a_*_C*   CA  cD rD , cluster(cluster_joined) r 
+
+
+ivregress 2sls for   proj_C*       s1p_a_*_C*   (P1 = slope)   , cluster(cluster_joined) r 
+
+
+ivregress 2sls for   (P1 = slope)   , cluster(cluster_joined) r 
+
+
+reg for   proj_C*       s1p_a_*_C*     , cluster(cluster_joined) r 
+
+
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_se
+predict pp_se, stdp
+
+set seed 10
+
+cap drop er1
+cap drop er2
+g er1 = rnormal(0,sqrt(pp_se))
+g er2 = rnormal(0,sqrt(pp_se))
+
+
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+* g pp_pre  = ((pp + er1 - _b[proj_C_con_post]*proj_C_con_post - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+* g pp_post = ((pp + er2  )^2)/(-_b[CA]*2)  if post==1
+
+g pp_pre  = ((pp + er1  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+g pp_post = ((pp + er2  )^2)/(-_b[CA]*2)  if post==1
+
+
+g diff = (pp_post - pp_pre)
+
+
+sum diff, detail
+disp `=r(mean)'*_N/150
+
+
+
+
+*** WELFARE IS SQUARED FOR SOME REASON!?
+
+disp (6.63^2)/(2*.00006)
+disp ((6.63^2)/(2*.00006))*22428/150
+
+* disp 54,770,297 (cost of the project)
+
+
+
+
+* in footprints
+disp 9/.00006
+* 150000
+count if proj_rdp>.1 & post==0
+disp 150000*22428/150
+
+
+** WITH IV APPROACH ! 
+disp 9/.00012
+* 75000
+count if proj_rdp>.1 & post==0
+disp 75000*22428/150
+
+disp 6.6*22428/150
+disp 987*220000
+
+* equals about 22 million, which is chill!
+
+disp 6.87/.00006
+* 114500
+sum s1p_a_1_C_con_post if post==1
+disp 114500*(350000*.01)/150
+
+* equals about 2.6 million
+
+
+* 150000 per project plot
+
+
+    global pmean =  225475 
+
+    cap drop CA
+    g CA       = $pmean if slope>=0 & slope<.
+    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+
+
+reg inf     proj_C*       s1p_a_*_C*   CA   , cluster(cluster_joined) r 
+
+
+* reg for     proj_C*       s1p_a_*_C*   CA  cD rD , cluster(cluster_joined) r 
+
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_se
+predict pp_se, stdp
+
+set seed 10
+
+
+cap drop er1
+cap drop er2
+* g er1 = rnormal(0,sqrt(pp_se))
+* g er2 = rnormal(0,sqrt(pp_se))
+
+g er1=0
+g er2=0
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+g pp_pre  = ((pp + er1 - _b[proj_C_con_post]*proj_C_con_post - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+g pp_post = ((pp + er2  )^2)/(-_b[CA]*2)  if post==1
+
+* g pp_pre  = ((pp + er1  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+* g pp_post = ((pp + er2  )^2)/(-_b[CA]*2)  if post==1
+
+
+g diff = (pp_post - pp_pre)
+
+
+sum diff, detail
+disp `=r(mean)'*_N/150
+
+
+
+
+
+/*
+
+
+areg total_buildings   proj_C*  s1p_a_1_C* s1p_a_2_C*  s1p_a_3_C*, cluster(cluster_joined) r a(id)
+
+
+areg total_buildings   proj_C*post   S2*post, cluster(cluster_joined) r a(id)
+
+
+areg total_buildings   proj_C*post  s1p_a_*_C*post , cluster(cluster_joined) r a(id)
+
+
+
+
+
+reg total_buildings_ch proj_C proj_C_con s1p_*_C s1p_*_C_con, cluster(cluster_joined) r
+
+
+
+coefplot, keep(*_post) vertical
+
+
+
+reg total_buildings_ch proj_C proj_C_con,  cluster(cluster_joined) r
+
+
+
+coefplot, vertical
+
+
+
+
+reg inf_ch             proj_C proj_C_con s1p_a_*_C s1p_a_*_C_con, cluster(cluster_joined) r
+
+
+
+reg for_ch proj_C proj_C_con s1p_*_C s1p_*_C_con, cluster(cluster_joined) r
+
+
+reg for proj_C_*  s1p_*_C* CA 
+
+
+
+areg for proj_C_* s1p_*_C* CA, a(id)
+
+
+
+
+
+areg total_buildings   s2p* , cluster(cluster_joined) r a(id)
+
+reg total_buildings_ch proj_C proj_C_con s1p_*_C s1p_*_C_con, cluster(cluster_joined) r
+
+
+
+
+
+
+/*
 
 
 

@@ -816,6 +816,8 @@ local qry = "
 odbc query "gauteng" ;
 odbc load, exec("`qry'") clear ; 
 
+save "census_grid_link_simple.dta", replace;
+
 
 merge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta" ;
 keep if _merge==3;

@@ -45,14 +45,26 @@ cd Generated/GAUTENG;
 
 use "gradplot_admin${V}_overlap.dta", clear;
 
+preserve ;
+  gegen P = mean(purch_price), by(grid_id);
+  keep grid_id P;
+  drop if P==.;
+  duplicates drop grid_id, force;
+  save "temp/grid_price.dta", replace;
+
+restore;
+
 cd ../..;
 cd $output ;
-
 
 #delimit cr;
 
 
 drop if mo2con_rdp==. & mo2con_placebo==.
+
+
+/*
+
 
 g post = ( mo2con_rdp>0 & mo2con_rdp<. & rdp==1 ) | ( mo2con_placebo>0 & mo2con_placebo<. & rdp==0 )
 
