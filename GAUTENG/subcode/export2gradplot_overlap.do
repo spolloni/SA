@@ -231,7 +231,38 @@ gen erf_size3 = erf_size^3
 
       
 * save data;
+
 save "gradplot_admin${V}_overlap.dta", replace
+
+
+preserve
+  g post = purch_yr>2006
+
+  gegen P = mean(purch_price), by(grid_id post)
+
+  keep P grid_id post
+  duplicates drop grid_id post, force
+
+  save "temp/grid_price.dta", replace
+restore
+
+* drop if mo2con_rdp==. & mo2con_placebo==.
+
+* g post = ( mo2con_rdp>0 & mo2con_rdp<. & rdp==1 ) | ( mo2con_placebo>0 & mo2con_placebo<. & rdp==0 )
+
+
+
+
+
+/*
+preserve ;
+  gegen P = mean(purch_price), by(grid_id);
+  keep grid_id P;
+  drop if P==.;
+  duplicates drop grid_id, force;
+  save "temp/grid_price.dta", replace;
+
+restore;
 
 
 

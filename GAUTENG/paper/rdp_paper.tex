@@ -558,31 +558,352 @@ Parallel patterns across constructed and unconstructed projects in both Figures 
 
 
 
+
+\section{A Model of Housing Markets}\label{section:theory}
+
+We develop a simple model of residential housing markets to capture the welfare effects of local housing projects within their neighborhoods.  This model infers welfare changes not only through changes in rents, but also through changes in the quantities of housing supplied.  
+
+%%% motivate more from a broad welfare perspective
+
+% Compare to Diamond's model! in writing;  mention time periods up front?!
+% This model is static where households h
+% Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
+
+
+Each time period, developers choose how much formal and informal housing to construct and maintain on each plot of land as well as rent levels.  Households then choose whether to rent housing receiving utility given by
+\begin{align*}
+U &= \delta_{hlt} - \frac{\lambda_h}{2} k_{hjt} - R_{hjt}   + \epsilon_{hjt}  
+\end{align*}
+\noindent where $h$ indexes housing sector (either formal or informal), $l$ indexes location, $j$ indexes the specific land plot within location $l$, and $t$ indexes the time period.  $\delta_{hlt}$ indicates the amenity value of location, $l$ for housing sector, $h$ in time period, $t$.  $k_{hjt}$ measures the amount of housing on the land plot by sector.  $\lambda_{h}$ captures the congestion disutility from having additional housing of the same sector on the same plot, which assumes zero spillovers across sectors.   $R_{hjt}$ is the rent charged for housing on plot $j$ where $\epsilon_{hjt}$ is the plot and time-specific amenity shock.    Households can also choose to live outside the city and receive reservation value, $\overline{U}$, which we normalize to zero.  % The distribution of $\epsilon_{hjt}$ may be correlated across housing sectors to capture whether land plots that are suitable for formal housing may also be suitable for informal housing.    $\lambda_{h}$ is also assumed to be independent of housing from another sector on the same plot 
+
+This approach assumes that households have identical preferences across housing and locations, which implies that housing demand is perfectly elastic.  This assumption is consistent with households having low moving costs within the city as well as no unique preferences for particular neighborhoods.  These assumptions may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.
+
+
+Given household preferences, developers maximize profits for each housing sector by setting rents just high enough to ensure that households are indifferent between renting housing on plot $j$ and their reservation utility.  Developers are assumed to have full bargaining power, setting rents to extract all household surplus.  Profit-maximizing rents as a function of the number of houses on a plot are given by
+\begin{align*}
+% \label{eq:rent}
+R_{hjt}^{*}(k_{hjt}) &= \delta_{hlt} - \frac{\lambda_h}{2} k_{hjt} + \epsilon_{hjt}
+\end{align*}
+From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents. %%% EXPLAIN MORE CLEARLY!
+
+Given profit-maximizing rents, developers then choose how much housing to build on each plot by maximizing total profit per plot given by
+\begin{align*}
+max_{\,k_{hjt}} \,\,\,\,\,\, \Pi_{hjt}(k_{hjt}) \,=\, k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{l} \, \Big ]
+\end{align*}
+\noindent where the $C_{hjt}$ measures the cost of constructing and maintaining each house, which may vary based on location.  The profit-maximizing number of houses in each sector, $k^{*}_{hjt}$ takes the following form
+\begin{align*}
+% \label{eq:kstar}
+k_{hjt}^{*} &= \frac{\delta_{hlt}}{\lambda_h} \,\, - \frac{C_l}{\lambda_h} + \frac{\epsilon_{hjt}}{\lambda_h}
+\end{align*}
+Profit-maximizing housing is increasing in amenity values, $\delta_{hlt}$, decreasing in congestion disutility, $\lambda_{h}$, and decreasing in construction costs, $C_{hjt}$.  In this framework, observed increases in the amount of housing per plot indicate an improvement in welfare.  The variance of amenity shocks, $\epsilon_{hjt}$ may be interpreted as a measure of the housing market supply elasticity by determining how quickly housing quantities respond to changes in amenity values.  Optimal profits are given by
+\begin{align*}
+% \label{eq:profits1}
+% \begin{split}
+\Pi_{hjt}^{*}  &= \frac{(\delta_{hlt}-C_l + \epsilon_{hjt} )^2}{2\lambda_h}
+% \end{split}
+\end{align*}
+Profits capture social welfare in this framework because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus. 
+
+\subsection{Modeling Public Housing Projects}
+
+Public housing projects are assumed to directly subsidize construction costs for the formal housing sector (given by $f$) within their footprints as well as indirectly affect amenity values for the informal housing sector (given by $i$) within their footprints and both informal and formal housing sectors nearby their footprints.  We define amenity value broadly to include any factors that affect the desirability of living in a  specific area.  In this case, amenity values capture increases in the desirability of living next to new, high quality project houses.  These values may also reflect how changes in local demographics caused by the projects may in turn affect the desirability of living in these neighborhoods.  Amenities may include public services that accompany projects such as water and electric utilities, community centers, and schools.  Lastly, this term may capture improvements in local labor markets as housing projects increase local population density.
+
+Amenities values may depend not only on direct overlap with project areas, but also on exposure to projects in their immediate neighborhoods.  To capture direct project overlap, amenity values are allowed to depend on the percentage of a plot's overlap with a project footprint which is given by $A(F_j, F_P) = \frac{ \text{Area} ( F_{j} \, \cap \, F_{P} )}{\text{Area}(F_j)}$ where $F_j$ is the plot footprint and $F_{P}$ captures project footprints for the set of projects given by $P$.  For plots that do not directly overlap with project footprints, their amenity values may still be affected depending on the extent to which their neighborhoods are exposed to project areas.  This exposure is measured in terms of percentage overlap with neighborhoods given by $A(B^{k_0,k_1}_j, F_P) = \frac{ \text{Area}(B^{k_0,k_1}_j \, \cap \, F_{P}) }{\text{Area}(B^{k_0,k_1}_j)}$ where $B^{k_0,k_1}_j$ is a buffer from $k_0$ kilometers to $k_1$ kilometers from $F_j$.  Amenity values from nearby housing projects can be expressed as follows
+\begin{align*}
+\overline{\eta}_{h,t}^{P} \, \, = \,
+\begin{cases}
+ \, \eta^{0,P}_{h,t} \, A(F_j, F_P)  &\text{ if }   A(F_j, F_P) > 0 \\
+ \, \sum_{k=1}^{K} \, \, \eta^{k,P}_{h,t} \, A(B^{k,k+1}_j, F_P) & \text{ if } A(F_j, F_P)=0 \\
+\end{cases}
+\end{align*}
+This approach assumes that amenity values from projects fully dissipate beyond $K$ kilometer distances from plot boundaries.  To empirically distinguish between direct and neighborhood effects of housing projects, this approach also assumes that neighborhood effects are zero for plots that overlap with project areas.\footnote{Empirically, any estimates direct effects for plots that overlap with project areas are likely to also implicitly include neighborhood effects, which suggests that any welfare calculations are unlikely to be sensitive to this assumption.}
+
+Since policymakers may target particular types of plots for housing projects, amenities are allowed to depend on exposure to project areas ($P=Proj$) and additionally on whether projects are successfully constructed ($P=Const$).
+
+INCLUDE AN EXAMPLE! 
+
+Policymakers subsidize marginal construction costs at a rate of $s$ within project footprints for the formal housing sector where total subsidies are given by 
+\begin{align*}
+S^{P}_{h,t} \, \, = \, 
+\begin{cases}
+\, s \, A(F_j, F_P)  & \text{ if }\,\, t = post \, \text{ and } \, P = Const \, \text{ and } \, h = f \\
+\, 0  & \text{ else }
+\end{cases}
+\end{align*}
+where $post$ indicates time periods after project construction.  
+
+In this framework, optimal housing per sector and plot takes the following form
+\begin{align*}
+k_{hjt}^{*} &= \frac{    \overline{\eta}_{h}^{Proj} + \overline{\eta}_{h}^{Const} + \overline{\eta}_{h,post}^{Proj} + \overline{\eta}_{h,post}^{Const}     }{\lambda_h} \,\, - \frac{C_l-S^{Const}_{h,post} }{\lambda_h} + \frac{\epsilon_{hjt}}{\lambda_h}
+\end{align*}
+
+
+Within projects,  the welfare effect of 
+
+Within projects, we make the conservative assumption that...
+
+Welfare : 
+
+\begin{align*}
+W_{hjt}  &= \frac{( \overline{\eta}_{h}^{Proj} + \overline{\eta}_{h}^{Const} + \overline{\eta}_{h,post}^{Proj} + \overline{\eta}_{h,post}^{Const}   -C_l + \epsilon_{hjt} )^2}{2\lambda} - \frac{( \overline{\eta}_{h}^{Proj} + \overline{\eta}_{h}^{Const} + \overline{\eta}_{h,post}^{Proj}  - C_l + \epsilon_{hjt} )^2}{2\lambda}
+\end{align*}
+
+For all other plots, 
+
+% Amenities values may depend not only on direct overlap with project areas, but also on exposure to projects in their immediate neighborhoods.  To capture direct project overlap, amenity values are allowed to depend on the percentage of a plot's overlap with a project footprint which is given by $E^{F}_{l} = \frac{ \text{Area} ( F_{l} \, \cap \, F_{P} )}{\text{Area}(F_l)}$ where $F_l$ is the plot footprint and $F_{P}$ captures project footprints for the set of projects given by $P$.  For plots that do not directly overlap with project footprints, their amenity values may still be affected by projects depending on the extent to which their neighborhoods are exposed to project areas.  This exposure is measured by $E^{B_{j,k}}_{l} = \frac{ \text{Area}(B_{j,k} \, \cap \, F_{P}) }{\text{Area}(B_{j,k})}$ where $B_{j,k}$ is a buffer from $j$ to $k$ km distance from plot $l$'s footprint and $F_{P}$ captures project footprints.
+% \begin{align*}
+% \eta_{hl}^{P} \, \, = \,
+% \begin{cases}
+%  \, \eta^{0}_{hl} \, E^{F}_{l}  &\text{ if }   E^{F}_l > 0 \\
+%  \, \sum_{j}^{J} \, \, \eta^{j}_{hl} \, E^{B_{j,j+1}}_{l} & \text{ if } E^{F}_l=0 \\
+% \end{cases}
+% \end{align*}
+% Since policymakers may target particular types of plots for housing projects, amenities are allowed to depend on exposure to project areas ($P=Proj$) and additionally on whether projects are successfully constructed ($P=Const$). 
+% \begin{align*}
+% \delta_{hl}^{P} \, \, =  \, \eta_{hl}^{Proj} \, + \eta_{hl}^{Const}  
+% \end{align*}
+
+% \begin{align*}
+% k_{hjt}^{*} &= \frac{\eta_{hl}^{P} \, + \, d_t \eta_{hl}^{P} }{\lambda_h} \,\, - \frac{C_l-S_{ft}}{\lambda_h} + \frac{\epsilon_{hjt}}{\lambda_h}
+% \end{align*}
+
+
+% \begin{align*}
+% k_{hft}^{*} &= \frac{\delta_{hft}}{\lambda_h} \,\, - \frac{C_f-S}{\lambda_h}  + \frac{\epsilon_{hft}}{\lambda_h}
+% \end{align*}
+
+% \begin{align*}
+% k_{hft}^{*} &= \frac{\delta_{hft}}{\lambda_h} \,\, - \frac{C_f-S}{\lambda_h}  + \frac{\epsilon_{hft}}{\lambda_h}
+% \end{align*}
+% where $S$ subsidizes marginal costs.
+
+
+PUT MAP IN RIGHT HERE WITH THE EXAMPLE!!!
+
+
+Therefore, THIS EXPRESSES THE CHANGE IN HOUSING  and  THIS EXPRESSES THE CHANGE IN SURPLUS!
+
+
+HOW TO WRITE THE ESTIMATING EQUATION!!!!?!
+
+Land plots targeted for housing projects are often , which suggests that having these types of plots nearby may affect neighborhood amenity values regardless of whether the projects are successfully constructed.
+
+, amenities are allowed to depend on potential exposure to constructed project areas, 
+
+
+
+
+
+
+To allow 
+
+Map $x$ provides an example of this approach.  It works best because of X Y Z...  
+
+May select particular areas!! 
+
+
+
+
+
+by shifting housing costs and amenity values both within as well as nearby project footprints. 
+
+
+Public housing projects enter the model by shifting housing costs and amenity values both within as well as nearby project footprints.  Let location index $l$ include whether plots fall within project footprints, $\textsc{\small Footprint}$ or nearby spillover areas, $\textsc{\small 0-500m Outside}$.  Similarly, let housing sector index $h$ include formal, $f$ and informal, $i$ housing sectors.
+
+Housing projects allocate subsidies to local developers to construct houses within project footprints.  These subsidies directly lower formal housing construction costs in project footprints, $C_{f,\textsc{\small Footprint,Post}}$.  These houses are then allocated to beneficiary households who can choose to live in these houses or rent them at efficient prices.  Housing projects also remove preexisting informal housing and rezone land for formal housing development, leaving limited land for new informal developments.  These practices may increase costs for informal housing, $C_{i,\textsc{\small Footprint,Post}}$ in project footprints.
+
+Housing projects may also affect amenities for formal housing, $\delta_{f,\textsc{\small Footprint,Post}}$ and informal housing, $\delta_{i,\textsc{\small Footprint,Post}}$ within project footprints.  Housing projects may boost local amenities by increasing access to piped water, electricity, and sewerage services while providing better roads and community centers.  
+
+Housing projects may also have effects on amenities for neighboring areas just outside of project footprints.  On one hand, improvements in infrastructure in project footprints as well as greater densities of formal housing may provide positive amenities for surrounding neighborhoods, $\delta_{h,\textsc{\small 0-500m Outside,Post}}$.  On the other hand, greater densities of backyard housing as well as more people in footprints may be perceived as negative amenities by housing markets, $\delta_{h,\textsc{\small 0-500m Outside,Post}}$.  
+
+Collapsing these effects into amenity and cost terms provides a reduced-form method of capturing the spillover effects of housing projects; however, this approach implies a series of restrictions on behavior.  First, the amenity and cost terms enter household utility linearly and independently of the number of houses per plot, which nests the assumption that the all households enjoy local amenities equally and independently of the density of neighboring housing.  This assumption does not allow for congestion costs from overusing public services.  Second, this approach imposes a limited structure for amenity externalities to extend across space:  amenities in project areas are allowed to affect amenities for spillover areas while amenities in all other areas are assumed to be spatially independent of each other.  
+
+
+
+
+
+% \begin{align*}
+% % \label{eq:profits1}
+% % \begin{split}
+% P_{hjt}^{*}(\delta_{1}) \, - \, P_{hjt}^{*}(\delta_{0})  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda} - \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
+% % \end{split}
+% \end{align*}
+
+% \begin{align*}
+% \delta = Exposure \, (\alpha_0 \,  \,  +  \, \alpha_2 \, Con )
+% \end{align*}
+
+
+ 
+
+
+% Given household preferences, developers maximize profits for each housing sector by setting rents just high enough to ensure that households are indifferent between renting each house on plot $j$ and their reservation utility $\overline{U}$.  Developers are assumed to have full bargaining power, setting rents to extract all household surplus.  Profit-maximizing rents as a function of the number of houses on a plot are given by
+% \begin{align}
+% % \label{eq:rent}
+% R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}) + \epsilon_{hjt} - \overline{U}}{\theta}
+% \end{align}
+% From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents.  Without detailed measures of home ownership, this approach is unable to disentangle the distributional consequences of public housing policies across the population of households.
+
+% Given profit-maximizing rents, developers then choose how many houses to build on each plot by maximizing total profit per plot given by
+% \begin{align*}
+% max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
+% \end{align*}
+% \noindent where the $C_{hjt}$ measures the cost of constructing and maintaining each house, which may vary based on location.
+
+% %and may depend on plot-specific features such as land slope, $C_{j} = c + \psi S_{j}$ where land slope is given by $S_{j}$.
+
+% When $\lambda(k_{hjt})$ is convex, the profit-maximizing number of houses in each sector, $k^{*}_{hjt}$ can be expressed as a function of the random amenity shock $\epsilon_{hjt}$ given by
+% \begin{align}
+% \label{eq:housingdemand}
+% \begin{split}
+% k_{hjt}^{*} &=
+% \begin{cases}
+% 0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
+% % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
+% k &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
+% \end{cases} \\
+% \text{ where }& \\
+% V_{hjt} & = \delta_{hlt}  - \theta C_{hjt}   \\
+% \Lambda_{h}(k) & =  k\lambda_{h}(k) - (k-1)\lambda_{h}(k-1) + \overline{U} \\
+% \lambda(0) & = 0 \,\, \text{ and } \lambda(.) \text{ is increasing and convex }
+% \end{split}
+% \end{align}
+% The profit-maximizing number of plots with houses and the number of houses per plot by sector are increasing in amenity values, $\delta_{hlt}$, decreasing in congestion disutility, $\Lambda_{h}(k)$, and decreasing in construction costs, $C_{hjt}$.  According to this framework, observed increases in the number of plots with houses and/or the number of houses per plot indicate an improvement in welfare holding constant reservation utility.  The variance of amenity shocks, $\epsilon_{hjt}$ may be interpreted as a measure of the sector-specific housing market elasticity by determining how quickly housing quantity responds to changes in amenity values among other factors.
+
+% Given optimal rents in equation (\ref{eq:rent}) and optimal houses in equation (\ref{eq:housingdemand}), let the price of each plot equal profit for each plot as follows
+% \begin{align}
+% \label{eq:profits}
+% \begin{split}
+% P_{hjt}^{*}  &=
+% k_{hjt}^{*} \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}^{*}) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] 
+% \end{split}
+% \end{align}
+% \begin{cases}
+% 0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
+% % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
+% k \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
+% \end{cases} 
+
+% Like the profit-maximizing number of houses per plot, plot prices are increasing with local amenities, decreasing in congestion disutility, and decreasing in construction costs.  Plot prices fully capture social welfare in this framework because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus. 
+
+
+\subsection{Measuring Exposure to Housing Projects}
+% With spatial outcomes according to land plots, we measure direct and indirect exposure 
+% To measure direct and spillover effects of projects, we calculate the share o
+
+
+We develop a new measure of spatial exposure to place-based policies according to the extent to which each land plot's footprint and immediate neighborhood overlap with the footprints of place-based policies --- or housing project footprints in our setting.  We measure direct exposure to project footprints in terms of the percentage of a plot's area that overlaps with project footprints.  Likewise, we measure spillover exposure in terms of the percentage of a plot's neighborhood that intersects with project footprints where neighborhoods are defined by fixed distance buffers around each plot.  GIVE EXAMPLES
+
+Compared to using the distance to nearest project (citations), measuring spatial overlap may better account for variation in the size, shape, and orientation of projects.  For example, a plot surrounded by many large projects may develop differently from a plot near one small project although both plots may share the same distance to their nearest project.  Figure YY indicates substantial variation in the layout of housing projects across space.  
+
+This approach nests the intuition that housing projects may affect local economic outcomes by shifting neighborhood amenity values through changes in housing quality, composition of neighbors, and infrastructure quality.  In this setting, larger projects produce greater shifts in neighborhood amenities, which in turn drive incentives to invest in these neighborhoods.  This approach may be less appropriate for placed-based policies like the construction of schools or hospitals where outcomes may depend solely on nearest accessibility.  
+
+
+% We measure direct exposure to project footprints in terms of the percentage of a plot's area that overlaps with project footprints given by $A(F_j, F_P) = \frac{ \text{Area} ( F_{j} \, \cap \, F_{P} )}{\text{Area}(F_j)}$ where $F_j$ is the plot footprint and $F_{P}$ captures all footprints of project type $P$.  For example, 
+
+% We measure spillover exposure in terms of the percentage of a plot's immediate neighborhood that intersects with project footprints given by $A(N^{k_0,k_1}_j, F_P) = \frac{ \text{Area}(N^{k_0,k_1}_j \, \cap \, F_{P}) }{\text{Area}(B^{k_0,k_1}_j)}$ where the neighborhood, $N^{k_0,k_1}_j$, is defined as a fixed-distance buffer from $k_0$ kilometers to $k_1$ kilometers from the plot footprint, $F_j$.  For example, EXPLAIN!  
+
+% To empirically separate direct from spillover exposures, we set spillover exposure equal to zero ($A(N^{k_0,k_1}_j, F_P)=0$) for any plot that experiences direct exposure ($A(F_j, F_P)>0$).
+
+
+DESCRIPTIVES ON THE MATCH!!! 
+
+
+
+
+
+
+
+THEN  DESCRIPTIVE STATISTICS !!!!
+
+
+% We measure direct exposure to project footprints is measured in terms of the percentage of a plot $j$'s area that overlaps with project footprints given by $A(F_j, F_P) = \frac{ \text{Area} ( F_{j} \, \cap \, F_{P} )}{\text{Area}(F_j)}$ where $F_j$ is the plot footprint and $F_{P}$ captures all footprints of project type $P$.  For example, 
+
+% We measure spillover exposure in terms of percentage overlap with neighborhoods given by $A(B^{k_0,k_1}_j, F_P) = \frac{ \text{Area}(B^{k_0,k_1}_j \, \cap \, F_{P}) }{\text{Area}(B^{k_0,k_1}_j)}$ where $B^{k_0,k_1}_j$ is a buffer from $k_0$ kilometers to $k_1$ kilometers from $F_j$.  
+
+
+
 \section{Empirical Methodology}\label{section:methodology}
 
-\begin{figure}
-\caption{Example Constructed Project and Planned, but Unconstructed Project}\label{fig:bblumaps}
-{\centering
-\includegraphics[width=1\textwidth,height=1\textheight,keepaspectratio]{figures/casestudy7_medium.png}}\\[.5em]
-{ \footnotesize Note: ``const.'' refers to constructed and ``unconst.'' refers to unconstructed.  Formal housing and informal housing are from 2012 after scheduled project construction. }
-\end{figure}
-
-To estimate project impacts, we use a difference-in-differences-in-differences (or triple-differences) strategy comparing changes in outcomes nearby projects to a little farther away from projects across constructed project areas and planned but unconstructed project areas.  Figure~\ref{fig:bblumaps} maps two example projects from our sample to provide intuition for this strategy.  The triple-differences specification is given by
-% \begin{align}\label{eq:main}
-% \begin{split}
-% \quad y_{ipt} \, =& \,   \textsc{\small Proj}_{ip} \,\, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
-% & \, \textsc{\small Spill}_{ip} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p} \, +\, \beta_4 \Big) \, + \\[.2em]
-% & \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, +  \, \theta \, X_{ipnt} \, + \, \lambda_{n} \, +  \, \varepsilon_{ipt} \quad 
-% \end{split}
-% \end{align}  % \footnote{ DO THE ROBUSTNESS EXCLUDING THESE AREAS!!!!!!! }
-\begin{align}\label{eq:main}
+To estimate project impacts, we compare changes in outcomes between constructed projects and planned but unconstructed projects.  We estimate both the direct effects of overlapping with project footprints as well as the spillover effects of  having projects.
+\begin{align}
+% \label{eq:main}
 \begin{split}
-\quad y_{ipt} \, =& \,   \textsc{\small Footprint}_{ip} \, \times \, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
-& \, \textsc{\small 0-500m Outside}_{ip} \, \times \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p} \, +\, \beta_4 \Big) \, + \\[.2em]
-& \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, +  \, \theta \, X_{ipnt} \, + \, \lambda_{n} \, +  \, \varepsilon_{ipt} \quad 
+\quad y_{it} \, =\, & ( \alpha_0 \, +  \, \alpha_1 \textsc{\small Post}_{t}) \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Projects} \Big) \, + \\[.2em]
+& ( \alpha_2 \, +  \, \alpha_3 \textsc{\small Post}_{t})  \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Const. Projects} \Big)  \, + \\[.5em]
+&\sum_{k=1}^{K} \,\, \Bigg[ \, (\beta_{0}^{k} \,+\, \beta_{1}^{k} \textsc{\small Post}_{t})  \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Projects} \Big) \, + \\
+&\hspace{2.8em}(\beta_{3}^{k} \,+\, \beta_{4}^{k} \textsc{\small Post}_{t})  \, \times \,\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Const. Projects} \Big)  \, \Bigg] \, +  \\[.5em]
+&\gamma\textsc{Post}_t + \varepsilon_{it}
+%  \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
+% & \, \sum_{k=0}^{K-1} \,\, \Big[.5k \, ,\,  .5(k+1)\Big] \, \, \textsc{km} \,\, \textsc{Buffer}_{ipk} \, \times \, \Big( \beta_1^{k} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^{k} \, \textsc{\small Post}_{t} \, + \, \beta_3^{k} \, \textsc{\small Const}_{p} \, +\, \beta_4^{k} \Big) \, \\[.2em]
+% &  + \gamma \textsc{\small Post}_{t} \, +  \, \varepsilon_{ipt} \quad 
 \end{split}
-\end{align} 
-\noindent where $y_{ipt}$ is the outcome for observation $i$ --- a 25m by 25m plot, a census block, or a housing transaction --- observed at time $t$ assigned to its nearest project $p$.  $\textsc{\small Post}_{t}$ equals one in time periods after scheduled construction and zero otherwise.  $\textsc{\small Const}_{p}$ equals one if project $p$ is ever constructed and zero otherwise.  $\,\textsc{\small Footprint}_{ip}$ equals one if the observation lies within project $p$'s footprint and zero otherwise.  Likewise, $\,\textsc{\small 0-500m Outside}_{ip}$ equals one if the observation lies between 0 and 500m outside of project $p$'s footprint and zero otherwise.  In some cases, plots and census blocks may partially overlap with project footprints or outside areas.  In these cases, $\,\textsc{\small Footprint}_{ip}$ and $\,\textsc{\small 0-500m Outside}_{ip}$ record the share of each observation $i$'s area that overlaps with the footprint or outside area.  We assume that all spillover effects of projects are contained within 500m, which is consistent with similar research on place-based policies.\footnote{\cite{diamond2016wants} and \cite{rossi2010housing} find that main effects are concentrated within similar radii.  We also test alternative buffer definitions.}  Areas 0 to 500m outside projects cover 3 $\text{km}^{2}$ while project footprints cover 1.2 $\text{km}^{2}$ on average.  We also only include observations within 1,500m of the nearest project.  To capture neighborhood fixed effects, $\lambda_{n}$ includes indicators for Census 2001 ``sub-places,'' which identify suburbs, wards, villages, or informal settlements.\footnote{See \cite{censusmeta} for details.  Samples include up to 1,069 neighborhoods with each containing on average 2,873 plots, 14 census blocks, and 13 property transactions.}  $X_{ipt}$ includes a vector of additional controls and $\varepsilon_{ipt}$ is the idiosyncratic error term.  
+\end{align}
+
+\noindent $y_{it}$ is the outcome for plot $i$ observed at time $t$.  $\textsc{\small Post}_{t}$ equals one after scheduled construction and zero otherwise.  $\textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Projects} \Big)$ and \\ $\textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{Const. Projects} \Big)$ measure the percentage of plot $i$'s footprint that intersects with project footprints and constructed project footprints respectively.  To capture spillover effects for plots that do not intersect with project footprints, we define neighborhoods for these plots in terms of 0.5 km rings spanning from 0 to 4 km.  Figure YY includes an example of neighborhoods from 0 to 0.5 km and 0.5 to 1 km.  Therefore, $\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Projects} \Big)$  and  \\ $\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Const. Projects} \Big)$ measure the percentage of neighborhood $k$ around plot $i$ that intersects with project footprints and constructed project footprints respectively. 
+
+
+
+% $ \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(F_i)} $ measure the share of plot $i$'s footprint that intersects with all projects while $\frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(F_i)}$ measure the share ofintersecting with projects that were successfully constructed.  $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(B^{k}_{i})}$ and $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(B^{k}_{i})}$ compute the shares of plot buffers that intersect with all projects and constructed projects respectively for plots that do not intersect with project footprints.  We measure buffers in 0.5 km intervals from 0 to 4 km from plot footprints.  In order to separately estimate 
+
+
+
+
+% \begin{align}
+% % \label{eq:main}
+% \begin{split}
+% \quad y_{it} \, =& \, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const Footprint }_{i} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \textsc{Footprint}_{t} \, + \, \alpha_3 \, \textsc{\small Const Footprint}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
+% & \, \sum_{k=0}^{K-1} \,\, \Big[.5k \, ,\,  .5(k+1)\Big] \, \, \textsc{km} \,\, \textsc{Buffer}_{ipk} \, \times \, \Big( \beta_1^{k} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^{k} \, \textsc{\small Post}_{t} \, + \, \beta_3^{k} \, \textsc{\small Const}_{p} \, +\, \beta_4^{k} \Big) \, \\[.2em]
+% &  + \gamma \textsc{\small Post}_{t} \, +  \, \varepsilon_{ipt} \quad 
+% \end{split}
+% \end{align}
+
+% \begin{align}
+% % \label{eq:main}
+% \begin{split}
+% \quad y_{it} \, = \, & \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(F_i)} \,\, \Big[\alpha_0 + \alpha_1 \textsc{Post}_t \Big] + \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(F_i)} \,\,\Big[\alpha_2 + \alpha_3 \textsc{Post}_t \Big]  \, + \\[.5em]
+% &  \mathbbm{1} \Big\{  F_{i}  \cap  P_{\textsc{All}} = \emptyset \Big\} \sum_{k=1}^{K} \frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(B^{k}_{i})} \,\, \Big[\beta_0^{k} + \beta_1^{k} \textsc{Post}_t \Big] + \frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(B^{k}_{i})} \,\, \Big[\beta_3^{k}+ \beta_4^{k} \textsc{Post}_t \Big] \, + \\[.5em]
+% & \gamma \textsc{Post}_t \,+  \, \varepsilon_{ipt} \\[.5em]
+% \text{Where }& \\
+% &F_i = \text{Plot $i$ footprint} \\
+% &P_{\textsc{Proj}} = \text{All project footprints} \\
+% &P_{\textsc{Const Proj}} = \text{Constructed project footprints} \\
+% &B_i^{k} = \text{Buffer from .5($k-1$) to .5$k$ km around plot $i$} 
+% \end{split}
+% \end{align}
+
+% \begin{align}
+% % \label{eq:main}
+% \begin{split}
+% \quad y_{it} \, = \, & A(F_{i},P_{\textsc{All}}) \, [\alpha_0 + \alpha_1 \textsc{Post}_t ] + A(F_{i},P_{\textsc{Const}})\,[\alpha_2 + \alpha_3 \textsc{Post}_t ]  \, + \\[.5em]
+% &  \mathbbm{1} \Big\{ A(F_{i},P_{\textsc{All}}) = 0  \Big\} \sum_{k=1}^{K} A(B_{i}^{k},P_{\textsc{All}}) \,[\beta_0^{k} + \beta_1^{k} \textsc{Post}_t ] + A(B_{i}^{k},P_{\textsc{Const}}) \, [\beta_3^{k}+ \beta_4^{k} \textsc{Post}_t ] \, + \\[.5em]
+% & \gamma \textsc{Post}_t \,+  \, \varepsilon_{ipt} \\[.5em]
+% \text{Where }& \\
+% &A(X,Y) = \frac{ \text{Area}(X \cap Y)}{\text{Area}(X)} \\
+% &F_i = \text{Plot $i$ footprint} \\
+% &P_{\textsc{Proj}} = \text{All project footprints} \\
+% &P_{\textsc{Const Proj}} = \text{Constructed project footprints} \\
+% &B_i^{k} = \text{Buffer from .5($k-1$) to .5$k$ km around plot $i$} 
+% \end{split}
+% \end{align}
+
+
+
+
+
+
+
+
+% \\[-.2em] &\hspace{2em}\text{ if } \text{Area} ( F_{i}  \cap  P_{\textsc{All}} ) = 0
+
+
+% \noindent $y_{ipt}$ is the outcome for plot $i$ observed at time $t$.  $\textsc{\small Post}_{t}$ equals one in time periods after scheduled construction and zero otherwise.  $ \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(F_i)} $ measure the share of plot $i$'s footprint that intersects with all projects while $\frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(F_i)}$ measures the share intersecting with projects that were successfully constructed.  $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(B^{k}_{i})}$ and $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(B^{k}_{i})}$ compute the shares of plot buffers that intersect with all projects and constructed projects respectively for plots that do not intersect with project footprints.  We measure buffers in 0.5 km intervals from 0 to 4 km from plot footprints.  In order to separately estimate 
+
+
+
+
+$\,\textsc{\small Footprint}_{ip}$ equals one if the observation lies within project $p$'s footprint and zero otherwise.  Likewise, $\,\textsc{\small 0-500m Outside}_{ip}$ equals one if the observation lies between 0 and 500m outside of project $p$'s footprint and zero otherwise.  In some cases, plots and census blocks may partially overlap with project footprints or outside areas.  In these cases, $\,\textsc{\small Footprint}_{ip}$ and $\,\textsc{\small 0-500m Outside}_{ip}$ record the share of each observation $i$'s area that overlaps with the footprint or outside area.  We assume that all spillover effects of projects are contained within 500m, which is consistent with similar research on place-based policies.\footnote{\cite{diamond2016wants} and \cite{rossi2010housing} find that main effects are concentrated within similar radii.  We also test alternative buffer definitions.}  Areas 0 to 500m outside projects cover 3 $\text{km}^{2}$ while project footprints cover 1.2 $\text{km}^{2}$ on average.  We also only include observations within 1,500m of the nearest project.  To capture neighborhood fixed effects, $\lambda_{n}$ includes indicators for Census 2001 ``sub-places,'' which identify suburbs, wards, villages, or informal settlements.\footnote{See \cite{censusmeta} for details.  Samples include up to 1,069 neighborhoods with each containing on average 2,873 plots, 14 census blocks, and 13 property transactions.}  $X_{ipt}$ includes a vector of additional controls and $\varepsilon_{ipt}$ is the idiosyncratic error term.  
+
 
 
 
@@ -593,6 +914,59 @@ This framework allows for constructed and unconstructed projects to experience d
 This framework does not allow for trends that are correlated with location and whether projects are constructed.  For example, forward-looking households may anticipate project construction on specific plots of land and alter their housing investment decisions accordingly.  Qualitative evidence suggests that it would be difficult for households to anticipate construction in this context due to substantial uncertainty in project location and timing.  Project managers face difficulties coordinating stakeholders and sourcing funding while housing authorities are rarely transparent about project planning \citep{serihistory}.\footnote{\cite{diamond2016wants} also leverage uncertainty in project timing to study affordable housing in the US.} 
 
 
+
+
+
+
+% \begin{align}
+% % \label{eq:main}
+% \begin{split}
+% \quad y_{ipt} \, =& \,    A(F_j, F_P) \, \times \, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
+% & \, \sum_{k=1}^{K} \, \, A(B^{k,k+1}_j, F_P) \, \times \, \Big( \beta_1^{k} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^{k} \, \textsc{\small Post}_{t} \, + \, \beta_3^{k} \, \textsc{\small Const}_{p} \, +\, \beta_4^{k} \Big) \, \\[.2em]
+% &  + \gamma \textsc{\small Post}_{t} \, +  \, \varepsilon_{ipt} \quad 
+% \end{split}
+% \end{align}
+
+\begin{align*}
+ y_{ipt}  &=  \beta^{0}_{h,P}  \, A(F_j, F_P)  + \sum_{k=1}^{K} \, \, \beta^{k,P}_{h}  \, A(B^{k,k+1}_j, F_P) \overline{\eta}_{h}^{Proj} + \overline{\eta}_{h}^{Const} + \overline{\eta}_{h,post}^{Proj} + \overline{\eta}_{h,post}^{Const}  + \epsilon_{hjt}
+\end{align*}
+
+
+\begin{align*}
+\overline{\eta}_{h,t}^{P} \, \, = \,
+\begin{cases}
+ \, \eta^{0,P}_{h,t} \, A(F_j, F_P)  &\text{ if }   A(F_j, F_P) > 0 \\
+ \, \sum_{k=1}^{K} \, \, \eta^{k,P}_{h,t} \, A(B^{k,k+1}_j, F_P) & \text{ if } A(F_j, F_P)=0 \\
+\end{cases}
+\end{align*}
+
+\begin{align*}
+k_{hjt}^{*} &=    \overline{\eta}_{h}^{Proj} + \overline{\eta}_{h}^{Const} + \overline{\eta}_{h,post}^{Proj} + \overline{\eta}_{h,post}^{Const}  + \epsilon_{hjt}
+\end{align*}
+
+
+\begin{figure}
+\caption{Example Constructed Project and Planned, but Unconstructed Project}\label{fig:bblumaps}
+{\centering
+\includegraphics[width=1\textwidth,height=1\textheight,keepaspectratio]{figures/casestudy7_medium.png}}\\[.5em]
+{ \footnotesize Note: ``const.'' refers to constructed and ``unconst.'' refers to unconstructed.  Formal housing and informal housing are from 2012 after scheduled project construction. }
+\end{figure}
+
+
+
+
+Figure~\ref{fig:bblumaps} maps two example projects from our sample to provide intuition for this strategy.  The triple-differences specification is given by
+% \begin{align}\label{eq:main}
+% \begin{split}
+% \quad y_{ipt} \, =& \,   \textsc{\small Proj}_{ip} \,\, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
+% & \, \textsc{\small Spill}_{ip} \, \Big( \beta_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2 \, \textsc{\small Post}_{t} \, + \, \beta_3 \, \textsc{\small Const}_{p} \, +\, \beta_4 \Big) \, + \\[.2em]
+% & \, \gamma_1 \,  \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \gamma_2 \,\textsc{\small Post}_{t} \, +  \, \theta \, X_{ipnt} \, + \, \lambda_{n} \, +  \, \varepsilon_{ipt} \quad 
+% \end{split}
+% \end{align}  % \footnote{ DO THE ROBUSTNESS EXCLUDING THESE AREAS!!!!!!! }
+
+
+
+ 
 
 
 
@@ -629,115 +1003,6 @@ In the absence of project construction, housing growth in footprints out-paces a
 % (given by \textsc{0-500m Outside} $\times$ \textsc{Constructed} $\times$ \textsc{Post})   (given by \textsc{0-500m Outside} $\times$ \textsc{Post}) % This \textsc{0-500m Outside} $\times$ \textsc{Post} coefficient also reflects the 
 
 
-% \begin{table}[hbt!]
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_overlap}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
-
-
-
-% \begin{table}
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing & \small Informal Backyard Housing  \\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_spill_overlap}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
-
-
-
-% \begin{table}
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates ZEROES APPENDIX}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_overlap_zeros}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
-
-
-% \begin{table}
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates SPILL ZEROES APPENDIX}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_overlap_spill_zeros}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
-
 
 
 
@@ -746,220 +1011,46 @@ In the absence of project construction, housing growth in footprints out-paces a
 \begin{table}
 \small
 \centering
-\caption{NEW TOP Housing Density per $\text{km}^{2}$ Estimates LAG APPENDIX}\label{table:bbluDDDfull}
+\caption{Main Results}\label{table:main}
 \vspace{-2mm}
 \resizebox{1\linewidth}{!}{
 \begin{threeparttable}
 \begin{tabular}{lCCCCC}
 \toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small $\Delta$ Total Housing & \small $\Delta$ Formal Housing & \small $\Delta$ Informal Housing & \small $\Delta$ Informal Non-Bkyd. Housing  & \small $\Delta$ Informal Backyard Housing\\ \midrule
- \\[-.5em]
-\input{figures/bblu_spill_test_new_top}
+% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
+ % & \small Population Density & \small Total Formal Housing & \small Total Informal Housing & \small Informal Bkyd. Housing  & \small Log(Price) \\ \midrule
+ % \\[-.5em]
+\input{figures/main_new}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
+Project areas are 100m by 100m plots within 4 km of project footprints.
+Housing and popuation densities are measure in terms of houses per $\text{km}^{2}$.
 % ``inside'' means within project footprint.  ``constr'' means constructed.
 \end{tablenotes}
 \end{threeparttable}
 }
 \end{table}
-
-
-\begin{table}
-\small
-\centering
-\caption{NEW TOP CENSUS Estimates LAG APPENDIX}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small $\Delta$ Pop Density & \small $\Delta$ Water Inside & \small $\Delta$ Flush Toilet & \small $\Delta$ Electricity  & \small $\Delta$ Rooms\\ \midrule
- \\[-.5em]
-\input{figures/census_spill_test_new_top}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-
-
-\begin{table}
-\small
-\centering
-\caption{NEW Housing Density per $\text{km}^{2}$ Estimates LAG APPENDIX}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
- \\[-.5em]
-\input{figures/bblu_spill_test_new}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-\begin{table}
-\small
-\centering
-\caption{NEW CENSUS Estimates LAG APPENDIX}\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small Pop Density & \small Water Inside & \small Flush Toilet & \small Electricity  & \small Rooms\\ \midrule
- \\[-.5em]
-\input{figures/census_spill_test_new}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-\begin{table}
-\small
-\centering
-\caption{DENSITY  Estimates SEPARATED }\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
- & \small $\Delta$ Total Housing & \small $\Delta$ Formal Housing & \small $\Delta$ Informal Housing & \small $\Delta$ Informal Non-Bkyd. Housing  & \small $\Delta$ Informal Backyard Housing\\ \midrule
- \\[-.5em]
-\input{figures/bblu_sep}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
-
-
-
-
-\begin{table}
-\small
-\centering
-\caption{DENSITY  Estimates COMPARISON }\label{table:bbluDDDfull}
-\vspace{-2mm}
-\resizebox{.9\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-& \small (1) & \small (2) & \small (3) & \small (4) \\
- & \small $\Delta$ Total Housing & \small $\Delta$  Total Housing & \small $\Delta$  Total Housing & \small $\Delta$  Total Housing  \\[1em]
-\textsc{Distance Metric} & \multicolumn{2}{c}{\% Buffer Overlap with Project} & \multicolumn{2}{c}{Distance to Project Boundary} \\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
- \\[-.5em]
-\input{figures/comparison}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-Project areas are 25m by 25m plots within 1,500m of project footprints.
-Estimates control for 2001 census sub-place fixed effects.
-Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% ``inside'' means within project footprint.  ``constr'' means constructed.
-\end{tablenotes}
-\end{threeparttable}
-}
-\end{table}
-
 
 
 
 % \begin{table}
 % \small
 % \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates LAG APPENDIX}\label{table:bbluDDDfull}
+% \caption{Main Results}\label{table:main}
 % \vspace{-2mm}
 % \resizebox{1\linewidth}{!}{
 % \begin{threeparttable}
 % \begin{tabular}{lCCCCC}
 % \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_overlap_lag}
+% \input{figures/main_new_top}
 % \bottomrule
 % \end{tabular}
 % \begin{tablenotes}
 % \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
-
-
-% \begin{table}
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates SPILL LAG APPENDIX}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Non-Bkyd. Housing  & \small Informal Backyard Housing\\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_spill_overlap_lag}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
+% Project areas are 100m by 100m plots within 4 km of project footprints.
+% Housing and popuation densities are measure in terms of houses per $\text{km}^{2}$.
 % % ``inside'' means within project footprint.  ``constr'' means constructed.
 % \end{tablenotes}
 % \end{threeparttable}
@@ -968,61 +1059,78 @@ Housing densities are measure in terms of houses per $\text{km}^{2}$.
 
 
 
+\begin{table}
+\small
+\centering
+\caption{Infrastructure Census}\label{table:inf_census}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+\input{figures/inf_census_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 100m by 100m plots within 4 km of project footprints.
+Housing and popuation densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
 
 
 
-% \begin{table}
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% % \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCC}
-% \toprule
-% & \small (1) & \small (2) \\
-%  & \small Total Housing & \small Total Housing \\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_spill_test}
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% % }
-% \end{table}
+
+\begin{table}
+\small
+\centering
+\caption{Infrastructure BBLU}\label{table:inf_census}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCCC}
+\toprule
+\input{figures/inf_bblu_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 100m by 100m plots within 4 km of project footprints.
+Housing and popuation densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
 
 
-% \begin{table}[hbt!]
-% \small
-% \centering
-% \caption{Housing Density per $\text{km}^{2}$ Estimates}\label{table:bbluDDDfull}
-% \vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-% \begin{threeparttable}
-% \begin{tabular}{lCCCCC}
-% \toprule
-% & \small (1) & \small (2) & \small (3) & \small (4) & \small (5) \\
-%  & \small Total Housing & \small Formal Housing & \small Informal Housing & \small Informal Backyard Housing & \small Informal Non-Bkyd. Housing \\ \midrule
-%  \\[-.5em]
-% \input{figures/bblu_3 }
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-% Project areas are 25m by 25m plots within 1,500m of project footprints.
-% Estimates control for 2001 census sub-place fixed effects.
-% Housing densities are measure in terms of houses per $\text{km}^{2}$.
-% % ``inside'' means within project footprint.  ``constr'' means constructed.
-% \end{tablenotes}
-% \end{threeparttable}
-% }
-% \end{table}
+
+
+\begin{table}
+\small
+\centering
+\caption{Infrastructure BBLU}\label{table:inf_census}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCC}
+\toprule
+\input{figures/agglom_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize Standard errors clustered at the project level in parenthesis. \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Project areas are 100m by 100m plots within 4 km of project footprints.
+Housing and popuation densities are measure in terms of houses per $\text{km}^{2}$.
+% ``inside'' means within project footprint.  ``constr'' means constructed.
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
 
 
 
@@ -1296,70 +1404,28 @@ Appendix~\ref{section:appendixpricerobust} examines pretrends by estimating effe
 % \section{New MODEL DISCUSSION SECTION!!! }
 
 
-\section{A Model of Housing Markets to Measure Welfare}\label{section:theory}
+% \section{A Model of Housing Markets to Measure Welfare}\label{section:theory}
 
-We develop a simple model of residential housing markets to capture the welfare effects of local housing projects within their neighborhoods.  This model infers welfare changes not only through changes in rents, but also through changes in the quantities of housing supplied.  
+% We develop a simple model of residential housing markets to capture the welfare effects of local housing projects within their neighborhoods.  This model infers welfare changes not only through changes in rents, but also through changes in the quantities of housing supplied.  
 
-%%% motivate more from a broad welfare perspective
+% %%% motivate more from a broad welfare perspective
 
-% Compare to Diamond's model! in writing;  mention time periods up front?!
-% This model is static where households h
-% Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
+% % Compare to Diamond's model! in writing;  mention time periods up front?!
+% % This model is static where households h
+% % Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
 
-
-
-\begin{align*}
-U &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} - R_{hjt}   + \epsilon_{hjt}  
-\end{align*}
-
-Set $\overline{U}$ equal to zero 
-
-\begin{align*}
-\label{eq:rent}
-R_{hjt}^{*}(k_{hjt}) &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} + \epsilon_{hjt}
-\end{align*}
-
-
-\begin{align*}
-max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
-\end{align*}
-
-
-\begin{align*}
-k_{hjt}^{*} &= \frac{\delta_{hlt}}{\lambda} \,\, - \frac{C}{\lambda} + \frac{\epsilon_{hjt}}{\lambda}
-\end{align*}
-
-\begin{align*}
-% \label{eq:profits1}
-% \begin{split}
-P_{hjt}^{*}  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
-% \end{split}
-\end{align*}
-
-
-
-
-\begin{align*}
-% \label{eq:profits1}
-% \begin{split}
-P_{hjt}^{*}(\delta_{1}) \, - \, P_{hjt}^{*}(\delta_{0})  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda} - \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
-% \end{split}
-\end{align*}
-
-
-\begin{align*}
-\delta = Exposure \, (\alpha_0 \,  \,  +  \, \alpha_2 \, Con )
-\end{align*}
 
 
 % \begin{align*}
-% U &= \delta_{hlt} - \lambda k_{hjt} - \theta R_{hjt}   + \epsilon_{hjt}  
+% U &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} - R_{hjt}   + \epsilon_{hjt}  
 % \end{align*}
 
-% \begin{align}
+% Set $\overline{U}$ equal to zero 
+
+% \begin{align*}
 % \label{eq:rent}
-% R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda k_{hjt} + \epsilon_{hjt} - \overline{U}}{\theta}
-% \end{align}
+% R_{hjt}^{*}(k_{hjt}) &= \delta_{hlt} - \frac{\lambda}{2} k_{hjt} + \epsilon_{hjt}
+% \end{align*}
 
 
 % \begin{align*}
@@ -1367,93 +1433,135 @@ P_{hjt}^{*}(\delta_{1}) \, - \, P_{hjt}^{*}(\delta_{0})  &= \frac{(\delta_{hlt}-
 % \end{align*}
 
 
-% \begin{align}
-% \label{eq:housingdemand}
-% k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{2\lambda} \,\, - \frac{\theta}{2\lambda}C + \frac{\epsilon_{hjt}}{2\lambda}
-% \end{align}
+% \begin{align*}
+% k_{hjt}^{*} &= \frac{\delta_{hlt}}{\lambda} \,\, - \frac{C}{\lambda} + \frac{\epsilon_{hjt}}{\lambda}
+% \end{align*}
+
+% \begin{align*}
+% % \label{eq:profits1}
+% % \begin{split}
+% P_{hjt}^{*}  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
+% % \end{split}
+% \end{align*}
 
 
-% \begin{align}
-% \label{eq:housingdemand}
-% k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{2\lambda} \,\, - \frac{\theta}{2\lambda}C + \frac{\epsilon_{hjt}}{2\lambda}
-% \end{align}
 
 
-% \begin{align}
-% \label{eq:profits1}
-% \begin{split}
-% P_{hjt}^{*}  &= \frac{\delta + \epsilon - \overline{U} }{2\theta}  + \frac{C}{2}
-% \end{split}
-% \end{align}
+% \begin{align*}
+% % \label{eq:profits1}
+% % \begin{split}
+% P_{hjt}^{*}(\delta_{1}) \, - \, P_{hjt}^{*}(\delta_{0})  &= \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda} - \frac{(\delta_{hlt}-C + \epsilon_{hjt} )^2}{2\lambda}
+% % \end{split}
+% \end{align*}
 
-Each time period, developers choose how many formal and informal houses to construct and maintain on each plot of land as well as the level of rent for each house.  Each house serves up to one household, and houses have identical quality.  Households then choose whether to rent a house receiving utility given by
-\begin{align*}
-U &= \delta_{hlt} - \lambda_{h}(k_{hjt}) - \theta R_{hjt}   + \epsilon_{hjt}  
-\end{align*}
-\noindent where $h$ indexes housing sector (either formal or informal), $l$ indexes location, $j$ indexes the specific land plot within location $l$, and $t$ indexes the time period.  $\delta_{hlt}$ indicates the amenity value of location, $l$ for housing sector, $h$ in time period, $t$.  $k_{hjt}$ measures the number of houses on the land plot for a given housing sector.  $\lambda_{h}(k_{hjt})$ captures the congestion disutility from having multiple houses of the same sector on the same plot and is assumed to be increasing and convex in the number of houses per plot.   $\lambda_{h}(k_{hjt})$ is also assumed to be independent of the number of houses from another sector on the same plot, which assumes zero spillovers across sectors.    $R_{hjt}$ is the rent charged for each house on plot $j$ and $\theta$ measures the marginal disutility of rent.  $\epsilon_{hjt}$ is the plot and time-specific amenity shock.  The distribution of $\epsilon_{hjt}$ may be correlated across housing sectors to capture whether land plots that are suitable for formal housing may also be suitable for informal housing.  Households can also choose to live outside the city and receive reservation value, $\overline{U}$.  
 
-This approach assumes that households have identical preferences across houses and locations, which implies that housing demand is perfectly elastic.  This assumption is consistent with households having low moving costs within the city as well as no unique preferences for particular neighborhoods.  These assumptions may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.
+% \begin{align*}
+% \delta = Exposure \, (\alpha_0 \,  \,  +  \, \alpha_2 \, Con )
+% \end{align*}
+
+
+% % \begin{align*}
+% % U &= \delta_{hlt} - \lambda k_{hjt} - \theta R_{hjt}   + \epsilon_{hjt}  
+% % \end{align*}
+
+% % \begin{align}
+% % \label{eq:rent}
+% % R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda k_{hjt} + \epsilon_{hjt} - \overline{U}}{\theta}
+% % \end{align}
+
+
+% % \begin{align*}
+% % max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
+% % \end{align*}
+
+
+% % \begin{align}
+% % \label{eq:housingdemand}
+% % k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{2\lambda} \,\, - \frac{\theta}{2\lambda}C + \frac{\epsilon_{hjt}}{2\lambda}
+% % \end{align}
+
+
+% % \begin{align}
+% % \label{eq:housingdemand}
+% % k_{hjt}^{*} &= \frac{(\delta_{hlt} - \overline{U})}{2\lambda} \,\, - \frac{\theta}{2\lambda}C + \frac{\epsilon_{hjt}}{2\lambda}
+% % \end{align}
+
+
+% % \begin{align}
+% % \label{eq:profits1}
+% % \begin{split}
+% % P_{hjt}^{*}  &= \frac{\delta + \epsilon - \overline{U} }{2\theta}  + \frac{C}{2}
+% % \end{split}
+% % \end{align}
+
+% Each time period, developers choose how many formal and informal houses to construct and maintain on each plot of land as well as the level of rent for each house.  Each house serves up to one household, and houses have identical quality.  Households then choose whether to rent a house receiving utility given by
+% \begin{align*}
+% U &= \delta_{hlt} - \lambda_{h}(k_{hjt}) - \theta R_{hjt}   + \epsilon_{hjt}  
+% \end{align*}
+% \noindent where $h$ indexes housing sector (either formal or informal), $l$ indexes location, $j$ indexes the specific land plot within location $l$, and $t$ indexes the time period.  $\delta_{hlt}$ indicates the amenity value of location, $l$ for housing sector, $h$ in time period, $t$.  $k_{hjt}$ measures the number of houses on the land plot for a given housing sector.  $\lambda_{h}(k_{hjt})$ captures the congestion disutility from having multiple houses of the same sector on the same plot and is assumed to be increasing and convex in the number of houses per plot.   $\lambda_{h}(k_{hjt})$ is also assumed to be independent of the number of houses from another sector on the same plot, which assumes zero spillovers across sectors.    $R_{hjt}$ is the rent charged for each house on plot $j$ and $\theta$ measures the marginal disutility of rent.  $\epsilon_{hjt}$ is the plot and time-specific amenity shock.  The distribution of $\epsilon_{hjt}$ may be correlated across housing sectors to capture whether land plots that are suitable for formal housing may also be suitable for informal housing.  Households can also choose to live outside the city and receive reservation value, $\overline{U}$.  
+
+% This approach assumes that households have identical preferences across houses and locations, which implies that housing demand is perfectly elastic.  This assumption is consistent with households having low moving costs within the city as well as no unique preferences for particular neighborhoods.  These assumptions may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.
  
-Given household preferences, developers maximize profits for each housing sector by setting rents just high enough to ensure that households are indifferent between renting each house on plot $j$ and their reservation utility $\overline{U}$.  Developers are assumed to have full bargaining power, setting rents to extract all household surplus.  Profit-maximizing rents as a function of the number of houses on a plot are given by
-\begin{align}
-% \label{eq:rent}
-R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}) + \epsilon_{hjt} - \overline{U}}{\theta}
-\end{align}
-From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents.  Without detailed measures of home ownership, this approach is unable to disentangle the distributional consequences of public housing policies across the population of households.
+% Given household preferences, developers maximize profits for each housing sector by setting rents just high enough to ensure that households are indifferent between renting each house on plot $j$ and their reservation utility $\overline{U}$.  Developers are assumed to have full bargaining power, setting rents to extract all household surplus.  Profit-maximizing rents as a function of the number of houses on a plot are given by
+% \begin{align}
+% % \label{eq:rent}
+% R_{hjt}^{*}(k_{hjt}) &= \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}) + \epsilon_{hjt} - \overline{U}}{\theta}
+% \end{align}
+% From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents.  Without detailed measures of home ownership, this approach is unable to disentangle the distributional consequences of public housing policies across the population of households.
 
-Given profit-maximizing rents, developers then choose how many houses to build on each plot by maximizing total profit per plot given by
-\begin{align*}
-max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
-\end{align*}
-\noindent where the $C_{hjt}$ measures the cost of constructing and maintaining each house, which may vary based on location.
+% Given profit-maximizing rents, developers then choose how many houses to build on each plot by maximizing total profit per plot given by
+% \begin{align*}
+% max_{\,k_{hjt}} \,\,\,\,\,\,  k_{hjt} \, \Big[ \, R_{hjt}^{*}(k_{hjt}) - C_{hjt} \, \Big ]
+% \end{align*}
+% \noindent where the $C_{hjt}$ measures the cost of constructing and maintaining each house, which may vary based on location.
 
-%and may depend on plot-specific features such as land slope, $C_{j} = c + \psi S_{j}$ where land slope is given by $S_{j}$.
+% %and may depend on plot-specific features such as land slope, $C_{j} = c + \psi S_{j}$ where land slope is given by $S_{j}$.
 
-When $\lambda(k_{hjt})$ is convex, the profit-maximizing number of houses in each sector, $k^{*}_{hjt}$ can be expressed as a function of the random amenity shock $\epsilon_{hjt}$ given by
-\begin{align}
-\label{eq:housingdemand}
-\begin{split}
-k_{hjt}^{*} &=
-\begin{cases}
-0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
-% 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
-k &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
-\end{cases} \\
-\text{ where }& \\
-V_{hjt} & = \delta_{hlt}  - \theta C_{hjt}   \\
-\Lambda_{h}(k) & =  k\lambda_{h}(k) - (k-1)\lambda_{h}(k-1) + \overline{U} \\
-\lambda(0) & = 0 \,\, \text{ and } \lambda(.) \text{ is increasing and convex }
-\end{split}
-\end{align}
-The profit-maximizing number of plots with houses and the number of houses per plot by sector are increasing in amenity values, $\delta_{hlt}$, decreasing in congestion disutility, $\Lambda_{h}(k)$, and decreasing in construction costs, $C_{hjt}$.  According to this framework, observed increases in the number of plots with houses and/or the number of houses per plot indicate an improvement in welfare holding constant reservation utility.  The variance of amenity shocks, $\epsilon_{hjt}$ may be interpreted as a measure of the sector-specific housing market elasticity by determining how quickly housing quantity responds to changes in amenity values among other factors.
-
-Given optimal rents in equation (\ref{eq:rent}) and optimal houses in equation (\ref{eq:housingdemand}), let the price of each plot equal profit for each plot as follows
-\begin{align}
-\label{eq:profits}
-\begin{split}
-P_{hjt}^{*}  &=
-k_{hjt}^{*} \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}^{*}) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] 
-\end{split}
-\end{align}
+% When $\lambda(k_{hjt})$ is convex, the profit-maximizing number of houses in each sector, $k^{*}_{hjt}$ can be expressed as a function of the random amenity shock $\epsilon_{hjt}$ given by
+% \begin{align}
+% \label{eq:housingdemand}
+% \begin{split}
+% k_{hjt}^{*} &=
 % \begin{cases}
 % 0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
 % % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
-% k \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
-% \end{cases} 
+% k &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
+% \end{cases} \\
+% \text{ where }& \\
+% V_{hjt} & = \delta_{hlt}  - \theta C_{hjt}   \\
+% \Lambda_{h}(k) & =  k\lambda_{h}(k) - (k-1)\lambda_{h}(k-1) + \overline{U} \\
+% \lambda(0) & = 0 \,\, \text{ and } \lambda(.) \text{ is increasing and convex }
+% \end{split}
+% \end{align}
+% The profit-maximizing number of plots with houses and the number of houses per plot by sector are increasing in amenity values, $\delta_{hlt}$, decreasing in congestion disutility, $\Lambda_{h}(k)$, and decreasing in construction costs, $C_{hjt}$.  According to this framework, observed increases in the number of plots with houses and/or the number of houses per plot indicate an improvement in welfare holding constant reservation utility.  The variance of amenity shocks, $\epsilon_{hjt}$ may be interpreted as a measure of the sector-specific housing market elasticity by determining how quickly housing quantity responds to changes in amenity values among other factors.
 
-Like the profit-maximizing number of houses per plot, plot prices are increasing with local amenities, decreasing in congestion disutility, and decreasing in construction costs.  Plot prices fully capture social welfare in this framework because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus. 
+% Given optimal rents in equation (\ref{eq:rent}) and optimal houses in equation (\ref{eq:housingdemand}), let the price of each plot equal profit for each plot as follows
+% \begin{align}
+% \label{eq:profits}
+% \begin{split}
+% P_{hjt}^{*}  &=
+% k_{hjt}^{*} \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k_{hjt}^{*}) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] 
+% \end{split}
+% \end{align}
+% % \begin{cases}
+% % 0 &\text{ if }\,\, \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(1)  \\
+% % % 1 &\text{ if }\,\,  H + \lambda(1)  < \epsilon_j \leq H  + 2\lambda(2) - \lambda(1)  \\
+% % k \Big[ \frac{ \delta_{hlt} - \lambda_{h}(k) + \epsilon_{hjt} - \overline{U}}{\theta}  - C_{hjt}\Big] &\text{ if }\,\,  \Lambda_{h}(k) < \epsilon_{hjt} + V_{hjt} \leq \Lambda_{h}(k+1)
+% % \end{cases} 
 
-\subsection{Modeling Public Housing Projects}
+% Like the profit-maximizing number of houses per plot, plot prices are increasing with local amenities, decreasing in congestion disutility, and decreasing in construction costs.  Plot prices fully capture social welfare in this framework because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus. 
 
-Public housing projects enter the model by shifting housing costs and amenity values both within as well as nearby project footprints.  Let location index $l$ include whether plots fall within project footprints, $\textsc{\small Footprint}$ or nearby spillover areas, $\textsc{\small 0-500m Outside}$.  Similarly, let housing sector index $h$ include formal, $f$ and informal, $i$ housing sectors.
+% \subsection{Modeling Public Housing Projects}
 
-Housing projects allocate subsidies to local developers to construct houses within project footprints.  These subsidies directly lower formal housing construction costs in project footprints, $C_{f,\textsc{\small Footprint,Post}}$.  These houses are then allocated to beneficiary households who can choose to live in these houses or rent them at efficient prices.  Housing projects also remove preexisting informal housing and rezone land for formal housing development, leaving limited land for new informal developments.  These practices may increase costs for informal housing, $C_{i,\textsc{\small Footprint,Post}}$ in project footprints.
+% Public housing projects enter the model by shifting housing costs and amenity values both within as well as nearby project footprints.  Let location index $l$ include whether plots fall within project footprints, $\textsc{\small Footprint}$ or nearby spillover areas, $\textsc{\small 0-500m Outside}$.  Similarly, let housing sector index $h$ include formal, $f$ and informal, $i$ housing sectors.
 
-Housing projects may also affect amenities for formal housing, $\delta_{f,\textsc{\small Footprint,Post}}$ and informal housing, $\delta_{i,\textsc{\small Footprint,Post}}$ within project footprints.  Housing projects may boost local amenities by increasing access to piped water, electricity, and sewerage services while providing better roads and community centers.  
+% Housing projects allocate subsidies to local developers to construct houses within project footprints.  These subsidies directly lower formal housing construction costs in project footprints, $C_{f,\textsc{\small Footprint,Post}}$.  These houses are then allocated to beneficiary households who can choose to live in these houses or rent them at efficient prices.  Housing projects also remove preexisting informal housing and rezone land for formal housing development, leaving limited land for new informal developments.  These practices may increase costs for informal housing, $C_{i,\textsc{\small Footprint,Post}}$ in project footprints.
 
-Housing projects may also have effects on amenities for neighboring areas just outside of project footprints.  On one hand, improvements in infrastructure in project footprints as well as greater densities of formal housing may provide positive amenities for surrounding neighborhoods, $\delta_{h,\textsc{\small 0-500m Outside,Post}}$.  On the other hand, greater densities of backyard housing as well as more people in footprints may be perceived as negative amenities by housing markets, $\delta_{h,\textsc{\small 0-500m Outside,Post}}$.  
+% Housing projects may also affect amenities for formal housing, $\delta_{f,\textsc{\small Footprint,Post}}$ and informal housing, $\delta_{i,\textsc{\small Footprint,Post}}$ within project footprints.  Housing projects may boost local amenities by increasing access to piped water, electricity, and sewerage services while providing better roads and community centers.  
 
-Collapsing these effects into amenity and cost terms provides a reduced-form method of capturing the spillover effects of housing projects; however, this approach implies a series of restrictions on behavior.  First, the amenity and cost terms enter household utility linearly and independently of the number of houses per plot, which nests the assumption that the all households enjoy local amenities equally and independently of the density of neighboring housing.  This assumption does not allow for congestion costs from overusing public services.  Second, this approach imposes a limited structure for amenity externalities to extend across space:  amenities in project areas are allowed to affect amenities for spillover areas while amenities in all other areas are assumed to be spatially independent of each other.  
+% Housing projects may also have effects on amenities for neighboring areas just outside of project footprints.  On one hand, improvements in infrastructure in project footprints as well as greater densities of formal housing may provide positive amenities for surrounding neighborhoods, $\delta_{h,\textsc{\small 0-500m Outside,Post}}$.  On the other hand, greater densities of backyard housing as well as more people in footprints may be perceived as negative amenities by housing markets, $\delta_{h,\textsc{\small 0-500m Outside,Post}}$.  
+
+% Collapsing these effects into amenity and cost terms provides a reduced-form method of capturing the spillover effects of housing projects; however, this approach implies a series of restrictions on behavior.  First, the amenity and cost terms enter household utility linearly and independently of the number of houses per plot, which nests the assumption that the all households enjoy local amenities equally and independently of the density of neighboring housing.  This assumption does not allow for congestion costs from overusing public services.  Second, this approach imposes a limited structure for amenity externalities to extend across space:  amenities in project areas are allowed to affect amenities for spillover areas while amenities in all other areas are assumed to be spatially independent of each other.  
 
 % This assumption is consistent with housing projects generating large, first-order changes that precipitate across neighborhoods while each individual's development decisions produce negligible externalities across neighborhoods.  Alternative approaches that explicitly model housing externalities across space would likely suffer from multiple equilibria as well as challenges for identification in this setting.\footnote{\cite{rossi2010housing} develop a model of spatial housing externalities over a single dimension, ``housing services'' where identification draws from the functional form of the housing externalities.  Our setting would require households to consider externalities across housing quantity as well as sectors.}
 

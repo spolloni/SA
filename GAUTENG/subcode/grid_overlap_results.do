@@ -82,29 +82,28 @@ ren OGC_FID area_code
   drop if _merge==2
   drop _merge
 
-g pop_density  = (10000)*(person_pop/area)
-replace pop_density=. if pop_density>2000
+* g pop_density  = (10000)*(person_pop/area)
+* replace pop_density=. if pop_density>2000
 
-
+g pop_density  = (1000000)*(person_pop/area)
+replace pop_density=. if pop_density>200000
 
 fmerge m:1 id using "grid_elevation_100_4000.dta"
 drop if _merge==2
 drop _merge
 
-* ren id grid_id
-*   fmerge m:1 grid_id using "temp/grid_price.dta"
-*   drop if _merge==2
-*   drop _merge
-* ren grid_id id
+ren id grid_id
+   fmerge m:1 grid_id post using "temp/grid_price.dta"
+   drop if _merge==2
+   drop _merge
+ ren grid_id id
+
 
 *** GENERATE ELEVATION ***  !!!!
 
-* g pop_density  = (1000000)*(person_pop/area)
-* replace pop_density=. if pop_density>200000
-
-* foreach var of varlist $outcomes {
-*   replace `var' = `var'*1000000/($grid*$grid)
-* }
+foreach var of varlist $outcomes {
+  replace `var' = `var'*1000000/($grid*$grid)
+}
 
 
 sort id post
@@ -247,9 +246,43 @@ forvalues r=1/$rset {
   g s1p_a_`r'_C_con_post = s1p_a_`r'_C_con*post
 }
 
+
+* forvalues r=1/$rset {
+*   forvalues z = 1/2 {
+*     cap drop s1p_a_`r'_K`z'
+*     cap drop s1p_a_`r'_K`z'_con
+*     cap drop s1p_a_`r'_K`z'_post 
+*     cap drop s1p_a_`r'_K`z'_con_post
+*     g s1p_a_`r'_K`z' = s1p_a_`r'_R + s1p_a_`r'_P
+*     replace s1p_a_`r'_K`z'=0 if s1p_a_`r'_K`z' ==.
+    
+*     g s1p_a_`r'_K`z'_con = s1p_a_`r'_R
+*     replace s1p_a_`r'_K`z'_con=0  if s1p_a_`r'_K`z'_con==.
+
+*     g s1p_a_`r'_K`z'_post = s1p_a_`r'_K`z'*post
+*     g s1p_a_`r'_K`z'_con_post = s1p_a_`r'_K`z'_con*post
+*     if `z'==2 {
+*       foreach var of varlist s1p_a_`r'_K`z'* {
+*         replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
+*       } 
+*     }
+*   }
+* }
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_K*  post, cluster(cluster_joined) r
+* reg  pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_K*  post, cluster(cluster_joined) r
+* coefplot, vertical keep(*K1_con_post)
+* coefplot, vertical keep(*K2_con_post)
+
+
+
+
 foreach var of varlist s1p_*_C* s1p_a_*_R s1p_a_*_P S2_*_post  {
   replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
 }
+
+
 
 g proj_C = proj_rdp
 replace proj_C = proj_placebo if proj_C==0 & proj_placebo>0
@@ -302,6 +335,15 @@ forvalues r=1/8 {
 * keep if distance_rdp<3000 | distance_placebo<3000
 
 
+
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+
+
+/*
+
+
 cd ../..
 cd $output
 
@@ -321,8 +363,110 @@ foreach var of varlist shops shops_inf util util_water util_energy util_refuse c
 }
 
 
+*** find no effect on prices  !!!  (cool!!)
+
+g ln_P = log(P)
+ * reg ln_P s1p_a_*_C*  CA cD rD if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r 
 
 
+cd ../../..
+cd $output
+
+
+
+
+reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+
+
+/*
+
+lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &Population Density"
+lab var for "Total Formal Housing"
+lab var inf "Total Informal Housing"
+lab var inf_backyard "Backyard Informal Housing"
+lab var ln_P "Log(Price) \\ \midrule \\[-.6em]"
+
+
+global cells = 1
+global outcomes = "pop_density for inf inf_backyard ln_P"
+
+rfull main_new
+
+
+lab var tot_rooms "(1)&(2)&(3)&(4)&(5)\\[.5em] &Total Rooms"
+lab var owner "Own House"
+lab var electric_lighting "Electric Lighting"
+lab var toilet_flush "Flush Toilet"
+lab var water_inside "Piped Water Inside\\ \midrule \\[-.6em]"
+
+*** census infrastructure
+global cells = 2
+global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
+
+rfull inf_census
+
+
+lab var util_water "(1)&(2)&(3)&(4)&(5)&(6)\\[.5em] &Water Utility Buildings"
+lab var util_energy "Electricity Utility Buildings"
+lab var util_refuse "Refuse Utility Buildings"
+lab var community "Community Centers"
+lab var health "Health Centers"
+lab var school "Schools\\ \midrule \\[-.6em]"
+
+*** bblu infrastructure 
+global cells = 3
+global outcomes  = " util_water util_energy util_refuse community health school "
+
+rfull inf_bblu
+
+*** MORE HOUSE QUALITY!?
+
+*** demographics 
+
+
+lab var shops "(1)&(2)&(3)&(4)\\[.5em] &Shops"
+lab var shops_inf "Informal Shops"
+lab var emp "Household Employment"
+lab var ln_inc "Log Household Income\\ \midrule \\[-.6em]"
+
+global cells = 3
+global outcomes = "  shops shops_inf emp ln_inc  "
+rfull agglom
+
+
+global cells = 3
+
+
+*** bblu infrastructure
+
+
+
+/*
+
+
+
+regs_spill_full bblu_spill_test_new
+
+global outcomes_census =  "  pop_density water_inside   toilet_flush  electricity  tot_rooms "
+global cells = 3
+
+sort id year
+foreach var of varlist $outcomes_census {
+  cap drop `var'_ch
+   by id: g `var'_ch = `var'[_n]-`var'[_n-1]
+   by id: g `var'_lag = `var'[_n-1]
+}
+
+global outcomes = "$outcomes_census"
+
+regs_spill_full census_spill_test_new
+
+
+
+
+/*
 
 foreach var of varlist shops shops_inf util util_water util_energy util_refuse community health school {
  reg `var'_ch proj_C*post s1p_a_*_C*post, cluster(cluster_joined) r 
@@ -377,6 +521,8 @@ disp (`=r(mean)'*_N/166)/1000000
 
 
 qui reg inf proj_C* s1p_a_*_C*  CA cD rD , cluster(cluster_joined) r 
+
+* qui reg for proj_C* s1p_a_*_C*  CA cD rD , cluster(cluster_joined) r 
 
 cap drop pp
 predict pp, xb
@@ -498,6 +644,7 @@ disp `=r(mean)'*_N/150
 
 
 
+reg total_buildings proj_C* s1p_a*_C*  post, cluster(cluster_joined) r
 
 
 
