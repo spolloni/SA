@@ -362,7 +362,7 @@ prog define rfull
   forvalues r= 1/8 {
       local r1 "`=(`r'-1)*.5'"
       local r2 "`=(`r')*.5'"
-      lab var s1p_a_`r'_C_con_post "\hspace{2.5em} \textsc{`=`r1''-`=`r2''}"
+      lab var s1p_a_`r'_C_con_post "\hspace{2.5em} \textsc{`=`r1'' - `=`r2''}"
       global llist = " $llist s1p_a_`r'_C_con_post "
       global ellist =  " $ellist s1p_a_`r'_C_con_post [0.3em]  "
   }

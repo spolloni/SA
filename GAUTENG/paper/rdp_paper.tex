@@ -825,84 +825,64 @@ THEN  DESCRIPTIVE STATISTICS !!!!
 
 \section{Empirical Methodology}\label{section:methodology}
 
-To estimate project impacts, we compare changes in outcomes between constructed projects and planned but unconstructed projects.  We estimate both the direct effects of overlapping with project footprints as well as the spillover effects of  having projects.
+To estimate project impacts, we compare changes in outcomes between constructed projects and planned but unconstructed projects.  We estimate both the direct effects of overlapping with project footprints as well as the spillover effects of  having projects nearby according to the following equation
+
+
+
+
 \begin{align}
 % \label{eq:main}
 \begin{split}
-\quad y_{it} \, =\, & ( \alpha_0 \, +  \, \alpha_1 \textsc{\small Post}_{t}) \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Projects} \Big) \, + \\[.2em]
-& ( \alpha_2 \, +  \, \alpha_3 \textsc{\small Post}_{t})  \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Const. Projects} \Big)  \, + \\[.5em]
-&\sum_{k=1}^{K} \,\, \Bigg[ \, (\beta_{0}^{k} \,+\, \beta_{1}^{k} \textsc{\small Post}_{t})  \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Projects} \Big) \, + \\
-&\hspace{2.8em}(\beta_{3}^{k} \,+\, \beta_{4}^{k} \textsc{\small Post}_{t})  \, \times \,\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Const. Projects} \Big)  \, \Bigg] \, +  \\[.5em]
-&\gamma\textsc{Post}_t + \varepsilon_{it}
-%  \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
-% & \, \sum_{k=0}^{K-1} \,\, \Big[.5k \, ,\,  .5(k+1)\Big] \, \, \textsc{km} \,\, \textsc{Buffer}_{ipk} \, \times \, \Big( \beta_1^{k} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^{k} \, \textsc{\small Post}_{t} \, + \, \beta_3^{k} \, \textsc{\small Const}_{p} \, +\, \beta_4^{k} \Big) \, \\[.2em]
-% &  + \gamma \textsc{\small Post}_{t} \, +  \, \varepsilon_{ipt} \quad 
+\quad y_{it}  =\, & ( \alpha_0 \, +  \, \alpha_1 \textsc{\small Post}_{t}) \, \times \, \frac{\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)}{\text{Area}\big(\textsc{Plot}_i\big)} \,\, + \\[.5em]
+& ( \alpha_2 \, +  \, \alpha_3 \textsc{\small Post}_{t})  \, \times \, \frac{\text{Area}\big(\textsc{Plot}_i \cap \textsc{Con. Proj.}\big)}{\text{Area}\big(\textsc{Plot}_i\big)} \,\, + \\[.7em]
+& \Bigg[ \, \sum_{k=1}^{K} \, (\beta_{0}^{k} \,+\, \beta_{1}^{k} \textsc{\small Post}_{t})  \, \times \, \frac{\text{Area}\big(\textsc{Ring}_i^{k}  \cap  \textsc{Proj.}\big)}{\text{Area}\big(\textsc{Ring}_i^{k}\big)} \, + \\[.5em]
+&\hspace{2.2em}(\beta_{2}^{k} \,+\, \beta_{3}^{k} \textsc{\small Post}_{t})  \, \times \, \frac{\text{Area}\big(\textsc{Ring}_i^{k}  \cap \textsc{Con. Proj.}\big)}{\text{Area}\big(\textsc{Ring}_i^{k}\big)} \, \Bigg]  \times \mathbbm{1}\Big\{\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)=0\Big \}\, +  \\[.5em]
+&\hspace{2.2em}\gamma\textsc{Post}_t + \varepsilon_{it}
 \end{split}
 \end{align}
 
-\noindent $y_{it}$ is the outcome for plot $i$ observed at time $t$.  $\textsc{\small Post}_{t}$ equals one after scheduled construction and zero otherwise.  $\textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Projects} \Big)$ and \\ $\textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{Const. Projects} \Big)$ measure the percentage of plot $i$'s footprint that intersects with project footprints and constructed project footprints respectively.  To capture spillover effects for plots that do not intersect with project footprints, we define neighborhoods for these plots in terms of 0.5 km rings spanning from 0 to 4 km.  Figure YY includes an example of neighborhoods from 0 to 0.5 km and 0.5 to 1 km.  Therefore, $\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Projects} \Big)$  and  \\ $\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Const. Projects} \Big)$ measure the percentage of neighborhood $k$ around plot $i$ that intersects with project footprints and constructed project footprints respectively. 
 
-
-
-% $ \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(F_i)} $ measure the share of plot $i$'s footprint that intersects with all projects while $\frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(F_i)}$ measure the share ofintersecting with projects that were successfully constructed.  $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(B^{k}_{i})}$ and $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(B^{k}_{i})}$ compute the shares of plot buffers that intersect with all projects and constructed projects respectively for plots that do not intersect with project footprints.  We measure buffers in 0.5 km intervals from 0 to 4 km from plot footprints.  In order to separately estimate 
-
-
+% \begin{align}
+% % \label{eq:main}
+% \begin{split}
+% \quad y_{it} \, =\, & ( \alpha_0 \, +  \, \alpha_1 \textsc{\small Post}_{t}) \, \times \, \frac{\text{Area}\big(\textsc{Plot}_i \, \cap \, \textsc{Proj.}\big)}{\text{Area}\big(\textsc{Plot}_i\big)} \,\, + \\[.5em]
+% & ( \alpha_2 \, +  \, \alpha_3 \textsc{\small Post}_{t})  \, \times \, \frac{\text{Area}\big(\textsc{Plot}_i \,\cap\, \textsc{Con. Proj.}\big)}{\text{Area}\big(\textsc{Plot}_i\big)} \,\, + \\[.5em]
+% &\mathbbm{1}\Big\{\text{Area}\big(\textsc{Plot}_i \, \cap \, \textsc{Proj.}\big)=0\Big \}\, \Bigg[ \, \sum_{k=1}^{K} \, (\beta_{0}^{k} \,+\, \beta_{1}^{k} \textsc{\small Post}_{t})  \, \times \, \frac{\text{Area}\big(\textsc{Ring}_i^{k} \, \cap \, \textsc{Proj.}\big)}{\text{Area}\big(\textsc{Ring}_i^{k}\big)} \, + \\[.5em]
+% &\hspace{2.8em}(\beta_{2}^{k} \,+\, \beta_{3}^{k} \textsc{\small Post}_{t})  \, \times \, \frac{\text{Area}\big(\textsc{Ring}_i^{k} \, \cap \, \textsc{Con. Proj.}\big)}{\text{Area}\big(\textsc{Ring}_i^{k}\big)} \, \Bigg] \, +  \\[.5em]
+% &\gamma\textsc{Post}_t + \varepsilon_{it}
+% \end{split}
+% \end{align}
 
 
 % \begin{align}
 % % \label{eq:main}
 % \begin{split}
-% \quad y_{it} \, =& \, \Big( \alpha_1 \, \textsc{\small Post}_{t}\times\textsc{\small Const Footprint }_{i} \, + \, \alpha_2 \, \textsc{\small Post}_{t} \textsc{Footprint}_{t} \, + \, \alpha_3 \, \textsc{\small Const Footprint}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
-% & \, \sum_{k=0}^{K-1} \,\, \Big[.5k \, ,\,  .5(k+1)\Big] \, \, \textsc{km} \,\, \textsc{Buffer}_{ipk} \, \times \, \Big( \beta_1^{k} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^{k} \, \textsc{\small Post}_{t} \, + \, \beta_3^{k} \, \textsc{\small Const}_{p} \, +\, \beta_4^{k} \Big) \, \\[.2em]
-% &  + \gamma \textsc{\small Post}_{t} \, +  \, \varepsilon_{ipt} \quad 
+% \quad y_{it} \, =\, & ( \alpha_0 \, +  \, \alpha_1 \textsc{\small Post}_{t}) \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Projects} \Big) \, + \\[.2em]
+% & ( \alpha_2 \, +  \, \alpha_3 \textsc{\small Post}_{t})  \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Const. Projects} \Big)  \, + \\[.5em]
+% &\sum_{k=1}^{K} \,\, \Bigg[ \, (\beta_{0}^{k} \,+\, \beta_{1}^{k} \textsc{\small Post}_{t})  \, \times \, \textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Projects} \Big) \, + \\
+% &\hspace{2.8em}(\beta_{2}^{k} \,+\, \beta_{3}^{k} \textsc{\small Post}_{t})  \, \times \,\textsc{\% Overlap} \,\Big(\textsc{Neighborhood}^{k}_i \,\, , \textsc{ Const. Projects} \Big)  \, \Bigg] \, +  \\[.5em]
+% &\gamma\textsc{Post}_t + \varepsilon_{it}
+% %  \, + \, \alpha_2 \, \textsc{\small Post}_{t} \, + \, \alpha_3 \, \textsc{\small Const}_{p}\, +\, \alpha_4 \Big) \, + \\[.2em]
+% % & \, \sum_{k=0}^{K-1} \,\, \Big[.5k \, ,\,  .5(k+1)\Big] \, \, \textsc{km} \,\, \textsc{Buffer}_{ipk} \, \times \, \Big( \beta_1^{k} \, \textsc{\small Post}_{t}\times\textsc{\small Const}_{p} \, + \, \beta_2^{k} \, \textsc{\small Post}_{t} \, + \, \beta_3^{k} \, \textsc{\small Const}_{p} \, +\, \beta_4^{k} \Big) \, \\[.2em]
+% % &  + \gamma \textsc{\small Post}_{t} \, +  \, \varepsilon_{ipt} \quad 
 % \end{split}
 % \end{align}
 
-% \begin{align}
-% % \label{eq:main}
-% \begin{split}
-% \quad y_{it} \, = \, & \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(F_i)} \,\, \Big[\alpha_0 + \alpha_1 \textsc{Post}_t \Big] + \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(F_i)} \,\,\Big[\alpha_2 + \alpha_3 \textsc{Post}_t \Big]  \, + \\[.5em]
-% &  \mathbbm{1} \Big\{  F_{i}  \cap  P_{\textsc{All}} = \emptyset \Big\} \sum_{k=1}^{K} \frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(B^{k}_{i})} \,\, \Big[\beta_0^{k} + \beta_1^{k} \textsc{Post}_t \Big] + \frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(B^{k}_{i})} \,\, \Big[\beta_3^{k}+ \beta_4^{k} \textsc{Post}_t \Big] \, + \\[.5em]
-% & \gamma \textsc{Post}_t \,+  \, \varepsilon_{ipt} \\[.5em]
-% \text{Where }& \\
-% &F_i = \text{Plot $i$ footprint} \\
-% &P_{\textsc{Proj}} = \text{All project footprints} \\
-% &P_{\textsc{Const Proj}} = \text{Constructed project footprints} \\
-% &B_i^{k} = \text{Buffer from .5($k-1$) to .5$k$ km around plot $i$} 
-% \end{split}
-% \end{align}
+\noindent $y_{it}$ is the outcome for plot $i$ observed at time $t$.  $\textsc{\small Post}_{t}$ equals one after scheduled construction and zero otherwise.  $\textsc{\% Overlap} \,\Big(\textsc{Footprint}_i \,\, , \textsc{ Projects} \Big)$ and $\textsc{\% Overlap}$ $\,\Big(\textsc{Footprint}_i$ $, \textsc{Const. Projects} \Big)$ measure the percentage of plot $i$'s footprint that intersects with project footprints and constructed project footprints respectively.  To capture spillover effects for plots that do not intersect with project footprints, we define neighborhoods in terms of 0.5 km rings spanning from 0 to 4 km.  This specification assumes that any spillover effects dissipate by 4 km, which is consistent with recent literature on place-based policies.\footnote{\cite{diamond2016wants} and \cite{rossi2010housing} find that main effects are concentrated within 1 km of place-based policies.}  Figure YY includes an example of neighborhoods from 0 to 0.5 km and 0.5 to 1 km.  $\textsc{\% Overlap}$ $\Big(\textsc{Neighborhood}^{k}_i$ $, \textsc{ Projects} \Big)$  and  $\textsc{\% Overlap}$ $\Big(\textsc{Neighborhood}^{k}_i$ $, \textsc{ Const. Projects} \Big)$ measure the percentage of neighborhood $k$ around plot $i$ that intersects with project footprints and constructed project footprints respectively for plots that do not directly intersect with projects.  $\varepsilon_{ipt}$ is the idiosyncratic error term.  
 
-% \begin{align}
-% % \label{eq:main}
-% \begin{split}
-% \quad y_{it} \, = \, & A(F_{i},P_{\textsc{All}}) \, [\alpha_0 + \alpha_1 \textsc{Post}_t ] + A(F_{i},P_{\textsc{Const}})\,[\alpha_2 + \alpha_3 \textsc{Post}_t ]  \, + \\[.5em]
-% &  \mathbbm{1} \Big\{ A(F_{i},P_{\textsc{All}}) = 0  \Big\} \sum_{k=1}^{K} A(B_{i}^{k},P_{\textsc{All}}) \,[\beta_0^{k} + \beta_1^{k} \textsc{Post}_t ] + A(B_{i}^{k},P_{\textsc{Const}}) \, [\beta_3^{k}+ \beta_4^{k} \textsc{Post}_t ] \, + \\[.5em]
-% & \gamma \textsc{Post}_t \,+  \, \varepsilon_{ipt} \\[.5em]
-% \text{Where }& \\
-% &A(X,Y) = \frac{ \text{Area}(X \cap Y)}{\text{Area}(X)} \\
-% &F_i = \text{Plot $i$ footprint} \\
-% &P_{\textsc{Proj}} = \text{All project footprints} \\
-% &P_{\textsc{Const Proj}} = \text{Constructed project footprints} \\
-% &B_i^{k} = \text{Buffer from .5($k-1$) to .5$k$ km around plot $i$} 
-% \end{split}
-% \end{align}
+
+
+To estimate the direct effect of housing projects in their footprints, our coefficient of interest, $\alpha_3$, measures the change in outcomes for plots that overlap with constructed projects relative to plots that overlap with unconstructed projects.  This coefficient reflects the causal effect of project construction under the assumption that in the absence of project construction, plots overlapping with constructed project areas would have evolved in the same way as plots overlapping with unconstructed project areas.
+
+We estimate the spillover effects of housing projects on neighboring areas through additional coefficients of interest, $\beta^{k}_3$.  Each $\beta^{k}_3$ measures the differential change in outcomes for plots with neighborhood $k$ overlapping with constructed project areas relative to plots with neighborhood $k$ overlapping with unconstructed project areas  controlling for each plot's overlap in all other neighborhoods.
 
 
 
 
+Our coefficients of interest, $\alpha_3$ and $\beta^{k}_3$, capture differential changes in outcomes for constructed projects versus unconstructed projects depending on the extent to which the footprints and neighborhoods 
 
+.  A causal interpretation requires the assumption that absent housing project construction, changes nearby constructed and unconstructed projects would have evolved similarly relative to changes farther away from projects.  
 
-
-
-% \\[-.2em] &\hspace{2em}\text{ if } \text{Area} ( F_{i}  \cap  P_{\textsc{All}} ) = 0
-
-
-% \noindent $y_{ipt}$ is the outcome for plot $i$ observed at time $t$.  $\textsc{\small Post}_{t}$ equals one in time periods after scheduled construction and zero otherwise.  $ \frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(F_i)} $ measure the share of plot $i$'s footprint that intersects with all projects while $\frac{ \text{Area} ( F_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(F_i)}$ measures the share intersecting with projects that were successfully constructed.  $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{All}} )}{\text{Area}(B^{k}_{i})}$ and $\frac{ \text{Area} ( B^{k}_{i}  \cap  P_{\textsc{Const}} )}{\text{Area}(B^{k}_{i})}$ compute the shares of plot buffers that intersect with all projects and constructed projects respectively for plots that do not intersect with project footprints.  We measure buffers in 0.5 km intervals from 0 to 4 km from plot footprints.  In order to separately estimate 
-
-
-
-
-$\,\textsc{\small Footprint}_{ip}$ equals one if the observation lies within project $p$'s footprint and zero otherwise.  Likewise, $\,\textsc{\small 0-500m Outside}_{ip}$ equals one if the observation lies between 0 and 500m outside of project $p$'s footprint and zero otherwise.  In some cases, plots and census blocks may partially overlap with project footprints or outside areas.  In these cases, $\,\textsc{\small Footprint}_{ip}$ and $\,\textsc{\small 0-500m Outside}_{ip}$ record the share of each observation $i$'s area that overlaps with the footprint or outside area.  We assume that all spillover effects of projects are contained within 500m, which is consistent with similar research on place-based policies.\footnote{\cite{diamond2016wants} and \cite{rossi2010housing} find that main effects are concentrated within similar radii.  We also test alternative buffer definitions.}  Areas 0 to 500m outside projects cover 3 $\text{km}^{2}$ while project footprints cover 1.2 $\text{km}^{2}$ on average.  We also only include observations within 1,500m of the nearest project.  To capture neighborhood fixed effects, $\lambda_{n}$ includes indicators for Census 2001 ``sub-places,'' which identify suburbs, wards, villages, or informal settlements.\footnote{See \cite{censusmeta} for details.  Samples include up to 1,069 neighborhoods with each containing on average 2,873 plots, 14 census blocks, and 13 property transactions.}  $X_{ipt}$ includes a vector of additional controls and $\varepsilon_{ipt}$ is the idiosyncratic error term.  
 
 
 
