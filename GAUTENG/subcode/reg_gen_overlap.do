@@ -48,7 +48,7 @@ program print_1
     forvalues r=1/$cat_num {
         in_stat newfile `2' `3' `4' "0" "${cat`r'}"
         }      
-    file write newfile " \\[.3em] " _n
+    file write newfile " \\[.15em] " _n
 end
 
 
@@ -311,8 +311,20 @@ prog define rfull
      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
     eststo  `var'
-
     g var_temp = e(sample)==1
+
+    qui sum proj_C_con, detail   
+    scalar define ep = _b[proj_C_con_post]*((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
+
+    qui sum s1p_a_1_C_con, detail
+    scalar define es = _b[s1p_a_1_C_con_post]*((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
+
+    estadd scalar effect_proj  = ep
+    estadd scalar effect_spill = es 
+    estadd scalar effect_total = ep + es
+
+
+
     mean `var' if post==0 & var_temp==1
     mat def E=e(b)
     estadd scalar Mean2001 = E[1,1] : `var'
@@ -320,16 +332,21 @@ prog define rfull
     mat def E=e(b)
     estadd scalar Mean2011 = E[1,1] : `var'
     drop var_temp
+
+
     }
+
 
 
   global X "{\tim}"
 
+  global tf1 = ""
+  global tf2 = ""
 
-  global bl_lab = "\textsc{\% Project Overlap with:} \\[1em] "
+  global bl_lab = "${tf1}Post $\times$ Constructed project overlap with:${tf2} \\[1em] "
 
-  global overlap_lab = "\hspace{1.5em}\textsc{Footprint}"
-  global buffer_lab  = "\hspace{1.5em}\textsc{Neighborhood (km)} \\[1em]"
+  global overlap_lab = "\hspace{1.5em}${tf1}Plot footprint${tf2}"
+  global buffer_lab  = "\hspace{1.5em}${tf1}Ring (km)${tf2} \\[1em]"
 
 
     lab var proj_C_con_post "$overlap_lab"
@@ -337,7 +354,27 @@ prog define rfull
     lab var proj_C_con      "$overlap_lab"
     lab var proj_C          "$overlap_lab"
 
-    lab var s1p_a_1_C_con_post "\hspace{1.5em} \textsc{0-.5km Neighborhood }"
+    lab var s1p_a_1_C_con_post "\hspace{1.5em}${tf1}Plot neighborhood (0-.5 km ring)${tf2}"
+
+
+  global etotal_lab = "${tf1}Total ${tf2}"
+  global eproj_lab = "\\[-.7em] \hspace{1.5em}${tf1}Footprint ${tf2}"
+  global espill_lab = "\\[-.7em] \hspace{1.5em}${tf1}Spillover (0-.5 km) ${tf2}"
+
+  estout $outcomes using "`1'_e.tex", replace  style(tex) ///
+    order(   ) ///
+    keep(  )  ///
+    varlabels( , blist(  ) ///
+    el(  ))  label ///
+      noomitted ///
+       mlabels(, none)  ///
+      collabels(none) ///
+      cells( b(fmt($cellsp) star ) se(par fmt($cellsp)) ) ///
+      stats( effect_total effect_proj effect_spill ,  ///
+    labels( "${etotal_lab}" "${eproj_lab}"    "${espill_lab}"  ) ///
+        fmt( %9.${cellsp}fc   %9.${cellsp}fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
 
 
   estout $outcomes using "`1'_top.tex", replace  style(tex) ///
@@ -362,7 +399,7 @@ prog define rfull
   forvalues r= 1/8 {
       local r1 "`=(`r'-1)*.5'"
       local r2 "`=(`r')*.5'"
-      lab var s1p_a_`r'_C_con_post "\hspace{2.5em} \textsc{`=`r1'' - `=`r2''}"
+      lab var s1p_a_`r'_C_con_post "\hspace{2.5em} ${tf1}`=`r1'' - `=`r2''${tf2}"
       global llist = " $llist s1p_a_`r'_C_con_post "
       global ellist =  " $ellist s1p_a_`r'_C_con_post [0.3em]  "
   }
@@ -405,10 +442,10 @@ prog define rfull
   forvalues r= 1/8 {
       local r1 "`=(`r'-1)*.5'"
       local r2 "`=(`r')*.5'"
-      lab var s1p_a_`r'_C           "\hspace{2.5em} \textsc{`=`r1''-`=`r2''}"
-      lab var s1p_a_`r'_C_con       "\hspace{2.5em} \textsc{`=`r1''-`=`r2''}"
-      lab var s1p_a_`r'_C_post      "\hspace{2.5em} \textsc{`=`r1''-`=`r2''}"
-      lab var s1p_a_`r'_C_con_post  "\hspace{2.5em} \textsc{`=`r1''-`=`r2''}"
+      lab var s1p_a_`r'_C           "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
+      lab var s1p_a_`r'_C_con       "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
+      lab var s1p_a_`r'_C_post      "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
+      lab var s1p_a_`r'_C_con_post  "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
       global llist_C          = " $llist_C s1p_a_`r'_C  "
       global llist_C_con      = " $llist_C_con s1p_a_`r'_C_con  "
       global llist_C_post     = " $llist_C_post s1p_a_`r'_C_post  "
@@ -435,12 +472,12 @@ prog define rfull
     keep(   $llist_C_con_post $llist_C_post $llist_C_con $llist_C post )  ///
    varlabels( , ///
    blist( ///
-   proj_C_con_post "\textsc{Constructed} $\times$ \textsc{Post} $\times$ \\[.5em]  "  ///
-   proj_C_con "\textsc{Constructed} $\times$ \\[.5em]  "  ///
-   proj_C_post "\textsc{Post} $\times$ \\[.5em]  "  ///
-   s1p_a_1_C_con_post  "\hspace{2em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]"      ///
-   s1p_a_1_C_post      "\hspace{2em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]"      ///
-   s1p_a_1_C_con       "\hspace{2em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]"     ) ///
+   proj_C_con_post "${tf1}Constructed${tf2} $\times$ ${tf1}Post${tf2} $\times$ \\[.5em]  "  ///
+   proj_C_con "${tf1}Constructed${tf2} $\times$ \\[.5em]  "  ///
+   proj_C_post "${tf1}Post${tf2} $\times$ \\[.5em]  "  ///
+   s1p_a_1_C_con_post  "\hspace{2em} ${tf1}\% Buffer Overlap with Project :  ${tf2}  \\[1em]"      ///
+   s1p_a_1_C_post      "\hspace{2em} ${tf1}\% Buffer Overlap with Project :  ${tf2}  \\[1em]"      ///
+   s1p_a_1_C_con       "\hspace{2em} ${tf1}\% Buffer Overlap with Project :  ${tf2}  \\[1em]"     ) ///
     el( $ellist_C $ellist_C_con $ellist_C_post $ellist_C_con_post post [.5em] ))  label ///
       noomitted ///
        mlabels(,  depvars)  ///
@@ -458,8 +495,28 @@ end
 
 
 
+cap prog drop cplot
+prog def cplot
+  preserve
+    parmest, fast
 
+    keep if regexm(parm,"s1p")==1 & regexm(parm,"C_con_post")==1
 
+    g index = regexs(1) if regexm(parm,"._([0-9])+_.")
+    destring index, replace force
+
+    label var index "Ring (km)"
+
+    g est1 = round(estimate,.1)
+
+    twoway rcap min95 max95 index , || ///
+           scatter estimate index, color(`2') mlabel(est1) ///
+           legend(off) yline(0, lp(dash)) ytitle("Coefficient size")  ///
+           xlabel( 1 "0 - .5"  2 ".5 - 1"  3 "1 - 1.5"   4 "1.5 - 2"  5 "2 - 2.5" 6 "2.5 - 3" 7 "3 - 3.5" 8 "3.5 - 4" 8.5 " "   )
+    graph export "`1'.pdf", as(pdf) replace
+
+  restore
+end
 
 
 cap prog drop regs_spill_full
@@ -861,6 +918,72 @@ prog define regs_3
 
 end
 
+
+
+
+
+
+*************************************************
+**************** PRINT TABLES *******************
+**************** PRINT TABLES *******************
+**************** PRINT TABLES *******************
+*************************************************
+
+
+
+cap prog drop print_blank
+program print_blank
+    forvalues r=1/$cat_num {
+    file write newfile  " & "
+    }    
+    file write newfile " \\ " _n
+end
+
+
+cap prog drop in_stat_cg
+program in_stat_cg
+    * preserve 
+        * `6' 
+        qui sum `2', detail 
+        local value=string(`=r(`3')',"`4'")
+        if `5'==0 {
+            file write `1' " & `value' "
+        }
+        if `5'==1 {
+            file write  `1' " & [`value'] "
+        }        
+    * restore 
+end
+
+cap prog drop print_1_cg
+program print_1_cg
+    file write newfile " `1' "
+    foreach r in $cat_group {
+        in_stat_cg newfile `2' `r' `3' "0" 
+        }      
+    file write newfile " \\ " _n
+end
+
+cap prog drop print_obs
+program print_obs
+    file write newfile " `1' "
+        in_stat_cg newfile `2' mean `3' "0" 
+    forvalues r=2/$cat_num {
+      file write newfile " & "
+    }    
+    file write newfile " \\ " _n
+end
+
+
+
+cap prog drop print_mean
+program print_mean
+    qui sum `2', detail 
+    local value=string(`=r(mean)*`4'',"`3'")
+    file open newfile using "${tables}`1'.tex", write replace
+    file write newfile "`value'"
+    file close newfile    
+end
 
 
 

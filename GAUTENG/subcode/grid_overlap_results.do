@@ -38,6 +38,9 @@ global rset = 8;
 global dist_break_reg1 = "500";
 global dist_break_reg2 = "4000";
 
+global pc = 166;
+global pu = 140;
+
 * global dist_break_reg1 = "250";
 * global dist_break_reg2 = "2000";
 global bin = $dist_break_reg1;
@@ -101,7 +104,7 @@ ren id grid_id
 
 *** GENERATE ELEVATION ***  !!!!
 
-foreach var of varlist $outcomes {
+foreach var of varlist $outcomes shops shops_inf util util_water util_energy util_refuse community health school {
   replace `var' = `var'*1000000/($grid*$grid)
 }
 
@@ -277,10 +280,24 @@ forvalues r=1/$rset {
 
 
 
+* descriptive_table_print.do
+
+
+
+
+* cap drop tobs
+* g tobs=_N
+ * global cat_num=4
+        * print_blank
+        * print_obs "Total Households" cobs "%10.0fc" 
+  
+  * file write newfile " & Mean & SD & Min & Max \\ " _n  
+
 
 foreach var of varlist s1p_*_C* s1p_a_*_R s1p_a_*_P S2_*_post  {
   replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
 }
+
 
 
 
@@ -309,25 +326,6 @@ g roadD = road_dist_r if rD < pD
 replace roadD = road_dist_p if rD>pD 
 
 
-global pct = .10
-
-cap drop d_r
-g d_r = .
-cap drop d_p
-g d_p = .
-forvalues r=1/8 {
-  cap drop s1p10_a_`r'_R
-  g s1p10_a_`r'_R = s1p_a_`r'_R>$pct & s1p_a_`r'_R<.
-  cap drop s1p10_a_`r'_P
-  g s1p10_a_`r'_P = s1p_a_`r'_P>$pct & s1p_a_`r'_P<.
-  cap drop s1p10_a_`r'_C 
-  g s1p10_a_`r'_C =s1p_a_`r'_C >$pct & s1p_a_`r'_C<.
-  cap drop s1p10_a_`r'_C_con
-  g s1p10_a_`r'_C_con =s1p_a_`r'_C_con >$pct & s1p_a_`r'_C_con<.
-
-  replace d_r = `r' if s1p10_a_`r'_R==1
-  replace d_p = `r' if s1p10_a_`r'_P==1
-}
 
 
 
@@ -340,8 +338,6 @@ forvalues r=1/8 {
 *      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
 
-
-/*
 
 
 cd ../..
@@ -369,30 +365,61 @@ g ln_P = log(P)
  * reg ln_P s1p_a_*_C*  CA cD rD if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r 
 
 
-cd ../../..
-cd $output
+* cd ../../..
+* cd $output
 
 
 
 
-reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+reg  pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
+cplot "gr_pop" "blue"
+
+reg total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+cplot "gr_house" "red"
 
 
-/*
-
-lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &Population Density"
-lab var for "Total Formal Housing"
-lab var inf "Total Informal Housing"
-lab var inf_backyard "Backyard Informal Housing"
-lab var ln_P "Log(Price) \\ \midrule \\[-.6em]"
 
 
-global cells = 1
-global outcomes = "pop_density for inf inf_backyard ln_P"
+
+
+
+
+
+
+lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People per $\text{km}^{2}$"
+lab var total_buildings "Houses per $\text{km}^{2}$"
+lab var for "Formal houses per $\text{km}^{2}$"
+lab var inf "Informal houses per $\text{km}^{2}$"
+lab var inf_backyard "Informal backyard houses per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
+
+* lab var ln_P "Log(Price) per transaction \\ \midrule \\[-.6em]"
+ * ln_P
+
+global cellsp   = 1
+global cells    = 1
+global outcomes = "pop_density total_buildings for inf inf_backyard"
+
 
 rfull main_new
+
+
+
+
+* sum proj_C_con, detail
+* disp  ((`=r(mean)'*(_N/2))/$pc)
+*   disp 618 * ((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
+
+* sum s1p_a_1_C_con, detail
+* disp  ((`=r(mean)'*(_N/2))/$pc)
+*   disp 618 * ((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
+
+
+ * estimate 
+
 
 
 lab var tot_rooms "(1)&(2)&(3)&(4)&(5)\\[.5em] &Total Rooms"
@@ -403,21 +430,23 @@ lab var water_inside "Piped Water Inside\\ \midrule \\[-.6em]"
 
 *** census infrastructure
 global cells = 2
+global cellsp = 2
 global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
 
 rfull inf_census
 
 
-lab var util_water "(1)&(2)&(3)&(4)&(5)&(6)\\[.5em] &Water Utility Buildings"
-lab var util_energy "Electricity Utility Buildings"
-lab var util_refuse "Refuse Utility Buildings"
-lab var community "Community Centers"
-lab var health "Health Centers"
-lab var school "Schools\\ \midrule \\[-.6em]"
+* lab var community "Community Centers"
+lab var util_water "(1)&(2)&(3)&(4)\\[.5em] &Water Utility Buildings per $\text{km}^{2}$ "
+lab var util_energy "Electricity Utility Buildings per $\text{km}^{2}$ "
+* lab var util_refuse "Refuse Utility Buildings per $\text{km}^{2}$"
+lab var health "Health Centers per $\text{km}^{2}$ "
+lab var school "Schools per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
 
 *** bblu infrastructure 
 global cells = 3
-global outcomes  = " util_water util_energy util_refuse community health school "
+global cellsp = 3
+global outcomes  = " util_water util_energy health school "
 
 rfull inf_bblu
 
@@ -425,21 +454,249 @@ rfull inf_bblu
 
 *** demographics 
 
-
-lab var shops "(1)&(2)&(3)&(4)\\[.5em] &Shops"
-lab var shops_inf "Informal Shops"
+lab var shops "(1)&(2)&(3)&(4)\\[.5em] &Businesses per $\text{km}^{2}$"
+lab var shops_inf "Informal Businesses per $\text{km}^{2}$"
 lab var emp "Household Employment"
 lab var ln_inc "Log Household Income\\ \midrule \\[-.6em]"
 
 global cells = 3
+global cellsp = 3
 global outcomes = "  shops shops_inf emp ln_inc  "
 rfull agglom
 
 
-global cells = 3
 
+
+* foreach var of varlist tot_rooms owner electric_lighting toilet_flush water_inside  {
+*   g `var'_pop = `var'*pop_density
+* }
+
+
+* lab var tot_rooms "(1)&(2)&(3)&(4)&(5)\\[.5em] &Total Rooms"
+* lab var owner "Own House"
+* lab var electric_lighting "Electric Lighting"
+* lab var toilet_flush "Flush Toilet"
+* lab var water_inside "Piped Water Inside\\ \midrule \\[-.6em]"
+
+* *** census infrastructure
+* global cells = 2
+* global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
+
+* rfull inf_census
+
+
+
+
+
+
+ global cat_group = "mean max"
+
+ foreach v in R P {
+    file open newfile using "spill_`v'.tex", write replace
+    forvalues r=1/8 {
+      local r1 "`=(`r'-1)*.5'"
+      local r2 "`=(`r')*.5'"
+      print_1_cg "\hspace{3em} `=`r1'' - `=`r2'' " s1p_a_`r'_`v'  "%10.3fc"
+    }
+    file close newfile
+}
+
+    file open newfile using "proj_rdp_exp.tex", write replace
+      print_1_cg "\hspace{2em}Plots " proj_rdp  "%10.3fc"
+    file close newfile
+
+    file open newfile using "proj_placebo_exp.tex", write replace
+      print_1_cg "\hspace{2em}Plots" proj_placebo  "%10.3fc"
+    file close newfile
+
+
+
+
+
+* g treat_R = 1 if proj_rdp==1 & proj_placebo==0 & post==0 
+* replace treat_R=2 if (s2p_a_1_R>0 | s2p_a_2_R>0)  & proj_rdp==0 & proj_placebo==0 & post==0 
+* replace treat_R=3 if (s2p_a_1_R==0 & s2p_a_2_R==0) & proj_rdp==0 & proj_placebo==0 & post==0 
+
+* g treat_P=1 if proj_placebo==1 & proj_rdp==0 & post==0
+* replace treat_P=2 if (s2p_a_1_P>0 | s2p_a_2_P>0)  & proj_rdp==0 & proj_placebo==0 & post==0 
+* replace treat_P=3 if (s2p_a_1_P==0 & s2p_a_2_P==0) & proj_rdp==0 & proj_placebo==0 & post==0 
+
+g o_bblu = 1 if for!=.
+g o_census = 1 if pop_density!=.
+g o_price = 1 if P!=.
+
+
+
+
+cap drop treat_R
+cap drop treat_P
+g treat_R = 1 if proj_rdp==1 & post==0 
+replace treat_R=2 if (s2p_a_1_R>0 | s2p_a_2_R>0)  & proj_rdp==0 & post==0 
+replace treat_R=3 if (s2p_a_1_R==0 & s2p_a_2_R==0) & proj_rdp==0  & post==0 
+
+g treat_P=1 if proj_placebo==1 & post==0
+replace treat_P=2 if (s2p_a_1_P>0 | s2p_a_2_P>0)  & proj_placebo==0 & post==0 
+replace treat_P=3 if (s2p_a_1_P==0 & s2p_a_2_P==0) & proj_placebo==0 & post==0 
+
+global cat1 = " if treat_R==1"
+global cat2 = " if treat_R==2"
+global cat3 = " if treat_R==3"
+global cat4 = " if treat_P==1"
+global cat5 = " if treat_P==2"
+global cat6 = " if treat_P==3"
+
+ global cat_num=6
+
+* " util_water util_energy util_refuse health school shops shops_inf "
+
+
+
+
+    file open newfile using "pre_table_bblu.tex", write replace
+    * file open newfile using "pre_table_bblu_1.tex", write replace
+          * print_1 "\hspace{1em}Houses" total_buildings "mean"                 "%10.1fc"          
+          print_1 "\hspace{1em}Formal houses" for "mean"                      "%10.1fc"
+          print_1 "\hspace{1em}Informal houses" inf "mean"                    "%10.1fc"
+          * print_1 "\hspace{1em}Informal backyard houses" inf_backyard "mean"  "%10.1fc"
+          * print_1 "\hspace{1em}Water utility buildings" util_water "mean"     "%10.1fc"
+          * print_1 "\hspace{1em}Electricity utility buildings" util_energy "mean" "%10.1fc"
+          print_1 "\hspace{1em}Health centers" health "mean"                  "%10.1fc"
+          print_1 "\hspace{1em}Schools" school "mean"                         "%10.1fc"
+          print_1 "\hspace{1em}Shops" shops "mean"                            "%10.1fc"
+          * print_1 "\hspace{1em}Informal Shops" shops_inf "mean"               "%10.1fc"
+          print_1 "\hspace{1em}Observations" o_bblu "N"                      "%10.0fc"
+    file close newfile
+
+
+    file open newfile using "pre_table_census.tex", write replace   
+    * file open newfile using "pre_table_census_1.tex", write replace    
+          print_1 "\hspace{1em}People per $\text{km}^{2}$" pop_density "mean"                      "%10.1fc"
+          print_1 "\hspace{1em}Rooms per house" tot_rooms "mean"                      "%10.1fc"
+          print_1 "\hspace{1em}Owns house" owner "mean"                    "%10.2fc"
+          print_1 "\hspace{1em}Electric lighting" electric_lighting "mean"                  "%10.2fc"
+          print_1 "\hspace{1em}Flush toilet" toilet_flush "mean"                         "%10.2fc"
+          print_1 "\hspace{1em}Piped water inside" water_inside "mean"                            "%10.2fc"
+          print_1 "\hspace{1em}Household head is employed" emp "mean"               "%10.2fc"
+          print_1 "\hspace{1em}Household income (Rand)" inc "mean"               "%10.0fc"
+          print_1 "\hspace{1em}Observations" o_census "N"                      "%10.0fc"
+    file close newfile
+
+
+
+cap prog drop print_1_price
+program print_1_price
+    file write newfile " `1' "
+    forvalues r=1/$cat_num {
+        if `r'==1 | `r'==4 {
+          file write newfile " &  "
+        }
+        else {
+           in_stat newfile `2' `3' `4' "0" "${cat`r'}"
+        }
+        }      
+    file write newfile " \\[.15em] " _n
+end
+
+    file open newfile using "pre_table_prices.tex", write replace    
+    * file open newfile using "pre_table_prices_1.tex", write replace    
+      print_1_price "\hspace{1em}Price (Rand)" P "mean"    "%10.0fc"
+      print_1_price "\hspace{1em}Observations" o_price "N"                      "%10.0fc"
+    file close newfile
+
+
+
+cap prog drop print_1_proj
+program print_1_proj
+    file write newfile " `1' "
+    forvalues r=1/$cat_num {
+        if `r'==1 | `r'==4 {
+          in_stat newfile `2' `3' `4' "0" "${cat`r'}"
+        }
+        else {
+           file write newfile " &  "
+        }
+        }      
+    file write newfile " \\[.15em] " _n
+end
+
+
+
+    file open newfile using "pre_table_proj_stats.tex", write replace 
+    * file open newfile using "pre_table_proj_stats_1.tex", write replace    
+
+    file write newfile " Number of Projects & 166 & 166 & 166 & 140 & 140 & 140 \\[.15em]  "
+    file write newfile " Average Project Area ($\text{km}^{2}$) & 1.18 & 1.18 & 1.18 & 1.19 & 1.19 & 1.19  \\[.15em]  "
+      * print_1 "Number of Projects" p_count "mean"    "%10.0fc"
+      * print_1 "Average Project Area ($\text{km}^{2}$)" p_size "mean"                      "%10.2fc"
+    file close newfile
+
+* cap drop p_count
+* g p_count = $pc if treat_R ==1 | treat_R ==2 |  treat_R ==3
+* replace p_count = $pu if treat_P ==1 | treat_P ==2 |  treat_P ==3
+* cap drop p_size
+* g p_size = 1.18 if treat_R ==1 | treat_R ==2 |  treat_R ==3 
+* replace p_size=1.19 if treat_P ==1 | treat_P ==2 |  treat_P ==3
+
+
+
+
+
+* SELECT AVG(K.shape_area) 
+* FROM 
+* (SELECT J.* FROM gcro_publichousing AS J 
+* JOIN
+* placebo_cluster AS R ON J.OGC_FID = R.cluster 
+* LEFT JOIN gcro_over_list AS G ON  R.cluster =                           
+*                        G.OGC_FID WHERE G.dp IS NULL ) AS K
+                       
+
+
+* preserve
+*   keep if proj_rdp>0 | proj_placebo>0
+*   g R = proj_rdp>0
+*   duplicates drop cluster_joined, force
+
+
+
+
+
+    * file open newfile using "pre_table_obs.tex", write replace    
+    *       print_1 "Observations" o "N"                      "%10.0fc"
+    * file close newfile
+
+
+
+/*
+
+
+* print_1 "N"                 total_buildings "N" "%10.0fc"
 
 *** bblu infrastructure
+
+
+
+
+
+* global pct = .10
+
+* cap drop d_r
+* g d_r = .
+* cap drop d_p
+* g d_p = .
+* forvalues r=1/8 {
+*   cap drop s1p10_a_`r'_R
+*   g s1p10_a_`r'_R = s1p_a_`r'_R>$pct & s1p_a_`r'_R<.
+*   cap drop s1p10_a_`r'_P
+*   g s1p10_a_`r'_P = s1p_a_`r'_P>$pct & s1p_a_`r'_P<.
+*   cap drop s1p10_a_`r'_C 
+*   g s1p10_a_`r'_C =s1p_a_`r'_C >$pct & s1p_a_`r'_C<.
+*   cap drop s1p10_a_`r'_C_con
+*   g s1p10_a_`r'_C_con =s1p_a_`r'_C_con >$pct & s1p_a_`r'_C_con<.
+
+*   replace d_r = `r' if s1p10_a_`r'_R==1
+*   replace d_p = `r' if s1p10_a_`r'_P==1
+* }
+
 
 
 
@@ -1689,830 +1946,6 @@ forvalues r=100(50)$DM_max {
 }
 
 
-
-
-reg total_buildings proj_rdp proj_placebo  s1p_a_1_R  s1p_a_1_P s2p_a_1_R s2p_a_1_P dr dp ///
-    if post==0 & (proj_rdp>0 | proj_placebo>0 | (s1p_a_1_R>0 | s1p_a_1_P>0)), cluster(cluster_joined) r
-
-
-reg total_buildings proj_rdp proj_placebo  s1p_a_1_R  s1p_a_1_P DR_* DP_* ///
-    if post==0 & (proj_rdp>0 | proj_placebo>0 | (s1p_a_1_R>0 | s1p_a_1_P>0)), cluster(cluster_joined) r
-
-
-
-g sm1p_a_1_P_1 = s1p_a_1_P> 0   &   s1p_a_1_P<=.025
-g sm1p_a_1_P_2 = s1p_a_1_P>.025 &   s1p_a_1_P<=.18
-g sm1p_a_1_P_3 = s1p_a_1_P>.18 
-
-g sm1p_a_1_R_1 = s1p_a_1_R> 0   &   s1p_a_1_R<=.025
-g sm1p_a_1_R_2 = s1p_a_1_R>.025 &   s1p_a_1_R<=.18
-g sm1p_a_1_R_3 = s1p_a_1_R>.18 
-
-
-
-reg total_buildings_ch proj_rdp proj_placebo  sm1p_a_1_R*  sm1p_a_1_P*  DR_* DP_* ///
-    , cluster(cluster_joined) r
-
-
-
-reg total_buildings_ch proj_rdp proj_placebo  sm1p_a_1_R*  sm1p_a_1_P* ///
-    , cluster(cluster_joined) r
-
-
-reg total_buildings proj_rdp proj_placebo  sm1p_a_1_R*  sm1p_a_1_P*  DR_* DP_* ///
-    if post==0 & (proj_rdp>0 | proj_placebo>0 | (s1p_a_1_R>0 | s1p_a_1_P>0)), cluster(cluster_joined) r
-
-
-
-
-
-
-reg total_buildings proj_rdp proj_placebo  sm1p_a_1_R*  sm1p_a_1_P*  if post==0
-
-
-
-reg total_buildings proj_rdp proj_placebo  sm1p_a_1_R*  sm1p_a_1_P*    ///
-           DR_* DP_* if post==0
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_1_R s2p_a_1_P s2p_a_2_R s2p_a_2_P, cluster(cluster_joined) r
-* reg  pop_density_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P , cluster(cluster_joined) r
-
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_C  s1p_a_1_C_con s2p_a_1_R s2p_a_1_P s2p_a_2_R s2p_a_2_P, cluster(cluster_joined) r
-* reg  pop_density_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P , cluster(cluster_joined) r
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_1_R s2p_a_1_P, cluster(cluster_joined) r
-* reg  pop_density_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P , cluster(cluster_joined) r
-
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-/*
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-* reg  pop_density_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-    
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_1_R  s2p_a_2_R  s2p_a_1_P s2p_a_2_P , cluster(cluster_joined) r
-* reg  pop_density_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-    
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_1_R  s2p_a_2_R  s2p_a_1_P s2p_a_2_P ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_1_R>0 | s1p_a_1_P>0), cluster(cluster_joined) r
-    
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_1_R  s2p_a_2_R  s2p_a_1_P s2p_a_2_P ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_4_R>0 & s1p_a_4_P>0), cluster(cluster_joined) r
-    
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-   sum distance_placebo
-
-
-
-
-
-reg total_buildings sp_a_*_R  sp_a_*_P    if post==0
-
-
-reg total_buildings sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P if post==0
-
-
-
-
-
-
-
-reg  pop_density_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P, cluster(cluster_joined) r
-
-
-
-
-
-  forvalues r = 2(2)$rset {
-  disp _b[sp_a_`r'_R] - _b[sp_a_`r'_P]
-  test sp_a_`r'_R - sp_a_`r'_P = 0
-  }
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   SP_a_*_R  SP_a_*_P, cluster(cluster_joined) r
-
-  forvalues r = 2(2)$rset {
-  disp _b[SP_a_`r'_R] - _b[SP_a_`r'_P]
-  test SP_a_`r'_R - SP_a_`r'_P = 0
-  }
-
-
-
-
-g other_pre_id = other if post==0
-gegen other_pre = max(other_pre_id), by(id)
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  , cluster(cluster_joined) r
-
-reg  total_buildings_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P , cluster(cluster_joined) r
-
-  forvalues r = 2(2)$rset {
-  disp _b[sp_a_`r'_R] - _b[sp_a_`r'_P]
-  test sp_a_`r'_R - sp_a_`r'_P = 0
-  }
-
-
-reg total_buildings sp_a_*_R  sp_a_*_P    if post==0
-
-
-reg total_buildings sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P if post==0
-
-
-
-reg  other_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P if other_pre<=2, cluster(cluster_joined) r
-
-  forvalues r = 2(2)$rset {
-  disp _b[sp_a_`r'_R] - _b[sp_a_`r'_P]
-  test sp_a_`r'_R - sp_a_`r'_P = 0
-  }
-
-
-
-
-reg  for_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P, cluster(cluster_joined) r
-
-  forvalues r = 2(2)$rset {
-  disp _b[sp_a_`r'_R] - _b[sp_a_`r'_P]
-  test sp_a_`r'_R - sp_a_`r'_P = 0
-  }
-
-  forvalues r = 2(2)$rset {
-  disp _b[SP_a_`r'_R] - _b[SP_a_`r'_P]
-  test SP_a_`r'_R - SP_a_`r'_P = 0
-  }
-
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   ///
-  sp_a_2_R  sp_a_2_P  sp_a_4_R  sp_a_4_P  sp_a_6_R  sp_a_6_P   ///
- SP_a_2_R  SP_a_2_P  SP_a_4_R  SP_a_4_P   SP_a_6_R  SP_a_6_P if dist_rdp<3000 | dist_placebo<3000, cluster(cluster_joined) r
-
-
-
-forvalues r = 2(2)6 {
-disp _b[sp_a_`r'_R] - _b[sp_a_`r'_P]
-test sp_a_`r'_R - sp_a_`r'_P = 0
-}
-
-forvalues r = 2(2)6 {
-disp _b[SP_a_`r'_R] - _b[SP_a_`r'_P]
-test SP_a_`r'_R - SP_a_`r'_P = 0
-}
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  if both==1, cluster(cluster_joined) r
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P  if dist_rdp<4000 & dist_placebo<4000, cluster(cluster_joined) r
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   sp_a_*_R  sp_a_*_P  SP_a_*_R  SP_a_*_P  if dist_rdp<4000 & dist_placebo<4000, cluster(cluster_joined) r
-
-forvalues r = 2(2)$rset {
-disp _b[sp_a_`r'_R] - _b[sp_a_`r'_P]
-test sp_a_`r'_R - sp_a_`r'_P = 0
-}
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con   ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_8_R>0 & s1p_a_8_P>0), cluster(cluster_joined) r
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_C  s1p_a_1_C_con , cluster(cluster_joined) r
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_C  s1p_a_1_C_con s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_C  s1p_a_1_C_con s2p_a_*_R  s2p_a_*_P ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_8_R>0 & s1p_a_8_P>0), cluster(cluster_joined) r
-
-
-
-
-
-
-* reg  total_buildings_ch proj_rdp proj_placebo   sp_a_2_R  sp_a_2_P , cluster(cluster_joined) r
-
-*   disp _b[sp_a_2_R] - _b[sp_a_2_P]
-*   test sp_a_2_R - sp_a_2_P = 0
-
-* reg  total_buildings_ch proj_rdp proj_placebo   sp_a_2_R  sp_a_2_P s2p_a_*_R  s2p_a_*_P, cluster(cluster_joined) r
-
-*   disp _b[sp_a_2_R] - _b[sp_a_2_P]
-*   test sp_a_2_R - sp_a_2_P = 0
-
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_*_R  s2p_a_*_P ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_8_R>0 & s1p_a_8_P>0), cluster(cluster_joined) r
-
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_1_R  s1p_a_1_P s2p_a_*_R  s2p_a_*_P ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_4_R>0 & s1p_a_4_P>0), cluster(cluster_joined) r
-
-  disp _b[s1p_a_1_R] - _b[s1p_a_1_P]
-  test s1p_a_1_R - s1p_a_1_P = 0
-
-*** ADD EVERYBODY it shows that only 500 is significant! 
-*** CONTROLS 
-
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con s2p_a_*_R  s2p_a_*_P  ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_8_R>0 & s1p_a_8_P>0), cluster(cluster_joined) r
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con   ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_4_R>0 & s1p_a_4_P>0), cluster(cluster_joined) r
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   S2_*_post , cluster(cluster_joined) r
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_R  s1p_a_*_P  , cluster(cluster_joined) r
-
-
-coefplot, vertical keep(*_R)
-coefplot, vertical keep(*_P)
-
-
-forvalues r = 1/$rset {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_R  s1p_a_*_P  s2p_a_*_R  s2p_a_*_P, cluster(cluster_joined) r
-
-forvalues r = 1/$rset {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_R  s1p_a_*_P  ///
-    if proj_rdp>0 | proj_placebo>0 | (s1p_a_8_R>0 & s1p_a_8_P>0), cluster(cluster_joined) r
-
-
-forvalues r = 1/$rset {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con, cluster(cluster_joined) r
-
-coefplot, vertical keep(*C_con)
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con s2p_a_*_R  s2p_a_*_P, cluster(cluster_joined) r
-
-coefplot, vertical keep(*C_con)
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s1p_a_*_C  s1p_a_*_C_con if dist_rdp<4000 & dist_placebo<4000 , cluster(cluster_joined) r
-
-
-
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R   ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P   , cluster(cluster_joined) r
-
-forvalues r = 1/4 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R s1p_a_5_R  s1p_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P s1p_a_5_P  s1p_a_6_P , cluster(cluster_joined) r
-
-forvalues r = 1/6 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_*_R  ///
-  s1p_a_*_P ///
-  s2p_a_*_R  ///
-  s2p_a_*_P   , cluster(cluster_joined) r
-
-
-forvalues r = 1/8 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R s1p_a_5_R  s1p_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P s1p_a_5_P  s1p_a_6_P , cluster(cluster_joined) r
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  sp_a_4_R sp_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  sp_a_4_P sp_a_6_P  ///
-  s2p_a_1_R  s2p_a_2_R  s2p_a_3_R  s2p_a_4_R s2p_a_5_R  s2p_a_6_R ///
-  s2p_a_1_P  s2p_a_2_P  s2p_a_3_P  s2p_a_4_P s2p_a_5_P  s2p_a_6_P if dist_rdp<3000 | dist_placebo<3000, cluster(cluster_joined) r
-
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R s1p_a_5_R  s1p_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P s1p_a_5_P  s1p_a_6_P ///
-  s2p_a_1_R  s2p_a_2_R  s2p_a_3_R  s2p_a_4_R s2p_a_5_R  s2p_a_6_R ///
-  s2p_a_1_P  s2p_a_2_P  s2p_a_3_P  s2p_a_4_P s2p_a_5_P  s2p_a_6_P if dist_rdp<3000 | dist_placebo<3000, cluster(cluster_joined) r
-
-
-forvalues r = 1/6 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-forvalues r = 1/6 {
-disp _b[s2p_a_`r'_R] - _b[s2p_a_`r'_P]
-test s2p_a_`r'_R - s2p_a_`r'_P = 0
-}
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R s1p_a_5_R  s1p_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P s1p_a_5_P  s1p_a_6_P ///
-     if dist_rdp<4000 & dist_placebo<4000 & (dist_rdp<3000 | dist_placebo<3000), cluster(cluster_joined) r
-
-forvalues r = 1/6 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-
-
-
-
-g Both=0
-
-forvalues r=1(1)6 {
-replace Both = 1 if ((s1p_a_`r'_P>0 & s1p_a_`r'_P<.) & (s1p_a_`r'_R>0 & s1p_a_`r'_R<.))  | proj_rdp>0 | proj_placebo>0
-}
-
-
-g Both_overlap = ((s1p_a_6_P>0 & s1p_a_6_P<.) & (s1p_a_6_R>0 & s1p_a_6_R<.))  | proj_rdp>0 | proj_placebo>0
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R s1p_a_5_R  s1p_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P s1p_a_5_P  s1p_a_6_P ///
-  s2p_a_1_R  s2p_a_2_R  s2p_a_3_R  s2p_a_4_R s2p_a_5_R  s2p_a_6_R ///
-  s2p_a_1_P  s2p_a_2_P  s2p_a_3_P  s2p_a_4_P s2p_a_5_P  s2p_a_6_P ///
-     if dist_rdp<4000 & dist_placebo<4000 & (dist_rdp<3000 | dist_placebo<3000), cluster(cluster_joined) r
-
-
-
-
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R s1p_a_5_R  s1p_a_6_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P s1p_a_5_P  s1p_a_6_P ///
-    if Both ==1 , cluster(cluster_joined) r
-
-forvalues r = 1/6 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-
-
-
-
-
-
-/*
-
-
-reg  total_buildings_ch proj_rdp proj_placebo ///
-  s1p_a_1_R  s1p_a_2_R  s1p_a_3_R  s1p_a_4_R ///
-  s1p_a_1_P  s1p_a_2_P  s1p_a_3_P  s1p_a_4_P ///
-  s2p_a_1_R  s2p_a_2_R  s2p_a_3_R  s2p_a_4_R ///
-  s2p_a_1_P  s2p_a_2_P  s2p_a_3_P  s2p_a_4_P , cluster(cluster_joined) r
-
-
-
-forvalues r = 1/4 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-forvalues r = 1/4 {
-disp _b[s2p_a_`r'_R] - _b[s2p_a_`r'_P]
-test s2p_a_`r'_R - s2p_a_`r'_P = 0
-}
-
-
-
-
-
-
-forvalues r = 1/$rset {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-} 
-
-forvalues r = 1/$rset {
-disp _b[s2p_a_`r'_R] - _b[s2p_a_`r'_P]
-test s2p_a_`r'_R - s2p_a_`r'_P = 0
-}
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-
-
-
-
-
-/*
-
-
-
-reg  total_buildings_ch proj_rdp proj_placebo   s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-
-
-
-/*
-
-
-
-foreach var of varlist $outcomes_census {
-reg  `var'_ch proj_rdp proj_placebo   s1p_a_*_R  s1p_a_*_P , cluster(cluster_joined) r
-forvalues r = 1/6 {
-disp _b[s1p_a_`r'_R] - _b[s1p_a_`r'_P]
-test s1p_a_`r'_R - s1p_a_`r'_P = 0
-}
-}
-
-
-foreach var of varlist $outcomes_census {
-reg  `var'_ch proj_rdp proj_placebo   s2p_a_*_R  s2p_a_*_P , cluster(cluster_joined) r
-forvalues r = 1/6 {
-disp _b[s2p_a_`r'_R] - _b[s2p_a_`r'_P]
-test s2p_a_`r'_R - s2p_a_`r'_P = 0
-}
-}
-
-
-
-
-
-
-
-/*
-
-
-
-
-reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con , cluster(cluster_joined) r
-
-est sto t1
-
-reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con for_lag inf_lag, cluster(cluster_joined) r
-
-est sto t2
-
-forvalues r=1/6 {
-  ren s1p_a_`r'_C s1p_a_`r'_C_temp
-  ren S2_`r'_post s1p_a_`r'_C
-
-  ren s1p_a_`r'_C_con s1p_a_`r'_C_con_temp
-  ren S2_`r'_con_S2_post s1p_a_`r'_C_con
-  } 
-
-* reg total_buildings_ch
-* est sto t3
-
-reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con  , cluster(cluster_joined) r
-
-est sto t3
-
-reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con for_lag inf_lag , cluster(cluster_joined) r
-
-est sto t4
-
-forvalues r=1/6 {
-  ren s1p_a_`r'_C S2_`r'_post 
-  ren s1p_a_`r'_C_temp s1p_a_`r'_C
-
-  ren s1p_a_`r'_C_con S2_`r'_con_S2_post 
-  ren s1p_a_`r'_C_con_temp s1p_a_`r'_C_con
-  } 
-
-    lab var s1p_a_1_C "\hspace{2em} \textsc{0-500m}"
-    lab var s1p_a_1_C_con "\hspace{2em} \textsc{0-500m}"  
-    lab var s1p_a_2_C "\hspace{2em} \textsc{500-1000m}"
-    lab var s1p_a_2_C_con "\hspace{2em} \textsc{500-1000m}"  
-    lab var s1p_a_3_C "\hspace{2em} \textsc{1000-1500m}"
-    lab var s1p_a_3_C_con "\hspace{2em} \textsc{1000-1500m}"  
-    lab var s1p_a_4_C "\hspace{2em} \textsc{1500-2000m}"
-    lab var s1p_a_4_C_con "\hspace{2em} \textsc{1500-2000m}"  
-    lab var s1p_a_5_C "\hspace{2em} \textsc{2000-2500m}"
-    lab var s1p_a_5_C_con "\hspace{2em} \textsc{2000-2500m}"  
-    lab var s1p_a_6_C "\hspace{2em} \textsc{2500-3000m}"
-    lab var s1p_a_6_C_con "\hspace{2em} \textsc{2500-3000m}"  
-
-
-    lab var proj_C_con "\textsc{\% Overlap with Project}"
-
-    lab var proj_C  "\textsc{\% Overlap with Project}"
-
-    lab var for_lag "Formal Housing in 2001"
-    lab var inf_lag "Informal Housing in 2001"
-
-    estout t1 t2 t3 t4  using "comparison.tex", replace  style(tex) ///
-    order( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con ///
-           proj_C s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C for_lag inf_lag ) ///
-    keep( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con ///
-           proj_C s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C  for_lag inf_lag  )  ///
-    varlabels( , blist( proj_C_con "\textsc{Constructed} $\times$ \\[.5em] \hspace{.5em} " s1p_a_1_C_con  "\textsc{ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{Distance Metric :  }  \\[1em]" ///
-                        s1p_a_1_C  " \textsc{Distance Metric :  }  \\[1em]" ) ///
-    el(  proj_C_con  "[.5em]"  s1p_a_1_C  "[0.3em]"  s1p_a_2_C  "[0.3em]"  s1p_a_3_C  "[0.3em]"  s1p_a_4_C   "[0.3em]"  s1p_a_5_C  "[0.3em]"  s1p_a_6_C  "[1em]"  ///
-         proj_C  "[.5em]" s1p_a_1_C_con  "[0.3em]"  s1p_a_2_C_con  "[0.3em]"  s1p_a_3_C_con  "[0.3em]"  s1p_a_4_C_con   "[0.3em]"  s1p_a_5_C_con  "[0.3em]"  s1p_a_6_C_con  "[1em]"  for_lag "[.3em]" inf_lag "[1em]"  ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt(1) star ) se(par fmt(1)) ) ///
-      stats( r2  N ,  ///
-    labels(   "R$^2$"   "N"  ) ///
-        fmt(   %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-
-
-* reg  total_buildings_ch proj_C proj_C_con S2_*_post for_lag inf_lag , cluster(cluster_joined) r
-* reg  total_buildings_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con   , cluster(cluster_joined) r
-
-
-
-cap prog drop regs_spill_full
-
-prog define regs_spill_full
-  eststo clear
-
-  foreach var of varlist $outcomes {
-    
-    reg  `var'_ch proj_C proj_C_con s1p_*_C s1p_a*_C_con  for_lag inf_lag , cluster(cluster_joined) r
-
-    eststo  `var'
-
-    g temp_var = e(sample)==1
-    mean `var'_lag $ww if temp_var==1
-    mat def E=e(b)
-    estadd scalar Mean2001 = E[1,1] : `var'
-    mean `var' $ww if temp_var==1
-    mat def E=e(b)
-    estadd scalar Mean2011 = E[1,1] : `var'
-    drop temp_var
-    }
-
-
-  global X "{\tim}"
-
-    lab var s1p_a_1_C "\hspace{2em} \textsc{0-500m}"
-    lab var s1p_a_1_C_con "\hspace{2em} \textsc{0-500m}"  
-    lab var s1p_a_2_C "\hspace{2em} \textsc{500-1000m}"
-    lab var s1p_a_2_C_con "\hspace{2em} \textsc{500-1000m}"  
-    lab var s1p_a_3_C "\hspace{2em} \textsc{1000-1500m}"
-    lab var s1p_a_3_C_con "\hspace{2em} \textsc{1000-1500m}"  
-    lab var s1p_a_4_C "\hspace{2em} \textsc{1500-2000m}"
-    lab var s1p_a_4_C_con "\hspace{2em} \textsc{1500-2000m}"  
-    lab var s1p_a_5_C "\hspace{2em} \textsc{2000-2500m}"
-    lab var s1p_a_5_C_con "\hspace{2em} \textsc{2000-2500m}"  
-    lab var s1p_a_6_C "\hspace{2em} \textsc{2500-3000m}"
-    lab var s1p_a_6_C_con "\hspace{2em} \textsc{2500-3000m}"  
-
-
-    lab var proj_C_con "\textsc{\% Overlap with Project}"
-
-    lab var proj_C  "\textsc{\% Overlap with Project}"
-
-    lab var for_lag "Formal Housing in 2001"
-    lab var inf_lag "Informal Housing in 2001"
-
-
-    estout $outcomes using "`1'.tex", replace  style(tex) ///
-    order( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con ///
-           proj_C s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C for_lag inf_lag ) ///
-    keep( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con ///
-           proj_C s1p_a_1_C s1p_a_2_C s1p_a_3_C s1p_a_4_C s1p_a_5_C s1p_a_6_C  for_lag inf_lag  )  ///
-    varlabels( , blist( proj_C_con "\textsc{Constructed} $\times$ \\[.5em] \hspace{.5em} " s1p_a_1_C_con  "\textsc{ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ///
-                        s1p_a_1_C  " \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ) ///
-    el(  proj_C_con  "[.5em]"  s1p_a_1_C  "[0.3em]"  s1p_a_2_C  "[0.3em]"  s1p_a_3_C  "[0.3em]"  s1p_a_4_C   "[0.3em]"  s1p_a_5_C  "[0.3em]"  s1p_a_6_C  "[1em]"  ///
-         proj_C  "[.5em]" s1p_a_1_C_con  "[0.3em]"  s1p_a_2_C_con  "[0.3em]"  s1p_a_3_C_con  "[0.3em]"  s1p_a_4_C_con   "[0.3em]"  s1p_a_5_C_con  "[0.3em]"  s1p_a_6_C_con  "[1em]"  for_lag "[.3em]" inf_lag "[1em]"  ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
-      stats( Mean2001 Mean2011 r2  N ,  ///
-    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
-        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-    estout $outcomes using "`1'_short.tex", replace  style(tex) ///
-    order( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con  for_lag inf_lag  ) ///
-    keep( proj_C_con s1p_a_1_C_con s1p_a_2_C_con s1p_a_3_C_con s1p_a_4_C_con s1p_a_5_C_con s1p_a_6_C_con  for_lag inf_lag )  ///
-    varlabels( , blist( proj_C_con "\textsc{Constructed} $\times$ \\[.5em] \hspace{.5em} "  s1p_a_1_C_con  "\textsc{ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]"     ) ///
-    el(   proj_C_con  "[.5em]"  s1p_a_1_C_con  "[0.3em]"  s1p_a_2_C_con  "[0.3em]"  s1p_a_3_C_con  "[0.3em]"  s1p_a_4_C_con   "[0.3em]"  s1p_a_5_C_con  "[0.3em]"  s1p_a_6_C_con  "[1em]"  for_lag "[.3em]" inf_lag "[1em]"  ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
-      stats( Mean2001 Mean2011 r2  N ,  ///
-    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
-        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-
-    lab var proj_C_con "\textsc{\% Overlap  with Project}"
-    lab var s1p_a_1_C_con "\textsc{\% 0-500m Buffer Overlap  with Project  } "
-
-    estout $outcomes using "`1'_top.tex", replace  style(tex) ///
-    order( proj_C_con s1p_a_1_C_con   ) ///
-    keep( proj_C_con s1p_a_1_C_con )  ///
-    varlabels( , blist( ) ///
-    el(   proj_C_con  "[.5em]"  s1p_a_1_C_con  "[1em]"  ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
-      stats( Mean2001 Mean2011 r2  N ,  ///
-    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
-        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-
-end
-
-
-global cells = 1
-regs_spill_full bblu_spill_test_new
-
-global outcomes_census =  "  pop_density water_inside   toilet_flush  electricity  tot_rooms "
-global cells = 3
-
-sort id year
-foreach var of varlist $outcomes_census {
-  cap drop `var'_ch
-   by id: g `var'_ch = `var'[_n]-`var'[_n-1]
-   by id: g `var'_lag = `var'[_n-1]
-}
-
-global outcomes = "$outcomes_census"
-
-regs_spill_full census_spill_test_new
-
-
-
-
-
-
-
-cap prog drop regs_spill_sep
-
-prog define regs_spill_sep
-  eststo clear
-
-  foreach var of varlist $outcomes {
-    
-    reg  `var'_ch proj_rdp proj_placebo   s1p_a_*_R  s1p_a_*_P  for_lag inf_lag , cluster(cluster_joined) r
-
-    eststo  `var'
-
-    g temp_var = e(sample)==1
-    mean `var'_lag $ww if temp_var==1
-    mat def E=e(b)
-    estadd scalar Mean2001 = E[1,1] : `var'
-    mean `var' $ww if temp_var==1
-    mat def E=e(b)
-    estadd scalar Mean2011 = E[1,1] : `var'
-    drop temp_var
-    }
-
-  global X "{\tim}"
-
-    lab var s1p_a_1_R "\hspace{2em} \textsc{0-500m}"
-    lab var s1p_a_1_P "\hspace{2em} \textsc{0-500m}"  
-    lab var s1p_a_2_R "\hspace{2em} \textsc{500-1000m}"
-    lab var s1p_a_2_P "\hspace{2em} \textsc{500-1000m}"  
-    lab var s1p_a_3_R "\hspace{2em} \textsc{1000-1500m}"
-    lab var s1p_a_3_P "\hspace{2em} \textsc{1000-1500m}"  
-    lab var s1p_a_4_R "\hspace{2em} \textsc{1500-2000m}"
-    lab var s1p_a_4_P "\hspace{2em} \textsc{1500-2000m}"  
-    lab var s1p_a_5_R "\hspace{2em} \textsc{2000-2500m}"
-    lab var s1p_a_5_P "\hspace{2em} \textsc{2000-2500m}"  
-    lab var s1p_a_6_R "\hspace{2em} \textsc{2500-3000m}"
-    lab var s1p_a_6_P "\hspace{2em} \textsc{2500-3000m}"  
-
-    lab var proj_rdp "\textsc{Constructed}  $\times$  \textsc{\% Overlap  with Project} "
-    lab var proj_placebo " \textsc{Unconstructed} $\times$  \textsc{\% Overlap  with Project}"
-
-    lab var for_lag "Formal Housing in 2001"
-    lab var inf_lag "Informal Housing in 2001"
-
-    estout $outcomes using "`1'.tex", replace  style(tex) ///
-    order( proj_rdp s1p_a_1_R s1p_a_2_R s1p_a_3_R s1p_a_4_R s1p_a_5_R s1p_a_6_R ///
-          proj_placebo  s1p_a_1_P s1p_a_2_P s1p_a_3_P s1p_a_4_P s1p_a_5_P s1p_a_6_P for_lag inf_lag) ///
-    keep(  proj_rdp  s1p_a_1_R s1p_a_2_R s1p_a_3_R s1p_a_4_R s1p_a_5_R s1p_a_6_R ///
-        proj_placebo  s1p_a_1_P s1p_a_2_P s1p_a_3_P s1p_a_4_P s1p_a_5_P s1p_a_6_P   for_lag inf_lag)  ///
-    varlabels( , blist( s1p_a_1_R  "\textsc{ Constructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ///
-                        s1p_a_1_P  "\textsc{ Unconstructed $\times$} \\[.5em] \hspace{.5em} \textsc{\% Buffer Overlap with Project :  }  \\[1em]" ) ///
-    el(  proj_rdp "[1em]" s1p_a_1_R  "[0.3em]"  s1p_a_2_R  "[0.3em]"  s1p_a_3_R  "[0.3em]"  s1p_a_4_R   "[0.3em]"  s1p_a_5_R  "[0.3em]"  s1p_a_6_R  "[1em]"  ///
-         proj_placebo "[1em]"  s1p_a_1_P  "[0.3em]"  s1p_a_2_P  "[0.3em]"  s1p_a_3_P  "[0.3em]"  s1p_a_4_P   "[0.3em]"  s1p_a_5_P  "[0.3em]"  s1p_a_6_P  "[1em]" ///
-          for_lag "[.3em]" inf_lag "[1em]" ))  label ///
-      noomitted ///
-      mlabels(,none)  ///
-      collabels(none) ///
-      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
-      stats( Mean2001 Mean2011 r2  N ,  ///
-    labels(  "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
-        fmt( %9.2fc   %9.2fc  %12.3fc   %12.0fc  )   ) ///
-    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
-
-end
-
-
-
-global outcomes = " total_buildings for  inf  inf_non_backyard inf_backyard  "
-global cells = 1
-
-regs_spill_sep bblu_sep
 
 
 
