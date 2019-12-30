@@ -78,9 +78,54 @@ replace cluster_joined = 0 if cluster_joined==.
 end
 
 
-
 cap prog drop generate_variables
 prog define generate_variables
+
+local constant "10000"
+g   proj_rdp = cluster_int_tot_rdp
+replace proj_rdp = 10000 if proj_rdp>10000
+replace proj_rdp = proj_rdp/`constant'
+* replace proj_rdp = 1 if proj_rdp>1 & proj_rdp<.
+g   proj_placebo = cluster_int_tot_placebo
+replace proj_placebo = 10000 if proj_placebo>10000
+replace proj_placebo = proj_placebo/`constant'
+* replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.
+
+
+foreach v in rdp placebo {
+  if "`v'"=="rdp" {
+    local v1 "R"
+  }
+  else {
+    local v1 "P"
+  }
+g s1p_a_1_`v1' = (b1_int_tot_`v' - cluster_int_tot_`v')
+  replace s1p_a_1_`v1'=(cluster_b1_area-cluster_area) if s1p_a_1_`v1'>(cluster_b1_area-cluster_area) & s1p_a_1_`v1'<.
+  replace s1p_a_1_`v1' = s1p_a_1_`v1'/`constant'
+
+forvalues r= 2/$rset {
+g s1p_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-1'_int_tot_`v')
+  replace s1p_a_`r'_`v1'=(cluster_b`r'_area - cluster_b`=`r'-1'_area ) if (cluster_b`r'_area - cluster_b`=`r'-1'_area ) <s1p_a_`r'_`v1' & s1p_a_`r'_`v1' <.
+  replace s1p_a_`r'_`v1'=s1p_a_`r'_`v1'/`constant'
+}
+}
+
+foreach var of varlist s1p_a* {
+  g `var'_tP = `var'*proj_placebo
+  g `var'_tR = `var'*proj_rdp
+}
+
+foreach var of varlist s1p_* {
+  g `var'_post = `var'*post 
+}
+
+end
+
+
+
+
+cap prog drop generate_variables_old
+prog define generate_variables_old
 
 
 * g cluster_joined = .
@@ -494,7 +539,6 @@ end
 
 
 
-
 cap prog drop cplot
 prog def cplot
   preserve
@@ -505,18 +549,43 @@ prog def cplot
     g index = regexs(1) if regexm(parm,"._([0-9])+_.")
     destring index, replace force
 
-    label var index "Ring (km)"
+    label var index "Ring (hm)"
 
     g est1 = round(estimate,.1)
 
     twoway rcap min95 max95 index , || ///
            scatter estimate index, color(`2') mlabel(est1) ///
            legend(off) yline(0, lp(dash)) ytitle("Coefficient size")  ///
-           xlabel( 1 "0 - .5"  2 ".5 - 1"  3 "1 - 1.5"   4 "1.5 - 2"  5 "2 - 2.5" 6 "2.5 - 3" 7 "3 - 3.5" 8 "3.5 - 4" 8.5 " "   )
+           xlabel( 1 "0 - 5"  2 "5 - 10"  3 "10 - 15"   4 "15 - 20"  5 "20 - 25" 6 "25 - 30" 7 "30 - 35" 8 "35 - 40" 8.5 " "   )
     graph export "`1'.pdf", as(pdf) replace
 
   restore
 end
+
+
+
+* cap prog drop cplot_old
+* prog def cplot_old
+*   preserve
+*     parmest, fast
+
+*     keep if regexm(parm,"s1p")==1 & regexm(parm,"C_con_post")==1
+
+*     g index = regexs(1) if regexm(parm,"._([0-9])+_.")
+*     destring index, replace force
+
+*     label var index "Ring (km)"
+
+*     g est1 = round(estimate,.1)
+
+*     twoway rcap min95 max95 index , || ///
+*            scatter estimate index, color(`2') mlabel(est1) ///
+*            legend(off) yline(0, lp(dash)) ytitle("Coefficient size")  ///
+*            xlabel( 1 "0 - .5"  2 ".5 - 1"  3 "1 - 1.5"   4 "1.5 - 2"  5 "2 - 2.5" 6 "2.5 - 3" 7 "3 - 3.5" 8 "3.5 - 4" 8.5 " "   )
+*     graph export "`1'.pdf", as(pdf) replace
+
+*   restore
+* end
 
 
 cap prog drop regs_spill_full

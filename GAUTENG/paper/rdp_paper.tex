@@ -473,8 +473,8 @@ Areas nearby projects (0 - 4 km) are more similar between constructed and uncons
 \begin{tabular}{l*{1}{rrrrrr}}
 \toprule
 \\[-.5em]
-Plot location&\multicolumn{3}{c}{Constructed Project Areas} &\multicolumn{3}{c}{Unconstructed Project Areas}  \\[.5em] 
-& Inside & 0 - 1 km  & 2 - 4 km & Inside & 0 - 1 km  & 2 - 4 km \\[.3em]
+&\multicolumn{3}{c}{Constructed Projects} &\multicolumn{3}{c}{Unconstructed Projects}  \\[.5em] 
+Plot location& Inside & 0 - 1 km  & 2 - 4 km & Inside & 0 - 1 km  & 2 - 4 km \\[.3em]
 \\[-.5em]
 Buildings (per $\text{km}^{2}$) \\ \midrule
 \\[-.5em]
@@ -537,38 +537,72 @@ House Prices \\ \midrule
 \begin{threeparttable}
 \begin{tabular}{lCC}
 \toprule
-& Mean & Max \\
+& Constructed Overlap (100 $\text{m}^{2}$) & Unconstructed Overlap (100 $\text{m}^{2}$) \\
 \midrule
 \\[-.5em]
-Constructed project overlap with  \\ 
+% Constructed project overlap with  \\ 
 \\[-.7em]
-\input{figures/proj_rdp_exp}
+\input{figures/proj_RP}
 \\[-.5em]
 \hspace{2em}Rings around plots (in km)   \\
-\input{figures/spill_R}
-\\
-Unconstructed project overlap with \\ 
-\\[-.7em]
-\input{figures/proj_placebo_exp}
-\\[-.5em]
-\hspace{2em}Rings around plots (in km)   \\
-\input{figures/spill_P}
+\input{figures/spill_RP}
+% \\
+% Unconstructed project overlap with \\ 
+% \\[-.7em]
+% \input{figures/proj_placebo_exp}
+% \\[-.5em]
+% \hspace{2em}Rings around plots (in km)   \\
+% \input{figures/spill_P}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize Sample includes plots within 4 km of projects.  ``Project overlap with plots'' measures the percentage of each plot's area that overlaps with projects.  ``Project overlap with rings around plots'' measures the percentage of the area of rings around each plot that overlap with projects and is only measured for plots outside of projects.
+\item \footnotesize Sample includes plots within 4 km of projects.  ``Project overlap with plots'' measures the share of each plot's area that overlaps with projects.  ``Project overlap with rings around plots'' measures the share of the area of rings around each plot that overlap with projects and is only measured for plots outside of projects.
 \end{tablenotes}
 \end{threeparttable}
 % }
 \end{table}
 
+% \begin{table}
+% \small
+% \centering
+% \caption{Spatial Exposure Summary Statistics}\label{table:spatialsummary}
+% \vspace{-2mm}
+% % \resizebox{1\linewidth}{!}{
+% \begin{threeparttable}
+% \begin{tabular}{lCC}
+% \toprule
+% & Mean & Max \\
+% \midrule
+% \\[-.5em]
+% Constructed project overlap with  \\ 
+% \\[-.7em]
+% \input{figures/proj_rdp_exp}
+% \\[-.5em]
+% \hspace{2em}Rings around plots (in km)   \\
+% \input{figures/spill_R}
+% \\
+% Unconstructed project overlap with \\ 
+% \\[-.7em]
+% \input{figures/proj_placebo_exp}
+% \\[-.5em]
+% \hspace{2em}Rings around plots (in km)   \\
+% \input{figures/spill_P}
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}
+% \item \footnotesize Sample includes plots within 4 km of projects.  ``Project overlap with plots'' measures the share of each plot's area that overlaps with projects.  ``Project overlap with rings around plots'' measures the share of the area of rings around each plot that overlap with projects and is only measured for plots outside of projects.
+% \end{tablenotes}
+% \end{threeparttable}
+% % }
+% \end{table}
+
 
 
 To estimate project impacts, we compare changes in outcomes between constructed projects and planned but unconstructed projects.  We estimate both direct effects in project footprints as well as spillover effects nearby project footprints.  To measure these effects when projects are clustered together and vary in size, we develop a new measure of spatial exposure to place-based policies according to the extent to which each land plot's footprint and immediate neighborhoods overlap with project footprints.  
 
-For plots that overlap with project footprints, we measure direct exposure in terms of the percentage of a plot's area that overlaps with project footprints.  Figure~\ref{fig:insideproj} includes an example plot that overlaps with a constructed project (upper) as well as an example plot that overlaps with an unconstructed project (lower).  Since the upper plot only partially overlaps with a constructed project, its exposure lies between 0 and 1.  The lower plot falls completely within an unconstructed project indicating exposure equal to 1.  On average across all plots, overlap between plots and projects equals 4.6\% for constructed projects and 3.8\% for unconstructed projects. Table~\ref{table:spatialsummary} summarizes this measure.
+For plots that overlap with project footprints, we measure direct exposure in terms of the share of a plot's area that overlaps with project footprints.  Figure~\ref{fig:insideproj} includes an example plot that overlaps with a constructed project (upper) as well as an example plot that overlaps with an unconstructed project (lower).  Since the upper plot only partially overlaps with a constructed project, its exposure lies between 0 and 1.  The lower plot falls completely within an unconstructed project indicating exposure equal to 1.  On average across all plots, overlap between plots and projects equals 4.6\% for constructed projects and 3.8\% for unconstructed projects. Table~\ref{table:spatialsummary} summarizes this measure.
 
-For plots that do not overlap with project footprints, we measure spillover exposure by first constructing .5 km rings around each plot and second calculating the percentage area of each ring that overlaps with project footprints.  Figure~\ref{fig:outsideproj} provides an example plot that falls just outside of project footprints but whose neighborhood rings from 0 to .5 km and from .5 to 1 km overlap with both constructed and unconstructed projects.  Table~\ref{table:spatialsummary} summarizes these measures across neighborhood rings and constructed and unconstructed projects.  We find that exposure increases with the radius of rings growing from 0.9\% for 0 to .5 km rings up to 3.7\% for 3.5 to 4 km rings for constructed projects.  
+For plots that do not overlap with project footprints, we measure spillover exposure by first constructing .5 km rings around each plot and second calculating the share of each ring's area that overlaps with project footprints.  Figure~\ref{fig:outsideproj} provides an example plot that falls just outside of project footprints but whose neighborhood rings from 0 to .5 km and from .5 to 1 km overlap with both constructed and unconstructed projects.  Table~\ref{table:spatialsummary} summarizes these measures across neighborhood rings and constructed and unconstructed projects.  We find that exposure increases with the radius of rings growing from 0.9\% for 0 to .5 km rings up to 3.7\% for 3.5 to 4 km rings for constructed projects.  
 
 Compared to the standard approach of measuring exposure in terms of the distance to the nearest project,\footnote{See \cite{diamond2016wants}, \cite{rossi2010housing}, and \cite{neumark2015place} for examples of the standard approach.} spatial overlap may better account for variation in the size, shape, and orientation of projects relative to each other.  For example, a plot surrounded by many large projects may develop differently from a plot near one small project although both plots may share the same distance to their nearest project.  The map of projects in Figure~\ref{figure:map} indicates substantial variation in the layout of housing projects across space.  This exposure measure also places greater weight on projects that cover larger land areas, which are also likely to reflect both larger government investments and changes to local neighborhoods.
 
@@ -588,7 +622,7 @@ Given these measures, we construct an estimating equation of the following form
 
 \noindent $y_{it}$ is the outcome for plot $i$ observed at time $t$.  $\textsc{Post}_{t}$ equals one after scheduled construction and zero otherwise.  $\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)$ measures the area of overlap between plot $i$ and all project footprints while $\text{Area}\big(\textsc{Plot}_i \cap \textsc{Con. Proj.}\big)$ measures the area of overlap between plot $i$ and only project footprints that were successfully constructed.  Likewise, $\text{Area}\big(\textsc{Ring}_i^{k}  \cap  \textsc{Proj.}\big)$ measures the area of overlap between a ring from $.5(k-1)$ to $.5k$ km around plot $i$ and all project footprints.   $\text{Area}\big(\textsc{Ring}_i^{k}  \cap  \textsc{Proj. Con.}\big)$ measures the area of overlap for this ring and only project footprints that were successfully constructed.  We consider concentric 0.5 km rings ranging from 0 to 4 km away from plots, which implicitly assumes that any spillover effects dissipate by 4 km consistent with recent literature on place-based policies.\footnote{\cite{diamond2016wants} and \cite{rossi2010housing} find that main effects are concentrated within 1 km of place-based policies.}  Figure~\ref{fig:spatialexposure} includes an example of rings from 0 to 0.5 km and 0.5 to 1 km.  $\varepsilon_{ipt}$ is the idiosyncratic error term.  Standard errors are clustered at the project-level with projects assigned to each plot with the greatest area of overlap either with the plot's footprint or with the closest overlapping ring.  
 
-For plots that overlap with project footprints (ie. $\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)>0$), we estimate the direct effects of project construction.  Our coefficient of interest, $\alpha_3$, measures the change in outcomes for plots overlapping with constructed projects relative to plots overlapping with planned but unconstructed projects (weighted by the percentage of a plot's area that overlaps with projects).  Likewise, for plots outside of project footprints (ie. $\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)>0$), we estimate the spillover effects of project construction.  Each coefficient of interest, $\beta_3^{k}$, measures the differential change in outcomes for plots whose neighborhoods from $.5(k-1)$ to $.5k$ km overlap with constructed project footprints relative to plots whose neighborhoods overlap with unconstructed project footprints (weighted by the percentage of a plot neighborhood's area that overlaps with projects).  These coefficients capture the causal effects of project construction under the assumption that in the absence of project construction, plots exposed to constructed project footprints would have evolved in the same way as plots exposed to unconstructed project footprints.\footnote{We do not estimate spillover effects for plots within project footprints because spillover effects for these plots would be mainly identified from the relative locations of plots within project footprints (ie. near the edge versus in the interior of a footprint) and these relative locations within plots are likely to capture variation in where project houses are constructed within footprints instead of the true spillover effects of having greater nearby exposure to projects.}
+For plots that overlap with project footprints (ie. $\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)>0$), we estimate the direct effects of project construction.  Our coefficient of interest, $\alpha_3$, measures the change in outcomes for plots overlapping with constructed projects relative to plots overlapping with planned but unconstructed projects (weighted by the share of a plot's area that overlaps with projects).  Likewise, for plots outside of project footprints (ie. $\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)>0$), we estimate the spillover effects of project construction.  Each coefficient of interest, $\beta_3^{k}$, measures the differential change in outcomes for plots whose neighborhoods from $.5(k-1)$ to $.5k$ km overlap with constructed project footprints relative to plots whose neighborhoods overlap with unconstructed project footprints (weighted by the percentage of a plot neighborhood's area that overlaps with projects).  These coefficients capture the causal effects of project construction under the assumption that in the absence of project construction, plots exposed to constructed project footprints would have evolved in the same way as plots exposed to unconstructed project footprints.\footnote{We do not estimate spillover effects for plots within project footprints because spillover effects for these plots would be mainly identified from the relative locations of plots within project footprints (ie. near the edge versus in the interior of a footprint) and these relative locations within plots are likely to capture variation in where project houses are constructed within footprints instead of the true spillover effects of having greater nearby exposure to projects.}
 
 Our flexible specification of spillover effects from 0 to 4 km allows us to examine how these effects dissipate across space.  We hypothesize that spillover effects are likely to be concentrated in nearby neighborhoods.  This specification also provides a partial test for whether areas with constructed projects and areas with unconstructed projects are likely to follow parallel trends.  We hypothesize that spillover effects are likely to dissipate at further distances (ie. 2 to 4 km).  Therefore, evidence of effects at these distances may suggest that areas with constructed projects develop differently from areas with unconstructed projects for reasons unrelated to project construction.  For example, housing projects may be accompanied by broader urban renewal programs.  Alternatively, policymakers may prioritize growing areas for project construction.
 
@@ -612,9 +646,18 @@ Our approach assumes that project construction occurs between 2001 and 2012.  To
 
 We first investigate how housing projects impact housing and population density within and around their footprints by estimating equation (\ref{eq:main}).  
 
-To examine how project neighborhood effects extend across space, Figure~\ref{fig:gr_coef} graphs coefficients for constructed project overlap with .5 km neighborhood rings from 0 to 4 km ($\beta_3^{1}$ to $\beta_3^{8}$) for two outcomes: people per $\text{km}^{2}$ and houses per $\text{km}^{2}$.  Coefficients are statistically significant at the 1\% level and positive for overlap with 0-.5 km rings.  This finding suggests that exposure to housing projects in immediate neighborhoods invites large increases in plot-level population and housing densities.  Coefficients for rings beyond .5 km are statistically insignificant and hover around zero, which indicates that neighborhood effects quickly dissipate at greater distances.  Zero effects for exposure further from projects further suggests that constructed and unconstructed projects are unlikely to experience differential policies or shifts in economic growth that affect areas evenly within 4 km of projects, supporting our identification assumption of parallel trends in outcomes between constructed and unconstructed projects.  In the following tables, we report results for the closest ring (0 to .5 km) while including estimates for all rings in the Appendix.
+To examine how spillover effects dissipate with distance, Figure~\ref{fig:gr_coef} graphs coefficients for constructed project overlap with .5 km neighborhood rings from 0 to 4 km ($\beta_3^{1}$ to $\beta_3^{8}$) for two outcomes: people per $\text{km}^{2}$ and houses per $\text{km}^{2}$.  Coefficients are statistically significant at the 1\% level and positive for overlap with 0-.5 km rings.  This finding suggests that exposure to housing projects in immediate neighborhoods drives large increases in a plot's population and housing.  Coefficients for rings beyond .5 km are statistically insignificant and hover around zero, which indicates that spillover effects quickly dissipate at greater distances.  Zero effects for exposure further from projects further suggests that constructed and unconstructed projects are unlikely to experience differential policies or shifts in economic growth that affect all areas evenly within 4 km of projects, providing some support to our identification assumption of parallel trends in outcomes between constructed and unconstructed projects in the absence of construction.  In the following tables, we report results for the closest ring (0 to .5 km) while including estimates for all rings in the Appendix.
 
-Table~\ref{table:main} includes coefficients for the effect of overlapping with constructed project areas ($\alpha_3$) for plots within projects and the effect of a 0 to .5 km neighborhood overlapping with constructed projects ($\beta_3^{1}$) for plots outside of projects.  The first row of column (1) indicates that moving from 0 to 100\% plot overlap with constructed projects generates an increase in 2,574 people per $\text{km}^{2}$.  Likewise, for plots that do not overlap with projects, the second row indicates that moving from 0 to 100\% overlap of a 0 to .5 km neighborhood with constructed projects generates an increase of 2,103 people per $\text{km}^{2}$.  We calculate the total effect per project by multiplying the coefficients by the total plot footprint and neighborhood exposures per project.  We calculate total footprint exposure per project equal to 1.19, which is also the average size of projects in $\text{km}^{2}$, and total neighborhood exposure per project equal to 0.24.  With this formula, coefficients from Table~\ref{table:main} indicate that projects lead to increases of 3,083 people within their footprints and 512 people in their immediate neighborhoods.  
+Table~\ref{table:main} includes coefficients for the direct effect --- the effect of overlapping with constructed project areas ($\alpha_3$)  --- and the spillover effect --- the effect of a 0 to .5 km ring overlapping with constructed projects ($\beta_3^{1}$) for plots outside of projects.  Column (1) finds a direct effect of 2,574 people per $\text{km}^{2}$ and an indirect effect of 2,103 people per $\text{km}^{2}$.  
+
+On average, each project covers .24
+
+We calculate the total effect per project by multiplying the coefficients by total plot footprint exposure and total 0-.5 km neighborhood exposure per project.  
+
+We calculate total footprint exposure per project equal to 1.19, which is also the average size of projects in $\text{km}^{2}$, and total 0-.5 km neighborhood exposure per project equal to 0.24.  With this formula, coefficients from Table~\ref{table:main} indicate that projects lead to increases of 3,083 people within their footprints and 512 people in their immediate neighborhoods.  
+
+
+% The first row of column (1) indicates that overlapping with constructed projects generates an increase in 2,574 people per $\text{km}^{2}$.  Likewise, for plots that do not overlap with projects, the second row indicates that moving from 0 to 100\% overlap of a 0 to .5 km neighborhood with constructed projects generates an increase of 2,103 people per $\text{km}^{2}$.  We calculate the total effect per project by multiplying the coefficients by the total plot footprint and neighborhood exposures per project.  We calculate total footprint exposure per project equal to 1.19, which is also the average size of projects in $\text{km}^{2}$, and total neighborhood exposure per project equal to 0.24.  With this formula, coefficients from Table~\ref{table:main} indicate that projects lead to increases of 3,083 people within their footprints and 512 people in their immediate neighborhoods.  
 
 
 % and 1,091 houses 
@@ -694,6 +737,7 @@ In the absence of project construction, housing growth in footprints out-paces a
         \includegraphics[width=\textwidth,trim={.2cm .2cm .2cm 0cm}, clip=true]{figures/gr_house.pdf}
         \label{fig:gr_house}
     \end{subfigure}
+{\footnotesize Confidence intervals are at the 95\% level. }
 \end{figure*} 
 
 

@@ -85,11 +85,11 @@ ren OGC_FID area_code
   drop if _merge==2
   drop _merge
 
-* g pop_density  = (10000)*(person_pop/area)
-* replace pop_density=. if pop_density>2000
+g pop_density  = (10000)*(person_pop/area)
+replace pop_density=. if pop_density>2000
 
-g pop_density  = (1000000)*(person_pop/area)
-replace pop_density=. if pop_density>200000
+* g pop_density  = (1000000)*(person_pop/area)
+* replace pop_density=. if pop_density>200000
 
 fmerge m:1 id using "grid_elevation_100_4000.dta"
 drop if _merge==2
@@ -104,9 +104,9 @@ ren id grid_id
 
 *** GENERATE ELEVATION ***  !!!!
 
-foreach var of varlist $outcomes shops shops_inf util util_water util_energy util_refuse community health school {
-  replace `var' = `var'*1000000/($grid*$grid)
-}
+* foreach var of varlist $outcomes shops shops_inf util util_water util_energy util_refuse community health school {
+*   replace `var' = `var'*1000000/($grid*$grid)
+* }
 
 
 sort id post
@@ -120,7 +120,7 @@ gen_cj
 
 generate_variables
 
-generate_slope 
+* generate_slope 
 
 
   ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ******
@@ -345,11 +345,11 @@ cd $output
 
 
 
-    global pmean = 225475
-    cap drop CA
-    g CA       = $pmean if slope>=0 & slope<.
-    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
-    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+    * global pmean = 225475
+    * cap drop CA
+    * g CA       = $pmean if slope>=0 & slope<.
+    * replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    * replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
 
 
 
@@ -367,6 +367,12 @@ g ln_P = log(P)
 
 * cd ../../..
 * cd $output
+
+
+
+*  reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*       s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
 
 
 
@@ -388,19 +394,24 @@ cplot "gr_house" "red"
 
 
 
+* lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People per $\text{km}^{2}$"
+* lab var total_buildings "Houses per $\text{km}^{2}$"
+* lab var for "Formal houses per $\text{km}^{2}$"
+* lab var inf "Informal houses per $\text{km}^{2}$"
+* lab var inf_backyard "Informal backyard houses per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
 
+lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People"
+lab var total_buildings "Houses"
+lab var for "Formal houses"
+lab var inf "Informal houses"
+lab var inf_backyard "Informal backyard houses \\ \midrule \\[-.6em]"
 
-lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People per $\text{km}^{2}$"
-lab var total_buildings "Houses per $\text{km}^{2}$"
-lab var for "Formal houses per $\text{km}^{2}$"
-lab var inf "Informal houses per $\text{km}^{2}$"
-lab var inf_backyard "Informal backyard houses per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
 
 * lab var ln_P "Log(Price) per transaction \\ \midrule \\[-.6em]"
  * ln_P
 
-global cellsp   = 1
-global cells    = 1
+global cellsp   = 3
+global cells    = 3
 global outcomes = "pop_density total_buildings for inf inf_backyard"
 
 
@@ -429,38 +440,54 @@ lab var toilet_flush "Flush Toilet"
 lab var water_inside "Piped Water Inside\\ \midrule \\[-.6em]"
 
 *** census infrastructure
-global cells = 2
-global cellsp = 2
+global cells = 4
+global cellsp = 4
 global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
 
 rfull inf_census
 
 
+* * lab var community "Community Centers"
+* lab var util_water "(1)&(2)&(3)&(4)\\[.5em] &Water Utility Buildings per $\text{km}^{2}$ "
+* lab var util_energy "Electricity Utility Buildings per $\text{km}^{2}$ "
+* * lab var util_refuse "Refuse Utility Buildings per $\text{km}^{2}$"
+* lab var health "Health Centers per $\text{km}^{2}$ "
+* lab var school "Schools per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
+
+
 * lab var community "Community Centers"
-lab var util_water "(1)&(2)&(3)&(4)\\[.5em] &Water Utility Buildings per $\text{km}^{2}$ "
-lab var util_energy "Electricity Utility Buildings per $\text{km}^{2}$ "
+lab var util_water "(1)&(2)&(3)&(4)\\[.5em] &Water Utility Buildings"
+lab var util_energy "Electricity Utility Buildings"
 * lab var util_refuse "Refuse Utility Buildings per $\text{km}^{2}$"
-lab var health "Health Centers per $\text{km}^{2}$ "
-lab var school "Schools per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
+lab var health "Health Centers"
+lab var school "Schools \\ \midrule \\[-.6em]"
+
+
 
 *** bblu infrastructure 
-global cells = 3
-global cellsp = 3
+global cells = 5
+global cellsp = 5
 global outcomes  = " util_water util_energy health school "
 
 rfull inf_bblu
 
 *** MORE HOUSE QUALITY!?
 
+
+* lab var shops "(1)&(2)&(3)&(4)\\[.5em] &Businesses per $\text{km}^{2}$"
+* lab var shops_inf "Informal Businesses per $\text{km}^{2}$"
+* lab var emp "Household Employment"
+* lab var ln_inc "Log Household Income\\ \midrule \\[-.6em]"
+
 *** demographics 
 
-lab var shops "(1)&(2)&(3)&(4)\\[.5em] &Businesses per $\text{km}^{2}$"
-lab var shops_inf "Informal Businesses per $\text{km}^{2}$"
+lab var shops "(1)&(2)&(3)&(4)\\[.5em] &Businesses"
+lab var shops_inf "Informal Businesses"
 lab var emp "Household Employment"
 lab var ln_inc "Log Household Income\\ \midrule \\[-.6em]"
 
-global cells = 3
-global cellsp = 3
+global cells = 5
+global cellsp = 5
 global outcomes = "  shops shops_inf emp ln_inc  "
 rfull agglom
 
@@ -484,30 +511,50 @@ rfull agglom
 
 * rfull inf_census
 
+cap prog drop in_stat
+program in_stat 
+        qui sum `2' `6', detail 
+        local value=string(`=r(`3')',"`4'")
+        if `5'==0 {
+            file write `1' " & `value' "
+        }
+        if `5'==1 {
+            file write  `1' " & [`value'] "
+        }       
+end
+
+
+cap prog drop print_1t
+program print_1t
+    file write newfile " `1' "
+    qui sum `2', detail 
+        local value=string(`=r(`4')',"`5'")
+        file write newfile " & `value' "
+    qui sum `3', detail 
+        local value=string(`=r(`4')',"`5'")
+        file write newfile " & `value' "
+    file write newfile " \\[.15em] " _n
+end
 
 
 
-
-
- global cat_group = "mean max"
-
- foreach v in R P {
-    file open newfile using "spill_`v'.tex", write replace
+    file open newfile using "spill_RP.tex", write replace
     forvalues r=1/8 {
-      local r1 "`=(`r'-1)*.5'"
-      local r2 "`=(`r')*.5'"
-      print_1_cg "\hspace{3em} `=`r1'' - `=`r2'' " s1p_a_`r'_`v'  "%10.3fc"
+      local r1 "`=(`r'-1)*5'"
+      local r2 "`=(`r')*5'"
+      print_1t "\hspace{3em} `=`r1'' - `=`r2'' " s1p_a_`r'_R s1p_a_`r'_P mean "%10.3fc"
     }
     file close newfile
-}
 
-    file open newfile using "proj_rdp_exp.tex", write replace
-      print_1_cg "\hspace{2em}Plots " proj_rdp  "%10.3fc"
+
+    file open newfile using "proj_RP.tex", write replace
+      print_1t "\hspace{2em}Plots " proj_rdp proj_placebo mean "%10.3fc"
     file close newfile
 
-    file open newfile using "proj_placebo_exp.tex", write replace
-      print_1_cg "\hspace{2em}Plots" proj_placebo  "%10.3fc"
-    file close newfile
+
+
+
+
 
 
 
@@ -524,8 +571,6 @@ rfull agglom
 g o_bblu = 1 if for!=.
 g o_census = 1 if pop_density!=.
 g o_price = 1 if P!=.
-
-
 
 
 cap drop treat_R
@@ -555,14 +600,14 @@ global cat6 = " if treat_P==3"
     file open newfile using "pre_table_bblu.tex", write replace
     * file open newfile using "pre_table_bblu_1.tex", write replace
           * print_1 "\hspace{1em}Houses" total_buildings "mean"                 "%10.1fc"          
-          print_1 "\hspace{1em}Formal houses" for "mean"                      "%10.1fc"
-          print_1 "\hspace{1em}Informal houses" inf "mean"                    "%10.1fc"
+          print_1 "\hspace{1em}Formal houses" for "mean"                      "%10.2fc"
+          print_1 "\hspace{1em}Informal houses" inf "mean"                    "%10.2fc"
           * print_1 "\hspace{1em}Informal backyard houses" inf_backyard "mean"  "%10.1fc"
           * print_1 "\hspace{1em}Water utility buildings" util_water "mean"     "%10.1fc"
           * print_1 "\hspace{1em}Electricity utility buildings" util_energy "mean" "%10.1fc"
-          print_1 "\hspace{1em}Health centers" health "mean"                  "%10.1fc"
-          print_1 "\hspace{1em}Schools" school "mean"                         "%10.1fc"
-          print_1 "\hspace{1em}Shops" shops "mean"                            "%10.1fc"
+          print_1 "\hspace{1em}Health centers" health "mean"                  "%10.2fc"
+          print_1 "\hspace{1em}Schools" school "mean"                         "%10.2fc"
+          print_1 "\hspace{1em}Shops" shops "mean"                            "%10.2fc"
           * print_1 "\hspace{1em}Informal Shops" shops_inf "mean"               "%10.1fc"
           print_1 "\hspace{1em}Observations" o_bblu "N"                      "%10.0fc"
     file close newfile
@@ -570,8 +615,8 @@ global cat6 = " if treat_P==3"
 
     file open newfile using "pre_table_census.tex", write replace   
     * file open newfile using "pre_table_census_1.tex", write replace    
-          print_1 "\hspace{1em}People per $\text{km}^{2}$" pop_density "mean"                      "%10.1fc"
-          print_1 "\hspace{1em}Rooms per house" tot_rooms "mean"                      "%10.1fc"
+          print_1 "\hspace{1em}People" pop_density "mean"                      "%10.2fc"
+          print_1 "\hspace{1em}Rooms per house" tot_rooms "mean"                      "%10.2fc"
           print_1 "\hspace{1em}Owns house" owner "mean"                    "%10.2fc"
           print_1 "\hspace{1em}Electric lighting" electric_lighting "mean"                  "%10.2fc"
           print_1 "\hspace{1em}Flush toilet" toilet_flush "mean"                         "%10.2fc"
@@ -625,7 +670,7 @@ end
     * file open newfile using "pre_table_proj_stats_1.tex", write replace    
 
     file write newfile " Number of Projects & 166 & 166 & 166 & 140 & 140 & 140 \\[.15em]  "
-    file write newfile " Average Project Area ($\text{km}^{2}$) & 1.18 & 1.18 & 1.18 & 1.19 & 1.19 & 1.19  \\[.15em]  "
+    file write newfile " Average Project Area (ha) & 11.8 & 11.8 & 11.8 & 11.9 & 11.9 & 11.9  \\[.15em]  "
       * print_1 "Number of Projects" p_count "mean"    "%10.0fc"
       * print_1 "Average Project Area ($\text{km}^{2}$)" p_size "mean"                      "%10.2fc"
     file close newfile
