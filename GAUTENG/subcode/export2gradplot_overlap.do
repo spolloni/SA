@@ -4,6 +4,14 @@ est clear
 set more off
 set scheme s1mono
 
+
+global prep_data = 0
+
+
+
+
+if $prep_data == 1 {
+
 #delimit;
 
 
@@ -234,13 +242,37 @@ gen erf_size3 = erf_size^3
 
 save "gradplot_admin${V}_overlap.dta", replace
 
+}
+
+
+
+if $prep_data == 0 {
+  cd ../..
+  if $LOCAL==1{
+    cd ..
+  }
+  cd Generated/GAUTENG
+}
+
+
+use "gradplot_admin${V}_overlap.dta", clear
+
 
 preserve
   g post = purch_yr>2006
 
+  g o = 1
   gegen P = mean(purch_price), by(grid_id post)
+  gegen B = sum(o), by(grid_id post)
 
-  keep P grid_id post
+
+
+  g purch_alt = purch_price if purch_yr<=2004 | purch_yr>=2009
+  g o_alt = o if purch_yr<=2004 | purch_yr>=2009
+
+  gegen P_alt = mean(purch_alt), by(grid_id post)
+  gegen B_alt = sum(o_alt), by(grid_id post)
+  keep P P_alt B B_alt grid_id post
   duplicates drop grid_id post, force
 
   save "temp/grid_price.dta", replace

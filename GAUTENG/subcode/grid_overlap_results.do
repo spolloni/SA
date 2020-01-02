@@ -85,12 +85,37 @@ ren OGC_FID area_code
   drop if _merge==2
   drop _merge
 
+  merge m:1 area_code year using  "temp_censuspers_agg${V}.dta"
+  drop if _merge==2
+  drop _merge
+
+
+* ren id grid_id
+*   merge m:1 grid_id using   "temp/ea_2001_grid.dta"
+*   drop if _merge==2
+*   drop _merge
+* ren grid_id id
+
+*   merge m:1 OGC_FID  post using  "temp/ghs_agg.dta"
+*   drop if _merge==2
+*   drop _merge
+
+
+
 g pop_density  = (10000)*(person_pop/area)
 replace pop_density=. if pop_density>2000
+
+g kids_density =  (10000)*(kids_pop/area)
+replace kids_density=. if kids_density>2000
+
+g kids_per = kids_density/pop_density
+replace kids_per = 1 if kids_per>1 & kids_per<.
 
 * g pop_density  = (1000000)*(person_pop/area)
 * replace pop_density=. if pop_density>200000
 
+*** GENERATE ELEVATION ***  !!!!
+*** GENERATE ELEVATION ***  !!!!
 fmerge m:1 id using "grid_elevation_100_4000.dta"
 drop if _merge==2
 drop _merge
@@ -102,7 +127,7 @@ ren id grid_id
  ren grid_id id
 
 
-*** GENERATE ELEVATION ***  !!!!
+
 
 * foreach var of varlist $outcomes shops shops_inf util util_water util_energy util_refuse community health school {
 *   replace `var' = `var'*1000000/($grid*$grid)
@@ -120,7 +145,7 @@ gen_cj
 
 generate_variables
 
-* generate_slope 
+generate_slope 
 
 
   ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ****** ***** KEY DROP ******
@@ -308,6 +333,16 @@ g proj_C_con = proj_rdp
 g proj_C_con_post = proj_rdp*post
 
 
+forvalues r=1/8 {
+  qui sum s1p_a_`r'_C, detail 
+  g As1p_a_`r'_C = s1p_a_`r'_C/`=r(sd)'
+  g As1p_a_`r'_C_con = s1p_a_`r'_C_con/`=r(sd)'
+  g As1p_a_`r'_C_post = s1p_a_`r'_C_post/`=r(sd)'
+  g As1p_a_`r'_C_con_post = s1p_a_`r'_C_con_post/`=r(sd)'
+}
+
+
+
 
 * global outcomes_census =  "  pop_density water_inside   toilet_flush  electricity  tot_rooms  emp inc "
 * global cells = 3
@@ -340,16 +375,308 @@ replace roadD = road_dist_p if rD>pD
 
 
 
+
+* set seed 10
+
+* forvalues r=1/10 {
+*   preserve
+*     bsample, cluster(cluster_joined)
+
+*   restore
+* }
+
+
+* global pmean = 161000
+* * global pmean = 217583
+* * global pmean = 336000
+
+* * use CAHF
+* * then USE AECOM
+
+* * global pmean = 100000
+
+*   local pmean "161000"
+*     cap drop CA
+*     g CA       = `pmean' if slope>=0 & slope<.
+*     replace CA = `pmean' + (`pmean'*.12*.25) + (`pmean'*.62*.05)  if slope>=.06 & slope<.12
+*     replace CA = `pmean' + (`pmean'*.12*.50) + (`pmean'*.62*.15)  if slope>=.12 & slope<.
+
+
+*  reg total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*   s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  CA cD rD, cluster(cluster_joined) r 
+
+* cap drop pp
+* predict pp, xb
+
+* cap drop pp_pre
+* g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post - _b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
+* cap drop pp_post
+* g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+* cap drop diff
+* g diff = (pp_post - pp_pre)
+
+* sum diff, detail
+* disp (`=r(mean)'*(_N/2)/166)/1000000
+
+
+* cap drop pp_pre
+* g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post )^2)/(-_b[CA]*2)  if post==1
+* cap drop pp_post
+* g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+* cap drop diff
+* g diff = (pp_post - pp_pre)
+
+* sum diff, detail
+* disp (`=r(mean)'*(_N/2)/166)/1000000
+
+
+
+
+cap prog drop wel
+prog define wel
+
+  if `4'== 1 {
+  set seed 10
+  mat define A`3' = J(`=1+`2'',9,.)
+
+  forvalues r=1/`=1+`2'' {
+
+    preserve
+    if `r'!= 1 {
+    bsample, cluster(cluster_joined)
+    }
+
+    foreach v in for inf {
+    local pmean "`1'"
+      cap drop CA
+      g CA       = `pmean' if slope>=0 & slope<.
+      replace CA = `pmean' + (`pmean'*.12*.25) + (`pmean'*.62*.05)  if slope>=.06 & slope<.12
+      replace CA = `pmean' + (`pmean'*.12*.50) + (`pmean'*.62*.15)  if slope>=.12 & slope<.
+
+    qui reg `v' proj_C proj_C_con proj_C_post proj_C_con_post ///
+    s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  CA cD rD, cluster(cluster_joined) r 
+
+    cap drop pp
+    predict pp, xb
+
+    cap drop pp_pre
+    g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post - _b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
+    cap drop pp_post
+    g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+    cap drop diff
+    g diff = (pp_post - pp_pre)
+
+    sum diff, detail
+    disp (`=r(mean)'*(_N/2)/166)/1000000
+    local est1_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
+
+
+    cap drop pp_pre
+    g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post )^2)/(-_b[CA]*2)  if post==1
+    cap drop pp_post
+    g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+    cap drop diff
+    g diff = (pp_post - pp_pre)
+
+    sum diff, detail
+    disp (`=r(mean)'*(_N/2)/166)/1000000
+    local est2_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
+
+    disp `est1_`v''+`est2_`v''
+
+    }
+
+      mat A`3'[`r',1] = `est1_for'
+      mat A`3'[`r',2] = `est2_for'  
+      mat A`3'[`r',3] = `est1_for'+`est2_for'  
+      mat A`3'[`r',4] = `est1_inf'
+      mat A`3'[`r',5] = `est2_inf' 
+      mat A`3'[`r',6] = `est1_inf' + `est2_inf'  
+      mat A`3'[`r',7] = `est1_inf' + `est1_for'
+      mat A`3'[`r',8] = `est2_inf' + `est2_for' 
+      mat A`3'[`r',9] = `est1_inf' + `est2_inf' + `est1_for'+`est2_for'  
+    restore
+  }
+  }
+
+  svmat A`3' 
+
+  sum A`3'1, detail
+  write "welfare/`3'_dir_for.tex"  `=A`3'1[1]' .1 "%12.1fc" 
+  write "welfare/`3'_dir_for_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'2, detail
+  write "welfare/`3'_spi_for.tex"  `=A`3'2[1]' .1 "%12.1fc" 
+  write "welfare/`3'_spi_for_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'3, detail
+  write "welfare/`3'_tot_for.tex"  `=A`3'3[1]' .1 "%12.1fc" 
+  write "welfare/`3'_tot_for_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+
+  sum A`3'4, detail
+  write "welfare/`3'_dir_inf.tex"  `=A`3'4[1]' .1 "%12.1fc" 
+  write "welfare/`3'_dir_inf_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'5, detail
+  write "welfare/`3'_spi_inf.tex"  `=A`3'5[1]' .1 "%12.1fc" 
+  write "welfare/`3'_spi_inf_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'6, detail
+  write "welfare/`3'_tot_inf.tex"  `=A`3'6[1]' .1 "%12.1fc" 
+  write "welfare/`3'_tot_inf_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+
+  sum A`3'7, detail
+  write "welfare/`3'_dir_tot.tex"  `=A`3'7[1]' .1 "%12.1fc" 
+  write "welfare/`3'_dir_tot_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'8, detail
+  write "welfare/`3'_spi_tot.tex"  `=A`3'8[1]' .1 "%12.1fc" 
+  write "welfare/`3'_spi_tot_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'9, detail
+  write "welfare/`3'_tot_tot.tex"  `=A`3'9[1]' .1 "%12.1fc" 
+  write "welfare/`3'_tot_tot_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+
+  drop A`3'1-A`3'9
+
+end
+
+
+wel 161000 20 low 1
+
+wel 217583 20 med 1
+
+wel 336000 20 hig 1
+
+
+
+cap prog drop est_wel
+prog def est_wel
+      
+      reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD rD, cluster(cluster_joined) r   
+            estadd local ctrl1 "\checkmark"
+
+    eststo  for
+    g var_temp = e(sample)==1
+    mean for if post==0 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : for
+    mean for if post==1 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : for
+    drop var_temp
+
+      reg  inf proj_C proj_C_con proj_C_post proj_C_con_post ///
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD rD, cluster(cluster_joined) r   
+            estadd local ctrl1 "\checkmark"
+
+    eststo  inf
+    g var_temp = e(sample)==1
+    mean inf if post==0 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : inf
+    mean inf if post==1 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : inf
+    drop var_temp
+
+  global X "{\tim}"
+
+  global tf1 = ""
+  global tf2 = ""
+
+  global bl_lab = "${tf1}Post $\times$ Constructed project overlap with:${tf2} \\[1em] "
+
+  global overlap_lab = "\hspace{1.5em}${tf1}Plot footprint${tf2}"
+  global buffer_lab  = "\hspace{1.5em}${tf1}Ring (hm)${tf2} \\[1em]"
+
+
+    lab var proj_C_con_post "$overlap_lab"
+    lab var proj_C_post     "$overlap_lab"
+    lab var proj_C_con      "$overlap_lab"
+    lab var proj_C          "$overlap_lab"
+
+    lab var s1p_a_1_C_con_post "\hspace{1.5em}${tf1}Plot neighborhood (0-5 hm ring)${tf2}"
+
+    lab var CA "Cost"
+
+  global etotal_lab = "${tf1}Total ${tf2}"
+  global eproj_lab = "\\[-.7em] \hspace{1.5em}${tf1}Footprint ${tf2}"
+  global espill_lab = "\\[-.7em] \hspace{1.5em}${tf1}Spillover (0-5 hm) ${tf2}"
+
+  estout [for inf] using "`1'_top.tex", replace  style(tex) ///
+    order( proj_C_con_post s1p_a_1_C_con_post  CA ) ///
+    keep( proj_C_con_post s1p_a_1_C_con_post CA )  ///
+    varlabels( , blist(  proj_C_con_post "$bl_lab" ) ///
+    el( proj_C_con_post [.5em] s1p_a_1_C_con_post [.5em] CA [.5em] ))  label ///
+      noomitted ///
+       mlabels(,  depvars)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( ctrl1 Mean2001 Mean2011 r2  N ,  ///
+    labels( "Dist. Nearest City Center/Highway" "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %18s %9.${cells}fc   %9.${cells}fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
+end
+
+
+/*
+
+* 359 mil / 1000  =  300000 per house which is reasonable
+
+359 / 
+
+
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+
+g pp_pre  = ((_b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
+sum pp_pre, detail
+disp (`=r(mean)'*_N/166)/1000000
+
+
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+
+g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post)^2)/(-_b[CA]*2)  if post==1
+g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+g diff = (pp_post - pp_pre)
+
+sum diff, detail
+disp (`=r(mean)'*_N/166)/1000000
+
+
+
+qui reg inf proj_C* s1p_a_*_C*  CA cD rD , cluster(cluster_joined) r 
+
+* qui reg for proj_C* s1p_a_*_C*  CA cD rD , cluster(cluster_joined) r 
+
+cap drop pp
+predict pp, xb
+
+cap drop pp_pre
+cap drop pp_post
+cap drop diff
+
+
+
+
+
+/*
+
+
+
+
+
 cd ../..
 cd $output
-
-
-
-    * global pmean = 225475
-    * cap drop CA
-    * g CA       = $pmean if slope>=0 & slope<.
-    * replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
-    * replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
 
 
 
@@ -362,6 +689,15 @@ foreach var of varlist shops shops_inf util util_water util_energy util_refuse c
 *** find no effect on prices  !!!  (cool!!)
 
 g ln_P = log(P)
+g ln_P_alt = log(P_alt)
+
+g B1 = B if B<=50
+g B1_alt = B_alt if B_alt<=50
+* g B1 = B 
+* g B1_alt = B_alt 
+replace B1 = 0 if B==.
+replace B1_alt = 0 if B_alt==.
+
  * reg ln_P s1p_a_*_C*  CA cD rD if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r 
 
 
@@ -370,12 +706,59 @@ g ln_P = log(P)
 
 
 
-*  reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-*       s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+* reg  hh_size proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+*** kids_per kids_pop pop_density educ_yrs schooling_noeduc 
+ * rdp_house low_rent shack bkyd_ghs inf_ghs bkydfor_ghs piped_ghs toi_shr har_id hurt_id piped_dist toi_home_ghs toi_dist elec_ghs {
 
 
 
+* foreach var of varlist  rdp_house low_rent inf_ghs piped_ghs toi_shr elec_ghs  har_id hurt_id poll_water poll_air poll_land poll_noise rent_ghs {
+*   reg  `var' proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+* }
+* foreach var of varlist rdp_house low_rent inf_ghs piped_ghs toi_shr elec_ghs  har_id hurt_id  {
+*   reg  `var' proj_C proj_C_con  ///g
+*      s1p_*_C s1p_a*_C_con if post==1, cluster(cluster_joined) r
+* }
 
+
+
+* reg ln_P s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
+* reg ln_P_alt s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
+
+* reg B1 s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
+* reg B1_alt s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
+
+/*
+
+global price = 0
+
+lab var B1 "(1)&(2)&(3)&(4)\\[.5em] &Transactions"
+lab var B1_alt "Transactions"
+lab var ln_P "Log Price"
+lab var ln_P_alt "Log Price \\ \midrule \\[-.6em]"
+
+global cellsp   = 2
+global cells    = 5
+global outcomes = "B1 B1_alt ln_P ln_P_alt"
+
+global dist     = 0
+global price    = 1
+rfull prices
+global price    = 0
+
+g B1_id = B1>0 & B1<.
+ replace B1_id = . if B1==.
+ gegen B1_idm = max(B1_id), by(id)
+sum B1_idm if post==1
+
+
+/*
 
 reg  pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
@@ -390,8 +773,22 @@ cplot "gr_house" "red"
 
 
 
+reg pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
+     As1p_*_C As1p_a*_C_con As1p_*_C_post As1p_a*_C_con_post post, cluster(cluster_joined) r
+
+cplot "gr_pop_sd" "blue"
+
+reg total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+     As1p_*_C As1p_a*_C_con As1p_*_C_post As1p_a*_C_con_post post, cluster(cluster_joined) r
+
+cplot "gr_house_sd" "red"
 
 
+
+
+
+
+global dist     = 0
 
 
 * lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People per $\text{km}^{2}$"
@@ -402,22 +799,26 @@ cplot "gr_house" "red"
 
 lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People"
 lab var total_buildings "Houses"
-lab var for "Formal houses"
-lab var inf "Informal houses"
-lab var inf_backyard "Informal backyard houses \\ \midrule \\[-.6em]"
+lab var for "Formal Houses"
+lab var inf "Informal Houses"
+lab var inf_backyard "Informal Backyard Houses \\ \midrule \\[-.6em]"
 
 
 * lab var ln_P "Log(Price) per transaction \\ \midrule \\[-.6em]"
  * ln_P
 
+
+
 global cellsp   = 3
 global cells    = 3
 global outcomes = "pop_density total_buildings for inf inf_backyard"
 
-
+global dist     = 0
 rfull main_new
 
-
+global dist    = 1 
+rfull main_new
+global dist    = 0
 
 
 * sum proj_C_con, detail
@@ -444,6 +845,7 @@ global cells = 4
 global cellsp = 4
 global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
 
+global dist     = 0
 rfull inf_census
 
 
@@ -458,18 +860,40 @@ rfull inf_census
 * lab var community "Community Centers"
 lab var util_water "(1)&(2)&(3)&(4)\\[.5em] &Water Utility Buildings"
 lab var util_energy "Electricity Utility Buildings"
-* lab var util_refuse "Refuse Utility Buildings per $\text{km}^{2}$"
 lab var health "Health Centers"
 lab var school "Schools \\ \midrule \\[-.6em]"
 
-
-
-*** bblu infrastructure 
 global cells = 5
 global cellsp = 5
 global outcomes  = " util_water util_energy health school "
 
+global dist     = 0
 rfull inf_bblu
+
+
+lab var age "(1)&(2)&(3)&(4)&(5)\\[.5em] &Age"
+lab var mar "Married"
+lab var black "African"
+lab var hh_size "Household Size"
+lab var kids_per "\% Under Age 18 \\ \midrule \\[-.6em]"
+global cells = 4
+global cellsp = 4
+global outcomes = " age mar black hh_size kids_per "
+
+global dist = 0
+rfull demo
+
+* lab var age_hoh "(1)&(2)&(3)&(4)\\[.5em] &Age (Household Head)"
+* lab var mar_hoh "Married (Household Head)"
+* lab var hh_size "Household Size"
+* lab var kids_per "\% Under Age 18 \\ \midrule \\[-.6em]"
+
+* global cells = 4
+* global cellsp = 4
+* global outcomes = " age_hoh mar_hoh hh_size kids_per "
+
+* global dist = 0
+* rfull demo
 
 *** MORE HOUSE QUALITY!?
 
@@ -489,6 +913,8 @@ lab var ln_inc "Log Household Income\\ \midrule \\[-.6em]"
 global cells = 5
 global cellsp = 5
 global outcomes = "  shops shops_inf emp ln_inc  "
+
+global dist     = 0
 rfull agglom
 
 
@@ -510,18 +936,6 @@ rfull agglom
 * global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
 
 * rfull inf_census
-
-cap prog drop in_stat
-program in_stat 
-        qui sum `2' `6', detail 
-        local value=string(`=r(`3')',"`4'")
-        if `5'==0 {
-            file write `1' " & `value' "
-        }
-        if `5'==1 {
-            file write  `1' " & [`value'] "
-        }       
-end
 
 
 cap prog drop print_1t
@@ -670,7 +1084,7 @@ end
     * file open newfile using "pre_table_proj_stats_1.tex", write replace    
 
     file write newfile " Number of Projects & 166 & 166 & 166 & 140 & 140 & 140 \\[.15em]  "
-    file write newfile " Average Project Area (ha) & 11.8 & 11.8 & 11.8 & 11.9 & 11.9 & 11.9  \\[.15em]  "
+    file write newfile " Average Project Area (ha) & 118 & 118 & 118 & 119 & 119 & 119  \\[.15em]  "
       * print_1 "Number of Projects" p_count "mean"    "%10.0fc"
       * print_1 "Average Project Area ($\text{km}^{2}$)" p_size "mean"                      "%10.2fc"
     file close newfile

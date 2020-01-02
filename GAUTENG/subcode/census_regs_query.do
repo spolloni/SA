@@ -44,11 +44,11 @@ global aggregate      = 0;
 global full_data_pers_1996 = 0;
 global full_data_pers_2001 = 0;
 global full_data_pers_2011 = 0;
-global aggregate_pers      = 0;
+global aggregate_pers      = 1;
 
 global add_grids = 0;
 
-global merge_place    = 0;
+global merge_place    = 1;
 
 
 
@@ -704,9 +704,9 @@ save "DDcensus_pers_full_2011_admin${V}.dta", replace ;
 
 if $aggregate_pers == 1 {;
 
-use "DDcensus_pers_full_1996_admin${V}.dta", clear ;
+* use "DDcensus_pers_full_1996_admin${V}.dta", clear ;
 
-append  using  "DDcensus_pers_full_2001_admin${V}.dta"  ;
+use  "DDcensus_pers_full_2001_admin${V}.dta"  ;
 append  using  "DDcensus_pers_full_2011_admin${V}.dta"  ;
 
 
@@ -736,8 +736,10 @@ replace educ_yrs = 16 if (education==25) & !missing(education);
 replace educ_yrs = 17 if (education==26) & !missing(education);
 replace educ_yrs = 17 if (education==27) & !missing(education);
 replace educ_yrs = 18 if (education==28) & !missing(education);
-gen schooling_noeduc  = (education==99 & (year ==2001 | year==1996))|((education==98 | education==0) & year ==2011) if !missing(education);
+gen schooling_noeduc  = (education==99 & (year ==2001 | year==1996))|((education==98 | education==0) & year ==2011) if !missing(education) & age>=18;
 gen schooling_postsec = (education>=12 & education<=30) if !missing(education) & age>=18;
+
+
 
 * race;
 gen black = (race==1) if !missing(race);
@@ -781,20 +783,37 @@ lab var inc_value_earners "HH Income";
 
 * population;
 g o = 1;
-egen person_pop = sum(o), by(area_code year);
+gegen pers_pop = sum(o), by(area_code year);
 drop o;
 
+
+
+g mar = marit_stat<=3 if year == 2001 & !missing(marit_stat);
+replace mar = marit_stat==1 if year == 2011 & !missing(marit_stat);
+
+g mar_hoh = mar if rel ==1 ;
+g age_hoh = age if rel ==1 ;
+g educ_years_hoh = educ_yrs if rel == 1;
+g black_hoh = black  if rel == 1;
+
+g kids_id = age<=18 ; 
+gegen kids_pop = sum(kids_id), by(area_code year);
+
+
+
 fcollapse 
-  (mean) unemployed educ_yrs black outside_gp age
+  (mean) unemployed educ_yrs black outside_gp age mar age_hoh mar_hoh educ_years_hoh black_hoh
   inc_value inc_value_earners schooling_noeduc schooling_postsec
-  (firstnm) person_pop
+  (firstnm) pers_pop kids_pop
   , by(area_code year);
 
 save "temp_censuspers_agg_no_place${V}.dta", replace;
 
-erase "DDcensus_pers_full_1996_admin${V}.dta";
-erase "DDcensus_pers_full_2001_admin${V}.dta";
-erase "DDcensus_pers_full_2011_admin${V}.dta";
+* erase "DDcensus_pers_full_1996_admin${V}.dta";
+* erase "DDcensus_pers_full_2001_admin${V}.dta";
+* erase "DDcensus_pers_full_2011_admin${V}.dta";
+
+
 
 };
 
@@ -838,6 +857,9 @@ fmerge 1:1 area_code year using "DDcensus_hh_place_admin${V}.dta";
 * keep if _merge==3;
 g merge_place = _merge;
 drop _merge;
+
+
+save "temp_censuspers_agg${V}.dta", replace;
 
 cd ../..;
 cd $output;

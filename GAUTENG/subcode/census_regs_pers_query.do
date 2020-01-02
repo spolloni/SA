@@ -432,11 +432,9 @@ gen cluster_joined  = cond(placebo==1, cluster_placebo, cluster_rdp);
 collapse 
   (mean) unemployed educ_yrs black outside_gp age
   inc_value inc_value_earners schooling_noeduc schooling_postsec
-  (firstnm) person_pop area_int_rdp area_int_placebo placebo
-  distance_joined cluster_joined distance_rdp distance_placebo cluster_rdp cluster_placebo het type_rdp type_placebo X Y sp_1 area
   , by(area_code year);
 
-save "temp_censuspers_agg_het${V}.dta", replace;
+save "temp_censuspers_agg${V}.dta", replace;
 
 
 };

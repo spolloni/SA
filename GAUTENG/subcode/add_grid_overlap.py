@@ -142,6 +142,7 @@ def link_census_grid(db,table,input_file,idvar):
 # link_census_grid(db,'ea_1996_grid','ea_1996','OGC_FID')
 # link_census_grid(db,'sal_2001_grid','sal_2001','OGC_FID')
 
+link_census_grid(db,'ea_2001_grid','ea_2001','OGC_FID')
 
 # grid_sal(db,'ea_1996_s2001','ea_1996','OGC_FID')
 # grid_sal(db,'sal_ea_2011_s2001','sal_ea_2011','OGC_FID')
@@ -1226,7 +1227,7 @@ def grid_to_landplots_near(db):
 
     return
 
-grid_to_landplots_near(db)
+#  grid_to_landplots_near(db)
 
 
 

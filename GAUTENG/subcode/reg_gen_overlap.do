@@ -350,14 +350,36 @@ cap prog drop rfull
 prog define rfull
   eststo clear
 
+
+  global pc = 1
+
   foreach var of varlist $outcomes {
     
-    reg  `var' proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+    if $dist == 0 {
+
+        if $price == 1 {
+           reg  `var'  s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post ///
+             if proj_rdp==0 & proj_placebo==0 , cluster(cluster_joined) r  
+          if $pc == 1 | $pc == 3 {
+            estadd local ctrl1 "\checkmark"
+            estadd local ctrl2 "" 
+          }
+          if $pc == 2 | $pc == 4 {
+            estadd local ctrl1 ""
+            estadd local ctrl2 "\checkmark"
+          }
+        global pc = $pc + 1
+      }
+      else {
+         reg  `var' proj_C proj_C_con proj_C_post proj_C_con_post ///
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r   
+      }
+    
 
     eststo  `var'
     g var_temp = e(sample)==1
 
+    if $price != 1 {
     qui sum proj_C_con, detail   
     scalar define ep = _b[proj_C_con_post]*((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
 
@@ -367,8 +389,7 @@ prog define rfull
     estadd scalar effect_proj  = ep
     estadd scalar effect_spill = es 
     estadd scalar effect_total = ep + es
-
-
+    }
 
     mean `var' if post==0 & var_temp==1
     mat def E=e(b)
@@ -378,9 +399,30 @@ prog define rfull
     estadd scalar Mean2011 = E[1,1] : `var'
     drop var_temp
 
+    }
+
+  
+    if $dist ==1 {
+
+    reg  `var' proj_C proj_C_con proj_C_post proj_C_con_post ///
+    s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post s2p*, cluster(cluster_joined) r
+
+    eststo  `var'
+    g var_temp = e(sample)==1
+
+    estadd local ctrl1 "\checkmark"
+
+    mean `var' if post==0 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : `var'
+    mean `var' if post==1 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : `var'
+    drop var_temp
 
     }
 
+  }
 
 
   global X "{\tim}"
@@ -391,7 +433,7 @@ prog define rfull
   global bl_lab = "${tf1}Post $\times$ Constructed project overlap with:${tf2} \\[1em] "
 
   global overlap_lab = "\hspace{1.5em}${tf1}Plot footprint${tf2}"
-  global buffer_lab  = "\hspace{1.5em}${tf1}Ring (km)${tf2} \\[1em]"
+  global buffer_lab  = "\hspace{1.5em}${tf1}Ring (hm)${tf2} \\[1em]"
 
 
     lab var proj_C_con_post "$overlap_lab"
@@ -399,12 +441,15 @@ prog define rfull
     lab var proj_C_con      "$overlap_lab"
     lab var proj_C          "$overlap_lab"
 
-    lab var s1p_a_1_C_con_post "\hspace{1.5em}${tf1}Plot neighborhood (0-.5 km ring)${tf2}"
+    lab var s1p_a_1_C_con_post "\hspace{1.5em}${tf1}Plot neighborhood (0-5 hm ring)${tf2}"
 
 
   global etotal_lab = "${tf1}Total ${tf2}"
   global eproj_lab = "\\[-.7em] \hspace{1.5em}${tf1}Footprint ${tf2}"
-  global espill_lab = "\\[-.7em] \hspace{1.5em}${tf1}Spillover (0-.5 km) ${tf2}"
+  global espill_lab = "\\[-.7em] \hspace{1.5em}${tf1}Spillover (0-5 hm) ${tf2}"
+
+
+  if $dist==0 & $price!=1 {
 
   estout $outcomes using "`1'_e.tex", replace  style(tex) ///
     order(   ) ///
@@ -442,8 +487,8 @@ prog define rfull
   global llist = " "
   global ellist = " "
   forvalues r= 1/8 {
-      local r1 "`=(`r'-1)*.5'"
-      local r2 "`=(`r')*.5'"
+      local r1 "`=(`r'-1)*5'"
+      local r2 "`=(`r')*5'"
       lab var s1p_a_`r'_C_con_post "\hspace{2.5em} ${tf1}`=`r1'' - `=`r2''${tf2}"
       global llist = " $llist s1p_a_`r'_C_con_post "
       global ellist =  " $ellist s1p_a_`r'_C_con_post [0.3em]  "
@@ -471,22 +516,22 @@ prog define rfull
   lab var proj_C_con_post "\hspace{2.5em} $overlap_lab"
   lab var proj_C_post     "\hspace{2.5em} $overlap_lab"
   lab var proj_C_con      "\hspace{2.5em} $overlap_lab"
-  lab var proj_C          "\hspace{2.5em} $overlap_lab"
+  lab var proj_C          "Plot footprint"
 
   global llist_C          = " proj_C "
   global llist_C_con      = " proj_C_con "
   global llist_C_post     = " proj_C_post "
   global llist_C_con_post = " proj_C_con_post "
   
-  global ellist_C          = " proj_C [.3em] "
-  global ellist_C_con      = " proj_C_con [.3em] "
-  global ellist_C_post     = " proj_C_post [.3em] "
-  global ellist_C_con_post = " proj_C_con_post [.3em] "
+  global ellist_C          = " proj_C [.01em] "
+  global ellist_C_con      = " proj_C_con [.01em] "
+  global ellist_C_post     = " proj_C_post [.01em] "
+  global ellist_C_con_post = " proj_C_con_post [.01em] "
 
 
   forvalues r= 1/8 {
-      local r1 "`=(`r'-1)*.5'"
-      local r2 "`=(`r')*.5'"
+      local r1 "`=(`r'-1)*5'"
+      local r2 "`=(`r')*5'"
       lab var s1p_a_`r'_C           "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
       lab var s1p_a_`r'_C_con       "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
       lab var s1p_a_`r'_C_post      "\hspace{2.5em} ${tf1}`=`r1''-`=`r2''${tf2}"
@@ -497,10 +542,10 @@ prog define rfull
       global llist_C_con_post = " $llist_C_con_post s1p_a_`r'_C_con_post  "
 
       if `r'==8 {
-        local sp "9"
+        local sp "01"
       }
       else {
-        local sp "3"
+        local sp "001"
       }
 
       global ellist_C          = " $ellist_C s1p_a_`r'_C [0.`sp'em]  "
@@ -509,7 +554,7 @@ prog define rfull
       global ellist_C_con_post = " $ellist_C_con_post s1p_a_`r'_C_con_post [0.`sp'em]  "
   }
 
-  lab var post "\textsc{Post}"
+  lab var post "Post"
 
 
     estout $outcomes using "`1'_full.tex", replace  style(tex) ///
@@ -520,9 +565,10 @@ prog define rfull
    proj_C_con_post "${tf1}Constructed${tf2} $\times$ ${tf1}Post${tf2} $\times$ \\[.5em]  "  ///
    proj_C_con "${tf1}Constructed${tf2} $\times$ \\[.5em]  "  ///
    proj_C_post "${tf1}Post${tf2} $\times$ \\[.5em]  "  ///
-   s1p_a_1_C_con_post  "\hspace{2em} ${tf1}\% Buffer Overlap with Project :  ${tf2}  \\[1em]"      ///
-   s1p_a_1_C_post      "\hspace{2em} ${tf1}\% Buffer Overlap with Project :  ${tf2}  \\[1em]"      ///
-   s1p_a_1_C_con       "\hspace{2em} ${tf1}\% Buffer Overlap with Project :  ${tf2}  \\[1em]"     ) ///
+   s1p_a_1_C_con_post  "\hspace{2em} ${tf1} Ring Overlap with Project :  ${tf2}  \\[.5em]"      ///
+   s1p_a_1_C_post      "\hspace{2em} ${tf1} Ring Overlap with Project :  ${tf2}  \\[.5em]"      ///
+   s1p_a_1_C_con       "\hspace{2em} ${tf1} Ring Overlap with Project :  ${tf2}  \\[.5em]"  ///
+   s1p_a_1_C           "${tf1} Ring Overlap with Project :  ${tf2}  \\[.5em]"     ) ///
     el( $ellist_C $ellist_C_con $ellist_C_post $ellist_C_con_post post [.5em] ))  label ///
       noomitted ///
        mlabels(,  depvars)  ///
@@ -533,9 +579,51 @@ prog define rfull
         fmt( %9.${cells}fc   %9.${cells}fc  %12.3fc   %12.0fc  )   ) ///
     starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
+  }
 
+  if $dist == 1 {
+    estout $outcomes using "`1'_top_dist.tex", replace  style(tex) ///
+    order( proj_C_con_post s1p_a_1_C_con_post  ) ///
+    keep( proj_C_con_post s1p_a_1_C_con_post )  ///
+    varlabels( , blist(  proj_C_con_post "$bl_lab" ) ///
+    el( proj_C_con_post [.5em] s1p_a_1_C_con_post [.5em] ))  label ///
+      noomitted ///
+       mlabels(,  depvars)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( ctrl1 Mean2001 Mean2011 r2  N ,  ///
+    labels( "Distance Controls (0 - 40 hm)" "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %18s %9.${cells}fc   %9.${cells}fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+  }
+
+
+  if $price == 1 {
+
+  estout $outcomes using "`1'_top.tex", replace  style(tex) ///
+    order( s1p_a_1_C_con_post  ) ///
+    keep( s1p_a_1_C_con_post )  ///
+    varlabels( , blist(  s1p_a_1_C_con_post "$bl_lab" ) ///
+    el( s1p_a_1_C_con_post [.5em] ))  label ///
+      noomitted ///
+       mlabels(,  depvars)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( ctrl1 ctrl2  Mean2001 Mean2011 r2  N ,  ///
+    labels( "Pre: 2001-2006 Post: 2007-2012"   "Pre: 2001-2004 Post: 2009-2012"   "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %30s %30s  %9.${cellsp}fc   %9.${cellsp}fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels( "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+  }
 
 end
+
+
+
+
+
+
+
 
 
 
@@ -551,7 +639,7 @@ prog def cplot
 
     label var index "Ring (hm)"
 
-    g est1 = round(estimate,.1)
+    g est1 = round(estimate,.0001)
 
     twoway rcap min95 max95 index , || ///
            scatter estimate index, color(`2') mlabel(est1) ///
@@ -560,6 +648,82 @@ prog def cplot
     graph export "`1'.pdf", as(pdf) replace
 
   restore
+end
+
+
+
+
+
+cap prog drop est_wel
+prog def est_wel
+      
+      reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD rD, cluster(cluster_joined) r   
+            estadd local ctrl1 "\checkmark"
+
+    eststo  for
+    g var_temp = e(sample)==1
+    mean for if post==0 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : for
+    mean for if post==1 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : for
+    drop var_temp
+
+      reg  inf proj_C proj_C_con proj_C_post proj_C_con_post ///
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD rD, cluster(cluster_joined) r   
+            estadd local ctrl1 "\checkmark"
+
+    eststo  inf
+    g var_temp = e(sample)==1
+    mean inf if post==0 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2001 = E[1,1] : inf
+    mean inf if post==1 & var_temp==1
+    mat def E=e(b)
+    estadd scalar Mean2011 = E[1,1] : inf
+    drop var_temp
+
+  global X "{\tim}"
+
+  global tf1 = ""
+  global tf2 = ""
+
+  global bl_lab = "${tf1}Post $\times$ Constructed project overlap with:${tf2} \\[1em] "
+
+  global overlap_lab = "\hspace{1.5em}${tf1}Plot footprint${tf2}"
+  global buffer_lab  = "\hspace{1.5em}${tf1}Ring (hm)${tf2} \\[1em]"
+
+
+    lab var proj_C_con_post "$overlap_lab"
+    lab var proj_C_post     "$overlap_lab"
+    lab var proj_C_con      "$overlap_lab"
+    lab var proj_C          "$overlap_lab"
+
+    lab var s1p_a_1_C_con_post "\hspace{1.5em}${tf1}Plot neighborhood (0-5 hm ring)${tf2}"
+
+    lab var CA "Cost"
+
+  global etotal_lab = "${tf1}Total ${tf2}"
+  global eproj_lab = "\\[-.7em] \hspace{1.5em}${tf1}Footprint ${tf2}"
+  global espill_lab = "\\[-.7em] \hspace{1.5em}${tf1}Spillover (0-5 hm) ${tf2}"
+
+  estout [for inf] using "`1'_top.tex", replace  style(tex) ///
+    order( proj_C_con_post s1p_a_1_C_con_post  CA ) ///
+    keep( proj_C_con_post s1p_a_1_C_con_post CA )  ///
+    varlabels( , blist(  proj_C_con_post "$bl_lab" ) ///
+    el( proj_C_con_post [.5em] s1p_a_1_C_con_post [.5em] CA [.5em] ))  label ///
+      noomitted ///
+       mlabels(,  depvars)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( ctrl1 Mean2001 Mean2011 r2  N ,  ///
+    labels( "Dist. Nearest City Center/Highway" "Mean Pre"    "Mean Post" "R$^2$"   "N"  ) ///
+        fmt( %18s %9.${cells}fc   %9.${cells}fc  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
+
+
 end
 
 
@@ -626,9 +790,9 @@ prog define regs_spill_full
     lab var s1p_a_6_C_con "\hspace{2em} \textsc{2500-3000m}"  
 
 
-    lab var proj_C_con "\textsc{\% Overlap with Project}"
+    lab var proj_C_con "\textsc{Overlap with Project}"
 
-    lab var proj_C  "\textsc{\% Overlap with Project}"
+    lab var proj_C  "\textsc{Overlap with Project}"
 
     lab var for_lag "Formal Housing in 2001"
     lab var inf_lag "Informal Housing in 2001"
