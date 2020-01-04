@@ -257,6 +257,7 @@ if $prep_data == 0 {
 
 use "gradplot_admin${V}_overlap.dta", clear
 
+/*
 
 preserve
   g post = purch_yr>2006

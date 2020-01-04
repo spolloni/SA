@@ -799,10 +799,11 @@ g black_hoh = black  if rel == 1;
 g kids_id = age<=18 ; 
 gegen kids_pop = sum(kids_id), by(area_code year);
 
-
+g emp_pers = 0       if  employment ==2 & age>=18 & age<=65 ;
+replace emp_pers = 1 if  employment ==1 & age>=18 & age<=65 ;
 
 fcollapse 
-  (mean) unemployed educ_yrs black outside_gp age mar age_hoh mar_hoh educ_years_hoh black_hoh
+  (mean) unemployed educ_yrs black outside_gp age mar age_hoh mar_hoh educ_years_hoh black_hoh emp_pers
   inc_value inc_value_earners schooling_noeduc schooling_postsec
   (firstnm) pers_pop kids_pop
   , by(area_code year);

@@ -654,11 +654,127 @@ end
 
 
 
+
+cap prog drop wel
+prog define wel
+
+  if `4'== 1 {
+  set seed 10
+  mat define A`3' = J(`=1+`2'',9,.)
+
+  forvalues r=1/`=1+`2'' {
+
+    preserve
+    if `r'!= 1 {
+    bsample, cluster(cluster_joined)
+    }
+
+    foreach v in for inf {
+    local pmean "`1'"
+      cap drop CA
+      g CA       = `pmean' if slope>=0 & slope<.
+      replace CA = `pmean' + (`pmean'*.12*.25) + (`pmean'*.62*.05)  if slope>=.06 & slope<.12
+      replace CA = `pmean' + (`pmean'*.12*.50) + (`pmean'*.62*.15)  if slope>=.12 & slope<.
+
+    qui reg `v' proj_C proj_C_con proj_C_post proj_C_con_post ///
+    s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  CA cD roadD, cluster(cluster_joined) r 
+
+    cap drop pp
+    predict pp, xb
+
+    cap drop pp_pre
+    g pp_pre  = ((pp  - _b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
+    cap drop pp_post
+    g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+    cap drop diff
+    g diff = (pp_post - pp_pre)
+
+    sum diff, detail
+    disp (`=r(mean)'*(_N/2)/166)/1000000
+    local est1_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
+
+
+    cap drop pp_pre
+    g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post )^2)/(-_b[CA]*2)  if post==1
+    cap drop pp_post
+    g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
+    cap drop diff
+    g diff = (pp_post - pp_pre)
+
+    sum diff, detail
+    disp (`=r(mean)'*(_N/2)/166)/1000000
+    local est2_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
+
+    disp `est1_`v''+`est2_`v''
+
+    }
+
+      mat A`3'[`r',1] = `est1_for'
+      mat A`3'[`r',2] = `est2_for'  
+      mat A`3'[`r',3] = `est1_for'+`est2_for'  
+      mat A`3'[`r',4] = `est1_inf'
+      mat A`3'[`r',5] = `est2_inf' 
+      mat A`3'[`r',6] = `est1_inf' + `est2_inf'  
+      mat A`3'[`r',7] = `est1_inf' + `est1_for'
+      mat A`3'[`r',8] = `est2_inf' + `est2_for' 
+      mat A`3'[`r',9] = `est1_inf' + `est2_inf' + `est1_for'+`est2_for'  
+    restore
+  }
+  }
+
+  svmat A`3' 
+
+  sum A`3'1, detail
+  write "welfare/`3'_dir_for.tex"  `=A`3'1[1]' .1 "%12.1fc" 
+  write "welfare/`3'_dir_for_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'2, detail
+  write "welfare/`3'_spi_for.tex"  `=A`3'2[1]' .1 "%12.1fc" 
+  write "welfare/`3'_spi_for_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'3, detail
+  write "welfare/`3'_tot_for.tex"  `=A`3'3[1]' .1 "%12.1fc" 
+  write "welfare/`3'_tot_for_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+
+  sum A`3'4, detail
+  write "welfare/`3'_dir_inf.tex"  `=A`3'4[1]' .1 "%12.1fc" 
+  write "welfare/`3'_dir_inf_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'5, detail
+  write "welfare/`3'_spi_inf.tex"  `=A`3'5[1]' .1 "%12.1fc" 
+  write "welfare/`3'_spi_inf_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'6, detail
+  write "welfare/`3'_tot_inf.tex"  `=A`3'6[1]' .1 "%12.1fc" 
+  write "welfare/`3'_tot_inf_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+
+  sum A`3'7, detail
+  write "welfare/`3'_dir_tot.tex"  `=A`3'7[1]' .1 "%12.1fc" 
+  write "welfare/`3'_dir_tot_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'8, detail
+  write "welfare/`3'_spi_tot.tex"  `=A`3'8[1]' .1 "%12.1fc" 
+  write "welfare/`3'_spi_tot_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+  sum A`3'9, detail
+  write "welfare/`3'_tot_tot.tex"  `=A`3'9[1]' .1 "%12.1fc" 
+  write "welfare/`3'_tot_tot_sd.tex"  `=r(sd)' .1 "%12.1fc" 
+
+  write "welfare/`3'_tot_tot_ub.tex"  `=A`3'9[1] + 1.96*`=r(sd)'' .1 "%12.1fc" 
+  write "welfare/`3'_tot_tot_lb.tex"  `=A`3'9[1] - 1.96*`=r(sd)'' .1 "%12.1fc" 
+
+  write "welfare/`3'_tot_tot_usd.tex"  `=A`3'9[1]/7.7' .1 "%12.1fc" 
+  write "welfare/`3'_tot_tot_ub_usd.tex"  `=(A`3'9[1] + 1.96*`=r(sd)')/7.7' .1 "%12.1fc" 
+  write "welfare/`3'_tot_tot_lb_usd.tex"  `=(A`3'9[1] - 1.96*`=r(sd)')/7.7' .1 "%12.1fc" 
+
+
+  drop A`3'1-A`3'9
+
+
+
+end
+
+
+
 cap prog drop est_wel
 prog def est_wel
-      
+    
       reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
-          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD rD, cluster(cluster_joined) r   
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA1 cD roadD, cluster(cluster_joined) r   
             estadd local ctrl1 "\checkmark"
 
     eststo  for
@@ -672,7 +788,7 @@ prog def est_wel
     drop var_temp
 
       reg  inf proj_C proj_C_con proj_C_post proj_C_con_post ///
-          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD rD, cluster(cluster_joined) r   
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA1 cD roadD, cluster(cluster_joined) r   
             estadd local ctrl1 "\checkmark"
 
     eststo  inf
@@ -703,17 +819,20 @@ prog def est_wel
 
     lab var s1p_a_1_C_con_post "\hspace{1.5em}${tf1}Plot neighborhood (0-5 hm ring)${tf2}"
 
-    lab var CA "Cost"
+    lab var CA1 "Cost (R millions)"
+    lab var cD "Hm to Nearest City Center"
+    lab var roadD "Hm to Nearest Highway"
+
 
   global etotal_lab = "${tf1}Total ${tf2}"
   global eproj_lab = "\\[-.7em] \hspace{1.5em}${tf1}Footprint ${tf2}"
   global espill_lab = "\\[-.7em] \hspace{1.5em}${tf1}Spillover (0-5 hm) ${tf2}"
 
-  estout [for inf] using "`1'_top.tex", replace  style(tex) ///
-    order( proj_C_con_post s1p_a_1_C_con_post  CA ) ///
-    keep( proj_C_con_post s1p_a_1_C_con_post CA )  ///
+  estout for inf using "`1'_top.tex", replace  style(tex) ///
+    order( proj_C_con_post s1p_a_1_C_con_post  CA1 ) ///
+    keep( proj_C_con_post s1p_a_1_C_con_post CA1 )  ///
     varlabels( , blist(  proj_C_con_post "$bl_lab" ) ///
-    el( proj_C_con_post [.5em] s1p_a_1_C_con_post [.5em] CA [.5em] ))  label ///
+    el( proj_C_con_post [.5em] s1p_a_1_C_con_post [.5em] CA1 [.5em] ))  label ///
       noomitted ///
        mlabels(,  depvars)  ///
       collabels(none) ///
@@ -723,6 +842,19 @@ prog def est_wel
         fmt( %18s %9.${cells}fc   %9.${cells}fc  %12.3fc   %12.0fc  )   ) ///
     starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
+  estout for inf using "`1'_top_simple.tex", replace  style(tex) ///
+    order(   CA1 cD roadD ) ///
+    keep(  CA1 cD roadD )  ///
+    varlabels( , blist(  ) ///
+    el(  CA1 [.5em] cD [.5em] roadD [.5em]))  label ///
+      noomitted ///
+       mlabels(,  depvars)  ///
+      collabels(none) ///
+      cells( b(fmt($cells) star ) se(par fmt($cells)) ) ///
+      stats( r2  N ,  ///
+    labels( "R$^2$"   "N"  ) ///
+        fmt(  %12.3fc   %12.0fc  )   ) ///
+    starlevels(  "\textsuperscript{c}" 0.10    "\textsuperscript{b}" 0.05  "\textsuperscript{a}" 0.01) 
 
 end
 

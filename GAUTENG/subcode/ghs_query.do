@@ -81,6 +81,9 @@ g elec_ghs = 0 if electricity!=1 & electricity!=. ;
 replace elec_ghs =1 if electricity==1 ;
 
 
+* sum price if price<6000000 & rdp==1 ;
+
+/*
 g post = year>=2010;
 
 fcollapse 
