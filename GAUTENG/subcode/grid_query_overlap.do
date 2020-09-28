@@ -16,7 +16,7 @@ global gcro_over 		= 0;
 global load_buffer_1 	= 0;
 global load_grids 		= 1;
 
-global load_buffer_2 	= 0;
+* global load_buffer_2 	= 0; old look back to generate project heterogeneity
 global merge_all  		= 0;
 global undev   			= 0;
 global elev   			= 0;
@@ -26,8 +26,6 @@ global grid = "100";
 global dist_break_reg1 = "500";
 global dist_break_reg2 = "4000";
 
-* global dist_break_reg1 = "250";
-* global dist_break_reg2 = "2000";
 
 global outcomes = 
 " total_buildings for inf inf_backyard 
@@ -230,10 +228,6 @@ clear;
 	";
 
 
-	* LEFT JOIN cbd_dist AS CB ON AA.distance_ = CB.grid_id;
-	* LEFT JOIN road_dist_grid AS RD ON AA.grid_id = RD.grid_id;
-
-* WHERE (A.s_lu_code=7.1 OR A.s_lu_code=7.2) ;
 
 	odbc query "gauteng";
 	odbc load, exec("`qry'");
@@ -284,145 +278,6 @@ save bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap, replac
 };
 
 
-
-
-
-
-if $load_buffer_2 == 1 {;
-
-
-use bbluplot_grid_${grid}_overlap, clear;
-
-
-g   proj_rdp = cluster_int_tot_rdp / cluster_area;
-replace proj_rdp = 1 if proj_rdp>1 & proj_rdp<.;
-g   proj_placebo = cluster_int_tot_placebo / cluster_area;
-replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.;
-
-g cluster_joined = .;
-replace cluster_joined = cluster_int_placebo_id if (cluster_int_tot_placebo>  cluster_int_tot_rdp ) & cluster_joined==.;
-replace cluster_joined = cluster_int_rdp_id if (cluster_int_tot_placebo<  cluster_int_tot_rdp ) & cluster_joined==.;
-
-keep if post==0;
-keep if proj_rdp==1 | proj_placebo==1;
-gegen tbm = mean(total_buildings), by(cluster_joined);
-keep if tbm ==0;
-
-keep cluster_joined;
-duplicates drop cluster_joined, force;
-save "zeros.dta", replace;
-
-
-
-local qry = " SELECT OGC_FID AS cluster_joined, name, descriptio AS des FROM gcro_publichousing";
-
-odbc query "gauteng";
-odbc load, exec("`qry'") clear;
-
-duplicates drop cluster_joined, force;
-
-replace des = lower(des);
-g mixed = regexm(des,"mixed")==1;
-keep if mixed==1;
-keep cluster_joined;
-
-save "mixed.dta", replace;
-
-
-
-
-local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
- B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area, B.cluster_b7_area, B.cluster_b8_area 
-FROM 
-(SELECT A.* FROM grid_temp_100_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
-LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
-WHERE G.dp IS NULL)
-JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
-odbc query "gauteng";
-odbc load, exec("`qry'") clear; 
-
-destring *, replace force ; 
-
-
-ren cluster cluster_joined;
-merge m:1 cluster_joined using "mixed.dta";
-	g mixed = _merge==3;
-	drop if _merge==2;
-	drop _merge;
-ren cluster_joined cluster;
-
-
-ren cluster cluster_joined;
-merge m:1 cluster_joined using "zeros.dta";
-	g zeros = _merge==3;
-	drop if _merge==2;
-	drop _merge;
-ren cluster_joined cluster;
-
-
-
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  b7_int b8_int  {;
-forvalues r=0/1 {;
-foreach het in "" "_mixed" "_zeros" {;
-
-if `r'==1 {;
-	local name "rdp";
-};
-else {;
-	local name "placebo";
-};
-
-local khet "";
-if "`het'"=="_mixed" {;
-	local khet " & mixed==1 ";
-};
-if "`het'"=="_zeros" {;
-	local khet " & zeros==1 ";
-};
-
-
-g `var'_`name'`het'=`var' if rdp==`r' `khet';
-gegen `var'_tot_`name'`het'  = sum(`var'_`name'`het'), by(grid_id);
-gegen `var'_`name'`het'_max  = max(`var'_`name'`het'), by(grid_id);
-
-g `var'_`name'`het'_id_max = cluster if `var'_`name'`het'_max == `var'_`name'`het' & `var'_`name'`het'!=.;
-gegen `var'_`name'`het'_id = max(`var'_`name'`het'_id_max), by(grid_id);
-
-drop `var'_`name'`het' `var'_`name'`het'_id_max `var'_`name'`het'_max ;
-
-};
-};
-};
-
-keep grid_id *_id *_tot_* *_area ;
-duplicates drop grid_id, force;
-
-
-save "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap_het.dta", replace;
-
-
-};
-
-
-if $merge_all== 1 {;
-
-use bbluplot_grid_pre_overlap, clear;
-
-g post=0;
-
-append using bbluplot_grid_post_overlap;
-replace post=1 if post==.;
-
-ren id grid_id ;
-fmerge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap_het.dta" ;
-drop if _merge==2;
-drop _merge;
-ren grid_id id;
-
-save "bbluplot_grid_${grid}_overlap_full_het.dta", replace;
-
-};
 
 
 

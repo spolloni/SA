@@ -8,16 +8,112 @@ global output = "Code/GAUTENG/paper/figures"
 global V="_4"
 
 
-*** probability that unflagged shapes are nearby?? (make figure there?)
-*** total distribution of shapes?!
-*** double-count shapes that are near other shapes?
-***** near the shapes should be higher density (because there's more shapes there!)
 
-*** distance from 50 by 50 squares?
+** key files
 
-*** need to find the cut so that the bblu graphs look balanced,
-*** ideas: (1) look at small versus big shapes separately (ie. rdp/plac have very different proj sizes)
-*** deal with all the crazy clustering (ie. lots of projects surrounding other stuff... might be really tricky?)
+*** OUTPUT : grid_overlap_results.do
+
+
+
+
+	* add_grid_overlap.py (incomplete)
+		* grid_xy
+			* input: 
+			* 	(sql) grid_temp_100
+			* output:
+			* 	(sql) grid_xy_100
+
+		* gcro_over
+			* input:
+			* 	(sql) gcro_publichousing
+			*   	  placebo_cluster
+			* 		  rdp_cluster
+			* output:
+			* 	(sql) gcro_over
+
+		* grid_to_undeveloped
+			* input:
+			* 	(sql) hydr_areas, phys_landform_artific, cult_recreational,  hydr_lines
+			* output:
+			* 	(sql) grid_100_to_hydr_areas, grid_100_to_phys_landform_artific, grid_100_to_phys_cult_recreational, grid_100_to_phys_hydr_lines
+
+		* link_census_grid
+			* input:
+			* 	(sql) sal_2011, ea_1996, ea_2001, sal_2001
+			* output: 
+			*   (sql) sal_2011_grid, ea_1996_grid, ea_2001_grid, sal_2001_grid
+
+
+
+	* grid_query_overlap.do (incomplete)
+		* options: 
+			* gcro_over
+				* input : 
+				*   (sql) gcro_over 
+				* output: 
+				*   (sql) gcro_over_list
+
+			* load_buffer_1
+				* input : 
+				* 	(sql) grid_temp_100_4000_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} 
+			    * 		  gcro_over_list 
+			    * 		  buffer_area_${dist_break_reg1}_${dist_break_reg2}
+			    * output: 
+			    *   (dta) "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta"
+
+			* load_grids
+			    * input : 
+			    * 	(sql) grid_temp_${grid}_4000
+			    *  		  distance_grid_temp_100_4000_gcro_full
+			    *  		  rdp_cluster 
+			    * 		  gcro_over_list 
+			    * 		  placebo_cluster 
+			    * 		  grid_bblu_pregrid_temp_${grid}_4000 
+			    * 		  grid_bblu_postgrid_temp_${grid}_4000 
+			    * 		  bblu_pre 
+			    * 		  bblu_post 
+			    * 		  cbd_dist
+			    *   	  road_dist
+			    * 		  grid_xy_100_4000
+			    *   (dta) "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta"
+			    * inter: 
+			    * 		  "bbluplot_grid_pre_overlap.dta"
+			    *		  "bbluplot_grid_post_overlap.dta" 
+			    * output:
+			    *   (dta) "bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap.dta"
+			* undev 
+				* input : 
+				*	(sql) grid_100_4000_to_cult_recreational ,
+				*		  grid_100_4000_to_hydr_areas , 
+				*		  grid_100_4000_to_phys_landform_artific
+				* output : 
+			* elev
+
+	* export2gradplot_overlap.do (incomplete)
+		* input:
+		* 	(sql) transactions
+		* 		  landplots_near_buffer_area_int_${dist_break_reg1}_${dist_break_reg2}
+		* 		  buffer_area_${dist_break_reg1}_${dist_break_reg2}_landplots_near
+		* 		  erven_s2001
+		* 		  erven
+		* 		  
+
+
+
+* 1. "bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap"
+* 2. "undev_100.dta"
+* 3. "census_grid_link.dta"
+* 4. "temp_censushh_agg${V}.dta"
+* 5. "grid_elevation_100_4000.dta"
+* 6. "temp/grid_price.dta"
+
+
+
+
+
+
+
+
 
 
 
@@ -40,10 +136,6 @@ global far = "Suburb"
 
 * DENSITY PARAMETERS
 
-
-global grid = 3000
-* global size     = 50
-* global sizesq   = $size*$size
 global dist_min = -500
 global dist_max     = 1500
 global dist_max_reg = 1500
@@ -86,12 +178,6 @@ global ifhists  = "s_N<30 & rdp_property==0 & purch_price > 2000 & purch_price<1
 
 
 *** KEY CENSUS OPTIONS! *** ;
-
-global type_area   = 1   /* use the areas of overlap separately for the types, 2 is with buildings! */
-global area_levels = 0   /* use the unit of exposure equal to km of overlap (instead of %) */
-global extra_controls = " y1996 area area_2 area_3  "
-
-
 
 
 

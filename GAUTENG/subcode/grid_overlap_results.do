@@ -12,6 +12,8 @@ prog define write
   file close newfile
 end
 
+
+
 global extra_controls = "  "
 global extra_controls_2 = "  "
 global grid = 100
@@ -520,12 +522,13 @@ replace roadD = roadD/100
 
 
 
-/*
 
 
 
 cd ../..
 cd $output
+
+
 
 
 
@@ -583,7 +586,7 @@ replace B1_alt = 0 if B_alt==.
 * reg B1 s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
 * reg B1_alt s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
 
-/*
+
 
 global price = 0
 
@@ -607,7 +610,6 @@ g B1_id = B1>0 & B1<.
 sum B1_idm if post==1
 
 
-/*
 
 reg  pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
@@ -618,8 +620,6 @@ reg total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
 cplot "gr_house" "red"
-
-
 
 
 reg pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
@@ -800,19 +800,43 @@ program print_1t
     file write newfile " \\[.15em] " _n
 end
 
+cap prog drop print_3t
+program print_3t
+    file write newfile " `1' "
+    qui sum `2', detail 
+        local value=string(`=r(`5')',"`6'")
+        file write newfile " & `value' "
+    qui sum `3', detail 
+        local value=string(`=r(`5')',"`6'")
+        file write newfile " & `value' "
+    qui sum `4', detail 
+        local value=string(`=r(`5')',"`6'")
+        file write newfile " & `value' "
+    file write newfile " \\[.15em] " _n
+end
 
+
+  
+  g cluster_b1_area_temp=(cluster_b1_area - cluster_area)/10000
+    forvalues r=2/8 {
+      local r0 `=`r'-1'
+      g cluster_b`r'_area_temp = (cluster_b`r'_area - cluster_b`r0'_area)/10000
+    }
 
     file open newfile using "spill_RP.tex", write replace
     forvalues r=1/8 {
       local r1 "`=(`r'-1)*5'"
       local r2 "`=(`r')*5'"
-      print_1t "\hspace{3em} `=`r1'' - `=`r2'' " s1p_a_`r'_R s1p_a_`r'_P mean "%10.3fc"
+      print_3t "\hspace{3em} `=`r1'' - `=`r2'' " cluster_b`r'_area_temp  s1p_a_`r'_R s1p_a_`r'_P mean "%10.3fc"
+      drop cluster_b`r'_area_temp
     }
     file close newfile
 
 
     file open newfile using "proj_RP.tex", write replace
-      print_1t "\hspace{2em}Plots " proj_rdp proj_placebo mean "%10.3fc"
+      g cluster_area_temp = cluster_area/10000
+      print_3t "\hspace{2em}Plots " cluster_area_temp proj_rdp proj_placebo mean "%10.3fc"
+      drop cluster_area_temp
     file close newfile
 
 

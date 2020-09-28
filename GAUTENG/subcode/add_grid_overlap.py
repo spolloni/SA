@@ -152,33 +152,6 @@ link_census_grid(db,'ea_2001_grid','ea_2001','OGC_FID')
 
 
 
-
-
-def grid_ward(db,table,input_file,idvar):
-
-    con = sql.connect(db)
-    cur = con.cursor()
-    con.enable_load_extension(True)
-    con.execute("SELECT load_extension('mod_spatialite');")
-    con.execute("DROP TABLE IF EXISTS {};".format(table))
-    con.execute('''
-                CREATE TABLE {} AS
-                SELECT G.{}, A.wd_code AS wd_1, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS  area_int 
-                FROM {} AS G, {} AS A
-                            WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                                            WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
-                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY)
-                                            GROUP BY G.{} ;
-
-                '''.format(table,idvar,input_file,'wd_2001',input_file,idvar))
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
-    print 'all set with ward_1 !'
-
-# grid_ward(db,'grid_25_w2001','grid_temp_25','grid_id')
-
-
-
-
 def grid_ea(db,table,input_file,idvar):
     print ' new ea intersection is runningggggggg '
     con = sql.connect(db)
@@ -225,103 +198,6 @@ def elevation_ea(db,table,input_file,idvar):
 # elevation_ea(db,'elevation_ea_2001','elevation','height')
 
 
-
-
-
-def bblu_in_range(db,time):
-    print 'starting bblu ' +time+' within .. '
-    con = sql.connect(db)
-    cur = con.cursor()
-    con.enable_load_extension(True)
-    con.execute("SELECT load_extension('mod_spatialite');")
-
-
-    def drop_full_table(name):
-        chec_qry = '''
-                   SELECT type,name from SQLite_Master
-                   WHERE type="table" AND name ="{}";
-                   '''.format(name)
-        drop_qry = '''
-                   SELECT DisableSpatialIndex('{}','GEOMETRY');
-                   SELECT DiscardGeometryColumn('{}','GEOMETRY');
-                   DROP TABLE IF EXISTS idx_{}_GEOMETRY;
-                   DROP TABLE IF EXISTS {};
-                   '''.format(name,name,name,name)
-        cur.execute(chec_qry)
-        result = cur.fetchall()
-        if result:
-            cur.executescript(drop_qry)
-
-    def add_index(name,index_var):
-        cur.execute("SELECT RecoverGeometryColumn('{}','GEOMETRY',2046,'POINT','XY');".format(name))
-        cur.execute("SELECT CreateSpatialIndex('{}','GEOMETRY');".format(name))
-        if index_var!='none':
-            cur.execute("CREATE INDEX {}_index ON {} ({});".format(name,name,index_var))
-
-    table_bpre='bblu_'+time+'_in_range'
-
-    drop_full_table(table_bpre)
-    con.execute('''
-                CREATE TABLE {} AS
-                SELECT A.OGC_FID, ST_makevalid(A.GEOMETRY) AS GEOMETRY
-                FROM bblu_{} AS A ;
-                '''.format(table_bpre,time))
-    add_index(table_bpre,'OGC_FID')
-
-    print 'bblu pre in range done'
-
-# bblu_in_range(db,'pre')
-# bblu_in_range(db,'post')
-
-
-
-def bblu_within(db,table,input_file,idvar,time):
-    print 'starting bblu '+time+' within .. '
-    con = sql.connect(db)
-    cur = con.cursor()
-    con.enable_load_extension(True)
-    con.execute("SELECT load_extension('mod_spatialite');")
-
-    con.execute("DROP TABLE IF EXISTS {};".format(table))
-    con.execute('''
-                CREATE TABLE {} AS
-                SELECT A.OGC_FID AS OGC_FID_bblu_{}, G.{}
-                FROM {} AS A, {} AS G
-                            WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
-                                            WHERE f_table_name='{}' AND search_frame=G.GEOMETRY)
-                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY);
-                '''.format(table,time,idvar,'bblu_'+time+'_in_range',input_file,'bblu_'+time+'_in_range'))
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
-
-    print 'all set with bblu '+time+' within!'
-
-
-# bblu_within(db,'bblu_pre_in_ea_1996','ea_1996','OGC_FID','pre')
-# bblu_within(db,'bblu_pre_in_sal_2001','sal_2001','OGC_FID','pre')
-# bblu_within(db,'bblu_post_in_sal_2011','sal_ea_2011','OGC_FID','post')
-
-# bblu_within(db,'bblu_pre_in_ea_2001','ea_2001','OGC_FID','pre')
-# bblu_within(db,'bblu_post_in_ea_2001','ea_2001','OGC_FID','post')
-
-def grid_xy(db,gridtype):
-
-    print 'grid xy start'
-    con = sql.connect(db)
-    cur = con.cursor()
-    con.enable_load_extension(True)
-    con.execute("SELECT load_extension('mod_spatialite');")
-    name =gridtype
-    table='grid_xy_100'
-    con.execute("DROP TABLE IF EXISTS {};".format(table))
-    con.execute('''
-                CREATE TABLE {} AS
-                SELECT grid_id, ST_X(ST_CENTROID(GEOMETRY)) AS X, ST_Y(ST_CENTROID(GEOMETRY)) AS Y
-                FROM {};
-                '''.format(table,name))
-    cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'grid_id'))
-    print 'done'
-
-# grid_xy(db,'grid_temp_100')
 
 
 
@@ -414,13 +290,6 @@ def grid_ea_point(db,table,input_file,idvar):
 #                                             GROUP BY A.sal_code, G.grid_id;
 #                 '''.format(table,'sal_2001','grid_temp_3'))
 #     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'grid_id'))
-
-
-
-
-
-
-
 
 
 
@@ -566,9 +435,6 @@ def add_grid(db,grid_size):
 
 
 # add_grid(db,3000)
-
-
-
 # add_grid(db,500)
 # add_grid(db,25)
 # add_grid(db,50)
@@ -1266,39 +1132,6 @@ def grid_to_elevation_points(db):
 
 
 
-def grid_to_undeveloped(db,undev):
-
-    print " start grid to undeveloped "
-    con = sql.connect(db)
-    cur = con.cursor()
-    con.enable_load_extension(True)
-    con.execute("SELECT load_extension('mod_spatialite');")
-
-
-    cur.execute('DROP TABLE IF EXISTS grid_to_{};'.format(undev)) 
-    make_qry=  ''' CREATE TABLE grid_to_{} AS 
-                            SELECT A.OGC_FID , G.grid_id
-                                FROM {} as A, grid_temp_25 AS G
-                                    WHERE G.ROWID IN 
-                                        (SELECT ROWID FROM SpatialIndex 
-                                            WHERE f_table_name='grid_temp_25' AND search_frame=A.GEOMETRY)
-                                            AND st_intersects(A.GEOMETRY,G.GEOMETRY) ;
-                    '''.format(undev,undev)
-    cur.execute(make_qry) 
-
-    cur.execute("CREATE INDEX grid_to_{}_index ON grid_to_{} (grid_id);".format(undev,undev))
-    cur.execute("CREATE INDEX {}_to_grid_index ON grid_to_{} (OGC_FID);".format(undev,undev))    
-    con.commit()
-    con.close()   
-    print " finish grid to undeveloped "
-
-    return
-
-# grid_to_undeveloped(db,'hydr_areas')
-# grid_to_undeveloped(db,'phys_landform_artific')
-# grid_to_undeveloped(db,'cult_recreational')
-# grid_to_undeveloped(db,'hydr_lines')
-
 
 # ['HYDR_AREAS','HYDR_LINES','PHYS_LANDFORM_ARTIFIC','CULT_RECREATIONAL']
 
@@ -1324,4 +1157,28 @@ def grid_to_undeveloped(db,undev):
 #     #cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,'sal_code'))
 
 # #buffer_250(db)
+
+
+
+# def grid_ward(db,table,input_file,idvar):
+
+#     con = sql.connect(db)
+#     cur = con.cursor()
+#     con.enable_load_extension(True)
+#     con.execute("SELECT load_extension('mod_spatialite');")
+#     con.execute("DROP TABLE IF EXISTS {};".format(table))
+#     con.execute('''
+#                 CREATE TABLE {} AS
+#                 SELECT G.{}, A.wd_code AS wd_1, st_area(st_intersection(A.GEOMETRY,G.GEOMETRY)) AS  area_int 
+#                 FROM {} AS G, {} AS A
+#                             WHERE G.ROWID IN (SELECT ROWID FROM SpatialIndex 
+#                                             WHERE f_table_name='{}' AND search_frame=A.GEOMETRY)
+#                                             AND st_intersects(A.GEOMETRY,G.GEOMETRY)
+#                                             GROUP BY G.{} ;
+
+#                 '''.format(table,idvar,input_file,'wd_2001',input_file,idvar))
+#     cur.execute("CREATE INDEX {}_index ON {} ({});".format(table,table,idvar))
+#     print 'all set with ward_1 !'
+
+# # grid_ward(db,'grid_25_w2001','grid_temp_25','grid_id')
 
