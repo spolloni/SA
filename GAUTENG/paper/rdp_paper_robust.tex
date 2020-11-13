@@ -1,0 +1,169 @@
+\documentclass[12pt]{article}
+
+% TEMPLATE DEFAULT PACKAGES
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,color,setspace,sectsty,comment,natbib,pdflscape,array,adjustbox}
+
+% ADDED PACKAGES FOR THIS MANUSCRIPT
+\usepackage{palatino,newtxmath,multirow,titlesec,threeparttable,tabu,booktabs,titlesec,threeparttable,mathtools,bm,bbm,subcaption,pdflscape,tcolorbox,mathrsfs,tikz,float,longtable}
+% endfloat,
+% \usepackage[capposition=top]{floatrow}
+\usepackage{tikzpagenodes}
+\usepackage{pbox}
+
+\usepackage{afterpage}
+\usepackage[hyphens]{url}
+\usepackage[margin=1cm]{caption}
+
+\usepackage[draft]{hyperref}
+\newcommand{\tim}{$\,\times\,$}
+% FIGURES & TABLES CAPTION STYLING
+\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=period}
+\captionsetup[table]{labelfont={bf},name={Table},labelsep=period}
+
+% SECTION TITLE SETTINGS
+\titlelabel{\thetitle.\enskip}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+% COLUMN TYPES
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
+\newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
+\newcolumntype{G}{>{\centering\arraybackslash}p{6em}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% MARGINS AND SPACING
+\normalem
+\geometry{left=1.1in,right=1.1in,top=1.0in,bottom=1.0in}
+\setlength{\parskip}{2.5pt}
+
+% SPECIAL CELL 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+% NO INDENT ON FOOTNOTES
+\usepackage[hang,flushmargin]{footmisc}
+
+
+\newcommand{\regtextfirst}{
+	``hm'' refers to a hectometer or 100 meters. Observations are one hectare plots ($\text{hm}^{2}$).
+``Plot footprint'' is the effect of an additional hectare of overlap with constructed projects.  
+For plots outside of projects, ``Plot neighborhood'' is the effect of an additional hectare of overlap between 0 to 5 hm rings around plots and constructed projects.  Specifications also include separate effects for 5 hm rings from 0 to 40 hm.
+Standard errors are clustered at the project level (in parentheses). 
+\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+}
+
+\newcommand{\regtext}{
+	``hm'' refers to a hectometer or 100 meters. Observations are one hectare plots ($\text{hm}^{2}$).
+``Plot footprint'' is the effect of an additional hectare of overlap with constructed projects.  
+For plots outside of projects, ``Plot neighborhood'' is the effect of an additional hectare of overlap between 0 to 5 hm rings around plots and constructed projects.  Although not displayed in the table, specifications also include separate effects for 5 hm rings from 0 to 40 hm and results are available upon request.
+Standard errors are clustered at the project level (in parentheses). 
+\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+}
+
+\newcommand{\ballparktext}{
+	``Footprint'' sums the footprint effect across plots within constructed projects.
+	``Spillover'' sums the neighborhood effect (0-.5 km) across plots nearby constructed projects.
+	``Total'' sums ``Footprint'' and ``Spillover'' effects.
+}
+
+\newcommand{\hmref}{
+	``hm'' refers to a hectometer or 100 meters.
+}
+\newcommand{\haref}{
+	``ha'' refers to a hectare or one $\text{hm}^{2}$.
+}
+
+\newcommand{\hmrefha}{
+	``hm'' refers to a hectometer or 100 meters. ``ha'' refers to a hectare or one $\text{hm}^{2}$.
+}
+
+
+
+
+\begin{document}
+
+\begin{table}
+\small
+\centering
+\caption{Effects on House Quality (2001-2011)}\label{table:inf_census}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+\input{figures/inf_census_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item 
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+\begin{table}
+\small
+\centering
+\caption{Effects on House Quality Placebo (1996-2001)}\label{table:inf_census_placebo}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+\input{figures/inf_census_test_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item 
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+
+\begin{table}
+\small
+\centering
+\caption{Effects on Census Outcomes (2001-2011)}\label{table:demo}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+\input{demo_true_test_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item 
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+
+
+\begin{table}
+\small
+\centering
+\caption{Effects on Census Outcomes Placebo (1996-2001)}\label{table:demo_placebo}
+\vspace{-2mm}
+\resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCCCCC}
+\toprule
+\input{figures/demo_test_top}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item 
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+\end{document}
+
+

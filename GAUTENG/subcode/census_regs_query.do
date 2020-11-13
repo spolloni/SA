@@ -704,10 +704,11 @@ save "DDcensus_pers_full_2011_admin${V}.dta", replace ;
 
 if $aggregate_pers == 1 {;
 
-* use "DDcensus_pers_full_1996_admin${V}.dta", clear ;
+use "DDcensus_pers_full_1996_admin${V}.dta", clear ;
 
-use  "DDcensus_pers_full_2001_admin${V}.dta"  ;
+append  using  "DDcensus_pers_full_2001_admin${V}.dta"  ;
 append  using  "DDcensus_pers_full_2011_admin${V}.dta"  ;
+
 
 
 * employment;
@@ -790,6 +791,7 @@ drop o;
 
 g mar = marit_stat<=3 if year == 2001 & !missing(marit_stat);
 replace mar = marit_stat==1 if year == 2011 & !missing(marit_stat);
+replace mar = marit_stat==2 | marit_stat==3 if year==1996 & !missing(marit_stat);
 
 g mar_hoh = mar if rel ==1 ;
 g age_hoh = age if rel ==1 ;

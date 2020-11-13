@@ -369,7 +369,22 @@ replace roadD = `=r(max)' if roadD==.
 replace roadD = roadD/100
 
 
+lab var formal "(1)&(2)&(3)\\[.5em] &Formal"
+lab var house "Single House"
+lab var age "Age"
+lab var hh_size "Household Size \\ \midrule \\[-.6em]"
+global cells = 4
+global cellsp = 4
 
+global outcomes = " formal house age  hh_size  "
+
+global dist = 0
+rfull demo_true_test
+
+
+
+
+/*
 
 * global regset = "(rdp_distance<3000 | placebo_distance<3000) & proj_rdp==0 & proj_placebo==0"
 * keep if distance_rdp<3000 | distance_placebo<3000

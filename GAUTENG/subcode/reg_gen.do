@@ -56,19 +56,19 @@ prog define regression
 
 	if `3'==0 {
 	if "${k}"=="none" {
-		reg `1' `2' $extra_controls , cl(cluster_joined) r
+		reg `1' `2' $extra_controls $pweight, cl(cluster_joined) r
 	}
 	else {
-	areg `1' `2' $extra_controls , cl(cluster_joined) a(LL) r
+	areg `1' `2' $extra_controls $pweight, cl(cluster_joined) a(LL) r
 	}
 	}
 
 	if `3'==1 {
 	if "${k}"=="none" {
-		reg `1' `2' $extra_controls_2 , cl(cluster_joined) r
+		reg `1' `2' $extra_controls_2  $pweight, cl(cluster_joined) r
 	}
 	else {
-	areg `1' `2' $extra_controls_2 , cl(cluster_joined) a(LL) r
+	areg `1' `2' $extra_controls_2  $pweight, cl(cluster_joined) a(LL) r
 	}
 	}
 end

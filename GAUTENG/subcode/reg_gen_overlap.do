@@ -359,7 +359,7 @@ prog define rfull
 
         if $price == 1 {
            reg  `var'  s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post ///
-             if proj_rdp==0 & proj_placebo==0 , cluster(cluster_joined) r  
+            $pweight if proj_rdp==0 & proj_placebo==0 , cluster(cluster_joined) r  
           if $pc == 1 | $pc == 3 {
             estadd local ctrl1 "\checkmark"
             estadd local ctrl2 "" 
@@ -372,7 +372,7 @@ prog define rfull
       }
       else {
          reg  `var' proj_C proj_C_con proj_C_post proj_C_con_post ///
-          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r   
+          s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  $pweight, cluster(cluster_joined) r   
       }
     
 
@@ -405,7 +405,7 @@ prog define rfull
     if $dist ==1 {
 
     reg  `var' proj_C proj_C_con proj_C_post proj_C_con_post ///
-    s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post s2p*, cluster(cluster_joined) r
+    s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post s2p*  $pweight, cluster(cluster_joined) r
 
     eststo  `var'
     g var_temp = e(sample)==1
