@@ -14,17 +14,15 @@ if $LOCAL==1 {;
 
 global gcro_over 		= 0;
 global load_buffer_1 	= 1;
-global load_grids 		= 0;
+global load_grids 		= 1;
 
-* global load_buffer_2 	= 0; 
-global merge_all  		= 0;
 global undev   			= 0;
 global elev   			= 0;
 
 
 global grid = "100";
-global dist_break_reg1 = "500";
-global dist_break_reg2 = "4000";
+global dist_break_reg1 = "100";
+global dist_break_reg2 = "600";
 
 
 global outcomes = 
@@ -124,7 +122,7 @@ if $load_buffer_1 == 1 {;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area,   B.cluster_b7_area, B.cluster_b8_area 
+  B.cluster_b5_area, B.cluster_b6_area
 FROM 
 (SELECT A.* FROM grid_temp_100_4000_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
 LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
@@ -144,7 +142,7 @@ destring *, replace force ;
 
 
 
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int b7_int b8_int  {;
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
 forvalues r=0/1 {;
 
 if `r'==1 {;

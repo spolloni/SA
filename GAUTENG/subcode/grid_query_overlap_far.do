@@ -14,10 +14,8 @@ if $LOCAL==1 {;
 
 global gcro_over 		= 0;
 global load_buffer_1 	= 1;
-global load_grids 		= 0;
+global load_grids 		= 1;
 
-* global load_buffer_2 	= 0; 
-global merge_all  		= 0;
 global undev   			= 0;
 global elev   			= 0;
 
@@ -124,27 +122,20 @@ if $load_buffer_1 == 1 {;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area,   B.cluster_b7_area, B.cluster_b8_area 
+  B.cluster_b5_area, B.cluster_b6_area
 FROM 
-(SELECT A.* FROM grid_temp_100_4000_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
+(SELECT A.* FROM far_grid_temp_100_4000_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
 LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
 WHERE G.dp IS NULL) AS A
-JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
+JOIN far_buffer_area_${dist_break_reg1}_${dist_break_reg2} AS B ON A.grid_id = B.grid_id ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
 
 destring *, replace force ; 
-* ren cluster_area cluster_int_area;
-* ren cluster_b1_area b1_int_area;
-* ren cluster_b2_area b2_int_area;
-* ren cluster_b3_area b3_int_area;
-* ren cluster_b4_area b4_int_area;
-* ren cluster_b5_area b5_int_area;
-* ren cluster_b6_area b6_int_area;
 
 
 
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int b7_int b8_int  {;
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
 forvalues r=0/1 {;
 
 if `r'==1 {;
@@ -174,7 +165,7 @@ keep grid_id *_id *_tot_* *_area ;
 duplicates drop grid_id, force;
 
 
-save "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta", replace;
+save "far_buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta", replace;
 
 };
 
@@ -268,12 +259,12 @@ append using bbluplot_grid_post_overlap;
 replace post = 1 if post==. ;
 
 ren id grid_id ;
-fmerge m:1 grid_id using "buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta" ;
+fmerge m:1 grid_id using "far_buffer_grid_${dist_break_reg1}_${dist_break_reg2}_overlap.dta" ;
 drop if _merge==2;
 drop _merge;
 ren grid_id id;
 
-save bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap, replace;
+save far_bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap, replace;
 
 };
 

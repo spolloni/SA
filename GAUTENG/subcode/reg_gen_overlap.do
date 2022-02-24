@@ -78,6 +78,27 @@ replace cluster_joined = 0 if cluster_joined==.
 end
 
 
+cap prog drop bm_weight
+prog define bm_weight
+    
+  append using "bm"
+
+  forvalues r=1/8 {
+    egen bm`r'_id=max(bm`r')
+    drop bm`r'
+    ren bm`r'_id bm`r'
+  }
+  drop if _n==_N
+
+  forvalues r=1/8 {
+    foreach var of varlist s1p_a_`r'_C s1p_a_`r'_C_con s1p_a_`r'_C_post s1p_a_`r'_C_con_post {
+    replace `var'=`var'/(bm`r'/`1')
+  }
+  }
+  
+end
+
+
 cap prog drop generate_variables
 prog define generate_variables
 
@@ -90,7 +111,6 @@ g   proj_placebo = cluster_int_tot_placebo
 replace proj_placebo = 10000 if proj_placebo>10000
 replace proj_placebo = proj_placebo/`constant'
 * replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.
-
 
 foreach v in rdp placebo {
   if "`v'"=="rdp" {
@@ -121,87 +141,6 @@ foreach var of varlist s1p_* {
 
 end
 
-
-
-
-cap prog drop generate_variables_old
-prog define generate_variables_old
-
-
-* g cluster_joined = .
-* replace cluster_joined = cluster_int_placebo_id if (cluster_int_tot_placebo>  cluster_int_tot_rdp ) & cluster_joined==.
-* replace cluster_joined = cluster_int_rdp_id if (cluster_int_tot_placebo<  cluster_int_tot_rdp ) & cluster_joined==.
-* forvalues r=1/6 {
-*   replace cluster_joined = b`r'_int_placebo_id if (b`r'_int_tot_placebo >  b`r'_int_tot_rdp  ) & cluster_joined==.
-*   replace cluster_joined = b`r'_int_rdp_id     if (b`r'_int_tot_placebo <  b`r'_int_tot_rdp  ) & cluster_joined==.
-* }
-* replace cluster_joined = 0 if cluster_joined==.
-* g cluster_joined = .
-* foreach var of varlist  *_id {
-*   replace cluster_joined = `var' if cluster_joined==.
-* }
-* replace cluster_joined=0 if cluster_joined==.
-
-
-g   proj_rdp = cluster_int_tot_rdp / cluster_area
-replace proj_rdp = 1 if proj_rdp>1 & proj_rdp<.
-g   proj_placebo = cluster_int_tot_placebo / cluster_area
-replace proj_placebo = 1 if proj_placebo>1 & proj_placebo<.
-
-* foreach v in rdp placebo {
-*   if "`v'"=="rdp" {
-*     local v1 "R"
-*   }
-*   else {
-*     local v1 "P"
-*   }
-* g sp_a_2_`v1' = (b2_int_tot_`v' - cluster_int_tot_`v')/(cluster_b2_area-cluster_area)
-*   replace sp_a_2_`v1'=1 if sp_a_2_`v1'>1 & sp_a_2_`v1'<.
-
-* foreach r in 4 6 {
-* g sp_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-2'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-2'_area )
-*   replace sp_a_`r'_`v1'=1 if sp_a_`r'_`v1'>1 & sp_a_`r'_`v1'<.
-* }
-* }
-
-* foreach var of varlist sp_a* {
-*   g `var'_tP = `var'*proj_placebo
-*   g `var'_tR = `var'*proj_rdp
-* }
-
-* foreach var of varlist proj_* sp_* {
-*   g `var'_post = `var'*post 
-* }
-
-
-foreach v in rdp placebo {
-  if "`v'"=="rdp" {
-    local v1 "R"
-  }
-  else {
-    local v1 "P"
-  }
-g s1p_a_1_`v1' = (b1_int_tot_`v' - cluster_int_tot_`v')/(cluster_b1_area-cluster_area)
-  replace s1p_a_1_`v1'=1 if s1p_a_1_`v1'>1 & s1p_a_1_`v1'<.
-
-forvalues r= 2/$rset {
-g s1p_a_`r'_`v1' = (b`r'_int_tot_`v' - b`=`r'-1'_int_tot_`v')/(cluster_b`r'_area - cluster_b`=`r'-1'_area )
-  replace s1p_a_`r'_`v1'=1 if s1p_a_`r'_`v1'>1 & s1p_a_`r'_`v1'<.
-}
-}
-
-foreach var of varlist s1p_a* {
-  g `var'_tP = `var'*proj_placebo
-  g `var'_tR = `var'*proj_rdp
-}
-
-foreach var of varlist s1p_* {
-  g `var'_post = `var'*post 
-}
-
-
-
-end
 
 
 
@@ -272,73 +211,6 @@ foreach var of varlist s1p_*_`1' {
 
 end
 
-
-
-cap prog drop generate_slope
-prog define generate_slope
-
-
-    global xsize = 500
-
-    sum XX, detail
-    egen xg = cut(XX), at(`=r(min)'($xsize)`=r(max)')
-    sum YY, detail
-    egen yg = cut(YY), at(`=r(min)'($xsize)`=r(max)')
-
-    gegen xyg = group(xg yg)
-
-    * bys xyg: g gn=_n
-    * bys xyg: g gN=_N
-    * count if gn==1
-
-    gegen hmax = max(height), by(xyg)
-    gegen hmin = min(height), by(xyg)
-    gegen hmean= mean(height), by(xyg)
-
-    g x_max_id = XX if height==hmax
-      gegen x_max = max(x_max_id), by(xyg)
-    g y_max_id = YY if height==hmax
-      gegen y_max = max(y_max_id), by(xyg)
-    g x_min_id = XX if height==hmin
-      gegen x_min = max(x_min_id), by(xyg)
-    g y_min_id = YY if height==hmin
-      gegen y_min = max(y_min_id), by(xyg)
-
-    g dist = sqrt( (x_max-x_min)^2  + (y_max-y_min)^2  )
-    replace dist = . if xyg==.
-
-    g hmean_f= hmean
-    sum hmean, detail
-    replace hmean_f = `=r(mean)' if hmean_f==.
-
-    g hd = hmax - hmin
-
-    * replace hd = hd/1000
-
-    g slope = hd/dist
-    replace slope=0 if slope==.
-
-    * preserve
-    *   import delimited using "erf_size_avg.csv", clear
-    *   global erf_size = v1[1]
-    *   import_delimited using "purch_price.csv", clear
-    *   global purch_price = v1[1]
-    *   * global pmean = $purch_price / ( $erf_size/(100*100) )
-    *   global pmean = $purch_price 
-    *   write "pmean.csv" $pmean .1 "%12.1g"
-    *   write "pmean.tex" $pmean .1 "%12.0fc"
-    *   write "erf_size.tex" $erf_size .1 "%12.0fc"
-    *   write "purch_price.tex" $purch_price .1 "%12.0fc"
-    * restore
-
-    global pmean = 225475 
-    * global pmean = 336000
-
-    g CA       = $pmean if slope>=0 & slope<.
-    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
-    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
-    * replace CA = CA/100000
-end
 
 
 
@@ -1348,6 +1220,62 @@ program print_mean
     file open newfile using "${tables}`1'.tex", write replace
     file write newfile "`value'"
     file close newfile    
+end
+
+
+
+
+cap prog drop generate_slope
+prog define generate_slope
+
+
+    global xsize = 500
+
+    sum XX, detail
+    egen xg = cut(XX), at(`=r(min)'($xsize)`=r(max)')
+    sum YY, detail
+    egen yg = cut(YY), at(`=r(min)'($xsize)`=r(max)')
+
+    gegen xyg = group(xg yg)
+
+    * bys xyg: g gn=_n
+    * bys xyg: g gN=_N
+    * count if gn==1
+
+    gegen hmax = max(height), by(xyg)
+    gegen hmin = min(height), by(xyg)
+    gegen hmean= mean(height), by(xyg)
+
+    g x_max_id = XX if height==hmax
+      gegen x_max = max(x_max_id), by(xyg)
+    g y_max_id = YY if height==hmax
+      gegen y_max = max(y_max_id), by(xyg)
+    g x_min_id = XX if height==hmin
+      gegen x_min = max(x_min_id), by(xyg)
+    g y_min_id = YY if height==hmin
+      gegen y_min = max(y_min_id), by(xyg)
+
+    g dist = sqrt( (x_max-x_min)^2  + (y_max-y_min)^2  )
+    replace dist = . if xyg==.
+
+    g hmean_f= hmean
+    sum hmean, detail
+    replace hmean_f = `=r(mean)' if hmean_f==.
+
+    g hd = hmax - hmin
+
+    * replace hd = hd/1000
+
+    g slope = hd/dist
+    replace slope=0 if slope==.
+
+    global pmean = 225475 
+    * global pmean = 336000
+
+    g CA       = $pmean if slope>=0 & slope<.
+    replace CA = $pmean + ($pmean*.12*.25) + ($pmean*.62*.05)  if slope>=.06 & slope<.12
+    replace CA = $pmean + ($pmean*.12*.50) + ($pmean*.62*.15)  if slope>=.12 & slope<.
+    * replace CA = CA/100000
 end
 
 

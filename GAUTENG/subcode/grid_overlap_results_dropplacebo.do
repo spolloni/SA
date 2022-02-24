@@ -62,7 +62,7 @@ cd Generated/Gauteng
 
 
 
-use "bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap", clear
+use "dropplacebo_bbluplot_grid_${grid}_${dist_break_reg1}_${dist_break_reg2}_overlap", clear
 
 
 
@@ -355,6 +355,8 @@ forvalues r=1/8 {
 *    by id: g `var'_ch = `var'[_n]-`var'[_n-1]
 * }
 
+g x = XX/100000
+g y = YY/100000
 
 g cD = cbd_dist_r if rD < pD 
 replace cD = cbd_dist_p if rD>pD 
@@ -381,8 +383,21 @@ global outcomes = " formal house age  hh_size  "
 global dist = 0
 * rfull demo_true_test
 
+g constant=1
 
-bm_weight 10000
+sum y, detail
+global y5=`=r(p25)'
+global y50 = `=r(p50)'
+sum x, detail
+global x5=`=r(p25)'
+global x50 = `=r(p50)'
+
+
+
+
+
+reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
 
 reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
@@ -390,77 +405,104 @@ reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
 
 
 
-gegen cjtag=tag(cluster_joined)
-
-set seed 3
-g rn = runiform()
-sort cjtag rn
-by cjtag: g rnn=_n
-replace rnn=. if cjtag!=1
-
-gegen rcg = max(rnn), by(cluster_joined)
-
-g constant=1
-g x = XX/100000
-g y = YY/100000
-
-preserve
-sort cluster_joined post
-  keep x y post id for proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post cluster_joined
-  saveold "reg_test.dta", replace
-restore
+wyoung for inf, cmd(reg OUTCOMEVAR proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r) familyp(s1p_a_1_C_con_post) bootstraps(50) seed(123) cluster(cluster_joined)
 
 
-reg for post proj_C proj_C_con proj_C_post proj_C_con_post
-
-reg for post proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post, cluster(cluster_joined)
-
-* s1p_a_1_C + s1p_a_1_C_con +s1p_a_1_C_post +s1p_a_1_C_con_post +s1p_a_2_C +s1p_a_2_C_con+ s1p_a_2_C_post+ s1p_a_2_C_con_post +s1p_a_3_C +s1p_a_3_C_con +s1p_a_3_C_post+ s1p_a_3_C_con_post +s1p_a_4_C+ s1p_a_4_C_con +s1p_a_4_C_post+ s1p_a_4_C_con_post+ s1p_a_5_C +s1p_a_5_C_con +s1p_a_5_C_post +s1p_a_5_C_con_post+ s1p_a_6_C +s1p_a_6_C_con +s1p_a_6_C_post +s1p_a_6_C_con_post+ s1p_a_7_C +s1p_a_7_C_con +s1p_a_7_C_post +s1p_a_7_C_con_post +s1p_a_8_C +s1p_a_8_C_con +s1p_a_8_C_post +s1p_a_8_C_con_post
+reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r 
 
 
-/*
+reg  inf proj_C proj_C_con proj_C_post proj_C_con_post ///
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+
+acreg for proj_C proj_C_con proj_C_post proj_C_con_post ///
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post,  spatial latitude(y) longitude(x) distcutoff(1) 
+
+
+
+
+timer on 1
+reg for proj_C if y<=$y5 & x<=$x5
+timer off 1
+timer list 1
+timer clear
+
+timer on 1
+reg for constant proj_C post if y<=$y5 & x<=$x5, cluster(cluster_joined)
+timer off 1
+timer list 1
+timer clear
+
+
+timer on 1
+acreg for constant proj_C if y<=$y5 & x<=$x5,  spatial latitude(y) longitude(x) distcutoff(.04) 
+timer off 1
+timer list 1
+timer clear
+
+
+timer on 1
+ols_spatial_HAC for constant  proj_C if y<=$y5 & x<=$x5, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
+timer on 1
+ols_spatial_HAC for constant  proj_C if y<=$y5 & x<=$x5, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
+
+timer on 1
+ols_spatial_HAC for constant  proj_C if y<=$y50 & x<=$x50, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
+
+timer on 1
+ols_spatial_HAC for constant  proj_C if y<=$y50 & x<=$x50, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
+
+*** COMPARE DISTANCE CUTOFFS
+timer on 1
+ols_spatial_HAC for constant  proj_C if y<=$y5 & x<=$x5, lat(y) lon(x) dist(10) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
+timer on 1
+ols_spatial_HAC for constant  proj_C if y<=$y5 & x<=$x5, lat(y) lon(x) dist(1) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
+
+*** COMPARE NUMBER OF VARS
+
+
+timer on 1
+ols_spatial_HAC for proj_C if y<=$y5 & x<=$x5, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
+timer off 1
+timer list 1
+timer clear
+
 timer on 1
 ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if rcg<=5, lat(y) lon(x) dist(4) timevar(post) panelvar(id) lagcutoff(0) display
+     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if y<=$y5 & x<=$x5, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
 timer off 1
 timer list 1
 timer clear
 
 
-* 6  : 7  sec
-* 10 : 19 sec
-* 10 : 71 sec full controls
-* 20 : 210 sec
-* 20 : 774 sec full controls
-* 30 : 2100 sec full controls (same time for distance )  ; the distance cutoff doesn't matter for significance
 
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post post constant if rcg<=20, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
-timer off 1
-timer list 1
-timer clear
-
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post  post constant if rcg<=30, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
-timer off 1
-timer list 1
-timer clear
-
-reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  if rcg<=30, cluster(cluster_joined) r
-
-
-
-
-
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post  post constant if rcg<=40, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
-timer off 1
-timer list 1
-timer clear
-
-reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  if rcg<=40, cluster(cluster_joined) r
+* timevar(time) panelvar(district) lat(y) lon(x) distcutoff(1000) lagcutoff(20)
+* reg2hdfespatial-id1id2.ado
 
 
 /*
