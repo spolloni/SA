@@ -9,6 +9,9 @@ global V="_4"
 
 
 
+* grid_overlap_drop_placebo has multiple hypothesis testing
+* R has spatial clustering test (and grid_overlap_results creates the output that R uses)
+
 ** key files
 
 *** OUTPUT : grid_overlap_results.do

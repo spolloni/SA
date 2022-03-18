@@ -85,9 +85,9 @@ Standard errors are clustered at the project level (in parentheses).
 \begin{document}
 
 \begin{titlepage} 
-\title{{Public Housing Spillovers: Evidence from South Africa}\thanks{We are grateful to Andrew Foster, Daniel Bjorkegren, Matthew Turner, Jesse Shapiro, Brian Knight, and John Friedman for their feedback and advice.  We also thank Adelaide Steedley and the Centre for Affordable Housing and Finance in Africa as well as GeoTerraImage for generous research guidance and for providing data without which this project would not have been possible.  Any opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views of the Federal Trade Commission or its Commissioners.}}
+\title{{Public Housing Spillovers:  Evidence from South Africa}\thanks{We are grateful to Andrew Foster, Daniel Bjorkegren, Matthew Turner, Jesse Shapiro, Brian Knight, and John Friedman for their feedback and advice.  We also thank Adelaide Steedley and the Centre for Affordable Housing and Finance in Africa as well as GeoTerraImage for generous research guidance and for providing data without which this project would not have been possible.  Any opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views of the Federal Trade Commission or its Commissioners.}}
 \author{\\[3em] Benjamin H. Bradlow\thanks{Weatherhead Center for International Affairs, Harvard University, Boston, MA.  E-mail: bhbradlow@fas.harvard.edu}\\
- Stefano Polloni\thanks{Mapdwell, Boston, MA.  E-mail: stefano@mapdwell.com}\\ 
+ Stefano Polloni\thanks{Mapdwell, Boston, MA.   E-mail: stefano@mapdwell.com}\\ 
   William Violette\thanks{Federal Trade Commission, Washington, DC. E-mail: william.j.violette@gmail.com} \\
  \\ 
   }
@@ -261,7 +261,7 @@ Figure \ref{figure:map} maps the sample of constructed and unconstructed project
 
 % To measure the spatial impacts of housing projects, we overlay 10 hm by 10 hm grids on all areas within 40 hm of housing projects.
 
-To measure spatial impacts of housing projects similarly across multiple data sources, we overlay square hectare plots of land (10,000 square meters or 1 square hectometer ``hm'') across all land within 4 km of projects.  We exclude plots where development is infeasible because they intersect with rivers, lakes, and/or mining excavation areas (10\% of total plots), which results in a total of 435,889 plots.  We then measure all spatial outcomes at the plot level.
+To measure spatial impacts of housing projects similarly across multiple data sources, we overlay square hectare plots of land (10,000 square meters or 1 square hectometer ``hm'') across all land within 4 km of projects.  We exclude plots where development is infeasible because they intersect with rivers, lakes, and/or mining excavation areas (10\% of total plots), which results in a total of 435,889 plots.  We then measure all spatial outcomes at the plot level. 
 
 We measure local physical development by counting the number of houses, businesses, and public service buildings in each plot in 2001 and 2012.  We use hand-coded building data from 2001 and 2012 derived from high-resolution aerial and satellite imagery obtained through a partnership with GeoTerraImage (Pty) ltd., a local remote-sensing specialist.\footnote{\href{http://www.geoterraimage.com/}{\tt http://www.geoterraimage.com/}} The data classify buildings into 30 categories, including formal and informal houses. Informal houses are easily identified from their temporary nature, often made of materials such as recycled wood and corrugated metal. In contrast, formal houses are permanent, generally made out of brick and may have a pitched or a flat roof with tiles, zinc panels, or other materials.\footnote{As a validation exercise, we find high correlations ($\geq$0.85) between formal and informal house counts and similar counts in census data from 2001 and 2011.}  The data also distinguish between non-backyard and backyard informal houses, which are often constructed on the same land plots as formal houses.  Beyond houses, we observe schools, health centers, water utility buildings, electricity buildings, and both formal and informal businesses.  
 % We construct outcome variables by counting the number of each type of building in each plot and year.
@@ -1190,7 +1190,38 @@ This table shows the direct and spillover effects of constructed housing project
 
 
 
-
+\begin{table}[ht!]
+\small
+\centering
+\caption{Correlations }\label{table:densitycorr}
+\vspace{-2mm}
+% \resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCC}
+\toprule
+ &Pre & Post \\
+Mean &  & \\
+\midrule
+Remote Sensing Data  \\
+\hspace{1cm} Formal Building Density& \input{figures/for_pre_mean} & \input{figures/for_post_mean} \\
+\hspace{1cm} Informal Building Density & \input{figures/inf_pre_mean} & \input{figures/inf_post_mean} \\
+Census Data  \\
+\hspace{1cm} Formal Building Density& \input{figures/ford_pre_mean} & \input{figures/ford_post_mean} \\
+\hspace{1cm} Informal Building Density & \input{figures/infd_pre_mean} & \input{figures/infd_post_mean} \\
+\\
+Correlation of Remote Sensing Data and Census Data \\
+\midrule
+\hspace{1cm} Formal Building Density & \input{figures/for_pre_corr} & \input{figures/for_post_corr} \\
+\hspace{1cm} Informal Building Density & \input{figures/inf_pre_corr} & \input{figures/inf_post_corr} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize 
+ \regtextfirst This table shows the mean building density measures calculated using the census data and using the remote sensing data as well as the correlations between the datasets.  Building density is measured in terms of building per hectare.
+\end{tablenotes}
+\end{threeparttable}
+% }
+\end{table}
 
 
 

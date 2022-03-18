@@ -92,20 +92,15 @@ ren OGC_FID area_code
   drop _merge
 
 
-* ren id grid_id
-*   merge m:1 grid_id using   "temp/ea_2001_grid.dta"
-*   drop if _merge==2
-*   drop _merge
-* ren grid_id id
+g hh_density  = (10000)*(hh_pop/area)
+replace hh_density=. if hh_density>2000
 
-*   merge m:1 OGC_FID  post using  "temp/ghs_agg.dta"
-*   drop if _merge==2
-*   drop _merge
-
-
+g for_density = hh_density*formal
+g inf_density = hh_density*informal
 
 g pop_density  = (10000)*(person_pop/area)
 replace pop_density=. if pop_density>2000
+
 
 g kids_density =  (10000)*(kids_pop/area)
 replace kids_density=. if kids_density>2000
@@ -277,48 +272,10 @@ forvalues r=1/$rset {
 }
 
 
-* forvalues r=1/$rset {
-*   forvalues z = 1/2 {
-*     cap drop s1p_a_`r'_K`z'
-*     cap drop s1p_a_`r'_K`z'_con
-*     cap drop s1p_a_`r'_K`z'_post 
-*     cap drop s1p_a_`r'_K`z'_con_post
-*     g s1p_a_`r'_K`z' = s1p_a_`r'_R + s1p_a_`r'_P
-*     replace s1p_a_`r'_K`z'=0 if s1p_a_`r'_K`z' ==.
-    
-*     g s1p_a_`r'_K`z'_con = s1p_a_`r'_R
-*     replace s1p_a_`r'_K`z'_con=0  if s1p_a_`r'_K`z'_con==.
-
-*     g s1p_a_`r'_K`z'_post = s1p_a_`r'_K`z'*post
-*     g s1p_a_`r'_K`z'_con_post = s1p_a_`r'_K`z'_con*post
-*     if `z'==2 {
-*       foreach var of varlist s1p_a_`r'_K`z'* {
-*         replace `var' = 0 if (proj_rdp>0 & proj_rdp<.)  |  (proj_placebo>0 & proj_placebo<.)
-*       } 
-*     }
-*   }
-* }
-* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_K*  post, cluster(cluster_joined) r
-* reg  pop_density proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_K*  post, cluster(cluster_joined) r
-* coefplot, vertical keep(*K1_con_post)
-* coefplot, vertical keep(*K2_con_post)
 
 
 
 * descriptive_table_print.do
-
-
-
-
-* cap drop tobs
-* g tobs=_N
- * global cat_num=4
-        * print_blank
-        * print_obs "Total Households" cobs "%10.0fc" 
-  
-  * file write newfile " & Mean & SD & Min & Max \\ " _n  
 
 
 foreach var of varlist s1p_*_C* s1p_a_*_R s1p_a_*_P S2_*_post  {
@@ -342,6 +299,15 @@ forvalues r=1/8 {
   g As1p_a_`r'_C_post = s1p_a_`r'_C_post/`=r(sd)'
   g As1p_a_`r'_C_con_post = s1p_a_`r'_C_con_post/`=r(sd)'
 }
+
+
+**
+
+* how are formal and informal defined in the two?
+
+* cd ../..
+* cd $output
+
 
 
 
@@ -390,16 +356,6 @@ reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
 
 
 
-gegen cjtag=tag(cluster_joined)
-
-set seed 3
-g rn = runiform()
-sort cjtag rn
-by cjtag: g rnn=_n
-replace rnn=. if cjtag!=1
-
-gegen rcg = max(rnn), by(cluster_joined)
-
 g constant=1
 g x = XX/100000
 g y = YY/100000
@@ -415,202 +371,11 @@ reg for post proj_C proj_C_con proj_C_post proj_C_con_post
 
 reg for post proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post, cluster(cluster_joined)
 
-* s1p_a_1_C + s1p_a_1_C_con +s1p_a_1_C_post +s1p_a_1_C_con_post +s1p_a_2_C +s1p_a_2_C_con+ s1p_a_2_C_post+ s1p_a_2_C_con_post +s1p_a_3_C +s1p_a_3_C_con +s1p_a_3_C_post+ s1p_a_3_C_con_post +s1p_a_4_C+ s1p_a_4_C_con +s1p_a_4_C_post+ s1p_a_4_C_con_post+ s1p_a_5_C +s1p_a_5_C_con +s1p_a_5_C_post +s1p_a_5_C_con_post+ s1p_a_6_C +s1p_a_6_C_con +s1p_a_6_C_post +s1p_a_6_C_con_post+ s1p_a_7_C +s1p_a_7_C_con +s1p_a_7_C_post +s1p_a_7_C_con_post +s1p_a_8_C +s1p_a_8_C_con +s1p_a_8_C_post +s1p_a_8_C_con_post
-
-
-/*
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if rcg<=5, lat(y) lon(x) dist(4) timevar(post) panelvar(id) lagcutoff(0) display
-timer off 1
-timer list 1
-timer clear
-
-
-* 6  : 7  sec
-* 10 : 19 sec
-* 10 : 71 sec full controls
-* 20 : 210 sec
-* 20 : 774 sec full controls
-* 30 : 2100 sec full controls (same time for distance )  ; the distance cutoff doesn't matter for significance
-
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post post constant if rcg<=20, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
-timer off 1
-timer list 1
-timer clear
-
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post  post constant if rcg<=30, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
-timer off 1
-timer list 1
-timer clear
-
-reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  if rcg<=30, cluster(cluster_joined) r
 
 
 
 
 
-timer on 1
-ols_spatial_HAC for proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post  post constant if rcg<=40, lat(y) lon(x) dist(4) timevar(post) panelvar(id)
-timer off 1
-timer list 1
-timer clear
-
-reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  if rcg<=40, cluster(cluster_joined) r
-
-
-/*
-
-* global regset = "(rdp_distance<3000 | placebo_distance<3000) & proj_rdp==0 & proj_placebo==0"
-* keep if distance_rdp<3000 | distance_placebo<3000
-
-
-
-* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
-
-
-
-  * local pmean "217583"
-  * local v "for"
-  *     cap drop CA
-  *     g CA       = `pmean' if slope>=0 & slope<.
-  *     replace CA = `pmean' + (`pmean'*.12*.25) + (`pmean'*.62*.05)  if slope>=.06 & slope<.12
-  *     replace CA = `pmean' + (`pmean'*.12*.50) + (`pmean'*.62*.15)  if slope>=.12 & slope<.
-
-  *   qui reg `v' proj_C proj_C_con proj_C_post proj_C_con_post ///
-  *   s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  CA cD rD, cluster(cluster_joined) r 
-
-  *   cap drop pp
-  *   predict pp, xb
-
-  *   cap drop pp_pre
-  *   g pp_pre  = ((pp  - _b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
-  *   cap drop pp_post
-  *   g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
-  *   cap drop diff
-  *   g diff = (pp_post - pp_pre)
-
-  *   sum diff, detail
-  *   disp (`=r(mean)'*(_N/2)/166)/1000000
-  *   local est1_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
-
-
-  *   cap drop pp_pre
-  *   g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post )^2)/(-_b[CA]*2)  if post==1
-  *   cap drop pp_post
-  *   g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
-  *   cap drop diff
-  *   g diff = (pp_post - pp_pre)
-
-  *   sum diff, detail
-  *   disp (`=r(mean)'*(_N/2)/166)/1000000
-  *   local est2_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
-
-  *   cap drop pp_pre
-  *   g pp_pre  = ((pp  - _b[proj_C_con_post]*proj_C_con_post - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post )^2)/(-_b[CA]*2)  if post==1
-  *   cap drop pp_post
-  *   g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
-  *   cap drop diff
-  *   g diff = (pp_post - pp_pre)
-
-  *   sum diff, detail
-  *   disp (`=r(mean)'*(_N/2)/166)/1000000
-  *   local est2_`v' `=(`=r(mean)'*(_N/2)/166)/1000000'
-
-
-  *   disp `est1_`v''+`est2_`v''
-
-
-
-* set seed 10
-
-* forvalues r=1/10 {
-*   preserve
-*     bsample, cluster(cluster_joined)
-
-*   restore
-* }
-
-
-* global pmean = 161000
-* * global pmean = 217583
-* * global pmean = 336000
-
-* * use CAHF
-* * then USE AECOM
-
-* * global pmean = 100000
-
-*   local pmean "161000"
-*     cap drop CA
-*     g CA       = `pmean' if slope>=0 & slope<.
-*     replace CA = `pmean' + (`pmean'*.12*.25) + (`pmean'*.62*.05)  if slope>=.06 & slope<.12
-*     replace CA = `pmean' + (`pmean'*.12*.50) + (`pmean'*.62*.15)  if slope>=.12 & slope<.
-
-
-*  reg total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-*   s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post  CA cD rD, cluster(cluster_joined) r 
-
-* cap drop pp
-* predict pp, xb
-
-* cap drop pp_pre
-* g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post - _b[proj_C_con_post]*proj_C_con_post)^2)/(-_b[CA]*2)  if post==1
-* cap drop pp_post
-* g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
-* cap drop diff
-* g diff = (pp_post - pp_pre)
-
-* sum diff, detail
-* disp (`=r(mean)'*(_N/2)/166)/1000000
-
-
-* cap drop pp_pre
-* g pp_pre  = ((pp  - _b[s1p_a_1_C_con_post]*s1p_a_1_C_con_post )^2)/(-_b[CA]*2)  if post==1
-* cap drop pp_post
-* g pp_post = ((pp   )^2)/(-_b[CA]*2)  if post==1
-* cap drop diff
-* g diff = (pp_post - pp_pre)
-
-* sum diff, detail
-* disp (`=r(mean)'*(_N/2)/166)/1000000
-
-
-
-* * cd ../../..
-* * cd $output
-
-
-* * wel 161000 20 low 1
-* wel 217583 20 med 0
-* * wel 336000 20 hig 1
-
-* ** Amed
-* g CA1 = CA/1000000
-* lab var for "(1)&(2)\\[.5em] &Formal Houses"
-* lab var inf "Informal Houses \\ \midrule \\[-.6em]"
-* global cellsp   = 2
-* global cells    = 2
-* est_wel welfare_est
-
-
-
-
-
-
-* reg for proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
-* reg for proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD roadD, cluster(cluster_joined) r
-* reg inf proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
-* reg inf proj_C proj_C_con proj_C_post proj_C_con_post ///
-*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post CA cD roadD, cluster(cluster_joined) r
 
 
 
@@ -679,6 +444,7 @@ replace B1_alt = 0 if B_alt==.
 
 * reg B1 s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
 * reg B1_alt s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
+
 
 
 
@@ -862,6 +628,37 @@ global dist     = 0
 rfull agglom
 
 
+
+
+*** MAKE CORRELATION TABLE ***
+sum for if post==0
+write for_pre_mean.tex `=r(mean)' .001 %10.2fc
+sum for if post==1
+write for_post_mean.tex `=r(mean)' .001 %10.2fc
+sum inf if post==0
+write inf_pre_mean.tex `=r(mean)' .001 %10.2fc
+sum inf if post==1
+write inf_post_mean.tex `=r(mean)' .001 %10.2fc
+
+sum for_density if post==0
+write ford_pre_mean.tex `=r(mean)' .001 %10.2fc
+sum for_density if post==1
+write ford_post_mean.tex `=r(mean)' .001 %10.2fc
+
+sum inf_density if post==0
+write infd_pre_mean.tex `=r(mean)' .001 %10.2fc
+sum inf_density if post==1
+write infd_post_mean.tex `=r(mean)' .001 %10.2fc
+
+
+corr for for_density if post==0
+write for_pre_corr.tex `=r(rho)' .0001 %10.3fc
+corr for for_density if post==1
+write for_post_corr.tex `=r(rho)' .0001 %10.3fc
+corr inf inf_density if post==0
+write inf_pre_corr.tex `=r(rho)' .0001 %10.3fc
+corr inf inf_density if post==1
+write inf_post_corr.tex `=r(rho)' .0001 %10.3fc
 
 
 * foreach var of varlist tot_rooms owner electric_lighting toilet_flush water_inside  {
