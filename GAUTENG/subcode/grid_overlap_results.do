@@ -81,6 +81,14 @@ ren id grid_id
   drop _merge
 ren grid_id id
 
+  merge m:1 id using "grid_to_cbd_100.dta"
+  drop if _merge==2
+  drop _merge
+
+  merge m:1 id using "grid_to_ways_100.dta"
+  drop if _merge==2
+  drop _merge
+
 
 ren OGC_FID area_code
   merge m:1 area_code year using  "temp_censushh_agg${V}.dta"
@@ -91,6 +99,9 @@ ren OGC_FID area_code
   drop if _merge==2
   drop _merge
 
+
+replace mdist_cbd=mdist_cbd/1000
+replace mdist_ways=mdist_ways/1000
 
 g hh_density  = (10000)*(hh_pop/area)
 replace hh_density=. if hh_density>2000
@@ -116,6 +127,8 @@ replace kids_per = 1 if kids_per>1 & kids_per<.
 fmerge m:1 id using "grid_elevation_100_4000.dta"
 drop if _merge==2
 drop _merge
+
+replace height = height/1000
 
 ren id grid_id
    fmerge m:1 grid_id post using "temp/grid_price.dta"
@@ -348,11 +361,20 @@ global dist = 0
 * rfull demo_true_test
 
 
-bm_weight 10000
 
 
-reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+bm_weight 1
+
+
+
+*** Test whether it works to split the regs and it works!
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+* reg  total_buildings s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_C==0, cluster(cluster_joined) r
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post post if proj_C!=0, cluster(cluster_joined) r
+  
+
+
 
 
 
@@ -367,18 +389,11 @@ sort cluster_joined post
 restore
 
 
-reg for post proj_C proj_C_con proj_C_post proj_C_con_post
-
-reg for post proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post, cluster(cluster_joined)
 
 
-
-
-
-
-
-
-
+*******************
+**** HERE'S WHERE THE KEY ANALYSIS STARTS
+*******************
 
 
 
@@ -386,7 +401,6 @@ reg for post proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con 
 
 cd ../..
 cd $output
-
 
 
 
@@ -410,10 +424,6 @@ replace B1 = 0 if B==.
 replace B1_alt = 0 if B_alt==.
 
  * reg ln_P s1p_a_*_C*  CA cD rD if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r 
-
-
-* cd ../../..
-* cd $output
 
 
 
@@ -444,6 +454,10 @@ replace B1_alt = 0 if B_alt==.
 
 * reg B1 s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
 * reg B1_alt s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_rdp==0 & proj_placebo==0, cluster(cluster_joined) r
+
+
+
+
 
 
 
@@ -494,17 +508,14 @@ cplot "gr_house_sd" "red"
 
 
 
-
-
-
+global price = 0
 global dist     = 0
 
 
-* lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People per $\text{km}^{2}$"
-* lab var total_buildings "Houses per $\text{km}^{2}$"
-* lab var for "Formal houses per $\text{km}^{2}$"
-* lab var inf "Informal houses per $\text{km}^{2}$"
-* lab var inf_backyard "Informal backyard houses per $\text{km}^{2}$ \\ \midrule \\[-.6em]"
+
+* cd ../../..
+* cd $output
+
 
 lab var pop_density "(1)&(2)&(3)&(4)&(5)\\[.5em] &People"
 lab var total_buildings "Houses"
@@ -512,34 +523,34 @@ lab var for "Formal Houses"
 lab var inf "Informal Houses"
 lab var inf_backyard "Informal Backyard Houses \\ \midrule \\[-.6em]"
 
-
-* lab var ln_P "Log(Price) per transaction \\ \midrule \\[-.6em]"
- * ln_P
-
+* set rmsg on
 
 
 global cellsp   = 3
 global cells    = 3
 global outcomes = "pop_density total_buildings for inf inf_backyard"
 
+    wyoung pop_density total_buildings , cmd(reg OUTCOMEVAR s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_C==0, cluster(cluster_joined) r) familyp(s1p_a_1_C_con_post) bootstraps(1) seed(123) cluster(cluster_joined)
+    mat list r(table)
+      mat define ET1=r(table)
+
+    wyoung for inf , cmd(reg OUTCOMEVAR s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_C==0, cluster(cluster_joined) r) familyp(s1p_a_1_C_con_post) bootstraps(1) seed(123) cluster(cluster_joined)
+    mat list r(table)
+      mat define ET2=r(table)
+
+    wyoung inf_backyard , cmd(reg OUTCOMEVAR s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post if proj_C==0, cluster(cluster_joined) r) familyp(s1p_a_1_C_con_post) bootstraps(1) seed(123) cluster(cluster_joined)
+    mat list r(table)
+      mat define ET3=r(table)
+
+    mat ET = ET1\ET2\ET3
+    mat list ET
+
 global dist     = 0
-rfull main_new
+rfull main_new_spill "supplied"
 
 global dist    = 1 
-rfull main_new
+rfull main_new_spill "supplied"
 global dist    = 0
-
-
-* sum proj_C_con, detail
-* disp  ((`=r(mean)'*(_N/2))/$pc)
-*   disp 618 * ((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
-
-* sum s1p_a_1_C_con, detail
-* disp  ((`=r(mean)'*(_N/2))/$pc)
-*   disp 618 * ((`=r(mean)'*(_N/2))/$pc) * (1/(1000000/($grid*$grid)))
-
-
- * estimate 
 
 
 
@@ -708,172 +719,320 @@ end
 
 
   
-  g cluster_b1_area_temp=(cluster_b1_area - cluster_area)/10000
-    forvalues r=2/8 {
-      local r0 `=`r'-1'
-      g cluster_b`r'_area_temp = (cluster_b`r'_area - cluster_b`r0'_area)/10000
+  * g cluster_b1_area_temp=(cluster_b1_area - cluster_area)/10000
+  *   forvalues r=2/8 {
+  *     local r0 `=`r'-1'
+  *     g cluster_b`r'_area_temp = (cluster_b`r'_area - cluster_b`r0'_area)/10000
+  *   }
+
+  *   file open newfile using "spill_RP.tex", write replace
+  *   forvalues r=1/8 {
+  *     local r1 "`=(`r'-1)*5'"
+  *     local r2 "`=(`r')*5'"
+  *     print_3t "\hspace{3em} `=`r1'' - `=`r2'' " cluster_b`r'_area_temp  s1p_a_`r'_R s1p_a_`r'_P mean "%10.3fc"
+  *     drop cluster_b`r'_area_temp
+  *   }
+  *   file close newfile
+
+
+  *   file open newfile using "proj_RP.tex", write replace
+  *     g cluster_area_temp = cluster_area/10000
+  *     print_3t "\hspace{2em}Plots " cluster_area_temp proj_rdp proj_placebo mean "%10.3fc"
+  *     drop cluster_area_temp
+  *   file close newfile
+
+
+
+
+
+
+cap prog drop print_1r
+program print_1r
+    file write newfile " `1' "
+
+      * reg `2' t1_R if post==0 & (t1_R==1 | t1_P==1), cluster(cluster_joined)
+      * local t = _b[t1_R]/_se[t1_R]
+      * local rr = 2*ttail(e(df_r),abs(`t'))
+      * global ss=""
+      * if `rr'<=.01 {
+      *   global ss = "a"
+      * }
+      * if `rr'>.01 & `rr'<=.05 {
+      *   global ss = "b"
+      * }
+      * if `rr'>.05 & `rr'<=.10 {
+      *   global ss = "c"
+      * }
+      * sum `2' if post==0 & t1_P==1, detail
+      * local value=string(`=r(`3')',"`4'")
+      * file write newfile " & `value'\,\,\, "
+      * sum `2' if post==0 & t1_R==1, detail
+      * local value=string(`=r(`3')',"`4'")
+      * disp "$ss"
+      * if `rr'<=.10 {
+      *   file write newfile " & \$`value'^{$ss}\$ "
+      * }
+      * if `rr'>.10 {
+      *   file write newfile " & `value'\,\,\, "
+      * }
+
+    forvalues k=1/3 {
+      sum `2' if post==0 & t`k'_P==1, detail
+      local value=string(`=r(`3')',"`4'")
+      file write newfile " & `value'\,\,\, "
+      foreach v in R B {
+        * reg `2' t`k'_R t`k'_B if post==0 & (t`k'_R==1 | t`k'_P==1 | t`k'_B==1), cluster(cluster_joined)
+        reg `2' t`k'_`v' if post==0 & (t`k'_`v'==1 | t`k'_P==1 ), cluster(cluster_joined)
+        local t = _b[t`k'_`v']/_se[t`k'_`v']
+        local rr = 2*ttail(e(df_r),abs(`t'))
+        global ss=""
+        if `rr'<=.01 {
+          global ss = "a"
+        }
+        if `rr'>.01 & `rr'<=.05 {
+          global ss = "b"
+        }
+        if `rr'>.05 & `rr'<=.10 {
+          global ss = "c"
+        }        
+        sum `2' if post==0 & t`k'_`v'==1, detail
+        local value=string(`=r(`3')',"`4'")
+        disp "$ss"
+        if `rr'<=.10 {
+          file write newfile " & \$`value'^{$ss}\$ "
+        }
+        if `rr'>.10 {
+          file write newfile " & `value'\,\,\, "
+        }
+      }
     }
 
-    file open newfile using "spill_RP.tex", write replace
-    forvalues r=1/8 {
-      local r1 "`=(`r'-1)*5'"
-      local r2 "`=(`r')*5'"
-      print_3t "\hspace{3em} `=`r1'' - `=`r2'' " cluster_b`r'_area_temp  s1p_a_`r'_R s1p_a_`r'_P mean "%10.3fc"
-      drop cluster_b`r'_area_temp
+    file write newfile " \\[.15em] " _n
+end
+
+
+
+
+
+cap prog drop print_1r_price
+program print_1r_price
+    file write newfile " `1' "
+    file write newfile " & & & "
+
+    forvalues k=2/3 {
+      sum `2' if post==0 & t`k'_P==1, detail
+      local value=string(`=r(`3')',"`4'")
+      file write newfile " & `value'\,\,\, "
+      foreach v in R B {
+        * reg `2' t`k'_R t`k'_B if post==0 & (t`k'_R==1 | t`k'_P==1 | t`k'_B==1), cluster(cluster_joined)
+        reg `2' t`k'_`v' if post==0 & (t`k'_`v'==1 | t`k'_P==1 ), cluster(cluster_joined)
+        local t = _b[t`k'_`v']/_se[t`k'_`v']
+        local rr = 2*ttail(e(df_r),abs(`t'))
+        global ss=""
+        if `rr'<=.01 {
+          global ss = "a"
+        }
+        if `rr'>.01 & `rr'<=.05 {
+          global ss = "b"
+        }
+        if `rr'>.05 & `rr'<=.10 {
+          global ss = "c"
+        }        
+        sum `2' if post==0 & t`k'_`v'==1, detail
+        local value=string(`=r(`3')',"`4'")
+        disp "$ss"
+        if `rr'<=.10 {
+          file write newfile " & \$`value'^{$ss}\$ "
+        }
+        if `rr'>.10 {
+          file write newfile " & `value'\,\,\, "
+        }
+      }
     }
-    file close newfile
 
 
-    file open newfile using "proj_RP.tex", write replace
-      g cluster_area_temp = cluster_area/10000
-      print_3t "\hspace{2em}Plots " cluster_area_temp proj_rdp proj_placebo mean "%10.3fc"
-      drop cluster_area_temp
-    file close newfile
+    file write newfile " \\[.15em] " _n
+end
 
 
-
-
-
-
-
-
-
-
-* g treat_R = 1 if proj_rdp==1 & proj_placebo==0 & post==0 
-* replace treat_R=2 if (s2p_a_1_R>0 | s2p_a_2_R>0)  & proj_rdp==0 & proj_placebo==0 & post==0 
-* replace treat_R=3 if (s2p_a_1_R==0 & s2p_a_2_R==0) & proj_rdp==0 & proj_placebo==0 & post==0 
-
-* g treat_P=1 if proj_placebo==1 & proj_rdp==0 & post==0
-* replace treat_P=2 if (s2p_a_1_P>0 | s2p_a_2_P>0)  & proj_rdp==0 & proj_placebo==0 & post==0 
-* replace treat_P=3 if (s2p_a_1_P==0 & s2p_a_2_P==0) & proj_rdp==0 & proj_placebo==0 & post==0 
 
 g o_bblu = 1 if for!=.
 g o_census = 1 if pop_density!=.
 g o_price = 1 if P!=.
 
 
-cap drop treat_R
-cap drop treat_P
-g treat_R = 1 if proj_rdp==1 & post==0 
-replace treat_R=2 if (s2p_a_1_R>0 | s2p_a_2_R>0)  & proj_rdp==0 & post==0 
-replace treat_R=3 if (s2p_a_1_R==0 & s2p_a_2_R==0) & proj_rdp==0  & post==0 
 
-g treat_P=1 if proj_placebo==1 & post==0
-replace treat_P=2 if (s2p_a_1_P>0 | s2p_a_2_P>0)  & proj_placebo==0 & post==0 
-replace treat_P=3 if (s2p_a_1_P==0 & s2p_a_2_P==0) & proj_placebo==0 & post==0 
+* cap drop treat_R
+* cap drop treat_P
+* g treat_R = 1 if proj_rdp==1 & post==0 
+* replace treat_R=2 if (s2p_a_1_R>0 | s2p_a_2_R>0)  & proj_rdp==0 & post==0 
+* replace treat_R=3 if (s2p_a_1_R==0 & s2p_a_2_R==0) & proj_rdp==0  & post==0 
 
-global cat1 = " if treat_R==1"
-global cat2 = " if treat_R==2"
-global cat3 = " if treat_R==3"
-global cat4 = " if treat_P==1"
-global cat5 = " if treat_P==2"
-global cat6 = " if treat_P==3"
+* g treat_P=1 if proj_placebo==1 & post==0
+* replace treat_P=2 if (s2p_a_1_P>0 | s2p_a_2_P>0)  & proj_placebo==0 & post==0 
+* replace treat_P=3 if (s2p_a_1_P==0 & s2p_a_2_P==0) & proj_placebo==0 & post==0 
 
- global cat_num=6
+
+* g trp1 = 1 if treat_R==1
+* replace trp1 = 0 if treat_P==1
+* g trp2 = 1 if treat_R==2
+* replace trp2 = 0 if treat_P==2
+* g trp3 = 1 if treat_R==3
+* replace trp3=0 if treat_P==3
+
+g i_R = proj_rdp>0 & proj_rdp<.
+g i_P = proj_placebo>0 & proj_placebo<.
+
+g n_R = (s2p_a_1_R>0 | s2p_a_2_R>0)
+g n_P = (s2p_a_1_P>0 | s2p_a_2_P>0)
+
+g n2_R = 0
+g n2_P = 0
+forvalues r=3/8 {
+  replace n2_R = 1 if s2p_a_`r'_R>0 & s2p_a_`r'_R<.
+  replace n2_P = 1 if s2p_a_`r'_P>0 & s2p_a_`r'_P<.
+}
+
+
+g t1_R = i_R==1 & i_P==0
+g t1_P = i_R==0 & i_P==1
+g t1_B = i_R==1 & i_P==1
+g t2_R = proj_rdp==0 & proj_placebo==0 & n_R==1 & n_P==0
+g t2_P = proj_rdp==0 & proj_placebo==0 & n_R==0 & n_P==1
+g t2_B = proj_rdp==0 & proj_placebo==0 & n_R==1 & n_P==1
+g t3_R = t1_R==0 & t1_P==0 & t2_R==0 & t2_P==0 & t2_B==0  & n2_R==1 & n2_P==0  
+g t3_P = t1_R==0 & t1_P==0 & t2_R==0 & t2_P==0 & t2_B==0  & n2_R==0 & n2_P==1
+g t3_B = t1_R==0 & t1_P==0 & t2_R==0 & t2_P==0 & t2_B==0  & n2_R==1 & n2_P==1
+
+
+* g tvar=0
+* foreach var of varlist t1_R t1_P t2_R t2_P t2_B t3_R t3_P t3_B {
+*   tab `var'
+*   replace tvar=1 if `var'==1
+* }
+* tab tvar
+
+
 
 * " util_water util_energy util_refuse health school shops shops_inf "
 
 
-
-
-    file open newfile using "pre_table_bblu.tex", write replace
-    * file open newfile using "pre_table_bblu_1.tex", write replace
-          * print_1 "\hspace{1em}Houses" total_buildings "mean"                 "%10.1fc"          
-          print_1 "\hspace{1em}Formal houses" for "mean"                      "%10.2fc"
-          print_1 "\hspace{1em}Informal houses" inf "mean"                    "%10.2fc"
-          * print_1 "\hspace{1em}Informal backyard houses" inf_backyard "mean"  "%10.1fc"
-          * print_1 "\hspace{1em}Water utility buildings" util_water "mean"     "%10.1fc"
-          * print_1 "\hspace{1em}Electricity utility buildings" util_energy "mean" "%10.1fc"
-          print_1 "\hspace{1em}Health centers" health "mean"                  "%10.3fc"
-          print_1 "\hspace{1em}Schools" school "mean"                         "%10.2fc"
-          print_1 "\hspace{1em}Shops" shops "mean"                            "%10.2fc"
-          * print_1 "\hspace{1em}Informal Shops" shops_inf "mean"               "%10.1fc"
-          print_1 "\hspace{1em}Observations" o_bblu "N"                      "%10.0fc"
+    file open newfile using "pre_table_bblur.tex", write replace       
+          print_1r "\hspace{1em}Formal houses" for "mean"                      "%10.2fc"
+          print_1r "\hspace{1em}Informal houses" inf "mean"                    "%10.2fc"
+          print_1r "\hspace{1em}Health centers" health "mean"                  "%10.3fc"
+          print_1r "\hspace{1em}Schools" school "mean"                         "%10.2fc"
+          print_1r "\hspace{1em}Shops" shops "mean"                            "%10.2fc"
+          print_1r "\hspace{1em}Observations" o_bblu "N"                      "%10.0fc"
     file close newfile
 
 
-    file open newfile using "pre_table_census.tex", write replace   
-    * file open newfile using "pre_table_census_1.tex", write replace    
-          print_1 "\hspace{1em}People" pop_density "mean"                      "%10.2fc"
-          print_1 "\hspace{1em}Rooms per house" tot_rooms "mean"                      "%10.2fc"
-          print_1 "\hspace{1em}Owns house" owner "mean"                    "%10.2fc"
-          print_1 "\hspace{1em}Electric lighting" electric_lighting "mean"                  "%10.2fc"
-          print_1 "\hspace{1em}Flush toilet" toilet_flush "mean"                         "%10.2fc"
-          print_1 "\hspace{1em}Piped water inside" water_inside "mean"                            "%10.2fc"
-          print_1 "\hspace{1em}Is Employed" emp_pers "mean"               "%10.2fc"
-          * print_1 "\hspace{1em}Employment" emp_pers "mean"               "%10.2fc"
-          print_1 "\hspace{1em}Household income (Rand)" inc "mean"               "%10.0fc"
-          print_1 "\hspace{1em}Observations" o_census "N"                      "%10.0fc"
+    file open newfile using "pre_table_censusr.tex", write replace   
+          print_1r "\hspace{1em}People" pop_density "mean"                      "%10.2fc"
+          print_1r "\hspace{1em}Rooms per house" tot_rooms "mean"                      "%10.2fc"
+          print_1r "\hspace{1em}Owns house" owner "mean"                    "%10.2fc"
+          print_1r "\hspace{1em}Electric lighting" electric_lighting "mean"                  "%10.2fc"
+          print_1r "\hspace{1em}Flush toilet" toilet_flush "mean"                         "%10.2fc"
+          print_1r "\hspace{1em}Piped water inside" water_inside "mean"                            "%10.2fc"
+          print_1r "\hspace{1em}Is Employed" emp_pers "mean"               "%10.2fc"
+          print_1r "\hspace{1em}Household income (R)" inc "mean"               "%10.0fc"
+          print_1r "\hspace{1em}Observations" o_census "N"                      "%10.0fc"
     file close newfile
 
 
 
-cap prog drop print_1_price
-program print_1_price
-    file write newfile " `1' "
-    forvalues r=1/$cat_num {
-        if `r'==1 | `r'==4 {
-          file write newfile " &  "
-        }
-        else {
-           in_stat newfile `2' `3' `4' "0" "${cat`r'}"
-        }
-        }      
-    file write newfile " \\[.15em] " _n
-end
+    file open newfile using "pre_table_pricesr.tex", write replace    
+      print_1r_price "\hspace{1em}Price (Rand)" P "mean"    "%10.0fc"
+      print_1r_price "\hspace{1em}Observations" o_price "N"                      "%10.0fc"
+    file close newfile
 
-    file open newfile using "pre_table_prices.tex", write replace    
-    * file open newfile using "pre_table_prices_1.tex", write replace    
-      print_1_price "\hspace{1em}Price (Rand)" P "mean"    "%10.0fc"
-      print_1_price "\hspace{1em}Observations" o_price "N"                      "%10.0fc"
+    file open newfile using "pre_table_geor.tex", write replace    
+      print_1r "\hspace{1em}Distance to CBD (km)" mdist_cbd "mean"    "%10.1fc"
+      print_1r "\hspace{1em}Distance to Major Highway (km)" mdist_ways "mean"    "%10.1fc"
+      print_1r "\hspace{1em}Elevation (km)" height "mean"    "%10.2fc"
+    file close newfile
+
+
+    file open newfile using "pre_table_proj_statsr.tex", write replace 
+    file write newfile " Number of Projects & 140\,\,\, & 166\,\,\,  \\[.15em]  "
+    file write newfile " Average Project Area (ha) & 119\,\,\, & 118\,\,\,   \\[.15em]  "
     file close newfile
 
 
 
-cap prog drop print_1_proj
-program print_1_proj
-    file write newfile " `1' "
-    forvalues r=1/$cat_num {
-        if `r'==1 | `r'==4 {
-          in_stat newfile `2' `3' `4' "0" "${cat`r'}"
-        }
-        else {
-           file write newfile " &  "
-        }
-        }      
-    file write newfile " \\[.15em] " _n
-end
+* Make treatment table TABLE
 
 
 
-    file open newfile using "pre_table_proj_stats.tex", write replace 
-    * file open newfile using "pre_table_proj_stats_1.tex", write replace    
-
-    file write newfile " Number of Projects & 166 & 166 & 166 & 140 & 140 & 140 \\[.15em]  "
-    file write newfile " Average Project Area (ha) & 118 & 118 & 118 & 119 & 119 & 119  \\[.15em]  "
-      * print_1 "Number of Projects" p_count "mean"    "%10.0fc"
-      * print_1 "Average Project Area ($\text{km}^{2}$)" p_size "mean"                      "%10.2fc"
-    file close newfile
-
-* cap drop p_count
-* g p_count = $pc if treat_R ==1 | treat_R ==2 |  treat_R ==3
-* replace p_count = $pu if treat_P ==1 | treat_P ==2 |  treat_P ==3
-* cap drop p_size
-* g p_size = 1.18 if treat_R ==1 | treat_R ==2 |  treat_R ==3 
-* replace p_size=1.19 if treat_P ==1 | treat_P ==2 |  treat_P ==3
-
-
-
-
-
-* SELECT AVG(K.shape_area) 
-* FROM 
-* (SELECT J.* FROM gcro_publichousing AS J 
-* JOIN
-* placebo_cluster AS R ON J.OGC_FID = R.cluster 
-* LEFT JOIN gcro_over_list AS G ON  R.cluster =                           
-*                        G.OGC_FID WHERE G.dp IS NULL ) AS K
                        
+
+cap prog drop print_1bt
+program print_1bt
+
+    file write newfile " `1' "
+
+    foreach k in P R {
+        sum s1p_a_`2'_`k' if s1p_a_`2'_`k'>0 & s1p_a_`2'_`k'<., detail
+        local value=string(`=r(mean)',"%12.2fc")
+        file write newfile " & `value'  "
+        local value=string(`=r(sd)',"%12.2fc")
+        file write newfile " & `value'  "
+        * local value=string(`=r(min)',"%12.2fc")
+        * file write newfile " & `value'  "
+        local value=string(`=r(max)',"%12.2fc")
+        file write newfile " & `value'  "
+        local value=string(`=r(N)',"%12.0fc")
+        file write newfile " & `value'  "
+    }
+            file write newfile " \\[.15em] " _n
+end
+
+
+
+
+
+file open newfile using "areatreattable.tex", write replace  
+    forvalues r=1/8 { 
+        print_1bt  "\hspace{1em}`=(`r'-1)*.5'-`=`r'*.5'" `r'
+    }
+file close newfile   
+
+
+
+file open newfile using "plottreattable.tex", write replace  
+    file write newfile " Plot "
+
+    foreach k in placebo rdp {
+        sum proj_`k' if proj_`k'>0 & proj_`k'<., detail
+        local value=string(`=r(mean)',"%12.2fc")
+        file write newfile " & `value'  "
+        local value=string(`=r(sd)',"%12.2fc")
+        file write newfile " & `value'  "
+        * local value=string(`=r(min)',"%12.2fc")
+        * file write newfile " & `value'  "
+        local value=string(`=r(max)',"%12.2fc")
+        file write newfile " & `value'  "
+        local value=string(`=r(N)',"%12.0fc")
+        file write newfile " & `value'  "
+    }
+    file write newfile " \\[.15em] " _n
+
+file close newfile   
+
+*** TESTING REGRESSIONS FOR OUTLIERS OF EXPOSURE MEASURE!
+
+* g no_out = 1
+
+* foreach k in R P {
+*   forvalue r=1/8 {
+*     replace no_out = 0 if s1p_a_`r'_`k' >10 & s1p_a_`r'_`k' <.
+*   }
+* }
+
+* reg total_buildings post proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post, cluster(cluster_joined)
+* reg total_buildings post proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post if no_out==1, cluster(cluster_joined)
+
+
 
 
 

@@ -13,7 +13,7 @@ if $LOCAL==1 {;
 };
 
 global gcro_over 		= 0;
-global load_buffer_1 	= 1;
+global load_buffer_1 	= 0;
 global load_grids 		= 0;
 
 * global load_buffer_2 	= 0; 
@@ -21,6 +21,8 @@ global merge_all  		= 0;
 global undev   			= 0;
 global elev   			= 0;
 
+global cbd          = 1;
+global ways 			  = 1;
 
 global grid = "100";
 global dist_break_reg1 = "500";
@@ -332,6 +334,49 @@ ren grid_id id;
 save "grid_elevation_100_4000.dta", replace;
 
 };
+
+
+
+if $cbd == 1 {;
+
+local qry = " 
+SELECT * FROM grid_to_cbd_100
+";
+
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force;
+
+gegen mdist_cbd=min(cbd_distance), by(grid_id);
+drop cbd_distance objectid;
+duplicates drop grid_id, force;
+ren grid_id id;
+
+save "grid_to_cbd_100.dta", replace;
+
+};
+
+
+
+if $ways == 1 {;
+
+local qry = " SELECT * FROM grid_to_ways_100 ";
+odbc query "gauteng";
+odbc load, exec("`qry'") clear; 
+
+destring *, replace force;
+
+gegen mdist_ways=min(ways_distance), by(grid_id);
+drop ways_distance OGC_FID;
+duplicates drop grid_id, force;
+ren grid_id id;
+
+save "grid_to_ways_100.dta", replace;
+
+};
+
+
 
 
 

@@ -49,40 +49,98 @@ merge m:1 id using "undev_100_4000.dta", keep(1) nogen
 ren id grid_id
 
 
-keep if rdp==1
+* keep if rdp==1
+
+* drop if cluster_int>0 & cluster_int<.
 
 
-drop if cluster_int>0 & cluster_int<.
+
+
+cap prog drop print_1b
+program print_1b
+
+    file write newfile " `1' "
+    * sum cluster_b`2'_area  if rdp==0 , detail
+    * local value=string(`=r(mean)',"%12.0fc")
+    * file write newfile " & `value'  "
+
+    forvalues r=0/1 {
+        sum cm`2'  if rdp==`r' , detail
+        local value=string(`=r(mean)',"%12.0fc")
+        file write newfile " & `value'  "
+        * sum b`2'  if rdp==`r' , detail
+        * local value=string(`=r(mean)',"%12.0fc")
+        * file write newfile " & `value'  "
+    }
+    forvalues r=0/1 {
+        sum bm`2'  if rdp==`r'  , detail
+        local value=string(`=r(mean)'/1000000,"%12.3fc")
+        file write newfile " & `value'  "
+    }
+
+            file write newfile " \\[.15em] " _n
+end
+
+
+
 
 
 
 g b1 = b1_int 
 replace b1 = b1_int - cluster_int if cluster_int!=.
+replace b1 = . if b1==0
+
 forvalues r=2/8 {
     g b`r' = b`r'_int
     replace b`r' = b`r'_int - b`=`r'-1'_int if b`=`r'-1'_int!=.
     replace b`r' = . if b`r'==0
 }
 
-gegen ctag = tag(cluster)
-
-
 forvalues r=1/8 {
-    gegen bm`r'_temp = mean(b`r'), by(cluster)
-    replace bm`r'_temp = . if ctag!=1
-    egen bm`r' = mean(bm`r'_temp)
-    drop bm`r'_temp
+    replace b`r' = . if cluster_int>0 & cluster_int<.
 }
 
-forvalues r=1/8 {
+g b0 = cluster_int if cluster_int>0 & cluster_int<.
+
+
+gegen ctag = tag(cluster rdp)
+
+
+forvalues r=0/8 {
+    g otemp=b`r'!=.
+    gegen cm`r'_temp = sum(otemp), by(cluster rdp)
+    gegen bm`r'_temp = mean(b`r'), by(cluster rdp)
+    replace cm`r'_temp = . if ctag!=1
+    replace bm`r'_temp = . if ctag!=1
+    gegen bm`r' = mean(bm`r'_temp), by(rdp)
+    gegen cm`r' = mean(cm`r'_temp), by(rdp)
+    drop bm`r'_temp cm`r'_temp otemp
+}
+
+forvalues r=0/8 {
     sum bm`r'
 }
 
-keep bm*
-keep if _n==1
-save "bm", replace
+preserve
+    keep bm*
+    keep if _n==1
+    save "bm", replace
+restore 
 
 
+cd ../..
+cd $output
+
+file open newfile using "areatableplot.tex", write replace  
+        print_1b  "Plot" 0
+file close newfile   
+
+
+file open newfile using "areatable.tex", write replace  
+    forvalues r=1/8 { 
+        print_1b  "\hspace{1em}`=(`r'-1)*.5'-`=`r'*.5'" `r'
+    }
+file close newfile   
 
 
 

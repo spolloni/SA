@@ -29,7 +29,8 @@
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{C}{>{\centering\arraybackslash}p{5.2em}}
 \newcolumntype{D}{>{\centering\arraybackslash}p{5em}}
-\newcolumntype{G}{>{\centering\arraybackslash}p{6em}}
+\newcolumntype{G}{>{\centering\arraybackslash}p{8em}}
+\newcolumntype{Z}{>{\centering\arraybackslash}p{10em}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
 
@@ -310,36 +311,43 @@ We attribute properties to plots according to the greatest area of overlap.  To 
 \vspace{0mm}
 \resizebox{1\linewidth}{!}{
 \begin{threeparttable}
-\begin{tabular}{l*{1}{rrrrrr}}
-\toprule
+\begin{tabular}{l*{1}{rrrrrrrrr}}
+% \toprule
 \\[-.5em]
-&\multicolumn{3}{c}{Constructed Projects} &\multicolumn{3}{c}{Unconstructed Projects}  \\[.5em] 
-Plot location& Inside & 0 - 10 hm  & 20 - 40 hm & Inside & 0 - 10 hm  & 20 - 40 hm \\[.3em]
+% &\multicolumn{3}{c}{Constructed Projects} &\multicolumn{3}{c}{Unconstructed Projects}  \\[.5em] 
+% Plot location& Inside & 0 - 10 hm  & 20 - 40 hm & Inside & 0 - 10 hm  & 20 - 40 hm \\[.3em]
+&\multicolumn{3}{c}{Overlap with} &\multicolumn{3}{c}{0 to 1 km from} &\multicolumn{3}{c}{1 to 4 km from}  \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10} 
+ & Uncon & Con & Both & Uncon & Con & Both  & Uncon & Con & Both  \\ 
 \\[-.5em]
 Buildings \\ \midrule
 \\[-.5em]
-\input{figures/pre_table_bblu}
+\input{figures/pre_table_bblur}
 \\[-.5em]
 Census Measures \\ \midrule
 \\[-.5em]
-\input{figures/pre_table_census}
+\input{figures/pre_table_censusr}
 \\[-.5em]
 House Prices \\ \midrule
 \\[-.5em]
-\input{figures/pre_table_prices}
-\\[-.3em]
-\input{figures/pre_table_proj_stats}
+\input{figures/pre_table_pricesr}
+\\[-.5em]
+Geographic Features\\ \midrule
+\\[-.5em]
+\input{figures/pre_table_geor}
+% \\[-.3em]
+% \input{figures/pre_table_proj_statsr}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize This table shows average measures for one-hectare plots grouped by their distance to the nearest constructed project and nearest unconstructed project.  Categories may overlap because constructed and unconstructed projects are sometimes clustered nearby each other as indicated by Figure~\ref{figure:map}.  Building and census measures are from 2001, and house prices are from 2001 to 2004.  \hmref  One hectare equals one $\text{hm}^{2}$.  For reference, the USD averaged around 7.70 Rands during the 2001-2012 period.  
+\item \footnotesize REDO This table shows average measures for one-hectare plots grouped by their distance to the nearest constructed project and nearest unconstructed project.  Categories may overlap because constructed and unconstructed projects are sometimes clustered nearby each other as indicated by Figure~\ref{figure:map}.  Building and census measures are from 2001, and house prices are from 2001 to 2004.  \hmref  One hectare equals one $\text{hm}^{2}$.  For reference, the USD averaged around 7.70 Rands during the 2001-2012 period.  
 \end{tablenotes}
 \end{threeparttable}
 }
 \end{table} 
 
 
- 
+REDO
 
 We provide descriptive evidence on project areas at baseline (before project construction) in Table~\ref{table:projectdescriptives} in order to characterize which types of areas receive constructed and unconstructed projects.
 
@@ -351,36 +359,6 @@ Areas nearby projects (0 - 40 hm) are more similar between constructed and uncon
 
 
 
-% Table~\ref{table:projectdescriptives} compares average attributes for constructed and unconstructed projects.  The first row finds that constructed projects receive 374 deeds houses while unconstructed projects only receive 11 deeds houses on average from 2001 to 2011.  Since deeds houses provide an independent measure of project construction, this finding suggests that few unconstructed projects are misclassified as constructed projects.  Housing prices within 1 km of both constructed and unconstructed projects are lower than for areas over 1 km from projects, indicating that housing authorities locate projects in neighborhoods with inexpensive land.  Size, timing, location, and nearby house prices are broadly similar between unconstructed and constructed projects.  Housing projects cover over 1 $\text{km}^{2}$, which represents a significant development in local neighborhoods.  Using census data, Appendix Table \ref{table:projectdescriptivescensus} finds that before project construction, houses in project footprints are smaller and have worse access to services compared to other houses.  
-
-
-
-
-% All other attributes of housing 
-%  the location, size, and surrounding housing stock of the \input{figures/total_con_uncon}constructed and unconstructed projects.  shows that constructed projects deliver an average of 374 houses as measured by the deeds data.  By contrast, projects flagged as unconstructed only produce 11 houses on average, suggesting that 
-% validated also by the descriptive changes in housing projects... 
-% Constructed projects are also substantially larger in area than unconstructed projects. these discrepancies may be due to many unconstructed projects representing smaller planned extensions to previously implemented projects. 
-% It may also reflect the fact that larger land plots are first targeted by housing authorities to maximize delivery. 
-% Though unconstructed projects are located in slightly more remote locations, both types of projects impose long commutes on residents, as measured by the average distance to central business districts. 
-% These distances are consistent with housing authorities targeting inexpensive, vacant land for these projects. Finally, prices for non-subsidized housing in the vicinity of project boundaries are slightly lower for unconstructed projects, perhaps driven in part by their more distant locations.
-
-% \vspace{0mm}
-% \begin{table}[h!]
-% \centering
-% \caption{Housing Project Areas Description}\label{table:projectdescriptives}
-% \vspace{0mm}
-% \begin{tabular}{l*{1}{cc}}
-% \toprule
-%   &Constructed & Unconstructed \\
-% \midrule
-% \input{figures/descriptives_tablet_4t}
-% \bottomrule
-% %\multicolumn{3}{l}{\scriptsize Const. refers to constructed projects and unconst. refers to unconstructed projects.}\\[-.5em]
-% %\multicolumn{3}{l}{\scriptsize $^*$Calculated from {\it expected} completion dates using Gauteng National Treasury budget reports.}\\[-.5em]
-% \multicolumn{3}{l}{\scriptsize $^\dagger$ The USD averaged around 7.70 Rands during the 2001-2011 period.}\\[-.5em]
-% \multicolumn{3}{l}{\scriptsize $^\ddagger$Measured with respect to Johannesburg and Pretoria CBDs. } \\[-.5em]
-% \end{tabular}
-% \end{table} 
 
 
 
@@ -428,6 +406,32 @@ To estimate project impacts, we compare changes in outcomes between constructed 
 For plots that overlap with project footprints, we measure direct exposure in terms of how much of each plot's area overlaps with project footprints, which can be expressed as $\text{Area}\big(\textsc{Plot}  \cap  \textsc{Proj.}\big)$.  Figure~\ref{fig:insideproj} includes an example plot (``Plot A'') that overlaps with a constructed project as well as an example plot (``Plot B'') that overlaps with an unconstructed project.  Since Plot A only partially overlaps with a constructed project, its exposure lies between 0 and 1 ha.\footnote{\haref}  Plot B falls completely within an unconstructed project indicating exposure equal to 1 ha.  On average across all plots, overlap between plots and projects equals 0.046 ha for constructed projects and 0.038 ha for unconstructed projects. Table~\ref{table:spatialsummary} summarizes this measure.
 
 
+% \begin{table}
+% \small
+% \centering
+% \caption{Average Area (in Hectares) of Plots, Rings around Plots, and their Overlap with Projects}\label{table:spatialsummary}
+% \vspace{-2mm}
+% % \resizebox{1\linewidth}{!}{
+% \begin{threeparttable}
+% \begin{tabular}{lrrr}
+% \toprule
+% & \multicolumn{1}{G}{Total Area} & \multicolumn{1}{G}{Constructed Project Overlap} &\multicolumn{1}{G}{Unconstructed Project Overlap} \\
+% \midrule
+% \\[-.7em]
+% \input{figures/proj_RP}
+% \\[-.5em]
+% \hspace{2em}Rings around plots (hm)   \\
+% \input{figures/spill_RP}
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}
+% \item \footnotesize  This table shows the average hectares of overlap with housing projects for plots and rings around plots.  Overlap with rings around plots is only measured for plots that lie outside of project areas.  The sample includes plots within 40 hm of projects. \hmref  See Figure~\ref{fig:spatialexposure} for example rings around plots.
+% \end{tablenotes}
+% \end{threeparttable}
+% % }
+% \end{table}
+
+
 \begin{table}
 \small
 \centering
@@ -435,23 +439,51 @@ For plots that overlap with project footprints, we measure direct exposure in te
 \vspace{-2mm}
 % \resizebox{1\linewidth}{!}{
 \begin{threeparttable}
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrr}
 \toprule
-& \multicolumn{1}{G}{Total Area} & \multicolumn{1}{G}{Constructed Project Overlap} &\multicolumn{1}{G}{Unconstructed Project Overlap} \\
-\midrule
-\\[-.7em]
-\input{figures/proj_RP}
+ & \multicolumn{2}{G}{Number of plots/rings that overlap with an avg project} & \multicolumn{2}{G}{Avg Area of plot/ring overlap with an avg project ($\text{km}^{2}$)}  \\
 \\[-.5em]
-\hspace{2em}Rings around plots (hm)   \\
-\input{figures/spill_RP}
+& Uncon & Con & Uncon & Con \\
+\midrule
+\input{figures/areatableplot}	
+\\[-.5em]
+Plot rings (km) \\
+\input{figures/areatable}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize  This table shows the average hectares of overlap with housing projects for plots and rings around plots.  Overlap with rings around plots is only measured for plots that lie outside of project areas.  The sample includes plots within 40 hm of projects. \hmref  See Figure~\ref{fig:spatialexposure} for example rings around plots.
+\item \footnotesize  [REDO] This table shows the average hectares of overlap with housing projects for plots and rings around plots.  Overlap with rings around plots is only measured for plots that lie outside of project areas.  The sample includes plots within 40 hm of projects. \hmref  See Figure~\ref{fig:spatialexposure} for example rings around plots.
 \end{tablenotes}
 \end{threeparttable}
 % }
 \end{table}
+
+\begin{table}
+\small
+\centering
+\caption{Distribution of Exposure Measure}\label{table:spatialsummaryexposure}
+\vspace{-2mm}
+% \resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+ & \multicolumn{4}{c}{Unconstructed} & \multicolumn{4}{c}{Constructed}  \\\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+\\[-.7em]
+& Mean & SD & Max & N & Mean & SD & Max & N \\
+\midrule
+\input{figures/plottreattable}
+\\[-.5em]
+Plot rings (km) \\
+\input{figures/areatreattable}	
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize  [REDO] 
+\end{tablenotes}
+\end{threeparttable}
+% }
+\end{table}
+
 
 For plots that do not overlap with project footprints, we measure spillover exposure by first, constructing 5 hm rings around each plot and second, calculating how much of each ring's area overlaps with project footprints, which can be expressed as $\text{Area}\big(\textsc{Ring}  \cap  \textsc{Proj.}\big)$.\footnote{\hmref}  Figure~\ref{fig:outsideproj} provides an example plot that falls just outside of project footprints but whose neighborhood rings from 0 to 5 hm and from 5 to 10 hm overlap with both constructed and unconstructed projects.  Table~\ref{table:spatialsummary} summarizes these measures across neighborhood rings and constructed and unconstructed projects.  We find that exposure increases with the radius of rings growing from 0.9 ha for 0 to 5 hm rings up to 44.7 ha for 35 to 40 hm rings for constructed projects.  
 
@@ -529,7 +561,7 @@ We first examine the direct and spillover effects of projects on housing and pop
 \begin{threeparttable}
 \begin{tabular}{lCCCCC}
 \toprule
-\input{figures/main_new_top}
+\input{figures/main_new_spill_full_int}
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -752,140 +784,145 @@ Taken together, these findings broadly support our parallel trends identificatio
 
 % We expect to find zero effect of project construction in this interval before project construction occurred.  
 
-\section{Welfare Impacts}\label{section:theory}
 
-%%% motivate more from a broad welfare perspective
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% COMMENTED OUT ALL OF THE WELFARE SECTION %%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Compare to Diamond's model! in writing;  mention time periods up front?!
-% This model is static where households h
-% Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
+% \section{Welfare Impacts}\label{section:theory}
 
-% In most cases, researchers use price changes to infer welfare impacts.  Instead, since price data does not seem to work well in our setting, we want to see what quantity changes imply for welfare changes.  
+% %%% motivate more from a broad welfare perspective
+
+% % Compare to Diamond's model! in writing;  mention time periods up front?!
+% % This model is static where households h
+% % Households and developers make choices independently each time period, which is consistent with mobile populations of households and high maintenance costs as well as low fixed construction costs per house.  
+
+% % In most cases, researchers use price changes to infer welfare impacts.  Instead, since price data does not seem to work well in our setting, we want to see what quantity changes imply for welfare changes.  
 
 
-In order to approximate the welfare impacts of housing projects, we develop a simple model of residential housing markets that maps observed changes in the quantity of housing into welfare changes.  Our approach uses variation in land steepness to shift construction costs and trace demand for housing.  Under the assumption that projects affect housing markets by changing local amenities and that houses within projects participate in a competitive rental market, we recover the value of local amenities that rationalize observed housing quantities.  Amenities provide a reduced-form method of capturing all aspects that may affect the desirability of living on a particular plot (including neighborhood quality, public services, and agglomeration economies).
+% In order to approximate the welfare impacts of housing projects, we develop a simple model of residential housing markets that maps observed changes in the quantity of housing into welfare changes.  Our approach uses variation in land steepness to shift construction costs and trace demand for housing.  Under the assumption that projects affect housing markets by changing local amenities and that houses within projects participate in a competitive rental market, we recover the value of local amenities that rationalize observed housing quantities.  Amenities provide a reduced-form method of capturing all aspects that may affect the desirability of living on a particular plot (including neighborhood quality, public services, and agglomeration economies).
 
-% This approach assumes that all households have identical housing demand.
-% We assume that housing sectors are independent from each other.
-% We assume that housing is continuous.
-% We assume that there is a competitive rental market for subsidized houses.
-% and map quantity changes into welfare estimates.
-% Under the assumption of elastic demand for housing, 
+% % This approach assumes that all households have identical housing demand.
+% % We assume that housing sectors are independent from each other.
+% % We assume that housing is continuous.
+% % We assume that there is a competitive rental market for subsidized houses.
+% % and map quantity changes into welfare estimates.
+% % Under the assumption of elastic demand for housing, 
 
- % We assume that households are identical and have perfectly elastic demand for housing.\footnote{This assumption may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.}
+%  % We assume that households are identical and have perfectly elastic demand for housing.\footnote{This assumption may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.}
 
-% We assume that developers face a constant marginal cost of building houses and are able to set rents to make households indifferent between renting a house and choosing their outside option.
+% % We assume that developers face a constant marginal cost of building houses and are able to set rents to make households indifferent between renting a house and choosing their outside option.
 
-% We then consider welfare impacts under the assumption that housing projects are acting entirely through an amenity channel.
-% We develop a simple model of residential housing markets to capture the welfare effects of local housing projects within their neighborhoods.  This model infers welfare changes not only through changes in rents, but also through changes in the quantities of housing supplied.  
+% % We then consider welfare impacts under the assumption that housing projects are acting entirely through an amenity channel.
+% % We develop a simple model of residential housing markets to capture the welfare effects of local housing projects within their neighborhoods.  This model infers welfare changes not only through changes in rents, but also through changes in the quantities of housing supplied.  
 
-% The distribution of $\upsilon_{hjt}$ may be correlated across housing sectors to capture whether land plots that are suitable for formal housing may also be suitable for informal housing.    $\lambda_{h}$ is also assumed to be independent of housing from another sector on the same plot 
-% This approach assumes that households have identical preferences across housing and locations, which implies that housing demand is perfectly elastic.  This assumption is consistent with households having low moving costs within the city as well as no unique preferences for particular neighborhoods.  These assumptions may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.
+% % The distribution of $\upsilon_{hjt}$ may be correlated across housing sectors to capture whether land plots that are suitable for formal housing may also be suitable for informal housing.    $\lambda_{h}$ is also assumed to be independent of housing from another sector on the same plot 
+% % This approach assumes that households have identical preferences across housing and locations, which implies that housing demand is perfectly elastic.  This assumption is consistent with households having low moving costs within the city as well as no unique preferences for particular neighborhoods.  These assumptions may be reasonable in a context like South Africa where high levels of unemployment mean that different households face similar strong incentives to locate near employment centers.
 
-For each time period and housing sector (formal versus informal), developers choose how much housing to construct/maintain as well as how much rent to charge on each plot of land.  Households are assumed to be identical and each rent a fixed amount of housing.  Household must choose which from which land plot to rent housing.  Household utility from renting on a particular plot is given by
-\begin{align*}
-U &= \delta - \frac{\lambda}{2} k - R   + \upsilon 
-\end{align*}
-where $k$ measures the amount of housing (assumed to be continuous) supplied on the land plot.  $\lambda$ captures the congestion disutility from having additional housing on the same plot.   $R$ is the rent charged for housing on the plot and $\upsilon$ is the plot amenity shock.  Households can also choose to rent outside of the city and receive a reservation value, which we normalize to zero.  Developers maximize profits by setting rents to ensure that households are indifferent between renting housing on each plot and their reservation value.  Profit-maximizing rents as a function of housing on a plot are given by
-\begin{align*}
-% \label{eq:rent}
-R^{*}(k) &= \delta - \frac{\lambda}{2} k + \upsilon
-\end{align*}
-% From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents. %%% EXPLAIN MORE CLEARLY!
+% For each time period and housing sector (formal versus informal), developers choose how much housing to construct/maintain as well as how much rent to charge on each plot of land.  Households are assumed to be identical and each rent a fixed amount of housing.  Household must choose which from which land plot to rent housing.  Household utility from renting on a particular plot is given by
+% \begin{align*}
+% U &= \delta - \frac{\lambda}{2} k - R   + \upsilon 
+% \end{align*}
+% where $k$ measures the amount of housing (assumed to be continuous) supplied on the land plot.  $\lambda$ captures the congestion disutility from having additional housing on the same plot.   $R$ is the rent charged for housing on the plot and $\upsilon$ is the plot amenity shock.  Households can also choose to rent outside of the city and receive a reservation value, which we normalize to zero.  Developers maximize profits by setting rents to ensure that households are indifferent between renting housing on each plot and their reservation value.  Profit-maximizing rents as a function of housing on a plot are given by
+% \begin{align*}
+% % \label{eq:rent}
+% R^{*}(k) &= \delta - \frac{\lambda}{2} k + \upsilon
+% \end{align*}
+% % From a distributional perspective, this approach assumes that developers are able to extract all social surplus by setting rents relative to household reservation utility.  Although some households may also be developers, welfare for non-developer households remains unaffected by shifts in local amenities because any shifts are immediately capitalized into rents. %%% EXPLAIN MORE CLEARLY!
 
-Given these rents, developers then choose how much housing to build on each plot by maximizing total profit per plot given by
-\begin{align*}
-max_{\,k} \,\,\,\,\,\, \Pi(k) \,=\, k \, \Big[ \, R^{*}(k) - C \, \Big ]
-\end{align*}
-\noindent where the $C$ measures the cost of constructing and maintaining each unit of housing.  The profit-maximizing amount of housing, $k^{*}$ takes the following form
-\begin{align}
-\label{eq:kstar}
-k^{*} &= \frac{\delta}{\lambda} \,\, - \frac{C}{\lambda} + \frac{\upsilon}{\lambda}
-\end{align}
-Profit-maximizing housing is increasing in amenity values, $\delta$ decreasing in congestion disutility, $\lambda$ and decreasing in construction costs, $C$.  
-% In this framework, observed increases in the amount of housing per plot indicate an improvement in welfare.
+% Given these rents, developers then choose how much housing to build on each plot by maximizing total profit per plot given by
+% \begin{align*}
+% max_{\,k} \,\,\,\,\,\, \Pi(k) \,=\, k \, \Big[ \, R^{*}(k) - C \, \Big ]
+% \end{align*}
+% \noindent where the $C$ measures the cost of constructing and maintaining each unit of housing.  The profit-maximizing amount of housing, $k^{*}$ takes the following form
+% \begin{align}
+% \label{eq:kstar}
+% k^{*} &= \frac{\delta}{\lambda} \,\, - \frac{C}{\lambda} + \frac{\upsilon}{\lambda}
+% \end{align}
+% Profit-maximizing housing is increasing in amenity values, $\delta$ decreasing in congestion disutility, $\lambda$ and decreasing in construction costs, $C$.  
+% % In this framework, observed increases in the amount of housing per plot indicate an improvement in welfare.
 
-% The variance of amenity shocks, $\epsilon_{i}$ may be interpreted as a measure of the housing market supply elasticity by determining how quickly housing quantities respond to changes in amenity values.  
-Given equation (\ref{eq:kstar}), optimal profits are given by
-\begin{align}
-\label{eq:profits1}
+% % The variance of amenity shocks, $\epsilon_{i}$ may be interpreted as a measure of the housing market supply elasticity by determining how quickly housing quantities respond to changes in amenity values.  
+% Given equation (\ref{eq:kstar}), optimal profits are given by
+% \begin{align}
+% \label{eq:profits1}
+% % \begin{split}
+% \Pi^{*}  &= \frac{(\delta-C + \upsilon )^2}{2\lambda}
+% % \end{split}
+% \end{align}
+% Profits capture social welfare in this framework because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus.  In this framework, higher amenity values, $\delta$ increase welfare quadratically because the developer is able to build more houses per plot and charge higher rents on all existing houses.
+
+% To estimate this model across plots $i$ and time periods $t$, we map our empirical specification in equation (\ref{eq:main}) directly onto our expression for optimal housing in equation (\ref{eq:kstar}) as follows 
+% \begin{align}
+% \label{eq:kstarest}
 % \begin{split}
-\Pi^{*}  &= \frac{(\delta-C + \upsilon )^2}{2\lambda}
+% k_{it} &= P_i \times \, \frac{\text{Direct}_{it}}{\lambda} \, + \, (1- P_i) \times \, \frac{\text{Spillover}_{it}}{\lambda} \,+\, \frac{\delta_0}{\lambda} \,+\, \frac{\delta_1}{\lambda} \, \textsc{Post}_t \, + \theta C_i + \frac{\upsilon_{it}}{\lambda} \\
+% \theta &= -\frac{1}{\lambda}  \\
+% P_i &= \mathbbm{1}\Big\{\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)>0\Big \}\,
 % \end{split}
-\end{align}
-Profits capture social welfare in this framework because equilibrium rents ensure that household utility is always equal to reservation utility, leaving developers to enjoy all additional surplus.  In this framework, higher amenity values, $\delta$ increase welfare quadratically because the developer is able to build more houses per plot and charge higher rents on all existing houses.
-
-To estimate this model across plots $i$ and time periods $t$, we map our empirical specification in equation (\ref{eq:main}) directly onto our expression for optimal housing in equation (\ref{eq:kstar}) as follows 
-\begin{align}
-\label{eq:kstarest}
-\begin{split}
-k_{it} &= P_i \times \, \frac{\text{Direct}_{it}}{\lambda} \, + \, (1- P_i) \times \, \frac{\text{Spillover}_{it}}{\lambda} \,+\, \frac{\delta_0}{\lambda} \,+\, \frac{\delta_1}{\lambda} \, \textsc{Post}_t \, + \theta C_i + \frac{\upsilon_{it}}{\lambda} \\
-\theta &= -\frac{1}{\lambda}  \\
-P_i &= \mathbbm{1}\Big\{\text{Area}\big(\textsc{Plot}_i  \cap  \textsc{Proj.}\big)>0\Big \}\,
-\end{split}
-\end{align}
-where each time period $t$ is assumed to represent a separate housing market equilibrium.  The amenity term $\delta$ is now comprised of the direct and spillover effects normalized by the congestion term, $\lambda$.  The error term, $\frac{\upsilon_{i}}{\lambda}$ captures plot specific amenity shocks also normalized by $\lambda$.   To identify $\lambda$, we add a measure of construction costs to equation (\ref{eq:main}) specified by $\theta C_i$ so that our empirical estimate of $\theta$ equals $-\frac{1}{\lambda}$.  We leverage cross-sectional variation in construction costs generated by land steepness.  Identification of $\theta$ requires assuming that steep slopes only affect housing quantity through higher construction and maintenance costs and not through any direct effects on local amenities.  Since steepness may correlate with the locations of highways and city centers which may both affect amenity values independently, we control for distances to nearest highway and city center (measured relative to the centroids of Johannesburg and Pretoria).
+% \end{align}
+% where each time period $t$ is assumed to represent a separate housing market equilibrium.  The amenity term $\delta$ is now comprised of the direct and spillover effects normalized by the congestion term, $\lambda$.  The error term, $\frac{\upsilon_{i}}{\lambda}$ captures plot specific amenity shocks also normalized by $\lambda$.   To identify $\lambda$, we add a measure of construction costs to equation (\ref{eq:main}) specified by $\theta C_i$ so that our empirical estimate of $\theta$ equals $-\frac{1}{\lambda}$.  We leverage cross-sectional variation in construction costs generated by land steepness.  Identification of $\theta$ requires assuming that steep slopes only affect housing quantity through higher construction and maintenance costs and not through any direct effects on local amenities.  Since steepness may correlate with the locations of highways and city centers which may both affect amenity values independently, we control for distances to nearest highway and city center (measured relative to the centroids of Johannesburg and Pretoria).
 
 
-\begin{table}
-\small
-\centering
-\caption{Construction Cost Estimates}\label{table:ccost}
-\vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCCCCC}
-\toprule
-\input{figures/welfare_est_top_simple}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize  This table shows the effect of an additional one million Rand in housing costs on the number of formal and informal houses per plot as measured by the building data.  Specifications also control for hectometers to the nearest city center and nearest highway.  Although not shown, specifications also include all terms from estimating equation (\ref{eq:main}) and full results are available upon request.  Standard errors are clustered at the project level (in parentheses). 
-\textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
-\end{tablenotes}
-\end{threeparttable}
-% }
-\end{table}
+% \begin{table}
+% \small
+% \centering
+% \caption{Construction Cost Estimates}\label{table:ccost}
+% \vspace{-2mm}
+% % \resizebox{1\linewidth}{!}{
+% \begin{threeparttable}
+% \begin{tabular}{lCCCCC}
+% \toprule
+% \input{figures/welfare_est_top_simple}
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}
+% \item \footnotesize  This table shows the effect of an additional one million Rand in housing costs on the number of formal and informal houses per plot as measured by the building data.  Specifications also control for hectometers to the nearest city center and nearest highway.  Although not shown, specifications also include all terms from estimating equation (\ref{eq:main}) and full results are available upon request.  Standard errors are clustered at the project level (in parentheses). 
+% \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+% \end{tablenotes}
+% \end{threeparttable}
+% % }
+% \end{table}
 
 
-We measure land steepness with 2 hm elevation contour lines provided by the National Geo-Spatial Information system of South Africa.\footnote{\hmref}   Overlaying 5 ha squares, we find each square's highest and lowest points and divide their elevation difference by the euclidean distance between them.\footnote{\haref}   The resulting dataset includes 19,521 squares of which 89\% have slopes less than 6\%, 8\% have slopes between 6\% and 12\%, and the remaining 3\% have slopes greater than 12\%.  South Africa's National Construction Guidelines indicate that constructing homes on steep slopes with 6 to 12\% ($\geq12\%$) gradients increases infrastructure costs by 25\% (50\%) and building costs by 5\% (15\%).\footnote{See \cite{redbook}.}  On average, building costs equal 62\% of construction costs and infrastructure costs equal 12\% of construction costs (\cite{cahfcosts}).  Competitive markets in property development suggest that construction costs roughly equal property values \citep{cahfcosts}, which average R217,583 in our deeds data.  We use this average cost value to impute variation in construction costs from land steepness for all plots in our data.\footnote{This value falls between two recent estimates in South Africa.  At the high end, the Center for Affordable Housing Finance in South Africa estimates that the average construction cost for a fully serviced, 46 $\text{m}^{2}$ house  in Pretoria is R336,000 \citep{cahfcosts}.  At the low end, a 2016 study by AECOM engineering estimates construction costs of R3,500 per $\text{m}^{2}$ for the lower end of the housing market, which implies a total cost of R161,000 for a 46 $\text{m}^{2}$ house \citep{aecom}. The USD averaged around 7.70 Rands during the 2001-2011 period.}  
+% We measure land steepness with 2 hm elevation contour lines provided by the National Geo-Spatial Information system of South Africa.\footnote{\hmref}   Overlaying 5 ha squares, we find each square's highest and lowest points and divide their elevation difference by the euclidean distance between them.\footnote{\haref}   The resulting dataset includes 19,521 squares of which 89\% have slopes less than 6\%, 8\% have slopes between 6\% and 12\%, and the remaining 3\% have slopes greater than 12\%.  South Africa's National Construction Guidelines indicate that constructing homes on steep slopes with 6 to 12\% ($\geq12\%$) gradients increases infrastructure costs by 25\% (50\%) and building costs by 5\% (15\%).\footnote{See \cite{redbook}.}  On average, building costs equal 62\% of construction costs and infrastructure costs equal 12\% of construction costs (\cite{cahfcosts}).  Competitive markets in property development suggest that construction costs roughly equal property values \citep{cahfcosts}, which average R217,583 in our deeds data.  We use this average cost value to impute variation in construction costs from land steepness for all plots in our data.\footnote{This value falls between two recent estimates in South Africa.  At the high end, the Center for Affordable Housing Finance in South Africa estimates that the average construction cost for a fully serviced, 46 $\text{m}^{2}$ house  in Pretoria is R336,000 \citep{cahfcosts}.  At the low end, a 2016 study by AECOM engineering estimates construction costs of R3,500 per $\text{m}^{2}$ for the lower end of the housing market, which implies a total cost of R161,000 for a 46 $\text{m}^{2}$ house \citep{aecom}. The USD averaged around 7.70 Rands during the 2001-2011 period.}  
 
-Table~\ref{table:ccost} includes our estimates of $\theta$ for formal and informal housing markets, finding a statistically significant coefficient of -33 for formal housing and -30 informal housing which translates to estimates between R30,000 and R33,000 for $\lambda$.  These estimates implies substantial congestion effects: an additional unit of housing on a plot reduces utility by around 15\% of the average property price.  Combining estimates of $\lambda$ with estimates of $\alpha$ and $\beta^{k}$ terms from Table~\ref{table:main}, we are able to calculate welfare by computing rental profits using equation (\ref{eq:profits1}) for each plot and housing sector.
-
-
-\subsection{Counterfactual Exercises}
-
-\begin{table}[h]
-\centering
-\caption{Welfare Impacts per Project (in Millions of Rands)}\label{table:welfare}
-\vspace{-2mm}
-\begin{threeparttable}
-\begin{tabular}{lDDD}
-\toprule
-  &    Formal Housing  &  Informal Housing & Total Housing \\ \midrule 
-Direct Effect (in project footprints) &  \input{figures/welfare/med_dir_for} & \input{figures/welfare/med_dir_inf} & \input{figures/welfare/med_dir_tot} \\
- & (\input{figures/welfare/med_dir_for_sd}\unskip) & (\input{figures/welfare/med_dir_inf_sd}\unskip) & (\input{figures/welfare/med_dir_tot_sd}\unskip) \\[.5em]
-Spillover Effect (nearby project footprints) &  \input{figures/welfare/med_spi_for} & \input{figures/welfare/med_spi_inf} & \input{figures/welfare/med_spi_tot} \\
- & (\input{figures/welfare/med_spi_for_sd}\unskip) & (\input{figures/welfare/med_spi_inf_sd}\unskip) & (\input{figures/welfare/med_spi_tot_sd}\unskip) \\[.5em]
-Total Effect & \input{figures/welfare/med_tot_for} & \input{figures/welfare/med_tot_inf} & \input{figures/welfare/med_tot_tot} \\
-&  (\input{figures/welfare/med_tot_for_sd}\unskip) & (\input{figures/welfare/med_tot_inf_sd}\unskip) & (\input{figures/welfare/med_tot_tot_sd}\unskip) \\[.5em]
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize 
-This table computes welfare effects for each housing sector as the difference in rental profits calculated according to equation (\ref{eq:profits1}) with project construction (using estimated values of $\alpha_3$ and $\beta_3^{1}$ from equation (\ref{eq:main}) normalized by the congestion cost estimate from Table~\ref{table:ccost}) versus without project construction (by setting estimates of $\alpha_3$ and $\beta_3^{1}$ equal to zero) for each plot.  Welfare effects are calculated separately for plots that overlap with projects and experience direct effects as well as plots that do not overlap with projects and instead experience indirect effects.  Bootstrapped standard errors clustered at the project level are in parentheses.  The USD averaged around 7.70 Rands during the 2001-2011 period.
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+% Table~\ref{table:ccost} includes our estimates of $\theta$ for formal and informal housing markets, finding a statistically significant coefficient of -33 for formal housing and -30 informal housing which translates to estimates between R30,000 and R33,000 for $\lambda$.  These estimates implies substantial congestion effects: an additional unit of housing on a plot reduces utility by around 15\% of the average property price.  Combining estimates of $\lambda$ with estimates of $\alpha$ and $\beta^{k}$ terms from Table~\ref{table:main}, we are able to calculate welfare by computing rental profits using equation (\ref{eq:profits1}) for each plot and housing sector.
 
 
-We consider two counterfactuals to capture a range of how housing projects may impact welfare.  
+% \subsection{Counterfactual Exercises}
 
-In our least conservative counterfactual, we assume that housing projects operate entirely by shifting local amenities for formal and informal housing sectors both within and nearby project footprints.  In this interpretation, increases in local housing result from local developers constructing new houses to benefit from these new amenities.  To compute welfare impacts, we calculate rental profits according to equation (\ref{eq:profits1}) for each plot and housing sector both with project construction (using estimated values of $\alpha_3$ and $\beta_3^{1}$ from equation (\ref{eq:main}) normalized by the congestion cost estimate from Table~\ref{table:ccost}) and without project construction (by setting estimates of $\alpha_3$ and $\beta_3^{1}$ equal to zero).  
+% \begin{table}[h]
+% \centering
+% \caption{Welfare Impacts per Project (in Millions of Rands)}\label{table:welfare}
+% \vspace{-2mm}
+% \begin{threeparttable}
+% \begin{tabular}{lDDD}
+% \toprule
+%   &    Formal Housing  &  Informal Housing & Total Housing \\ \midrule 
+% Direct Effect (in project footprints) &  \input{figures/welfare/med_dir_for} & \input{figures/welfare/med_dir_inf} & \input{figures/welfare/med_dir_tot} \\
+%  & (\input{figures/welfare/med_dir_for_sd}\unskip) & (\input{figures/welfare/med_dir_inf_sd}\unskip) & (\input{figures/welfare/med_dir_tot_sd}\unskip) \\[.5em]
+% Spillover Effect (nearby project footprints) &  \input{figures/welfare/med_spi_for} & \input{figures/welfare/med_spi_inf} & \input{figures/welfare/med_spi_tot} \\
+%  & (\input{figures/welfare/med_spi_for_sd}\unskip) & (\input{figures/welfare/med_spi_inf_sd}\unskip) & (\input{figures/welfare/med_spi_tot_sd}\unskip) \\[.5em]
+% Total Effect & \input{figures/welfare/med_tot_for} & \input{figures/welfare/med_tot_inf} & \input{figures/welfare/med_tot_tot} \\
+% &  (\input{figures/welfare/med_tot_for_sd}\unskip) & (\input{figures/welfare/med_tot_inf_sd}\unskip) & (\input{figures/welfare/med_tot_tot_sd}\unskip) \\[.5em]
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}
+% \item \footnotesize 
+% This table computes welfare effects for each housing sector as the difference in rental profits calculated according to equation (\ref{eq:profits1}) with project construction (using estimated values of $\alpha_3$ and $\beta_3^{1}$ from equation (\ref{eq:main}) normalized by the congestion cost estimate from Table~\ref{table:ccost}) versus without project construction (by setting estimates of $\alpha_3$ and $\beta_3^{1}$ equal to zero) for each plot.  Welfare effects are calculated separately for plots that overlap with projects and experience direct effects as well as plots that do not overlap with projects and instead experience indirect effects.  Bootstrapped standard errors clustered at the project level are in parentheses.  The USD averaged around 7.70 Rands during the 2001-2011 period.
+% \end{tablenotes}
+% \end{threeparttable}
+% \end{table}
 
-Table~\ref{table:welfare} provides the results of this exercise in millions of Rands per project disaggregated by housing sector as well as by direct and spillover effects.  We find a total positive welfare effect per project of R\input{figures/welfare/med_tot_tot}million with a wide 95\% confidence interval ranging from \input{figures/welfare/med_tot_tot_lb}to R\input{figures/welfare/med_tot_tot_ub}million.  The point estimate is over 10 times the average reported cost per project of R25 million calculated from the National Budget Reports of the South African Treasury. To benchmark against our earlier results, Table~\ref{table:main} links each project to 1,251 total new houses meaning that our welfare estimate implies a gain in welfare of R232,374 per new house, which just exceeds the average property value of R217,583.  While most of the gains are driven by direct effects within project footprints, total spillover effects alone (R\input{figures/welfare/med_spi_tot}million) are enough to exceed project costs.  Welfare gains are roughly evenly distributed between formal and informal housing sectors.\footnote{The USD averaged around 7.70 Rands during the 2001-2011 period.}
 
-We also consider a conservative counterfactual where instead of attributing new formal housing in project footprints as an endogenous response to better amenity values, we assume that formal housing is constructed in project footprints by government contractors at a cost equal to the average property value of R217,583.  According to Table~\ref{table:main}, projects generate around 785 new formal houses in their footprints, which implies costs per project of R171 million that greatly exceed reported costs of R25 million.  Welfare effects on informal housing in project footprints (R\input{figures/welfare/med_dir_inf}million), formal housing nearby footprints (R\input{figures/welfare/med_spi_for}million), and informal housing nearby footprints (R\input{figures/welfare/med_spi_inf}million) total R142.3 million.  Therefore, in order to justify construction costs, project houses would need to generate R28.7 million total welfare for recipients, which translates to R36,561 per house.  Project houses are likely to exceed this threshold given that households living in government subsidized houses estimate their own property values to equal R59,137 on average.\footnote{We calculate property values from survey responses to the General Household Survey from 2005 to 2008 excluding outlier values above R6 million.}   Taken together, while all of our welfare estimates are statistically imprecise, they suggest that projects are likely produce welfare gains even under relatively conservative assumptions.
+% We consider two counterfactuals to capture a range of how housing projects may impact welfare.  
+
+% In our least conservative counterfactual, we assume that housing projects operate entirely by shifting local amenities for formal and informal housing sectors both within and nearby project footprints.  In this interpretation, increases in local housing result from local developers constructing new houses to benefit from these new amenities.  To compute welfare impacts, we calculate rental profits according to equation (\ref{eq:profits1}) for each plot and housing sector both with project construction (using estimated values of $\alpha_3$ and $\beta_3^{1}$ from equation (\ref{eq:main}) normalized by the congestion cost estimate from Table~\ref{table:ccost}) and without project construction (by setting estimates of $\alpha_3$ and $\beta_3^{1}$ equal to zero).  
+
+% Table~\ref{table:welfare} provides the results of this exercise in millions of Rands per project disaggregated by housing sector as well as by direct and spillover effects.  We find a total positive welfare effect per project of R\input{figures/welfare/med_tot_tot}million with a wide 95\% confidence interval ranging from \input{figures/welfare/med_tot_tot_lb}to R\input{figures/welfare/med_tot_tot_ub}million.  The point estimate is over 10 times the average reported cost per project of R25 million calculated from the National Budget Reports of the South African Treasury. To benchmark against our earlier results, Table~\ref{table:main} links each project to 1,251 total new houses meaning that our welfare estimate implies a gain in welfare of R232,374 per new house, which just exceeds the average property value of R217,583.  While most of the gains are driven by direct effects within project footprints, total spillover effects alone (R\input{figures/welfare/med_spi_tot}million) are enough to exceed project costs.  Welfare gains are roughly evenly distributed between formal and informal housing sectors.\footnote{The USD averaged around 7.70 Rands during the 2001-2011 period.}
+
+% We also consider a conservative counterfactual where instead of attributing new formal housing in project footprints as an endogenous response to better amenity values, we assume that formal housing is constructed in project footprints by government contractors at a cost equal to the average property value of R217,583.  According to Table~\ref{table:main}, projects generate around 785 new formal houses in their footprints, which implies costs per project of R171 million that greatly exceed reported costs of R25 million.  Welfare effects on informal housing in project footprints (R\input{figures/welfare/med_dir_inf}million), formal housing nearby footprints (R\input{figures/welfare/med_spi_for}million), and informal housing nearby footprints (R\input{figures/welfare/med_spi_inf}million) total R142.3 million.  Therefore, in order to justify construction costs, project houses would need to generate R28.7 million total welfare for recipients, which translates to R36,561 per house.  Project houses are likely to exceed this threshold given that households living in government subsidized houses estimate their own property values to equal R59,137 on average.\footnote{We calculate property values from survey responses to the General Household Survey from 2005 to 2008 excluding outlier values above R6 million.}   Taken together, while all of our welfare estimates are statistically imprecise, they suggest that projects are likely produce welfare gains even under relatively conservative assumptions.
 
 
 

@@ -1334,8 +1334,60 @@ def grid_to_elevation_points(db):
 
 
 
+def grid_to_cbd(db):
+
+    print "start grid to cbd"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_cbd_100;') 
+    make_qry=  ''' CREATE TABLE grid_to_cbd_100 AS 
+                            SELECT A.objectid , G.grid_id , st_distance(A.GEOMETRY,G.GEOMETRY) AS cbd_distance
+                                FROM cbd_centroids as A, grid_temp_100 AS G ;
+                    '''
+    cur.execute(make_qry) 
+    # cur.execute("CREATE INDEX grid_to_cbd_index ON grid_to_cbd_100 (grid_id);")
+    # cur.execute("CREATE INDEX elevation_id_to_grid_100_index ON grid_to_elevation_points_100 (fid);")    
+    con.commit()
+    con.close()   
+    print "finish grid to cbd"
+    return
+
+# grid_to_cbd(db)
 
 
+def grid_to_highways(db):
+
+    print "start grid to highways"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute('DROP TABLE IF EXISTS grid_to_ways_100;') 
+    make_qry=  ''' CREATE TABLE grid_to_ways_100 AS 
+                            SELECT A.OGC_FID , G.grid_id , st_distance(A.GEOMETRY,G.GEOMETRY) AS ways_distance
+                                FROM freeway_dissolved_chain_small as A, grid_temp_100 AS G ;
+                    '''
+    cur.execute(make_qry)  
+    con.commit()
+    con.close()   
+    print "finish grid to highways"
+    return
+
+# grid_to_highways(db)
+
+
+
+
+
+
+
+#############################
+#############################
+#############################
 
 # ['HYDR_AREAS','HYDR_LINES','PHYS_LANDFORM_ARTIFIC','CULT_RECREATIONAL']
 
