@@ -1,0 +1,265 @@
+\documentclass{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % make more characters printable when copy-pasted here
+\usepackage{xcolor} % to facilitate the myNotes and myTodo commands.
+
+\usepackage{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{rdp_paper}
+% Created by Jack Baker, last modified 11/3/2020
+
+% initialize counters for reviewer number and comment number
+\newcounter{reviewer}
+\setcounter{reviewer}{0}
+\newcounter{point}[reviewer]
+\setcounter{point}{0}
+
+% Set the format of reviewer comment numbers and responses.
+\renewcommand{\thepoint}{Q\,\thereviewer.\arabic{point}} 
+\newcommand{\point}[1]{\refstepcounter{point}  \bigskip \hrule \medskip \noindent {{\fontseries{b}\selectfont \thepoint } #1}\par}
+\newcommand{\reply}{\medskip \noindent \textbf{Reply}:\ \textit }   
+\newcommand{\sr}{\begin{minipage}{\dimexpr\textwidth-3cm}}
+\newcommand{\er}{\end{minipage}}
+\newcommand{\cc}{\medskip \noindent \textbf{Comment:}\hspace{2em}}
+
+
+% Set the format for reviewer headings
+\newcommand{\reviewersection}{\stepcounter{reviewer}
+                  \section*{Reviewer \thereviewer}}
+
+% Set the format for notes on in-progress responses
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand\myTodo[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Response to YJUEC-D-20-00422\_review}
+\author{}
+\begin{document}
+
+\maketitle
+
+\noindent
+
+\section{Main comments}
+
+\subsection{Framework and welfare}
+
+\cc The paper lacks a clear framework to understand what impacts housing projects may have and why the outcomes the authors consider are important. There are references to the literature on place-based policies, but no adequate discussion of key concepts such as amenity capitalization, externalities, or place-based distortions. The mechanisms discussion is not very sharp and some of the language is vague.
+\sr
+\reply{We appreciate your suggestions here and below to sharpen our three mechanisms discussion.  We reframed the Discussion in Section~\ref{section:discussion}.  We also reframed the introduction as follows:}
+\begin{itemize}
+\item \textit{``First, projects are accompanied by infrastructure investments including electricity and water buildings that may also benefit nearby houses.'' }
+\item \textit{ ``Second, buildings identified as businesses increase within projects, which may invite employees to locate nearby.'' }
+\item \textit{ ``Third, projects may produce positive housing externalities for surrounding households (Rossi-Hansberg et al. 2010; Diamond and McQuade 2019).  For example, neighbors may benefit from social interactions, improved perceptions of safety, and community development.''}
+\end{itemize}
+\er
+
+\cc The welfare analysis is not very convincing. Trying to back out welfare effects without having any reliable price data is going to be very difficult in this context. The authors should probably downplay it to a more tentative “back of the envelope” exercise and discuss caveats and limitations.
+
+It is hard to think of welfare effects without having a clear counterfactual in mind. Do we know anything about who moved into the project areas and were they are coming from? Absent the projects, are these people who would have srowded slums in the periphery? Would the schools and health centers have been built somewhere else absent the program? The welfare impacts are also likely to be very different depending on whether the projects are on empty land or are replacing slums, whose residents were evicted and only in part compensated with public housing. How should we think about the displaced residents’ welfare?
+
+The welfare calculations are not very clearly explained. It is not clear what is a plot-specific endogenous variable and what is a model parameter. I don’t think delta is defined anywhere.
+
+The welfare analysis assumes that projects only change amenities levels and therefore the demand side. However there is also an effect of expanding formal sector supply.
+
+The authors state that developers are competitive, yet they don’t have zero profits?
+
+\sr
+\reply{Helpful observations, and we have removed the welfare analysis entirely.}\\
+\er
+
+\subsection{Empirics}
+
+\cc The authors should do more to justify the “planned but not constructed” empirical strategy. What is the nature of selection bias in this context and why is this approach alleviating it? 
+
+\sr
+\reply{  To better justify our empirical strategy, the Introduction adds a discussion of how near/far or pre/post comparisons may lead to biased estimates as follows: }
+\begin{itemize}
+\item \textit{``the empirical strategy addresses two main challenges in measuring the impacts of housing projects.  First, projects are often located not only in poor neighborhoods, but also on relatively undeveloped plots of land within these neighborhoods.  Comparing projects to neighboring areas would likely capture these preexisting differences.  Our strategy controls for these differences because constructed and unconstructed projects are often located on similar types of land plots in similar types of neighborhoods.  Second, projects are often located in rapidly growing cities with high demand for housing.  Measuring the evolution of project areas would likely also capture urban growth that is unrelated to the projects.  Our strategy controls for trends in urban development by comparing relative growth for areas with constructed or unconstructed projects.'' }
+\end{itemize}
+\er
+
+\cc Constructed projects are not randomly selected within the list of potential projects considered. They are likely to be positively selected based on their infrastructure access, location (through zoning) and environmental suitability. It is not obvious to me that this selection bias is less pronounced than selection bias that would be encountered by considering areas that are just adjacent to constructed projects.
+
+\sr
+\reply{ Thank you for highlighting an important limitation in our strategy which we first examine at baseline and later test with robustness exercises.}
+\begin{itemize}
+\item \textit{We provide evidence that while construction status is non-random, constructed/unconstructed comparisons are likely to be less problematic than near/far comparisons.  See Descriptives Section~\ref{section:descriptives} for discussion and Table~\ref{table:projectdescriptives} for empirical results. }
+\item \textit{We show that our results are robust to (1) controlling for baseline characteristics with a propensity score approach, (2) only including projects with no houses at baseline, (3) examining pre-trends, and (4) alternate unconstructed definitions.  See Section~\ref{section:robustness} for discussion. }
+
+\end{itemize} 
+\er
+
+\cc The authors should account for the observables that are likely to matter for selection of projects: distance from the central business district or other city amenities, terrain characteristics (elevation, slope, distance to water bodies), distance to preexisting infrastructure etc. At the very least the authors should show a “balance test” table accounting for these sross-sectional characteristics, in addition to the “pre” outcomes reported in Table 1. They could include time-varying controls for these characteristics and also include them in the propensity matching exercise.
+
+\sr
+\reply{ While we would like to include more controls, we unfortunately  do not have time-variation in variables that are likely to affect project construction but are not otherwise affected by project construction.  Table~\ref{table:projectdescriptives} provides a balance test finding significant differences between many baseline characteristics.  We include all measures in the pre-period to develop a propensity score and reweight our analysis by this score and results are robust (See Table~\ref{table:pweight}, Figure~\ref{table:mainpweight}, and Table~\ref{table:mainpweight}).  We also include projects with no housing development at baseline, finding broadly similar results in Table~\ref{table:mainmatching3}. See Section~\ref{section:robustness}.  }\\
+\er
+
+\cc Beyond selection, the location of plots and all the “natural advantage” characteristics listed above are likely to be important sources of heterogeneous effects, which the authors at the moment are not exploring.
+
+\sr
+\reply{ While we agree there are many interesting dimensions of heterogeneity to explore, we feel underpowered with only around 300 projects to cut the data across too many dimensions.  Section~\ref{section:heterogeneity} and Tables~\ref{table:hetclose} and \ref{table:hetfar} explore heterogeneity by distance to CBD, which is likely an important dimension for policymakers. }\\
+\er
+
+\cc An inherent limitation of the data is that the authors can’t really observe prices well. While they don’t discuss whether their data on housing transactions include formal or informal housing, my sense is that it has very limited coverage. 
+
+\sr
+\reply{ Thank you for calling attention to price measurement challenges. We clarify in  Data Section~\ref{section:data} that ``we analyze deeds data covering the universe of formal housing transactions from 2001 to 2011 in ``affordable areas,'' which are defined as census enumeration areas with 2010 mean house prices below R500,000''.  We also emphasize ``Additional considerations may introduce measurement error into our price measure. Buyers and sellers may not have strong incentives to accurately report transaction prices on deeds records.  The timing of the transaction may also differ from the date that the deed is recorded.'' }\\
+\er
+
+\cc Unsurprisingly, the price effects are too noisy to be interpretable.
+
+\sr
+\reply{ We agree that noisy estimates are difficult to interpret and take the approach of presenting results but including caveats in our interpretations.  We also note in the introduction that our point estimates are at least in line with the literature.     }
+\begin{itemize}
+    \item \textit{Our interpretation in Section~\ref{section:spillovereffects} is as follows ``Positive effects on local prices are consistent with public housing projects providing positive local amenities.  Yet, the statistical insignificance of these results means that we cannot exclude the possibility of zero or even negative effects of projects on local prices.  One reason for these statistically insignificant results may be that deeds records are relatively rare occurring on only 7.6\% of plots.  This finding underscores the difficulty of estimating spillover effects using official deeds records in contexts where housing transactions are unlikely to be officially recorded.''}
+\end{itemize}
+\er\\
+
+\cc For many outcomes (most importantly prices but also demographics and some house quality measures) the study appears underpowered. These results should be probably downplayed or relegated to the appendix, unless the authors are able to uncover some patterns in a heterogeneity analysis. Accounting for differences in market access / market potential of different areas may help.
+
+\sr
+\reply{Thank you for the suggestion.  Although our power is low with only $\sim$300 projects and possible noise in many of the measures, we agree with another reviewer that a strength of the study is that we have many measures and our analysis is transparent about including measures that have zero or noisy effects.  We also correct for multiple hypothesis testing throughout.  Section~\ref{section:heterogeneity} and Tables~\ref{table:hetclose} and \ref{table:hetfar} explore heterogeneity by distance to CBD, which is likely to be policy relevant.}\\
+\er
+
+\cc I would downplay the measure of project exposure at the plot level, which is presented by the authors as a novel element of their strategy.
+
+\sr
+\reply{ Great suggestion.  We downplay the novelty of our measure throughout and note similarities between our approach and previous approaches in the literature like Autor et al. 2014 and Gechter and Tsvanidis 2020. }\\
+\er
+
+\cc I don’t expect the results to be much different if instead of a continuous measure of overlap the authors used a simpler binary indicator for whether a grid cell includes a housing project. This would also streamline the notation of expressions (1), (2), and (3), which is currently very heavy.
+
+\sr
+\reply{Our spatial overlap approach helps deal with the close proximity of some projects to each other as well as their varying sizes, which we discuss in Section~\ref{section:exposuremeasure}.  We streamline the expressions by estimating direct effects and spillover effects separately.  See equations (\ref{eq:main1}) and (\ref{eq:main2}) in Section~\ref{section:estimatingequations}.  Estimating separately does not meaningfully affect the coefficient estimates or standard errors.  }\\
+\er
+
+\cc The authors may want to consider alternative types of standard errors for robustness, such as Conley.
+
+\sr
+\reply{We appreciate the helpful suggestion.  After many attempts, we determined that Conley errors are not feasible with a dataset this large.  As an alternate robustness approach, we exclude projects within 2 km of each other and find similar results with isolated projects.  The results are not substantially less significant despite losing about half the sample.  Since isolated projects are unlikely to suffer from spatial correlation, this approach may at least partially address spatially correlated errors.  See Robustness Section~\ref{section:robustness} and  Table~\ref{table:far_robust}.}\\
+\er
+
+\cc The authors should provide more detail on the aerial photograph dataset they employ. What are the 30 categories provided for buildings? 
+\reply{The 30 categories are divided into agriculture, forestry, conservation, mining, transport, utilities and infrastructure, residential, community services, health care facilities, education, commercial industrial, recreation and leisure, tourism, institutions, and not classified.  }\\
+
+\cc How is informal defined in that dataset? How does that dataset distinguish between schools, health centers, etc? How does that dataset detect informal businesses (which are often carried out inside one’s house)?
+
+\sr
+\reply{Since the company that provided the dataset uses proprietary methods, we do not have detailed information on how categories are determined.  We do know that the company combines aerial photographs with ground-truthing such as surveys.  Our approach is to present the following validation exercises and appropriately caveat the interpretations of our results. }
+\begin{itemize}
+\item \textit{ We are able to reasonably validate building and census measures for formal and informal housing.  Validation exercises are described in the Data Section~\ref{section:data} finding strong correlations.   We note that our correlation estimate is different from the previous version because we are now calculating correlations at the level of the enumerator area to make the census and building data as comparable as possible.  }
+\item \textit{We also find very similar results using both housing measures given by Appendix Table~\ref{table:census_building_robust} and discussed in Section~\ref{section:robustness}.}
+\item \textit{ We have less success validating business and utility measures, and include caveats in the result interpretations. Validation exercises (and limitations to the exercises) are described in the Data Section~\ref{section:data}.} 
+\end{itemize} 
+\er\\
+
+\cc I am still not clear on how the “post” dummy is defined. The authors state that their project maps are from 2008 and that they consider “built” projects that show up as completed in those maps. That seems to suggest that “post” is defined as after 2008. Then on p. 15 the authors state that post refers to “after scheduled construction”, which sounds like project-specific. Then on p. 17 it is said that construction occurs between 2001 and 2012, which sounds like post should be 2012. Then the post definition changes again in Table 4.
+
+\sr
+\reply{Thank you for pointing to the confusing definitions in the draft.  We updated our Estimating Equations Section~\ref{section:estimatingequations} to clarify ``$\textsc{Post}_{t}$ equals one for 2012 and zero for 2001.''  We also clarify the timing of the data in the introduction and Data Section~\ref{section:data}.}\\
+\er 
+
+\cc In Table 1 it would be helpful to have a formal test of whether the averages are statistically different between the two samples.
+
+\sr
+\reply{Table~\ref{table:projectdescriptives} now includes t-tests clustered at the project level and finds many significant differences.}\\
+\er
+
+\subsection{Mechanisms}
+
+\cc The framework provided to distinguish between mechanisms is not very useful. Perhaps the authors should distinguish between direct program effects (public investments), complementary private investments (house quality), productive amenity spillovers (businesses).
+
+\sr
+\reply{ We appreciate the suggested categories which we used to sharpen our mechanism categories in Discussion section~\ref{section:discussion} into:  }
+\begin{itemize}
+    \item \textit{``First, surrounding neighborhoods may benefit directly from public investments in utilities and other services within project footprints.''}
+    \item \textit{``Second, projects may serve as employment centers'' that ``may invite people to live nearby and work within projects.''}
+    \item \textit{``Third, by increasing the quality and quantity of houses, projects may produce positive housing externalities for surrounding neighborhoods (Rossi-Hansberg et al. 2010; Diamond and McQuade 2019).  Investment may increase in nearby housing markets because neighbors benefit from projects in many non-market ways such as improved social interactions, perceptions of safety, and aesthetics.''}
+\end{itemize}
+\er\\
+
+\cc Heterogeneous effects analysis could be used to assess some of the mechanisms. For instance, the authors argue that the spillovers may come from improved access to schools and health centers. Do we see any differential effects at different distances from schools / health centers?
+
+\sr
+\reply{ We updated Discussion section~\ref{section:discussion} to consider how our estimates might help distinguish between mechanisms. While we agree that heterogeneity may be helpful, we feel underpowered to cut the data in many different ways.  Instead, we focus on a policy relevant dimension -- distance to CBD -- documented in Section~\ref{section:heterogeneity} and Tables~\ref{table:hetclose} and \ref{table:hetfar}. }\\
+\er
+
+\subsection{Minor comments:}
+
+\cc The control areas correspond to projects that are marked as “under planning”, “future”, “proposed” etc., suggesting they may be actually implemented by the time the outcomes are observed. Perhaps it would be more conservative to consider those treated or exclude them.
+
+\reply{ Excellent point to consider heterogeneity in construction categories. It turns out we do not observe substantial heterogeneity as explained below, and unfortunately we do not have better information on categories.  }
+\begin{itemize}
+    \item \textit{ ``We test whether the results are sensitive to our definition of unconstructed projects by excluding 89 unconstructed projects labeled ``proposed,'' ``investigating,'' or ``uncertain.'' Table~\ref{table:dropplacebo_robust} finds results very similar to our main specifications, indicating that our empirical strategy is insensitive to this alternate project definition.'' from Robustness Section~\ref{section:robustness}.}
+    \item \textit{We do not have more documentation on what the construction categories signify because we received our data from a non-profit research group who received the data from the government.  Since the projects often become very political, it can be difficult to get accurate reports on project status through other sources. }
+\end{itemize}  
+
+\cc I don’t quite follow the argument on p. 16 by which the spatial decay in spillover effects would suggest omitted variable bias.
+
+\sr
+\reply{Thanks for pointing to the confusing discussion and we removed the argument.}\\
+\er
+
+\cc In Table 3, is “mean pre” referring to the control group?
+
+\sr
+\reply{We clarify in the table notes that ``mean pre and post are average outcomes  across all projects pre and post construction.''}\\
+\er
+
+\cc The number of observations sometimes changes from column to column in the tables and it is not always clear why.
+
+\sr
+\reply{We add table notes to clarify changing observations, which is generally due to the fact that census enumerator areas do not cover all of the plots. }\\
+\er
+
+\cc Is “informal backyard house” a sub-category of “informal house” or a separate category?
+
+\sr
+\reply{We clarify that informal backyard houses are a subcategory of informal houses, and we focus our main analysis on informal, backyard houses and informal, non-backyard houses.}\\
+\er
+
+\subsection{Exposition:}
+
+\cc The literature review should emphasize how the context studied in this paper differs from the developed country settings where most urban renewal / public housing projects are studied. This is a setting with weak property rights and pervasive informality: how does this change the potential effects?
+
+\sr
+\reply{ We appreciate this observation.  In the introduction, we clarify that ``since we focus on a developing context with pervasive informal housing, our study differs in two main ways.  First, it is important to account for spatial outcomes within project footprints such as backyard housing.  Second, to the extent that informal housing grows in response to place-based policies and is itself a negative amenity, informal housing may undermine policy goals of producing positive amenities.'' }\\
+\er
+
+\cc The intro doesn’t explain the timeline and time structure of the data well: when was this public housing program implemented? Do the authors have time variation in the outcomes? When are the outcomes measured? Is the goal to estimate short or long term impacts? All this should come asross clearly from the very beginning of the paper.
+
+\sr
+\reply{Thank you for pointing out the lack of clarity on project/data dessriptions.  We added the following early in the introduction: ``Annually since 1994, the government has acquired parcels of land and constructed neighborhoods of single-story, two-room houses.'' and ``We compile detailed spatial data in 2001 and 2011 for the Johannesburg metro-area including household census data, deeds records of formal housing transactions, and an aerial panel of all buildings.  This dataset allows us to measure the medium-term outcomes for housing projects built between 2001 and 2011.   The aerial panel provides a novel measure of slum growth by distinguishing between formal and informal house types.  Our main outcomes are population, formal and informal housing, formal house prices, and infrastructure investments.'' }\\
+\er
+
+\cc In order to explain their identification strategy the authors contrast their approach with what they consider the “standard” one (comparing treated areas to nearby untreated ones). The exposition would be sharper if instead they spelled out clearly what the identification challenge is (unobserved characteristics of treated areas), how they propose to solve it, and what the identifying assumptions are.
+
+\sr
+\reply{The introduction adds: ``This strategy addresses two main challenges in measuring the impacts of housing projects.  First, projects are often located not only in poor neighborhoods, but also on relatively undeveloped plots of land within these neighborhoods.  Comparing projects to neighboring areas would likely capture these preexisting differences.  Our strategy controls for these differences because constructed and unconstructed projects are often located on similar types of land plots in similar types of neighborhoods.  Second, projects are often located in rapidly growing cities with high demand for housing.  Measuring the evolution of project areas would likely also capture urban growth that is unrelated to the projects.  Our strategy controls for trends in urban development by comparing relative growth for areas with constructed or unconstructed projects.''}\\
+\er
+
+\cc The introduction should be clearer from the very beginning on what the treatment is. What were the program components? What exactly gets built within project footprints? What were the projects’ goals and what does it mean that projects were “successful”?
+
+\sr
+\reply{The introduction adds context including: ``We examine these effects in the context of South African housing projects'' and ``Annually since 1994, the South African government acquires parcels of land and constructs many housing projects.  Projects consist of (1) building neighborhoods of new single-story, two-room houses each on their own plot of land, (2) allocating full ownership of houses to recipient households, and (3) servicing houses with basic infrastructure including water, electricity, community centers, and other complementary investments.  Housing projects range widely in size from a few dozen to several hundred houses per project.''}\\
+\er
+
+\cc It may be easier to express all distances as meters (e.g. say the units are 100 m x 100 m plots) rather than using hectars and reminding the reader many times throughout the paper.
+
+\sr
+\reply{Great suggestion and updated with km's throughout.}\\
+\er
+
+
+
+
+
+
+
+
+\end{document}
+
+
+

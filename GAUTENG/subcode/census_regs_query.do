@@ -37,14 +37,14 @@ global data_load_place = 0;
 global full_data_1996 = 0;
 global full_data_2001 = 0;
 global full_data_2011 = 0;
-global aggregate      = 0;
+global aggregate      = 1;
 
 
 
 global full_data_pers_1996 = 0;
 global full_data_pers_2001 = 0;
 global full_data_pers_2011 = 0;
-global aggregate_pers      = 1;
+global aggregate_pers      = 0;
 
 global add_grids = 0;
 
@@ -502,6 +502,13 @@ gen shack_non_bkyd =  (dwelling_type == 8 & year==1996)|(dwelling_type == 7 & ye
 gen room_on_shared_prop = (dwelling_type == 9 & year==1996)|(dwelling_type == 8 & year==2001)|(dwelling_type == 10 & year==2011)  if !missing(dwelling_type);
 
 
+
+* areg owner traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop i.year, a(area_code)
+* areg electric_cooking traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop i.year, a(area_code)
+* areg water_inside traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop i.year, a(area_code)
+* areg toilet_flush traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop i.year, a(area_code)
+
+
 * gen house_bkyd = (dwelling_type == 6 & year==1996)|(dwelling_type == 5 & year==2001)|(dwelling_type == 7 & year==2011)  if !missing(dwelling_type);
 * lab var house_bkyd "House Backyard";
 
@@ -511,7 +518,11 @@ gen room_on_shared_prop = (dwelling_type == 9 & year==1996)|(dwelling_type == 8 
 * gen shack_non_bkyd = (dwelling_type == 8  & year==1996)|(dwelling_type == 7  & year==2001)|(dwelling_type == 9 & year==2011)  if !missing(dwelling_type);
 * lab var shack_non_bkyd "Shack Non-Backyard";
 
-foreach var of varlist house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop {;
+g informal = house_bkyd==1 | shack_bkyd==1 | shack_non_bkyd==1 if !missing(dwelling_type);
+g formal = informal==0 if !missing(dwelling_type);
+
+
+foreach var of varlist house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop informal formal {;
 gegen `var'_dens = sum(`var'), by(area_code year) ;
 g `var'_hh = `var'*hh_size ;
 gegen `var'_dens_pers = sum(`var'_hh), by(area_code year) ;
@@ -551,11 +562,14 @@ gegen  person_pop = sum(hh_size), by(area_code year);
 *g pop_density = (person_pop/area)*1000000;
 *lab var pop_density "People per km2";
 
-g formal = house==1 | house_bkyd==1;
-g informal = shack_bkyd==1 | shack_non_bkyd==1;
+* g formal = house==1 | house_bkyd==1;
+* g informal = shack_bkyd==1 | shack_non_bkyd==1;
+* g for_id = house==1 | flat==1 | duplex==1 | room_on_shared_prop==1;
+* g inf_id = house==1 | shack_bkyd==1 | shack_non_bkyd==1 ;
 
-g for_id = house==1 | flat==1 | duplex==1 | room_on_shared_prop==1;
-g inf_id = house==1 | shack_bkyd==1 | shack_non_bkyd==1 ;
+
+g for_id = formal;
+g inf_id = informal;
 g bkyd_id = house_bkyd==1 | shack_bkyd==1 ;
 g n_bkyd_id = shack_non_bkyd==1;
 
@@ -576,7 +590,7 @@ fcollapse
       formal informal   house traditional flat duplex house_bkyd shack_bkyd shack_non_bkyd room_on_shared_prop  
   (firstnm) 
       hh_pop person_pop  house_dens traditional_dens flat_dens duplex_dens house_bkyd_dens shack_bkyd_dens shack_non_bkyd_dens room_on_shared_prop_dens
-      house_dens_pers traditional_dens_pers flat_dens_pers duplex_dens_pers house_bkyd_dens_pers shack_bkyd_dens_pers shack_non_bkyd_dens_pers room_on_shared_prop_dens_pers
+      house_dens_pers traditional_dens_pers flat_dens_pers duplex_dens_pers house_bkyd_dens_pers shack_bkyd_dens_pers shack_non_bkyd_dens_pers room_on_shared_prop_dens_pers formal_dens_pers informal_dens_pers
   , 
     by(area_code year);
 

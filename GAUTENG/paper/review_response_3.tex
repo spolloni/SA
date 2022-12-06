@@ -1,0 +1,186 @@
+\documentclass{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % make more characters printable when copy-pasted here
+\usepackage{xcolor} % to facilitate the myNotes and myTodo commands.
+
+% Created by Jack Baker, last modified 11/3/2020
+
+\usepackage{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{rdp_paper}
+
+% initialize counters for reviewer number and comment number
+\newcounter{reviewer}
+\setcounter{reviewer}{0}
+\newcounter{point}[reviewer]
+\setcounter{point}{0}
+
+% Set the format of reviewer comment numbers and responses.
+\renewcommand{\thepoint}{Q\,\thereviewer.\arabic{point}} 
+\newcommand{\point}[1]{\refstepcounter{point}  \bigskip \hrule \medskip \noindent {{\fontseries{b}\selectfont \thepoint } #1}\par}
+\newcommand{\reply}{\medskip \noindent \textbf{Reply}:\ \textit }   
+\newcommand{\sr}{\begin{minipage}{\dimexpr\textwidth-3cm}}
+\newcommand{\er}{\end{minipage}}
+\newcommand{\cc}{\medskip \noindent \textbf{Comment:}\hspace{2em}}
+
+% Set the format for reviewer headings
+\newcommand{\reviewersection}{\stepcounter{reviewer}
+                  \section*{Reviewer \thereviewer}}
+
+% Set the format for notes on in-progress responses
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand\myTodo[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Response to 2021-01-25-jue}
+\author{}
+\begin{document}
+
+\maketitle
+
+\noindent
+
+\section{Summary}
+
+\cc This paper contrasts changes in outcomes between 2001 and 2011 for areas where public housing projects were constructed in Gauteng Province, South Africa, compared to areas where planned projects were not constructed. Gauteng contains Pretoria and Johanesburg, with the projects clustered around the latter. The program under which the projects were constructed began in 1994. There are two main novel findings:
+
+\sr
+\reply{Just to note, in Data Section~\ref{section:data}, we clarify that ``We locate projects using a map of housing projects for the Johannesburg metro area (excluding Pretoria) obtained from the Gauteng City Regional Observatory''.  We also include a footnote in the introduction ``Our data does not cover Pretoria.'' }\\
+\er
+
+1. Along with the expected formal constructions, areas within project boundaries also saw large increases in informal construction, including of ``backyard houses'' built on formal plots.
+
+2. There is some evidence of small spillover effects of the projects outside their boundaries, which raise the socioeconomic status of the surrounding neighborhoods. On formal house transaction prices, the order of magnitude is similar to those found for low-income areas in Diamond and McQuade (2019) although the results in the present paper are not statistically significant.
+
+\section{Long-form comments}
+
+\cc Let me start by saying that the paper makes a distinct contribution to the literature, which will benefit from a greater understanding of the effects of public housing in a developing country setting. To this end, I would like to see more direct comparison with the results on spillover effects of public housing construction in high-income countries, reviewed for example in Diamond and McQuade (2019). Outside of the effects on informal outcomes, how do the results differ and what does this tell us? 
+
+\sr
+\reply{ We appreciate the recommendation to better link to the literature.  We updated our discussion of price effects in the intro as follows: ``We estimate that prices for formal housing transactions increase by 9\% between 0 and 0.5 km from project footprints although this result is statistically indistinguishable from zero.  This effect is similar to previous price estimates in the literature, which range from 6.5\% to 15\% in low-income US neighborhoods to 12\% in a middle-income neighborhood in Uruguay. Footnote: \{See Diamond and McQuade, 2019 and  Baum-Snow and Marion, 2009 for US Low Income Housing Tax Credit estimates.  See Gonzalez-Pampillon, 2022 for public housing estimates from Uruguay.\}  Our effect differs from the 2.5\% decrease in prices observed in high income US neighborhoods. Footnote: \{Diamond and McQuade, 2019 \}.  Given that South African housing projects are located in relatively low-income neighborhoods, our price effects are largely consistent with the literature. '' }\\
+\er
+
+\cc Because the authors provide regression results with the fine building categories as separate outcomes, I would like to see more validation (or at least description) of the data. I agree that aerial photographs are quite informative for whether a given building is constructed with formal or informal building materials, but I am not convinced it is easy to ascertain whether a building contains firms, how many firms there are, and whether the firms are formal as suggested by the first two columns of Table 8. I would like the authors to provide the details of the validation exercise they conducted correlating the GeoTerraImage data on number of informal houses with the figures from the census. I'm not sure whether to consider the reported correlation coefficient of 0.85 large or small. 
+
+\sr
+\reply{ Great idea to better validate the building data.  We have success validating the informal/formal housing measures and less success with the business measures. }
+\begin{itemize}
+\item \textit{ We are able to reasonably validate building and census measures for formal and informal housing.  Validation exercises are described in the Data Section~\ref{section:data} finding strong correlations.   We note that our correlation estimate is different from the previous version because we are now calculating correlations at the level of the enumerator area to make the census and building data as comparable as possible.  }
+\item \textit{We also find very similar results using both housing measures given by Appendix Table~\ref{table:census_building_robust} and discussed in Section~\ref{section:robustness}.}
+\item \textit{ We have less success validating business and utility measures, and include caveats in the result interpretations. Validation exercises (and limitations to the exercises) are described in the Data Section~\ref{section:data}.} 
+\end{itemize} 
+\er\\
+
+
+\cc For the formal/informal contrast in Table 3, the authors could show that results are robust to using census measures as outcome variables. Brueckner et al. (2019) suggests that there is some social data on backyard housing, I don't suppose the distinction is present in the census? 
+
+\sr
+\reply{ Thank you for the suggestion.  Luckily, the distinction is present, and we find similar results as described below.}
+\begin{itemize}
+    \item \textit{ The census identifies (1) ``Informal dwelling (shack in backyard),'' (2) ``Informal dwelling (shack not in backyard, e.g. in an informal/squatter settlement or on a farm),'' and (3) ``House/flat/room in backyard'' as given by the new footnote added in Section~\ref{section:data}.   }
+    \item \textit{We find very similar results using both housing measures given by Appendix Table~\ref{table:census_building_robust} and discussed in Section~\ref{section:robustness}.}
+\end{itemize}
+\er\\
+
+\cc For the firm variables, I'd like to see evidence that they track with employment numbers from the census.  This more-involved validation would be valuable as more researchers use the GeoTerraImage data with Brueckner et al. (2019), at least, having already done so.
+
+\sr
+\reply{ Great suggestion, which we tried, but found low correlations possibly because people live and work in different locations.  We include a full discussion in Data Section~\ref{section:data} and caveat our results interpretations accordingly. }\\
+\er
+
+\cc I'd also like some clarification on what is/isn't known about each housing project. Analysis is at the level of cells of a 100 m  100 m grid imposed on the area of interest, which the authors refer to as plots. The effect of project construction on number of formal houses in a given project area between 2001 and 2011 is presumably known to project administrators, as is the effect on construction of public service buildings. If the authors accessed this information they could, for instance, estimate the average across projects of the number of formal houses built per plot on plots contained within project areas, where () indicates the cardinality of the argument and I've abstracted away from the fact that some plots are not fully inside or outside a project area. As I understand it, this is effectively what () should measure in equation 1 when the outcome variable is number of formal houses. For the net effect of being in a constructed project, the authors could estimate () for unconstructed projects. The only statistical uncertainty comes from estimation of () so this result would be more precise than what the authors report.  Can the authors follow this approach? If not, is it because program administrators do not make the information available (why not? Could it be that fewer houses were constructed than should have been?), or because they don't have records?  
+
+\sr
+\reply{ Thank you for the detailed empirical suggestions, but unfortunately, we face many data limitations described below.}
+\begin{itemize}
+\item \textit{ In the Data Section~\ref{section:data}, we clarify that: ``With this project definition, we do not know the dates when projects were started or completed.  While the majority of projects were likely to have started construction after 2001 consistent with a broad expansion in housing programs in the early 2000's, the data may also include some projects that were already completed by 2001.'' }
+\item \textit{ Unfortunately, reliable data on the number of units constructed and dates of construction are not available.  We have reached out to administrators to no avail, and we have tried linking project names to government treasury records, but different naming conventions mean that this exercise did not yield any reasonable results.  One explanation is that government housing is an intensely political issue in South Africa.  }
+\item \textit{We reframed our estimates of the effect of project construction on formal housing in the project footprint to be in terms of measuring the projects themselves (instead of estimating any exogenous effects).  See Measuring Housing Project Construction Section~\ref{section:measuringprojects} for a detailed discussion.} 
+\end{itemize}
+  
+\er\\
+
+\cc In Figure 1, I notice that many unconstructed project areas border constructed project areas so that according to the authors' own analysis the Stable Unit Treatment Value assumption will not hold for the within plot footprint analysis because the unconstructed plots will be subject to spillover effects. As a robustness check, I would like to see the analysis of at least Table 1 repeated when excluding plots where non-constructed and constructed areas are close, recognizing that these areas are somewhat geographically distinct. Since spillovers appear to be small, I do not expect large differences in results.
+
+\sr
+\reply{Excellent suggestion for a robustness test.  We find that the main results remain largely unchanged excluding any projects that are within 2 km of any other projects. See new Table~\ref{table:far_robust} and Robustness Section~\ref{section:robustness} }\\
+\er
+
+\cc I would also like to see the welfare analysis in section 9 removed altogether. The authors cannot treat the actual construction of the public housing itself as the action of a profit-maximizing developer, which is implied by including direct effects on formal housing in equation 6. The authors imply that there is a first-stage relationship between construction costs and steepness but as far as I can tell, they do not have variation in construction cost so it isn't clear how () in equation 6 is being estimated.
+
+\sr
+\reply{Helpful suggestion, and we have removed it.}\\
+\er
+
+\section{Short comments}
+
+\cc The authors claim that their measure of plot exposure to the projects is novel since it measures exposure by the fraction of the project area that intersects the plot itself and areas around the plot centroid instead of distance to the nearest project as in Diamond and McQuade (2019). I do not think the measure is novel. At the very least, Autor et al. (2014) have a similarly-continuous measure of exposure to rent controlled buildings in Cambridge, MA, although it is based on number of units rather than area. Gechter and Tsivanidis (2020) contains a similar measure with that paper being developed over the same time period as this one. Maybe the authors mean the measure is novel within the literature on spillover and direct effects of public housing development?
+
+\sr
+\reply{Thank you for the helpful cites.  We removed claims that it is novel and added citations to Autor et al. (2014) and Gechter and Tsivanidis (2020) in the measurement section~\ref{section:exposuremeasure}}\\
+\er
+
+\cc I was a bit confused about the area covered by the public housing project data. Am I right that it is all of Gauteng province and therefore, there was no public housing constructed under the program in Pretoria?
+
+\sr
+\reply{ Thank you for identifying the lack of context. In the Introduction, we added a footnote clarifying ``Our data does not cover Pretoria.''  In the Data Section~\ref{section:data}, we also clarify that the data does not include Pretoria.}\\
+\er
+
+\cc I didn't understand the following interpretation of the coefficients in the ``Plot foot-print row of columns 4 and 5 in Table 1: Among informal houses, backyard houses replace non-backyard houses consistent with qualitative evidence that housing authorities cleared preexisting slums before constructing new projects''. Both coefficients are positive and significant whereas the statement made me expect a negative coefficient on informal houses.
+
+\sr
+\reply{ We have revised our description to the following in Section~\ref{section:directeffects} ``Columns (2) and (3) disaggregate the total effect into effects on informal backyard houses and informal non-backyard houses.  Backyard housing is a common phenomenon in South Africa where households erect informal dwellings within the plots of formal dwellings.  We observe a large increase in backyard housing at the same magnitude as the increase in formal housing in Table~\ref{table:main_formal_proj}.  This finding suggests that almost every formal project house is accompanied by an informal, backyard house constructed on the same parcel of land.  We also estimate a relative decline in informal, non-backyard houses in constructed project areas relative to unconstructed project areas.  The number of people living in informal housing declines as a result of project construction.  These findings are consistent with larger non-backyard houses being replaced by smaller backyard houses.'' }\\
+\er
+
+\cc On page 27, the first instance of the word ``which'' should be deleted.
+
+\sr
+\reply{Great catch, and we have removed the welfare section that contained it.}\\
+\er
+
+\cc There is a good reason why Diamond and McQuade (2019) and Rossi-Hansberg et al. (2010) do not consider effects on public housing project plots: they are not considering informal activity. I wouldn't imagine informal activity is first-order in their settings. Perhaps it was in Hornbeck and Keniston (2017)'s historical setting. As such, I would like the authors to moderate their statements in the conclusion about a general need to consider within-area effects of public housing projects.
+
+\sr
+\reply{Great observation.  In conclusion section~\ref{section:conclusion}, we clarify ``researchers and policymakers have largely focused on changes outside of policy footprints because policies in developed settings leave little scope for informal activity within their footprints'' and emphasize that our results are relevant for developing settings.}
+\er
+
+% References
+
+% Autor, D. H., C. J. Palmer, and P. A. Pathak (2014). Housing Market Spillovers: Evi-
+
+% dence from the End of Rent Control in Cambridge, Massachusetts. Journal of Political
+
+% Economy 122 (3), 661{717.
+
+% Brueckner, J. K., C. Rabe, and H. Selod (2019). Backyarding: Theory and evidence for
+
+% South Africa. Regional Science and Urban Economics 79 (November).
+
+% Diamond, R. and T. McQuade (2019). Who wants affordable housing in their backyard?
+
+% An equilibrium analysis of low-income property development. Journal of Political Econ-
+
+% omy 127 (3), 1063{1117.
+
+% Gechter, M. and N. Tsivanidis (2020). Spatial Spillovers from Urban Renewal: Evidence
+
+% from the Mumbai Mills Redevelopment. Working Paper.
+
+% Hornbeck, R. and D. Keniston (2017). Creative Destruction: Barriers to Urban Growth and
+
+% the Great Boston Fire of 1872. American Economic Review 107 (6), 1365{98.
+
+% Rossi-Hansberg, E., P.-D. Sarte, and R. Owens (2010). Housing Externalities. The Journal
+
+% of Poitical Economy 118 (3), 485{534.
+
+
+
+
+
+
+
+\end{document}
+
+
+

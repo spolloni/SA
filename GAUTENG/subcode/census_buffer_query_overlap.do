@@ -22,7 +22,7 @@ if $buffer_query == 1 {;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area, 1996 as year
+  B.cluster_b5_area, B.cluster_b6_area, B.cluster_b7_area, B.cluster_b8_area, 1996 as year
 FROM 
 ea_1996_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2}_ea_1996 AS B ON A.OGC_FID = B.OGC_FID ";
@@ -36,7 +36,7 @@ save "buffer_${dist_break_reg1}_${dist_break_reg2}_1996_overlap.dta", replace;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area, 2001 as year
+  B.cluster_b5_area, B.cluster_b6_area, B.cluster_b7_area, B.cluster_b8_area, 2001 as year
 FROM 
 sal_2001_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2}_sal_2001 AS B ON A.OGC_FID = B.OGC_FID ";
@@ -50,7 +50,7 @@ save "buffer_${dist_break_reg1}_${dist_break_reg2}_2001_overlap.dta", replace;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area, 2011 as year, S.sal_code
+  B.cluster_b5_area, B.cluster_b6_area, B.cluster_b7_area, B.cluster_b8_area, 2011 as year, S.sal_code
 FROM 
 sal_ea_2011_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A
 JOIN buffer_area_${dist_break_reg1}_${dist_break_reg2}_sal_ea_2011 AS B ON A.OGC_FID = B.OGC_FID 
@@ -76,9 +76,9 @@ append using "buffer_${dist_break_reg1}_${dist_break_reg2}_2011_overlap.dta" ;
 
 
 
-erase "buffer_${dist_break_reg1}_${dist_break_reg2}_1996_overlap.dta";
-erase "buffer_${dist_break_reg1}_${dist_break_reg2}_2001_overlap.dta";
-erase "buffer_${dist_break_reg1}_${dist_break_reg2}_2011_overlap.dta";
+* erase "buffer_${dist_break_reg1}_${dist_break_reg2}_1996_overlap.dta";
+* erase "buffer_${dist_break_reg1}_${dist_break_reg2}_2001_overlap.dta";
+* erase "buffer_${dist_break_reg1}_${dist_break_reg2}_2011_overlap.dta";
 
 
 
@@ -88,7 +88,7 @@ cd $output;
 
 
 
-foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int  {;
+foreach var of varlist cluster_int b1_int b2_int b3_int b4_int b5_int b6_int b7_int b8_int  {;
 forvalues r=0/1 {;
 
 if `r'==1 {;
@@ -130,7 +130,7 @@ use "temp_censushh_agg${V}.dta", clear;
     drop _merge;
 
 
-save "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}${V}_overlap.dta", replace; 
+save "temp_censushh_agg_buffer_${dist_break_reg1}_${dist_break_reg2}_overlap.dta", replace; 
 
 
 

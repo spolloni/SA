@@ -52,9 +52,11 @@ save "far_placebo", replace ;
 use "far_rdp", clear;
 append using "far_placebo";
 
-* sum dist, detail;
+sum dist, detail;
 
 keep if dist>=2000;
+
+
 
 keep OGC_FID;
 odbc exec("DROP TABLE IF EXISTS gcro_far ;"), dsn("gauteng");

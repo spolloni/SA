@@ -1,0 +1,170 @@
+\documentclass{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % make more characters printable when copy-pasted here
+\usepackage{xcolor} % to facilitate the myNotes and myTodo commands.
+
+\usepackage{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{rdp_paper}
+
+% Created by Jack Baker, last modified 11/3/2020
+
+% initialize counters for reviewer number and comment number
+\newcounter{reviewer}
+\setcounter{reviewer}{0}
+\newcounter{point}[reviewer]
+\setcounter{point}{0}
+
+% Set the format of reviewer comment numbers and responses.
+\renewcommand{\thepoint}{Q\,\thereviewer.\arabic{point}} 
+\newcommand{\point}[1]{\refstepcounter{point}  \bigskip \hrule \medskip \noindent {{\fontseries{b}\selectfont \thepoint } #1}\par}
+\newcommand{\reply}{\medskip \noindent \textbf{Reply}:\ \textit }   
+\newcommand{\sr}{\begin{minipage}{\dimexpr\textwidth-3cm}}
+\newcommand{\er}{\end{minipage}}
+\newcommand{\cc}{\medskip \noindent \textbf{Comment:}\hspace{2em}}
+
+% Set the format for reviewer headings
+\newcommand{\reviewersection}{\stepcounter{reviewer}
+                  \section*{Reviewer \thereviewer}}
+
+% Set the format for notes on in-progress responses
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand\myTodo[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Response to Report\_YJUEC-D-20-00422}
+\author{}
+\begin{document}
+
+\maketitle
+
+\noindent
+
+\cc That said, South Africa (their setting) is not a typical African country.  According to World Bank, it is about 4.8 times richer per capita than the average sub-Sahara African country in 2001, and 4.2 times in 2012. It is important that authors improve the framing of South Africa (their context) in Africa more generally.
+
+\sr
+\reply{Thank you for the helpful observation.  In an introduction footnote, we clarify that ``compared to its low-income, sub-Saharan neighbors, South Africa shares similar urban slum conditions including a thriving informal housing sector.  However, South Africa is unique among its neighbors in its ability to fund large-scale housing programs (Bah et al. 2018).'' }\\
+\er
+
+\cc I agree with the authors that their question is an important contribution to the literature. However, their discussion of Michaels et al. (2020) and Harari and Wong (2020) is not clear. These papers do not find mixed results. The Michaels paper studies areas that were planned before development, while Harari and Wong study slum upgrading areas. Their results are largely consistent. 
+
+\sr
+\reply{We appreciate the clarification and have addressed it in the introduction.}\\
+\er
+
+\cc The contribution of this paper, is rather, to study a different policy: public housing, where Michaels studies pre-emptive urban planning, and Harari and Wong study slum upgrading. 
+
+\sr
+\reply{ We reframe our contribution in the introduction as ``our study contributes to this literature by studying public housing projects using spatial panel data''}\\
+\er
+
+\cc Related, the authors might also want to look at Franklin's job market paper on public housing projects in Ethiopia.
+
+\sr
+\reply{ Thank you for the suggestion of Simon Franklin's job market paper, which we found very interesting.  Since it focuses on recipient's outcomes, we couldn't find a natural way to reference it.}\\
+\er
+
+
+\section{Substantive issues}
+
+\subsection{The counterfactual}
+
+\cc A substantive issue with the empirical analysis is the classification of the counterfactual group. The building data are recorded at 2001 and 2012 and census data at 2001 and 2011. The treatment group contains projects described as ``current'', ``under implementation'', or ``complete'' as of 2008. The control group contains projects described as ``proposed'', ``under planning'', ``future'', ``investigating'', and ``uncertain'' as of 2008. Since the control group is partly comprised of planned or future projects, development in these areas is likely inhibited by the government. To address this, can results be broken down by proposed, investigating, and uncertain vs. future and under planning projects? It would also be helpful to have more explanation with examples of what each of these statuses mean. Ideally the counterfactual group should contain projects that were approved on paper, but with no action taken on the ground. In a related paper, Franklin (2020) uses housing projects that were planned and approved during his study period but cancelled or delayed in their implementation.
+
+\sr
+\reply{ Excellent point to explore heterogeneity in construction categories. It turns out we do not observe substantial heterogeneity as explained below, and unfortunately we do not have better information on categories.  }
+\begin{itemize}
+    \item \textit{ In Robustness Section~\ref{section:robustness}, ``we test whether the results are sensitive to our definition of unconstructed projects by excluding 89 unconstructed projects labeled ``proposed,'' ``investigating,'' or ``uncertain.'' Table~\ref{table:dropplacebo_robust} finds results very similar to our main specifications, indicating that our empirical strategy is insensitive to this alternate project definition.'' }
+    \item \textit{We do not have more documentation on what the construction categories signify because we received our data from a non-profit research group who received the data from the government.  Likely because the projects often become very political, we have been unable to get accurate reports on project status through other sources. }
+\end{itemize}  
+\er\\
+
+
+\cc There are also observable baseline differences between treatment and control groups. First of all, Table 1 should statistically test for differences in these characteristics between constructed and unconstructed projects - currently it only provides point estimates. Also, based on Figure 1, it would be good to add differences in connection to the city center (distance to CBD and main highways) to Table 1. All of these observables could influence the change in private housing investment, and so may bias the diff-in-diff estimates. The authors should show that their results are robust to the inclusion of baseline observables that are 'unbalanced' in Table 1.
+
+\sr
+\reply{  We share your concern and have concluded that although imperfect, the constructed/uunconstructed comparison is the best available and survices many robustness checks.  We try to be transparent about the limitations of our approach throughout. }
+\begin{itemize}
+    \item \textit{ Table~\ref{table:spatialsummary} finds many statistically significant differences and includes many additional variables including distance to CBD and highways.}
+    \item \textit{ We are unable to include all variables directly in our diff-in-diff analysis because they do not change over time.}
+    \item \textit{   We include all measures available in the pre-period to develop a propensity score and reweight our analysis by this score and results are robust (See discussion in Section~\ref{section:robustness}  and results in Table~\ref{table:pweight}, Figure~\ref{table:mainpweight}, and Table~\ref{table:mainpweight}).  We also include projects with no housing development at baseline, finding broadly similar results in Table~\ref{table:mainmatching3} (discussion in Section~\ref{section:robustness}). }\\
+\end{itemize}
+\er
+
+\subsection{Direct effects}
+
+\cc It is unclear what we learn from the direct effects estimates. Since, as far as I can tell, we cannot distinguish between buildings that were built as part of the project and those that were complementary investment. This includes formal buildings, informal buildings, and public service buildings. Consequently, the direct effects are capturing the project itself. Potentially more could be done to distinguish which buildings were built as part of the project and which were not. However this may be prohibitively difficult to do, in which case the paper should focus on the spillover (outside of project boundaries) effects instead, especially for the welfare analysis.
+
+\sr
+\reply{Thank you for the helpful observation.  We reframe our analysis given that we cannot separate project from non-project formal houses/infrastructure.  We continue to estimate direct effects on informal buildings because they were explicitly not part of the program as described below. }
+\begin{itemize}
+    \item \textit{In the introduction, we more clearly define project goals as building formal houses, moving recipients into houses, and providing basic services/infrastructure, which is consistent with project guidelines.}
+    \item \textit{While data is not available to precisely identify project structures, we treat informal housing within project footprints as an outcome because qualitative interviews with housing officials indicated that informal housing development is viewed as entirely separate from projects. Also, informal/formal housing results are similar with both aerial building data and census measures (See section~\ref{section:robustness}). }
+    \item \textit{We reframe our analysis as (1) measuring the projects (formal housing, infrastructure), (2) direct effects on informal housing, and (3) spillover effects.}
+\end{itemize}
+\er
+
+
+\subsection{Welfare and displacement}
+
+\cc The paper does not address whether the projects provide welfare gains on aggregate or simply displace development from other areas of the city. This is a fundamental concern when evaluating place based policies, and it is very difficult to provide a definitive answer in many cases. I do not expect that it is possible to provide an answer in this context where all analysis is done within one city, but it is important that the paper critically discusses this issue. The welfare results should be heavily caveated in light of this issue.
+
+\sr
+\reply{Helpful observations, and we have removed it.}\\
+\er
+
+
+\subsection{Measurement}
+
+\cc Census measures are interpolated from census areas to plots. This could confound spillover effects with direct effects because these census areas will straddle the project boundary even if the (interpolated) plot is entirely outside. Therefore, census measures should be analyzed at the spatial unit they are measured in, at least as a robustness check.
+
+\sr
+\reply{ Table~\ref{table:census_ea_robust} repeats the census results at the census enumerator area level with roughly 7,500 enumerator areas (EAs).  We find similar results in project footprints but zero spillover effects.  Zero spillovers from this method are likely due to excluding EAs that straddle any project boundaries leaving only a few EAs that are close to projects but do not straddle boundaries, which is a very conservative approach to detecting spillovers. See Robustness Section~\ref{section:robustness} for discussion. }\\
+\er
+
+\subsection{Minor issues}
+
+\cc Since there are no spillovers beyond 500m, it would be interesting to see spillovers broken down over an even finer spatial scale.
+
+\sr
+\reply{ Thanks for the interesting suggestion.  We tried 100m rings from 0 to 500m and found that results are mostly insignificant without a clear pattern of effects nearest or furthest in this range. See Table~\ref{table:dist_robust} and Robustness Section~\ref{section:robustness} for discussion.}\\
+\er
+
+\cc I very much appreciate the authors' transparency reporting all results even if they are insignificant. Since there are so many outcomes, it would be helpful to correct for multiple hypothesis testing. This could be done by table (i.e. family of outcomes) using, for instance, the False Discovery Rate or Family Wise Error Rate correction.
+
+\sr
+\reply{We added a family-wise error rate correction using the Bonferonni method throughout, which informs our indicators of significance.}\\
+\er
+
+\cc Estimates of theta are very similar for both formal and informal housing. Can the authors explain in more detail why informal housing is only 10\% more costly?
+
+\sr
+\reply{We decided to remove the welfare section altogether.}\\
+\er
+
+\cc I assume that there is no data on the footprint sizes of buildings, if so it would be good to see this as an outcome as well.
+
+\sr
+\reply{We agree especially since we likely identify project houses due to their uniform construction.  Unfortunately, the data are unavailable to us.}\\
+\er
+
+\cc Why use hectometre and not just km? I know that the plots are measured in hectares, but it is much simpler to use km in the text. This would remove the need for the many footnotes on this.
+
+\sr
+\reply{Great suggestion and updated with km's throughout.}\\
+\er
+
+\cc The authors continually mention that some housing projects may have already been completed by 2001. Can you find out their dates? How many are there? How long before?
+
+\sr
+\reply{We tried matching strings of project names to government budget reports as well as reaching out to various government housing authorities, both to no avail.  Unfortunately, we have been unable to find any quality data on construction dates (possibly because construction completion can be very political).}\\
+\er
+
+
+
+
+
+\end{document}
+
+
+

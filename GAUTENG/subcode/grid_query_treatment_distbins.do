@@ -28,7 +28,7 @@ cd Generated/Gauteng;
 
 local qry = " SELECT A.*, B.cluster_area, B.cluster_b1_area, B.cluster_b2_area, 
  B.cluster_b3_area, B.cluster_b4_area,
-  B.cluster_b5_area, B.cluster_b6_area,   B.cluster_b7_area, B.cluster_b8_area 
+  B.cluster_b5_area, B.cluster_b6_area
 FROM 
 (SELECT A.* FROM grid_temp_100_4000_buffer_area_int_${dist_break_reg1}_${dist_break_reg2} AS A 
 LEFT JOIN gcro_over_list AS G ON G.OGC_FID = A.cluster 
@@ -49,38 +49,57 @@ merge m:1 id using "undev_100_4000.dta", keep(1) nogen
 ren id grid_id
 
 
-keep if rdp==1
+* keep if rdp==1
+
+* drop if cluster_int>0 & cluster_int<.
 
 
-drop if cluster_int>0 & cluster_int<.
 
 
 
 g b1 = b1_int 
 replace b1 = b1_int - cluster_int if cluster_int!=.
-forvalues r=2/8 {
+replace b1 = . if b1==0
+
+forvalues r=2/6 {
     g b`r' = b`r'_int
     replace b`r' = b`r'_int - b`=`r'-1'_int if b`=`r'-1'_int!=.
     replace b`r' = . if b`r'==0
 }
 
-gegen ctag = tag(cluster)
-
-
-forvalues r=1/8 {
-    gegen bm`r'_temp = mean(b`r'), by(cluster)
-    replace bm`r'_temp = . if ctag!=1
-    egen bm`r' = mean(bm`r'_temp)
-    drop bm`r'_temp
+forvalues r=1/6 {
+    replace b`r' = . if cluster_int>0 & cluster_int<.
 }
 
-forvalues r=1/8 {
+g b0 = cluster_int if cluster_int>0 & cluster_int<.
+
+
+gegen ctag = tag(cluster rdp)
+
+
+forvalues r=0/6 {
+    g otemp=b`r'!=.
+    gegen cm`r'_temp = sum(otemp), by(cluster rdp)
+    gegen bm`r'_temp = mean(b`r'), by(cluster rdp)
+    replace cm`r'_temp = . if ctag!=1
+    replace bm`r'_temp = . if ctag!=1
+    gegen bm`r' = mean(bm`r'_temp), by(rdp)
+    gegen cm`r' = mean(cm`r'_temp), by(rdp)
+    drop bm`r'_temp cm`r'_temp otemp
+}
+
+forvalues r=0/6 {
     sum bm`r'
 }
 
-keep bm*
-keep if _n==1
-save "bm_distbins", replace
+preserve
+    keep bm*
+    ren bm* dbbm*
+    keep if _n==1
+    save "bm_distbins", replace
+restore 
+
+
 
 
 

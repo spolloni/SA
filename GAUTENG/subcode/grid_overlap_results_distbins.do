@@ -5,6 +5,8 @@ est clear
 
 do reg_gen_overlap.do
 
+do reg_gen_overlap_dbins.do
+
 cap prog drop write
 prog define write
   file open newfile using "`1'", write replace
@@ -116,6 +118,8 @@ replace kids_density=. if kids_density>2000
 g kids_per = kids_density/pop_density
 replace kids_per = 1 if kids_per>1 & kids_per<.
 
+g for_density  = (10000)*(formal_dens_pers/area)
+g inf_density  = (10000)*(informal_dens_pers/area)
 
 * gen_cj
 
@@ -135,7 +139,7 @@ generate_variables
 
 drop proj_rdp proj_placebo
 
-local constant "10000"
+local constant "1"
 g   proj_rdp = DBcluster_int_tot_rdp
 replace proj_rdp = 10000 if proj_rdp>10000
 replace proj_rdp = proj_rdp/`constant'
@@ -226,29 +230,71 @@ g proj_C_con = proj_rdp
 g proj_C_con_post = proj_rdp*post
 
 *** DROP UNUSED
+bm_weight 1
+
 drop s1p_a_1*
 drop DBs1p_a_6*
 
 
 
-lab var formal "(1)&(2)&(3)\\[.5em] &Formal"
-lab var house "Single House"
-lab var age "Age"
-lab var hh_size "Household Size \\ \midrule \\[-.6em]"
-global cells = 4
-global cellsp = 4
 
-global outcomes = " total_buildings formal house age  "
+* *** DO BM WEIGHT FOR DISTBINS
+  append using "bm_distbins"
 
-global dist = 1
-global price=0
-rfull dist_bin1
+  forvalues r=1/5 {
+    egen dbbm`r'_id=max(dbbm`r')
+    drop dbbm`r'
+    ren dbbm`r'_id dbbm`r'
+  }
+  drop if _n==_N
+
+  forvalues r=1/5 {
+    foreach var of varlist DBs1p_a_`r'_C DBs1p_a_`r'_C_con DBs1p_a_`r'_C_post DBs1p_a_`r'_C_con_post {
+    replace `var'=`var'/(dbbm`r'/1)
+  }
+  }
 
 
 
-reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-     DBs1p_*_C DBs1p_a*_C_con DBs1p_*_C_post DBs1p_a*_C_con_post  ///
-      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+cd ../..
+cd $output
+
+
+
+
+
+lab var for "(1)&(2)&(3)&(4)&(5)\\[.5em] &Formal Houses "
+lab var for_density "People in Formal Houses"
+lab var inf_backyard "Informal Backyard Houses"
+lab var inf_non_backyard "Informal Non-Backyard Houses"
+lab var inf_density "People in Informal Houses \\ \midrule "
+
+
+global cellsp   = 2
+global cells    = 2
+global outcomes = " for for_density inf_backyard inf_non_backyard inf_density "
+ rfulldb robust_dist "spill"
+
+
+
+
+* lab var formal "(1)&(2)&(3)\\[.5em] &Formal"
+* lab var house "Single House"
+* lab var age "Age"
+* lab var hh_size "Household Size \\ \midrule \\[-.6em]"
+* global cells = 4
+* global cellsp = 4
+
+* global outcomes = " total_buildings formal house age  "
+
+* global dist = 0
+* global price=0
+* rfulldb robust_dist "spill"
+
+
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      DBs1p_*_C DBs1p_a*_C_con DBs1p_*_C_post DBs1p_a*_C_con_post  ///
+*       s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
 
 

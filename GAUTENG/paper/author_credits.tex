@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % make more characters printable when copy-pasted here
+\usepackage{xcolor} % to facilitate the myNotes and myTodo commands.
+% \usepackage[dvipsnames]{xcolor}
+
+\usepackage{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{rdp_paper}
+% Created by Jack Baker, last modified 11/3/2020
+
+% initialize counters for reviewer number and comment number
+\newcounter{reviewer}
+\setcounter{reviewer}{0}
+\newcounter{point}[reviewer]
+\setcounter{point}{0}
+
+\definecolor{replyblue}{RGB}{0, 30, 102}
+% Set the format of reviewer comment numbers and responses.
+\renewcommand{\thepoint}{Q\,\thereviewer.\arabic{point}} 
+\newcommand{\point}[1]{\refstepcounter{point}  \bigskip \hrule \medskip \noindent {{\fontseries{b}\selectfont \thepoint } #1}\par}
+% \newcommand{\reply}{\medskip \noindent \textbf{Reply}: \textcolor{blue} }  
+\newcommand{\reply}{\medskip \noindent \textcolor{replyblue}} 
+\newcommand{\ri}{\textcolor{replyblue} }  
+
+\newcommand{\sr}{}
+\newcommand{\er}{}
+% \newcommand{\sr}{\begin{minipage}{\dimexpr\textwidth-3cm}}
+% \newcommand{\er}{\end{minipage}}
+% \newcommand{\cc{}{\medskip \noindent \textbf{Comment:}\hspace{2em} \textit}
+
+\newcommand{\cc}{\noindent}
+% Set the format for reviewer headings
+\newcommand{\reviewersection}{\stepcounter{reviewer}
+                  \section*{Reviewer \thereviewer}}
+
+% Set the format for notes on in-progress responses
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand\myTodo[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Credit Author Statement}
+\author{}
+\begin{document}
+
+\maketitle
+
+\textbf{Benjamin Bradlow}: Conceptualization, Investigation, Writing - Review \& Editing, Resources
+\medskip
+
+\textbf{Stefano Polloni}: Writing - Review \& Editing, Resources, Data Curation, Software, Validation, Methodology
+\medskip
+
+\textbf{William Violette}: Conceptualization, Writing - Original Draft, Investigation Formal Analysis, Data Curation, Software, Methodology
+
+
+\end{document}
+
+
+

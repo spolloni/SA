@@ -581,10 +581,11 @@ def buffer_area_int_full8(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buf
 
     # # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011','grid_temp_3','ea_2011','ea_2001','grid_temp_3'],['OGC_FID','OGC_FID','OGC_FID','grid_id','OGC_FID','OGC_FID']):
     # # for name,fid in zip(['ea_2011'],['OGC_FID']):
-    # for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
+    for name,fid in zip(['ea_1996','sal_2001','sal_ea_2011'],['OGC_FID','OGC_FID','OGC_FID']):
     # # for name,fid in zip(['sal_ea_2011'],['OGC_FID']):
     # # for name,fid in zip(['ea_1996','sal_2001'],['OGC_FID','OGC_FID']):
-    for name,fid in zip(['grid_temp_100_4000'],['grid_id']):
+    ## THIS IS THE MAIN ONE
+    # for name,fid in zip(['grid_temp_100_4000'],['grid_id']):
     
     # for name,fid in zip(['ea_2001'],['OGC_FID']):
     # for name,fid in zip(['ea_2011'],['OGC_FID']):
@@ -811,7 +812,7 @@ def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,
 
 
 
-def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buffer7,buffer8):
+def buffer_area_int_full8dropplacebo(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,buffer7,buffer8):
     print 'buffer time starting ...'
     con = sql.connect(db)
     cur = con.cursor()
@@ -856,7 +857,7 @@ def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,
         print 'generate area table '+name
 
         for tag in ['rdp','placebo']:
-            table= 'far_'+name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)+'_'+tag
+            table= 'dropplacebo_'+name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)+'_'+tag
             con.execute("DROP TABLE IF EXISTS {};".format(table))
             con.execute('''
                     CREATE TABLE {} AS
@@ -873,7 +874,7 @@ def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,
                             G.OGC_FID AS cluster
 
                     FROM {} AS A, 
-                    gcro_publichousing AS G JOIN (SELECT A.cluster FROM {}_cluster AS A JOIN gcro_far AS B ON A.cluster = B.OGC_FID) AS J ON J.cluster=G.OGC_FID
+                    gcro_publichousing AS G JOIN (SELECT A.cluster FROM {}_cluster AS A JOIN gcro_dropplacebo AS B ON A.cluster = B.OGC_FID) AS J ON J.cluster=G.OGC_FID
                             WHERE A.ROWID IN (SELECT ROWID FROM SpatialIndex 
                                                 WHERE f_table_name='{}' AND search_frame=ST_BUFFER(G.GEOMETRY,{}))
                                                 AND st_intersects(A.GEOMETRY,ST_BUFFER(G.GEOMETRY,{})) ;
@@ -882,7 +883,7 @@ def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,
             print 'done all '+tag+' '+name
 
 
-        table_full= 'far_'+name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)
+        table_full= 'dropplacebo_'+name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)
         con.execute("DROP TABLE IF EXISTS {};".format(table_full))
         con.execute('''
                 CREATE TABLE {} AS
@@ -894,15 +895,15 @@ def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,
 
 
         for tag in ['rdp','placebo']:
-            table= 'far_'+name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)+'_'+tag
+            table= 'dropplacebo_'+name+'_buffer_area_int_'+str(buffer1)+'_'+str(buffer8)+'_'+tag
             con.execute("DROP TABLE IF EXISTS {};".format(table))
 
         con.execute("DROP TABLE IF EXISTS {};".format(table))
 
         if str(fid)=="grid_id":
-            table= 'far_'+'buffer_area_'+str(buffer1)+'_'+str(buffer8)
+            table= 'dropplacebo_'+'buffer_area_'+str(buffer1)+'_'+str(buffer8)
         else:
-            table= 'far_'+'buffer_area_'+str(buffer1)+'_'+str(buffer8)+'_'+str(name)
+            table= 'dropplacbeo_'+'buffer_area_'+str(buffer1)+'_'+str(buffer8)+'_'+str(name)
 
         con.execute("DROP TABLE IF EXISTS {};".format(table))
         con.execute('''
@@ -929,7 +930,7 @@ def buffer_area_int_full8far(db,buffer1,buffer2,buffer3,buffer4,buffer5,buffer6,
 
 
 
-# buffer_area_int_full8far(db,500,1000,1500,2000,2500,3000,3500,4000)
+# buffer_area_int_full8dropplacebo(db,500,1000,1500,2000,2500,3000,3500,4000)
 
 
 
@@ -1342,10 +1343,10 @@ def grid_to_cbd(db):
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
 
-    cur.execute('DROP TABLE IF EXISTS grid_to_cbd_100;') 
-    make_qry=  ''' CREATE TABLE grid_to_cbd_100 AS 
+    cur.execute('DROP TABLE IF EXISTS grid_to_cbd_100_4000;') 
+    make_qry=  ''' CREATE TABLE grid_to_cbd_100_4000 AS 
                             SELECT A.objectid , G.grid_id , st_distance(A.GEOMETRY,G.GEOMETRY) AS cbd_distance
-                                FROM cbd_centroids as A, grid_temp_100 AS G ;
+                                FROM cbd_centroids as A, grid_temp_100_4000 AS G ;
                     '''
     cur.execute(make_qry) 
     # cur.execute("CREATE INDEX grid_to_cbd_index ON grid_to_cbd_100 (grid_id);")
@@ -1366,10 +1367,10 @@ def grid_to_highways(db):
     con.enable_load_extension(True)
     con.execute("SELECT load_extension('mod_spatialite');")
 
-    cur.execute('DROP TABLE IF EXISTS grid_to_ways_100;') 
-    make_qry=  ''' CREATE TABLE grid_to_ways_100 AS 
+    cur.execute('DROP TABLE IF EXISTS grid_to_ways_100_4000;') 
+    make_qry=  ''' CREATE TABLE grid_to_ways_100_4000 AS 
                             SELECT A.OGC_FID , G.grid_id , st_distance(A.GEOMETRY,G.GEOMETRY) AS ways_distance
-                                FROM freeway_dissolved_chain_small as A, grid_temp_100 AS G ;
+                                FROM freeway_dissolved_chain_small as A, grid_temp_100_4000 AS G ;
                     '''
     cur.execute(make_qry)  
     con.commit()
@@ -1380,9 +1381,27 @@ def grid_to_highways(db):
 # grid_to_highways(db)
 
 
+def dist_to_controls(db,control):
+
+    print "start grid to highways"
+    con = sql.connect(db)
+    cur = con.cursor()
+    con.enable_load_extension(True)
+    con.execute("SELECT load_extension('mod_spatialite');")
+
+    cur.execute('DROP TABLE IF EXISTS dist_{}_100_4000;'.format(control)) 
+    make_qry=  ''' CREATE TABLE dist_{}_100_4000 AS 
+                             SELECT A.OGC_FID , G.grid_id , st_distance(A.GEOMETRY,G.GEOMETRY) AS {}_distance
+                                FROM {} as A, grid_temp_100_4000 AS G ;
+                    '''.format(control,control,control)
+    cur.execute(make_qry)  
+    con.commit()
+    con.close()   
+    print "finish grid to {}".format(control)
+    return
 
 
-
+dist_to_controls(db,'cult_recreational')
 
 
 #############################

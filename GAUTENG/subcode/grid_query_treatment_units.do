@@ -64,19 +64,19 @@ program print_1b
     * local value=string(`=r(mean)',"%12.0fc")
     * file write newfile " & `value'  "
 
-    forvalues r=0/1 {
-        sum cm`2'  if rdp==`r' , detail
+    * forvalues r=0/1 {
+        sum cm`2'  if rdp==`3' , detail
         local value=string(`=r(mean)',"%12.0fc")
         file write newfile " & `value'  "
         * sum b`2'  if rdp==`r' , detail
         * local value=string(`=r(mean)',"%12.0fc")
         * file write newfile " & `value'  "
-    }
-    forvalues r=0/1 {
-        sum bm`2'  if rdp==`r'  , detail
+    * }
+    * forvalues r=0/1 {
+        sum bm`2'  if rdp==`3'  , detail
         local value=string(`=r(mean)'/1000000,"%12.3fc")
         file write newfile " & `value'  "
-    }
+    * }
 
             file write newfile " \\[.15em] " _n
 end
@@ -131,16 +131,28 @@ restore
 cd ../..
 cd $output
 
-file open newfile using "areatableplot.tex", write replace  
-        print_1b  "Plot" 0
+file open newfile using "areatableplot_placebo.tex", write replace  
+        print_1b  "Plot" 0 0
 file close newfile   
 
 
-file open newfile using "areatable.tex", write replace  
+file open newfile using "areatable_placebo.tex", write replace  
     forvalues r=1/8 { 
-        print_1b  "\hspace{1em}`=(`r'-1)*.5'-`=`r'*.5'" `r'
+        print_1b  "\hspace{1em}`=(`r'-1)*.5'-`=`r'*.5'" `r' 0
     }
 file close newfile   
 
+
+
+file open newfile using "areatableplot_rdp.tex", write replace  
+        print_1b  "Plot" 0 1
+file close newfile   
+
+
+file open newfile using "areatable_rdp.tex", write replace  
+    forvalues r=1/8 { 
+        print_1b  "\hspace{1em}`=(`r'-1)*.5'-`=`r'*.5'" `r' 1
+    }
+file close newfile   
 
 

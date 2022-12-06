@@ -1,0 +1,80 @@
+\documentclass{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % make more characters printable when copy-pasted here
+\usepackage{xcolor} % to facilitate the myNotes and myTodo commands.
+
+% Created by Jack Baker, last modified 11/3/2020
+
+% initialize counters for reviewer number and comment number
+\newcounter{reviewer}
+\setcounter{reviewer}{0}
+\newcounter{point}[reviewer]
+\setcounter{point}{0}
+
+% Set the format of reviewer comment numbers and responses.
+\renewcommand{\thepoint}{Q\,\thereviewer.\arabic{point}} 
+\newcommand{\point}[1]{\refstepcounter{point}  \bigskip \hrule \medskip \noindent {{\fontseries{b}\selectfont \thepoint } #1}\par}
+\newcommand{\reply}{\medskip \noindent \textbf{Reply}:\ }   
+
+% Set the format for reviewer headings
+\newcommand{\reviewersection}{\stepcounter{reviewer}
+                  \section*{Reviewer \thereviewer}}
+
+% Set the format for notes on in-progress responses
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand\myTodo[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Response to Reviewer Comments}
+\author{Author 1 \and Author 2}
+\begin{document}
+
+\maketitle
+
+\noindent
+
+
+\reviewersection
+
+
+
+
+
+
+
+\point{I have a concern about XXX.}
+\label{revise_example}
+
+\reply{Thank for for noting this limitation in the original manuscript. We have significantly revised Section 5 to further document ...
+
+% \myNotes{Need to discuss this response with coauthors [note myNotes command for red text]. }
+}
+
+\point{I have a concern about YYY.}
+
+\reply{Response ...
+
+% \myTodo{Need to update Figure 2 to incorporate this change. [note myTodo command for blue text]. }
+}
+
+
+
+
+
+\reviewersection
+
+
+\point{I have a concern about XXX...}
+
+\reply{We agree with this suggestion, and have documented our revisions in the response to \ref{revise_example}, where another reviewer made a similar suggestion. \textit{[Note the use of label and ref to refer to a prior comment.]}}
+
+
+
+
+
+
+
+\end{document}
+
+
+

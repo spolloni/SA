@@ -81,7 +81,15 @@ ren id grid_id
   drop _merge
 ren grid_id id
 
+  merge m:1 id using "grid_to_cbd_100.dta"
+  drop if _merge==2
+  drop _merge
 
+  merge m:1 id using "grid_to_ways_100.dta"
+  drop if _merge==2
+  drop _merge
+
+  
 ren OGC_FID area_code
   merge m:1 area_code year using  "temp_censushh_agg${V}.dta"
   drop if _merge==2
@@ -102,7 +110,8 @@ ren OGC_FID area_code
 *   drop if _merge==2
 *   drop _merge
 
-
+g for_density  = (10000)*(formal_dens_pers/area)
+g inf_density  = (10000)*(informal_dens_pers/area)
 
 g pop_density  = (10000)*(person_pop/area)
 replace pop_density=. if pop_density>2000
@@ -335,14 +344,7 @@ g proj_C_con = proj_rdp
 g proj_C_con_post = proj_rdp*post
 
 
-forvalues r=1/8 {
-  qui sum s1p_a_`r'_C, detail 
-  g As1p_a_`r'_C = s1p_a_`r'_C/`=r(sd)'
-  g As1p_a_`r'_C_con = s1p_a_`r'_C_con/`=r(sd)'
-  g As1p_a_`r'_C_post = s1p_a_`r'_C_post/`=r(sd)'
-  g As1p_a_`r'_C_con_post = s1p_a_`r'_C_con_post/`=r(sd)'
-}
-
+bm_weight 1
 
 
 
@@ -396,25 +398,44 @@ global x50 = `=r(p50)'
 
 
 
-reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
 
-reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+lab var for "(1)&(2)&(3)&(4)&(5)&(6)\\[.5em] &Formal Houses"
+lab var for_density "People in Formal Houses "
+lab var inf "Informal Houses"
+lab var inf_backyard "Informal Backyard Houses "
+lab var inf_non_backyard "Informal Non-Backyard Houses "
+lab var inf_density "People living in Informal Housing\\ \midrule"
+
+global outcomes = " for for_density inf inf_backyard inf_non_backyard inf_density"
+
+global cellsp   = 2
+global cells    = 2
+
+
+rfull dropplacebo "proj"
+rfull dropplacebo "spill"
+
+
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+
+* reg  total_buildings proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
+
+
+* reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r 
+
+
+* reg  inf proj_C proj_C_con proj_C_post proj_C_con_post ///
+*      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
 
 
 
-wyoung for inf, cmd(reg OUTCOMEVAR proj_C proj_C_con proj_C_post proj_C_con_post s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r) familyp(s1p_a_1_C_con_post) bootstraps(50) seed(123) cluster(cluster_joined)
 
-
-reg  for proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r 
-
-
-reg  inf proj_C proj_C_con proj_C_post proj_C_con_post ///
-     s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post, cluster(cluster_joined) r
-
+/*
 
 acreg for proj_C proj_C_con proj_C_post proj_C_con_post ///
      s1p_*_C s1p_a*_C_con s1p_*_C_post s1p_a*_C_con_post post,  spatial latitude(y) longitude(x) distcutoff(1) 

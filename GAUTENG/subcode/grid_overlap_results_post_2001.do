@@ -353,7 +353,10 @@ global cellsp = 4
 global outcomes = " tot_rooms owner electric_lighting toilet_flush water_inside "
 
 global dist     = 0
-rfull inf_census_test
+rfull inf_census_test "proj"
+rfull inf_census_test "spill"
+
+/*
 
 
 * * lab var community "Community Centers"

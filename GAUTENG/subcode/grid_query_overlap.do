@@ -340,7 +340,7 @@ save "grid_elevation_100_4000.dta", replace;
 if $cbd == 1 {;
 
 local qry = " 
-SELECT * FROM grid_to_cbd_100
+SELECT * FROM grid_to_cbd_100_4000
 ";
 
 odbc query "gauteng";
@@ -353,7 +353,7 @@ drop cbd_distance objectid;
 duplicates drop grid_id, force;
 ren grid_id id;
 
-save "grid_to_cbd_100.dta", replace;
+save "grid_to_cbd_100_4000.dta", replace;
 
 };
 
@@ -361,7 +361,7 @@ save "grid_to_cbd_100.dta", replace;
 
 if $ways == 1 {;
 
-local qry = " SELECT * FROM grid_to_ways_100 ";
+local qry = " SELECT * FROM grid_to_ways_100_4000 ";
 odbc query "gauteng";
 odbc load, exec("`qry'") clear; 
 
@@ -372,7 +372,7 @@ drop ways_distance OGC_FID;
 duplicates drop grid_id, force;
 ren grid_id id;
 
-save "grid_to_ways_100.dta", replace;
+save "grid_to_ways_100_4000.dta", replace;
 
 };
 

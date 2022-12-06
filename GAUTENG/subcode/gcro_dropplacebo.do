@@ -35,7 +35,8 @@ replace status="uncertain" if regexm(desc,"uncertain")==1;
 
 tab status;
 
-drop if status=="proposed";
+* drop if status=="proposed";
+drop if status=="proposed" | status=="uncertain" | status=="investigating";
 
 *** note: effects are strong for under planning (because when we dropped it, effects got smaller);
 

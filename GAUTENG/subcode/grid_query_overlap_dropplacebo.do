@@ -12,7 +12,7 @@ if $LOCAL==1 {;
 	cd ..;
 };
 
-global gcro_over 		= 0;
+global gcro_over 		  = 0;
 global load_buffer_1 	= 1;
 global load_grids 		= 1;
 
