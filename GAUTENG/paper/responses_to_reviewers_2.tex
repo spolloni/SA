@@ -1,0 +1,126 @@
+\documentclass{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % make more characters printable when copy-pasted here
+\usepackage{xcolor} % to facilitate the myNotes and myTodo commands.
+% \usepackage[dvipsnames]{xcolor}
+
+\usepackage{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{rdp_paper}
+% Created by Jack Baker, last modified 11/3/2020
+
+% initialize counters for reviewer number and comment number
+\newcounter{reviewer}
+\setcounter{reviewer}{0}
+\newcounter{point}[reviewer]
+\setcounter{point}{0}
+
+\definecolor{replyblue}{RGB}{0, 30, 102}
+% Set the format of reviewer comment numbers and responses.
+\renewcommand{\thepoint}{Q\,\thereviewer.\arabic{point}} 
+\newcommand{\point}[1]{\refstepcounter{point}  \bigskip \hrule \medskip \noindent {{\fontseries{b}\selectfont \thepoint } #1}\par}
+% \newcommand{\reply}{\medskip \noindent \textbf{Reply}: \textcolor{blue} }  
+\newcommand{\reply}{\medskip \noindent \textcolor{replyblue}} 
+\newcommand{\ri}{\textcolor{replyblue} }  
+
+\newcommand{\sr}{}
+\newcommand{\er}{}
+% \newcommand{\sr}{\begin{minipage}{\dimexpr\textwidth-3cm}}
+% \newcommand{\er}{\end{minipage}}
+% \newcommand{\cc{}{\medskip \noindent \textbf{Comment:}\hspace{2em} \textit}
+
+\newcommand{\cc}{\noindent}
+% Set the format for reviewer headings
+\newcommand{\reviewersection}{\stepcounter{reviewer}
+                  \section*{Reviewer \thereviewer}}
+
+% Set the format for notes on in-progress responses
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand\myTodo[1]{\textcolor{blue}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Responses to Reviewers (Round 2)}
+\author{Benjamin Bradlow, Stefano Polloni, William Violette}
+\begin{document}
+
+\maketitle
+
+\textbf{Referee 3}
+\\
+
+
+%%%%%%%%%%%% DONE
+\cc{My only remaining suggestion is to sharpen the literature review to better frame the paper in relation to existing work on housing policy in developing countries. The current paragraph emphasizes how this paper has panel data as opposed to existing papers that only use cross-sectional variation. The focus should instead be on how public housing relates to other housing policies (like slum upgrading or sites and services) and whether the results in the literature are consistent (e.g. do the other papers find evidence of spillovers?). This would also be the appropriate place to reference Simon Franklin’s work on public housing in Sub-Saharan Africa (which at the moment is relegated to the conclusion).}
+
+\reply{Excellent suggestion thanks.  After rereading the literature, we noticed that our results are largely consistent with previous findings and have revised the introduction to emphasize those similarities, including with Simon Franklin's work in Ethiopia.   }\\
+
+
+\textbf{Referee 2}
+\\
+
+\cc{I would like the paper to be substantially shorter. The main novel findings are: (a) Public housing projects, while having the expected increase in the amount of formal houses in an area, are also associated with the construction of informal “backyard housing” by occupants. (b) Housing project development seems to cause construction and occupancy of both formal and informal housing in a narrow band around the projects. The first finding is pretty robust to the data source and concerns raised by the other referees, while I still have questions about the effect on formal housing in the second.}
+
+\reply{Thank you for the observations.  Following your suggestions below, we moved some tables to the Appendix and trimmed parts of the introduction (as described below) and a background section describing public housing in general.}\\
+
+%%%%%%%%%%% DONE
+\cc{I asked for a comparison of the point estimate of the spillover effect on formal house prices with the literature which the authors did a nice job of, but I think a sentence in the abstract, and several sentences in the introduction is too much given this effect is insignificant. A few sentences of discussion around Table 9 would be fine.}
+
+\reply{Great organizational suggestion.  We omit discussion of prices in the abstract and relocated the introduction discussion to around Table 9.}\\
+
+%%%%%%%%%%%%%% DONE
+\cc{I wasn’t convinced by the validation of the aerial photo-based approach to identifying businesses in Table 28, with weak correlations between the photo-based measures and what’s available in the census. Is there an economic census available which would measure amount of employment by work location? I agree with the authors that employment levels of the residential population can be a poor proxy for levels of people actually working in a location. If there’s no way to validate the photo-based measures, I’d prefer to have Tables 7 and 11 in an appendix caveating the lack of validation for these measures.}
+
+\reply{Thank you for the suggestion.  We moved Tables 7 and 11 to the appendix, and kept the short discussions in the text with the appropriate caveats.}\\
+
+%%%%%%%%%%%% DONE
+\cc{It would also be nice to have a few sentences on the specifics of GeoTerraImage’s methods: are they having staff visually inspect each photo or are they using machine learning?}
+
+\reply{Since GeoTerraImage uses proprietary methods, we unfortunately do not have greater insight than what we already shared in the paper.  While we think it is unlikely that sophisticated machine learning methods were used in this time period, we do not have direct evidence.}\\
+
+%%%%%%%%%%% DONE
+\cc{The formal housing measures weren’t so highly correlated, either. I wonder if some houses are being misidentified as firms? This is problematic for estimation of spillover effects on formal house construction because the analysis using the raw census data before converting to 100 x 100 m plots in Table 24 do not show evidence of spillovers. In general with the census data I agree with the authors that alternatively-constructed geographies may provide more accurate measures of project effects than the census enumeration areas (Table 25). But there are an order of magnitude more plots than census blocks so the standard errors when using plots as observations when the underlying data are census-based are misleadingly small. This should be acknowledged. An rough-and-ready alternative might be to generate alternative plots whose number is roughly equal to the number of census blocks when using census-based measures.}
+
+\reply{Thank you for the careful attention to our approach and suggestions.  Since our standard errors are clustered at the project-level, they are unlikely to change substantially with different plot-size definitions.  Also, larger plot sizes would prevent us from detecting highly local spillover effects.}\\
+
+%%%%%%%%% DONE
+\cc{The fact that informal housing measures correlate well between the aerial photo-derived and census-based sources helps me feel comfortable with the authors’ use of the photobased measure as the primary source for this outcome. The fact that photo-measured informal houses increase in areas surrounding the public housing in almost all specifications confirms there is some small spillover of project construction. I’d like the abstract to say something about the magnitude of spillover effects that can be robustly recovered. I would say the effects are small, or report the size of effects as in the discussion in the Introduction.}
+
+\reply{Great suggestion.  We now qualify spillover effects as small in the abstract, and added an additional footnote to contextualize effects sizes in the introduction.}\\
+
+%%%%%%%%% DONE
+\cc{Balance between plots overlapping with constructed and unconstructed projects isn’t perfect but I agree with the authors that unconstructed projects seem to be the best comparison group for constructed project areas and I find the pre-trend analysis reassuring. A sensitivity analysis in the style of Oster (2019), where the magnitude of selection on observables proxies for the magnitude of selection on unobservables, could be a nice complement to the robustness checks in Section 8. I like most of the checks in Section 8 but the conclusion that average differences in characteristics disappear after weighting by a propensity score which includes those same characteristics is almost mechanical.}
+
+\reply{Thanks for carefully reading the robustness checks.  We better clarified that the propensity score mechanically makes differences disappear.  Thank you for the Oster (2019) suggestion.  Our understanding is that the method in Oster (2019) works well when conditioning directly on a series of controls.  In our difference-in-differences approach, we do not condition on time-varying controls with which to implement the Oster (2019) method. }\\
+
+%%%%%%%%%% DONE
+\cc{The authors make normative statements against the construction of backyard housing. These seem to be based on conversations with policymakers, cited in footnote 5, who considered the backyard housing an undesirable outcome. But the policymakers could be incorrect if, for example, the public housing is not as dense as would be efficient. And based on the Conclusion section of the paper it seems that at least some policymakers are less negative on the backyard housing phenomenon. So I would like the authors to be more agnostic in their descriptions of the backyard housing, or to present more economic evidence to support the idea that backyard housing growth is a negative outcome.}
+
+\reply{Thank you for this observation.  In the introduction, we removed some discussion of South Africa's housing policy goals which may be considered subjective. We also removed a speculative policy recommendation in the conclusion.}\\
+
+%%%%%%%%%% DONE
+\cc{I like the description of the study area as the Johannesburg metro area rather than Gauteng province in most of the text since it addresses my question about whether Pretoria is included. I don’t think footnote 2 is needed and I would remove references to Gauteng except when it is necessary to be explicit.}
+
+\reply{We removed footnote 2 and references to Gauteng, thanks!}\\
+
+%%%%%%%%%% DONE
+\cc{The description of the Bonferroni correction on page 19 should say that it is done within-table.}
+
+\reply{Great suggestion, and we have updated the text and table descriptions.}\\
+
+\cc{In the last sentence of the first paragraph of the Introduction, I wasn’t clear on whether the figures referred to public housing.}
+
+\reply{Thanks for identifying this confusion.  We clarified that the figures refer to public housing.}\\
+
+\cc{I think the table reference in the last paragraph of Section 8 is supposed to be to Table 26.}
+
+\reply{Thank you for noticing this typo.  We have corrected it.}\\
+
+\cc{What’s the difference between Table 8 and Table 26?}
+
+\reply{Table 8 looks at .5 km distance rings while Table 26 (now Table 24) looks at .1 km distance rings to look for localized spillovers. We added additional clarification in the footnote of Table 26 (now Table 24).}
+
+
+\end{document}
+
+
+

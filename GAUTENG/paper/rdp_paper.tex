@@ -54,7 +54,7 @@ Mean pre and post are average outcomes across all areas pre and post project con
 }
 
 \newcommand{\regtext}{
-Mean pre and post are average outcomes  across all areas pre and post project construction.   Although not displayed in the table, specifications also include separate effects for 0.5 km rings from 0 to 4 km and results are available upon request.  Standard errors (in parentheses) are clustered at the project level.  P-values [in brackets] adjust for multiple hypothesis testing using the Bonferroni method and inform the coefficient superscripts, \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
+Mean pre and post are average outcomes  across all areas pre and post project construction.   Although not displayed in the table, specifications also include separate effects for 0.5 km rings from 0 to 4 km and results are available upon request.  Standard errors (in parentheses) are clustered at the project level.  P-values [in brackets] adjust for multiple hypothesis testing using the Bonferroni method (within table) and inform the coefficient superscripts, \textsuperscript{c} p$<$0.10,\textsuperscript{b} p$<$0.05,\textsuperscript{a} p$<$0.01 \,\,
 }
 
 \newcommand{\ballparktext}{
@@ -65,6 +65,7 @@ Mean pre and post are average outcomes  across all areas pre and post project co
 
 %%% EDIT COMMANDS %%%
 \newcommand{\rv}{}
+\newcommand{\rw}{\textbf}
 \newcommand{\rt}{\textbf{Heavily Revised Table: }}
 \newcommand{\nt}{\textbf{New Table: }}
 \newcommand{\ns}{\textbf Heavily Revised Section: }
@@ -98,7 +99,7 @@ Mean pre and post are average outcomes  across all areas pre and post project co
 	% We estimate the effects of building public housing projects on urban development both inside project footprints as well as in surrounding areas in South Africa.  To identify effects, we compare changes in outcomes for 166 projects that are successfully constructed to 140 projects that remain planned but not constructed.  
 
 
-Can place-based policies promote urban development beyond their footprints?  We estimate the spillover effects of public housing projects in South Africa by comparing changes near 166 projects that were successfully constructed to changes near 140 projects that were planned but not constructed.  \rv{Constructed projects triple the amount of formal housing inside their footprints and lead to one new informal house being built for every three new formal houses. These effects extend beyond project footprints, with increases in both formal and informal housing detected up to 500m from the targeted areas.  The findings are consistent with projects generating positive housing externalities}.
+Can place-based policies promote urban development beyond their footprints?  We estimate the spillover effects of public housing projects in South Africa by comparing changes near 166 projects that were successfully constructed to changes near 140 projects that were planned but not constructed.  Constructed projects triple the amount of formal housing inside their footprints and lead to one new informal house being built for every three new formal houses. These effects extend beyond project footprints, with \rw{small} increases in both formal and informal housing detected up to 500m from the targeted areas.  The findings are consistent with projects generating positive housing externalities.
 
 
  % as well as both formal and informal housing nearby.
@@ -136,7 +137,7 @@ In developing cities, slum conditions may amplify the welfare effects of place-b
 
 This paper asks how public housing projects affect population growth, housing development, and public services in areas within project footprints as well as areas nearby project footprints.  \rv{We examine these effects in the context of South African housing projects.  While South Africa has a higher average income than many of its sub-Saharan counterparts, housing projects are often located in undeveloped areas that share many similarities with urban slums across Africa.\footnote{\rv{Compared to its low-income, sub-Saharan neighbors, South Africa is unique in its ability to fund large-scale housing programs \citep{bah2018housing}.}}  Annually since 1994, the South African government acquires parcels of land and contracts the construction of many housing projects.  Projects consist of (1) building neighborhoods of new single-story, two-room houses each on their own plot of land, (2) allocating full ownership of houses to recipient households, and (3) servicing houses with basic infrastructure including water, electricity, community centers, and other complementary investments.  Housing projects range widely in size from a few dozen to several hundred houses per project.}
 
-\rv{We compile detailed spatial data in 2001 and 2011 for the Johannesburg metro-area including household census data, deeds records of formal housing transactions, and a remote-sensed survey of all buildings.\footnote{\rv{Our data do not cover Pretoria.}}  These data allow us to measure the medium-term outcomes for housing projects built between 2001 and 2011.   The building survey provides a novel measure of slum growth by distinguishing between formal and informal house types.  Our main outcomes are population, formal and informal housing density, formal house prices, infrastructure investments, and demographics.} To measure impacts across multiple spatial datasets, we create a uniform unit of analysis by overlaying gridded 100 by 100m plots of land across all areas within 4 km of projects and computing average measures within each plot.\footnote{For spatial measures that partially overlap with plots (such as census enumerator areas), we attribute measures to plots based on their greatest area of overlap.} 
+We compile detailed spatial data in 2001 and 2011 for the Johannesburg metro-area including household census data, deeds records of formal housing transactions, and a remote-sensed survey of all buildings.  These data allow us to measure the medium-term outcomes for housing projects built between 2001 and 2011.   The building survey provides a novel measure of slum growth by distinguishing between formal and informal house types.  Our main outcomes are population, formal and informal housing density, formal house prices, infrastructure investments, and demographics. To measure impacts across multiple spatial datasets, we create a uniform unit of analysis by overlaying gridded 100 by 100m plots of land across all areas within 4 km of projects and computing average measures within each plot.\footnote{For spatial measures that partially overlap with plots (such as census enumerator areas), we attribute measures to plots based on their greatest area of overlap.} 
 
 Our empirical strategy compares changes in outcomes for exposure to 166 constructed projects to changes in outcomes for exposure to 140 planned, but unconstructed projects.  \rv{We measure project exposure for each plot of land based on the area that each plot overlaps with project footprints.  For plots outside of project footprints, we calculate the area for which each plot's immediate neighborhood overlaps with project footprints.  Since housing projects are often clustered near each other, the measure allows plots to be exposed to multiple projects at varying intensities.}  
 
@@ -147,13 +148,14 @@ The empirical strategy identifies the causal effect of housing projects under th
 \rv{We observe that in the pre-period, areas near constructed projects have more houses and people than areas near unconstructed projects.  This pattern is consistent with mismeasurement of construction status where some projects were actually completed prior to our pre-period data.  This mismeasurement would lead comparisons of constructed and unconstructed projects to underestimate the effect of project construction.}  Another explanation is that local authorities prioritize dense, slum areas for project construction.  To address these concerns, we show that our main results are similar to analyzing only project footprints without houses in the pre-period or balancing on pre-period characteristics.  We also find limited evidence of pre-trends in census outcomes.
 
 
-\rv{We find that constructed projects largely succeed in their three goals of building, allocating, and servicing project houses.  The numbers of formal houses and people living in formal houses triple in constructed projects relative to unconstructed projects.  New formal houses are well-serviced with basic utilities and largely resemble other formal houses in project areas.  Projects do not seem to change the demographics of people living in formal housing in project areas.  } We also estimate that constructed projects invite growth of informal backyard houses, which may partially undermine South Africa's goals to ``ensure the elimination and prevention of slums and slum conditions.''\footnote{See \cite{housingact}.}  Together, these effects translate into growth of over \rv{660 new formal houses and 3,060 people per project} within their footprints.
+\rv{We find that constructed projects largely succeed in their three goals of building, allocating, and servicing project houses.  The numbers of formal houses and people living in formal houses triple in constructed projects relative to unconstructed projects.  New formal houses are well-serviced with basic utilities and largely resemble other formal houses in project areas.  Projects do not seem to change the demographics of people living in formal housing in project areas.  } 
+% We also estimate that constructed projects invite growth of informal backyard houses, which may partially undermine South Africa's goals to ``ensure the elimination and prevention of slums and slum conditions.''\footnote{See \cite{housingact}.}  Together, these effects translate into growth of over \rv{660 new formal houses and 3,060 people per project} within their footprints.
 
-\rv{We also observe that projects have the unintended consequence of stimulating large increases in informal housing within project footprints. One new informal house is built for every three new formal houses.  The growth of informal housing is driven entirely by informal dwellings built in the backyards of formal dwellings\citep{Brueckner2018backyarding}.\footnote{Qualitative interviews with national and local government housing officials that we conducted between 2015 and 2017 suggest that housing subsidy programs are viewed as being in contradiction to an outcome of densifying backyard shacks.} }
+\rv{We also observe that projects have the unintended consequence of stimulating large increases in informal housing within project footprints. One new informal house is built for every three new formal houses.  The growth of informal housing is driven entirely by informal dwellings built in the backyards of formal dwellings \citep{Brueckner2018backyarding}.
+% \footnote{Qualitative interviews with national and local government housing officials that we conducted between 2015 and 2017 suggest that housing subsidy programs are viewed as being in contradiction to an outcome of densifying backyard shacks.} }
 
-\rv{We then estimate spillover effects nearby projects.}  Between 0 and 0.5 km from project footprints, we find positive effects that are statistically significant for population and house growth with informal houses outpacing formal houses.   \rv{Estimates imply that on average, each project invites nearby growth of 66 formal houses, 103 informal, backyard houses, and 27 informal, non-backyard houses.}  These results are consistent with housing projects supporting government goals ``to use money available for housing development in a manner which stimulates private investment in, and the contributions of individuals to housing development.''\footnote{See \cite{housingact}.} 
+\rv{We then estimate spillover effects nearby projects.}  Between 0 and 0.5 km from project footprints, we find positive effects that are statistically significant for population and house growth with informal houses outpacing formal houses.   Estimates imply that on average, each project invites nearby growth of 66 formal houses, 103 informal, backyard houses, and 27 informal, non-backyard houses.}\footnote{\rw{For comparison, we estimate growth of 660 formal houses and 250 informal houses within each project footprint.}}  These results are consistent with housing projects supporting government goals ``to use money available for housing development in a manner which stimulates private investment in, and the contributions of individuals to housing development.''\footnote{See \cite{housingact}.}  \rw{We also estimate that prices for formal housing transactions increase by 9\% up to 0.5 km from project footprints although this result is statistically indistinguishable from zero.  }
 
-\rv{We estimate that prices for formal housing transactions increase by 9\% up to 0.5 km from project footprints although this result is statistically indistinguishable from zero.  This effect is similar to previous price estimates in the literature, which range from 6.5\% to 15\% in low-income US neighborhoods to 12\% in middle-income neighborhoods in Uruguay.\footnote{See \cite{diamond2019wants} and \cite{baum2009effects} for US Low Income Housing Tax Credit estimates.  See \cite{gonzalez2022spillover} for public housing estimates from Uruguay.}  Our effect differs from the 2.5\% decrease in prices observed in high income US neighborhoods.\footnote{See \citep{diamond2019wants}.}  Given that South African housing projects are located in relatively low-income neighborhoods, our price effects are largely consistent with the literature. }
 
 \rv{To explain positive spillover effects, we consider three potential mechanisms.}
 \begin{enumerate}
@@ -165,7 +167,8 @@ The empirical strategy identifies the causal effect of housing projects under th
 
 This paper contributes to growing research on place-based policies.  Studies in the US compare changes in outcomes either (1) near versus far from project areas\footnote{See \cite{rossi2010housing,hornbeck2017creative}, and \cite{diamond2019wants}.} or (2) in constructed versus planned, but unconstructed project areas.\footnote{See \cite{busso2013assessing} and \cite{kline2013local}.}  Most closely related to our work, \cite{diamond2019wants} find that public housing projects in the US increase housing prices in low-income neighborhoods and decrease housing prices in high-income neighborhoods.  \rv{Since we focus on a developing context with pervasive informal housing, our study differs in two main ways.  First, in these settings, it may be important to account for spatial outcomes within project footprints such as backyard housing.  Second, to the extent that informal housing grows in response to place-based policies and is itself a negative amenity, informal housing may undermine policy goals of producing positive amenities.}
 
-In developing countries, researchers often lack panel data and instead, rely on cross-sectional comparisons to study spillover effects of housing and urban development policies.  In Tanzania, \cite{baruah2017planning} observe that areas near sites-and-services programs have better housing quality than similar, untreated areas.  Using a similar design \rv{to study slum-upgrading} in Jakarta, Indonesia, \cite{harari2018slum} find declines in local land values and levels of formalization.  \cite{gechter2020spatial} link changes in Mumbai's zoning laws to formal housing development and higher nearby property prices.   \rv{Our study contributes to this literature by studying public housing projects using spatial panel data.}
+\rw{Our study is largely consistent with the existing literature on place-based policies in developing countries.  Our finding that housing projects invite growth of informal housing parallels the finding by \cite{harari2018slum} that slum formalization generates declines in local land values and levels of formalization in Jakarta, Indonesia.  At the same time, we also document improvements in formal housing quality that are similar to those observed by \cite{michaels2021planning} as a result of a sites-and-services program in Tanzania.  Our estimates of positive spillover effects mirror the findings of \cite{gechter2020spatial} who link changes in Mumbai's zoning laws to formal housing development and higher nearby property prices. Like the study of a housing lottery in Ethiopia by \cite{franklin2019demand}, we do not find evidence of large effects on employment or demographic characteristics of housing recipients as a result of housing projects.}
+
 
 Our study also relates to recent research on South Africa's national housing program focusing on outcomes for direct beneficiaries of project houses.  Using household surveys, studies estimate the effect of receiving a project house on women's labor supply: \cite{picarelli2019there}  finds negative effects nationally while \cite{franklin2020enabled} finds positive effects in Capetown.  \cite{franklin2020enabled} also shows that planned, but unconstructed projects may provide useful counterfactuals to estimate project effects in this context.
 
@@ -183,16 +186,37 @@ We proceed by first providing background information on public housing and the S
 
 
 
-\section{Public Housing Projects}\label{section:background}
+% \section{Public Housing Projects}\label{section:background}
 
 
-European cities began investing in social housing programs in the early 20th century, and national governments in the West continued to grow these investments in the post-WWII era. After the wave of de-colonization in the 1950s, many developing nations also began public investments in housing, which were progressively phased out in order to secure international financing for national debt crises in the 1970s and 1980s \citep{rondinelli1990housing}. Beginning in the 1990s large middle-income countries took on subsidized housing programs that focused on channeling public funds to private developers to build full top-structure dwellings. Chile, South Africa, and Brazil are examples of this more recent approach \citep{buckley2005housing}.
+% European cities began investing in social housing programs in the early 20th century, and national governments in the West continued to grow these investments in the post-WWII era. After the wave of de-colonization in the 1950s, many developing nations also began public investments in housing, which were progressively phased out in order to secure international financing for national debt crises in the 1970s and 1980s \citep{rondinelli1990housing}. Beginning in the 1990s large middle-income countries took on subsidized housing programs that focused on channeling public funds to private developers to build full top-structure dwellings. Chile, South Africa, and Brazil are examples of this more recent approach \citep{buckley2005housing}.
+% @article{rondinelli1990housing,
+%   title={Housing the Urban Poor in Developing Countries: The Magnitude of Housing Deficiencies and the Failure of Conventional Strategies are World-wide Problems},
+%   author={Rondinelli, Dennis A},
+%   journal={American Journal of Economics and Sociology},
+%   volume={49},
+%   number={2},
+%   pages={153--166},
+%   year={1990},
+%   publisher={Wiley Online Library}
+% }
+% @article{buckley2005housing,
+%   title={Housing policy in developing countries: Conjectures and refutations},
+%   author={Buckley, Robert M and Kalarickal, Jerry},
+%   journal={The World Bank Research Observer},
+%   volume={20},
+%   number={2},
+%   pages={233--257},
+%   year={2005},
+%   publisher={Oxford University Press}
+% }
 
 
-\subsection{Public Housing in South Africa}
+
+\section{Public Housing in South Africa}\label{section:background}
 
 
-The housing projects studied in this paper were implemented as part of a large national housing scheme enacted in 1994. Though periodically revised and renamed,\footnote{Public housing in South Africa has been delivered under the {\it Reconstruction and Development Program} (RDP) starting in 1994 and  by its successor, {\it Breaking New Grounds}, as of 2004.} the program has consistently sought to redress the economic and geographic legacy of apartheid by providing formal housing to low-income households.  
+The housing projects studied in this paper were implemented as part of a large national housing scheme enacted in South Africa in 1994. Though periodically revised and renamed,\footnote{Public housing in South Africa has been delivered under the {\it Reconstruction and Development Program} (RDP) starting in 1994 and  by its successor, {\it Breaking New Ground}, as of 2004.} the program has consistently sought to redress the economic and geographic legacy of apartheid by providing formal housing to low-income households.  
 
 This program allocates yearly funds to local housing authorities to construct and allocate 40m$^2$, single-story, two-room houses on individual plots.\footnote{Local housing authorities include provincial housing departments and municipal housing departments for urban areas like Johannesburg \citep{dhsreports}.}  Local authorities identify large parcels of land that are able to each accommodate several hundred houses.\footnote{We draw on qualitative field work conducted over 7 months between 2015 and 2018, including interviews with City of Johannesburg and Gauteng provincial housing officials, to corroborate our understanding of the practical specifics of policy design and implementation.}  To meet budgetary targets, authorities often identify inexpensive land located on the urban periphery.\footnote{See Interview with author, 23 August 2017 and \cite{dhsreports}}  In many cases, authorities combine housing projects with slum eradication goals by replacing preexisting informal settlements with new housing projects \citep{hofmeyr2008risk}.  Since project construction requires passing an environmental impact assessment, receiving zoning approval from local municipalities, and providing infrastructure access, authorities implement the most feasible subset of candidate projects each year.  Existing policy research characterizes South African public housing as an opaque, top-down system where government authorities locate and allocate houses with minimal participation from local communities \citep{seriq}.  Tissington [2012] documents how local community calls for housing improvements in Guateng were left unanswered for over a decade by local authorities.  \cite{seriq} report how the Gauteng government refused to provide information about plans for housing subsidies and allocation to the Soweto Farm, a local community based organization.   Housing authorities subcontract with local housing developers for housing construction.  According to government figures, upwards of 3 million housing units have been delivered nationally between 1994 and 2015.
 
@@ -230,7 +254,7 @@ We locate projects using a map of housing projects \rv{for the Johannesburg metr
 \tcbox[colback=white,boxrule=.35mm,boxsep=0mm]{\includegraphics[scale=.6,trim={.9cm .4cm .9cm .4cm}]{figures/projmap_1.png}}
 \end{figure}
 
-Figure \ref{figure:map} maps the sample of constructed and unconstructed projects within the Gauteng province.  Projects are generally located far from central business districts, suggesting that inexpensive land plots are targeted by housing authorities.  Outside of the central business district, projects are distributed relatively evenly throughout the Johannesburg metro area.  Despite their distances from central business districts, projects are often next to arterial highways, potentially easing commuting costs for recipients.  Many constructed and unconstructed projects are adjacent to each other while others remain isolated.  
+Figure \ref{figure:map} maps the sample of constructed and unconstructed projects within the Johannesburg metro area.  Projects are generally located far from central business districts, suggesting that inexpensive land plots are targeted by housing authorities.  Outside of the central business district, projects are distributed relatively evenly throughout the Johannesburg metro area.  Despite their distances from central business districts, projects are often next to arterial highways, potentially easing commuting costs for recipients.  Many constructed and unconstructed projects are adjacent to each other while others remain isolated.  
 
 %   Since project construction often occurs in phases, 
 %  which is consistent with revisions in project planning and 
@@ -595,7 +619,7 @@ Y_{it} \,=\, \beta_0 \,+\, \sum_{k=1}^{8} \, &(\beta_{1}^{k} \,+\, \beta_{2}^{k}
 \end{align}
 \noindent \rv{where $\overline{\text{Area}}\big(\textsc{Ring}_i^{k}  \cap  \textsc{Proj.}\big)$ measures the sq km of overlap between a ring from $0.5(k-1)$ to $0.5k$ km around plot $i$ and all project footprints.   $\overline{\text{Area}}\big(\textsc{Ring}_i^{k}  \cap  \textsc{Proj. Con.}\big)$ measures the sq km of overlap for this ring and only project footprints that are successfully constructed.  The overlap measures are normalized by the ring overlap generated by an average constructed project.  This normalization allows us to interpret each parameter of interest, $\beta_4^{k}$, as the average effect of constructing a project for plots whose $k$ ring has at least some project overlap.  We consider concentric 0.5 km concentric rings ranging from 0 to 4 km away from plots that implicitly assumes that any spillover effects dissipate by 4 km, which is consistent with recent literature on place-based policies.\footnote{\cite{diamond2019wants} and \cite{rossi2010housing} find that main effects are concentrated within 1 km of place-based policies.}   For reference, Figure~\ref{fig:spatialexposure} includes an example of rings from 0 to 0.5 km and 0.5 to 1 km.}
 
-\rv{Standard errors are clustered at the project-level with projects assigned to each plot according to the greatest area of overlap first with the plot's footprint and if no overlap, then with the closest overlapping ring.  We also correct standard errors for multiple hypothesis testing using the Bonferroni method and test robustness to spatially correlated errors.}
+\rv{Standard errors are clustered at the project-level with projects assigned to each plot according to the greatest area of overlap first with the plot's footprint and if no overlap, then with the closest overlapping ring.  We also correct standard errors for multiple hypothesis testing using the Bonferroni method \rw{(within each table)} and test robustness to spatially correlated errors.}
 
 Our coefficients of interest --- $\alpha_4$ for the direct effect and $\beta_4^{k}$ for the spillover effects --- capture the causal effects of project construction under the assumption that in the absence of project construction, plots exposed to constructed project footprints would have evolved in the same way as plots exposed to unconstructed project footprints.  Our flexible specification of spillover effects from 0 to 4 km allows us to examine how these effects dissipate across space.  We hypothesize that spillover effects are likely to be concentrated in nearby neighborhoods.  This specification also provides a partial test for whether areas with constructed projects and areas with unconstructed projects are likely to follow parallel trends.  We hypothesize that spillover effects are likely to dissipate at further distances (ie. 2 to 4 km).  Therefore, evidence of effects at these distances may suggest that areas with constructed projects develop differently from areas with unconstructed projects for reasons unrelated to project construction.  For example, housing projects may be accompanied by broader urban renewal programs that affect broader areas around projects.  Alternatively, policymakers may prioritize growing areas for project construction.
 
@@ -708,7 +732,7 @@ This table provides the differences-in-difference coefficient for how housing co
 \end{tabular}
 \begin{tablenotes}
 \item \footnotesize 
- This table shows difference-in-differences coefficients for census measures of people living in informal houses.  The estimates are for plots that overlap with projects. Age, African, and employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level. Population has fewer observations because census enumerator areas do not intersect with every plot.   \regtextfirst
+ This table shows difference-in-differences coefficients for census measures of people living in informal houses.  The estimates are for plots that overlap with projects. Population has fewer observations because census enumerator areas do not intersect with every plot.   \regtextfirst
 \end{tablenotes}
 \end{threeparttable}
 % }
@@ -735,34 +759,14 @@ This table provides the differences-in-difference coefficient for how housing co
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize This table shows the difference-in-differences coefficients for census measures of people living in informal houses. Age, African, and employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.  Employment and log-income are not available for all plots.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
+\item \footnotesize This table shows the difference-in-differences coefficients for census measures of people living in informal houses. Age, African, and Employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.  Employment and log-income are not available for all plots.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
 \end{tablenotes}
 \end{threeparttable}
 % }
 \end{table}
 
 
-\rv{We also examine whether projects invite business development in their footprints.  The building data record total businesses and a subcategory identified as informal businesses although there may be some imprecision in categorizing businesses in this dataset as discussed in Section~\ref{section:data}.  Table~\ref{table:agglom_proj} finds large, statistically significant increases in total businesses, which are driven in large part by informal businesses.  The point estimate for informal businesses is almost four times the pre period mean.  These findings are consistent with housing recipients using their new dwellings as opportunities to launch their own businesses.  An important caveat is that since the building data is mainly derived from aerial imagery, there may be substantial scope for mismeasurement if backyard housing and informal businesses have similar visual markers.}
-
-\begin{table}[h!]
-\small
-\centering
-\caption{Direct Effects on Economic Outcomes}\label{table:agglom_proj}
-\vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCC}
-\toprule
-\input{figures/agglom_top_proj}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize 
-This table shows the difference-in-differences estimates for average business counts per plot from the business data.  The estimates are for plots that overlap with projects. \regtextfirst
-\end{tablenotes}
-\end{threeparttable}
-% }
-\end{table}
+We also examine whether projects invite business development in their footprints.  The building data record total businesses and a subcategory identified as informal businesses although there may be some imprecision in categorizing businesses in this dataset as discussed in Section~\ref{section:data}.  \rw{Appendix Table~\ref{table:agglom_proj}} finds large, statistically significant increases in total businesses, which are driven in large part by informal businesses.  The point estimate for informal businesses is almost four times the pre period mean.  These findings are consistent with housing recipients using their new dwellings as opportunities to launch their own businesses.  An important caveat is that since the building data is mainly derived from aerial imagery, there may be substantial scope for mismeasurement if backyard housing and informal businesses have similar visual markers.
 
 
 
@@ -804,7 +808,9 @@ This table shows the spillover effects of constructed housing projects on popula
 
 
 
-\rv{We examine whether project construction generates spillover effects on formal house prices in 0-.5 km neighborhoods.  Table~\ref{table:prices} provides estimates of spillover effects on the number of transactions per plot in columns (1) and (2) and the average price of transactions per plot in columns (3) and (4).  Columns (1) and (3) define periods pre/post construction as pre/post 2006.  In contrast, columns (2) and (4) define pre construction as before 2004 and post construction as after 2009, which may more precisely reflect conditions before and after construction while including fewer observations.  Columns (1) and (2) find close to zero, statistically insignificant impacts of project construction on the number of transactions per plot.  Columns (3) and (4) find small, statistically insignificant positive impacts of project construction on average prices per plot.  Since prices are expressed in log-terms, point estimates approximate the percentage change in transaction prices associated with overlap with constructed projects in 0-.5 km rings around plots.  Point estimates suggest spillover effect of 3.4\% price increases in column (3) and 8.9\% price increases in column (4) although these results are statistically insignificantly different from zero.  }
+\rv{We examine whether project construction generates spillover effects on formal house prices in 0-.5 km neighborhoods.  Table~\ref{table:prices} provides estimates of spillover effects on the number of transactions per plot in columns (1) and (2) and the average price of transactions per plot in columns (3) and (4).  Columns (1) and (3) define periods pre/post construction as pre/post 2006.  In contrast, columns (2) and (4) define pre construction as before 2004 and post construction as after 2009, which may more precisely reflect conditions before and after construction while including fewer observations.  Columns (1) and (2) find close to zero, statistically insignificant impacts of project construction on the number of transactions per plot.  Columns (3) and (4) find small, statistically insignificant positive impacts of project construction on average prices per plot.  Since prices are expressed in log-terms, point estimates approximate the percentage change in transaction prices associated with overlap with constructed projects in 0-.5 km rings around plots.  Point estimates suggest spillover effect of 3.4\% price increases in column (3) and 8.9\% price increases in column (4) although these results are statistically insignificantly different from zero. } 
+
+\rw{ This 8.9\% price effect is similar to previous price estimates in the literature, which range from 6.5\% to 15\% in low-income US neighborhoods to 12\% in middle-income neighborhoods in Uruguay.\footnote{See \cite{diamond2019wants} and \cite{baum2009effects} for US Low Income Housing Tax Credit estimates.  See \cite{gonzalez2022spillover} for public housing estimates from Uruguay.}  Our effect differs from the 2.5\% decrease in prices observed in high income US neighborhoods.\footnote{See \citep{diamond2019wants}.}  Given that South African housing projects are located in relatively low-income neighborhoods, our price effects are largely consistent with the literature. }
 
 \begin{table}[h!]
 \small
@@ -848,7 +854,7 @@ This table shows the spillover effects of constructed housing projects on formal
 \end{tabular}
 \begin{tablenotes}
 \item \footnotesize
- This table shows the difference-in-differences coefficients for census measures.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  Age, African, and employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
+ This table shows the difference-in-differences coefficients for census measures.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  Age, African, and Employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
 \end{tablenotes}
 \end{threeparttable}
 }
@@ -857,29 +863,7 @@ This table shows the spillover effects of constructed housing projects on formal
 
 \rv{Table~\ref{table:census_spill} examines whether spillover housing growth is linked to changing house quality and changing demographics of the inhabitants.  We estimate relatively precise zeros across almost all census outcomes.  These results suggest that improvements in house quality such as access to services like water and electricity do not spill over to neighboring houses just outside of project footprints.  Additionally, the growth in housing quantity does not appear to be accompanied by a change in the types of people living in these houses.  Appendix Tables~\ref{table:census_formal_spill} and \ref{table:census_informal_spill} find similarly zero effects for people living formal housing and informal housing respectively.   }
 
-\begin{table}[h!]
-\small
-\centering
-\caption{Spillover Effects on Economic Outcomes}\label{table:agglom_spill}
-\vspace{-2mm}
-% \resizebox{1\linewidth}{!}{
-\begin{threeparttable}
-\begin{tabular}{lCC}
-\toprule
-\input{figures/agglom_top_spill}
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\item \footnotesize 
-This table shows the difference-in-differences estimates for average business counts per plot from the business data.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  \regtextfirst
-\end{tablenotes}
-\end{threeparttable}
-% }
-\end{table}
-
-
-
-\rv{We then estimate potential spillover effects on business growth nearby projects.  Table~\ref{table:agglom_spill} finds positive coefficients on both total businesses and informal businesses although these effects are statistically insignificant to the point that we cannot reject substantial negative effects.  These estimates suggest little scope for substantial spillovers in economic development nearby projects.}
+\rv{We then estimate potential spillover effects on business growth nearby projects.  Appendix Table~\ref{table:agglom_spill} finds positive coefficients on both total businesses and informal businesses although these effects are statistically insignificant to the point that we cannot reject substantial negative effects.  These estimates suggest little scope for substantial spillovers in economic development nearby projects.}
 
 
 
@@ -946,7 +930,7 @@ This table shows the direct and spillover effects of constructed housing project
 \section{Discussion}\label{section:discussion}
 
 
-\rv{We now evaluate each of three hypotheses that frame our investigation of place-based effects of public housing policy in Gauteng.}
+\rv{We now evaluate each of three hypotheses that frame our investigation of place-based effects of public housing policy in the Johannesburg metro area.}
 
 \rv{First, surrounding neighborhoods may benefit directly from public investments in utilities and other services within project footprints.  Projects bring new water and electricity utility buildings as shown in Table~\ref{table:infra_proj}, which may extend access to nearby houses.  Instead, we observe little evidence of improved services among nearby houses according to Table~\ref{table:census_spill}.  Nearby houses may still benefit from infrastructure not measured in our datasets such as parks and community centers.  Measurement error due to the interpolation of census areas onto plots may also limit the extent to which we can detect precise effects on nearby houses.}
 
@@ -964,7 +948,7 @@ First, we limit the sample to include only plots whose closest projects have no 
 
 % find broadly similar effects as our main specifications across population, housing, and census outcomes.
 
-Second, we reweight the sample to ensure balance in housing and population characteristics across projects in the pre-period.  We construct weights with a propensity score approach \citep{angrist2008mostly}.  First, we use a logistic regression to predict the probability of project construction according to \rv{all measures in Table~\ref{table:projectdescriptives} in each project footprint in the pre-period.}  Results in Appendix Table~\ref{table:pweight} indicate that preexisting \rv{population and distance to CBD are the strongest predictors} of whether a project is ultimately constructed.  We construct propensity score weights by computing predicted values, $\hat{e}$, from the logistic regression and assigning weights, $\frac{1}{\hat{e}}$, to constructed projects and weights $\frac{1}{(1-\hat{e})}$ to unconstructed projects.\footnote{Appendix Figure~\ref{figure:pweight} plots the histogram of predicted values and finds that constructed and unconstructed projects share common support across the distribution of predicted values.}  After weighting, average differences in housing quantity and population between constructed and unconstructed project footprints are no longer statistically significant.  Finally, we assign a propensity score weight to each plot according to the plot's nearest housing project.  Appendix Table~\ref{table:mainpweight} includes the main results where observations are reweighted according to their propensity score weights.  Results are very similar to our main specifications.
+Second, we reweight the sample to ensure balance in housing and population characteristics across projects in the pre-period.  We construct weights with a propensity score approach \citep{angrist2008mostly}.  First, we use a logistic regression to predict the probability of project construction according to \rv{all measures in Table~\ref{table:projectdescriptives} in each project footprint in the pre-period.}  Results in Appendix Table~\ref{table:pweight} indicate that preexisting \rv{population and distance to CBD are the strongest predictors} of whether a project is ultimately constructed.  We construct propensity score weights by computing predicted values, $\hat{e}$, from the logistic regression and assigning weights, $\frac{1}{\hat{e}}$, to constructed projects and weights $\frac{1}{(1-\hat{e})}$ to unconstructed projects.\footnote{Appendix Figure~\ref{figure:pweight} plots the histogram of predicted values and finds that constructed and unconstructed projects share common support across the distribution of predicted values.}  \rw{As a result of weighting,} average differences in housing quantity and population between constructed and unconstructed project footprints are no longer statistically significant.  Finally, we assign a propensity score weight to each plot according to the plot's nearest housing project.  Appendix Table~\ref{table:mainpweight} includes the main results where observations are reweighted according to their propensity score weights.  Results are very similar to our main specifications.
 
 Third, we conduct a placebo test where we recreate our main analysis while instead using 1996 census data as a pre-period and 2001 census data as a post-period.  Any effects of project construction in this interval before project construction would suggest that constructed and unconstructed projects were following differential trends prior to project construction.  Results in Appendix Table~\ref{table:mainplacebo} indicate largely statistically insignificant and small magnitude effects across 10 census measures.  Population in project footprints experiences the largest positive effect although it is statistically significant at the 10\% level and is less than 20\% of the effect of our main specifications.  Overall, these results provide little evidence of \rv{significant} differential trends in outcomes leading up to project construction.  \rv{These results further suggest that relatively few constructed projects were completed prior to 2001.}  
 
@@ -980,7 +964,7 @@ Third, we conduct a placebo test where we recreate our main analysis while inste
 \rv{Eighth, we examine whether the census data may mismeasure direct and spillover effects because large census enumerator areas are interpolated onto small land plots.  Table~\ref{table:census_ea_robust} replicates the census results using census enumerator areas as the spatial unit of observation.  We observe similar directions but smaller magnitudes for the direct effects.  Spillover effects are insignificant and close to zero across most outcomes.  Zero spillover effects are likely the result of having few enumerator areas that do not directly overlap with projects but are still close enough to projects for neighborhood overlap in the 0-.5 km range.  Results for population from the census data and houses from the building data closely match each other in Table~\ref{table:census_building_robust}, suggesting that the extrapolation procedure may not introduce substantial bias. }
 
 
-\rv{Ninth, we examine spillover effects at 0.1 km intervals to determine whether effects are concentrated immediately near project boundaries.  Table~\ref{table:far_robust} includes results for 0.1 km rings from 0 to 0.5 km from project boundaries while also controlling for 0.5 km rings from 0.5 to 4 km from projects.  The only statistically significant spillovers are detected from 0.4 to 0.5 km from projects for formal housing in column (1) and informal backyard houses in column (3).  Point estimates do not indicate a clear pattern in spillover effects and distance to projects within 0.5 km.  }
+\rv{Ninth, we examine spillover effects at 0.1 km intervals to determine whether effects are concentrated immediately near project boundaries.  Table~\ref{table:dist_robust} includes results for 0.1 km rings from 0 to 0.5 km from project boundaries while also controlling for 0.5 km rings from 0.5 to 4 km from projects.  The only statistically significant spillovers are detected from 0.4 to 0.5 km from projects for formal housing in column (1) and informal backyard houses in column (3).  Point estimates do not indicate a clear pattern in spillover effects and distance to projects within 0.5 km.  }
 
 
 
@@ -1005,7 +989,9 @@ Finally as a third goal, ``government must promote the establishment, developmen
 
 Our results also provide broader lessons for considering informal housing markets in the design of place-based policies in developing countries.  We find that the supply of informal housing may be particularly responsive to place-based policies.  While projects may increase prices in formal housing markets for high-income areas just as in developed country settings (\cite{diamond2019wants}), informal markets experience large increases in the quantity of dwellings.  In future research, housing quantity data may complement formal housing price data for measuring the total impacts of these policies.  
 
-Active informal housing markets also allow for the spillover effects of housing projects to extend not only just outside of project footprints, but also within project footprints.  We document substantial construction of informal houses in the backyards of project houses.  \rv{To measure the spillover effects of place-based policies, researchers and policymakers have largely focused on changes outside of policy footprints because policies in developed settings leave little scope for informal activity within their footprints (\cite{diamond2019wants}, \cite{rossi2010housing}, \cite{hornbeck2017creative}).  Our analysis suggests that in developing contexts, future research on place-based policies may benefit broadening the area of analysis to include outcomes in the project footprints themselves.}  From a policy perspective, these results indicate that policymakers in developing contexts may consider pairing housing projects with broader investments in basic infrastructure in anticipation of informal backyard housing growth \citep{visagie2020getting}.
+Active informal housing markets also allow for the spillover effects of housing projects to extend not only just outside of project footprints, but also within project footprints.  We document substantial construction of informal houses in the backyards of project houses.  \rv{To measure the spillover effects of place-based policies, researchers and policymakers have largely focused on changes outside of policy footprints because policies in developed settings leave little scope for informal activity within their footprints (\cite{diamond2019wants}, \cite{rossi2010housing}, \cite{hornbeck2017creative}).  Our analysis suggests that in developing contexts, future research on place-based policies may benefit broadening the area of analysis to include outcomes in the project footprints themselves.}  
+
+% From a policy perspective, these results indicate that policymakers in developing contexts may consider pairing housing projects with broader investments in basic infrastructure in anticipation of informal backyard housing growth \citep{visagie2020getting}.
 
 \rv{While our analysis identifies some channels through which projects may affect welfare, we are unable to measure the full welfare effects of housing projects.  Our estimates of positive spillover effects suggest that projects may generate positive housing externalities and improve welfare for nearby residents and developers.  Data limitations prevent us from understanding welfare changes for people who lived in project areas before construction, people who received project houses, and the neighborhoods left behind by people who moved into project areas.  We also lack detailed data on the government's costs of constructing projects in our sample.  Quantifying these aspects may provide a useful direction for future research on housing projects in developing countries.}\footnote{ \rv{See \cite{franklin2019demand} for a detailed analysis of housing project recipients in Ethiopia.} }
 
@@ -1411,7 +1397,7 @@ This table shows the direct and spillover effects of constructed housing project
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize  This table shows the spillover effects for 0.1 km rings from 0 to 0.5 km from plots.  The full set of 0.5 km rings from 0.5 to 4 km from plots are also included as controls although the coefficients are not included here.  \regtextfirst
+\item \footnotesize  This table shows the spillover effects for 0.1 km rings from 0 to 0.5 km from plots \rw{in order to test for localized spillover effects within 0.5 km of projects}.  The full set of 0.5 km rings from 0.5 to 4 km from plots are also included as controls although the coefficients are not included here.  \regtextfirst
 \end{tablenotes}
 \end{threeparttable}
 }
@@ -1525,6 +1511,50 @@ Correlation of Building Data and Census Data \\
 
 
 
+\clearpage
+
+\begin{table}[ht!]
+\small
+\centering
+\caption{Direct Effects on Economic Outcomes}\label{table:agglom_proj}
+\vspace{-2mm}
+% \resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCC}
+\toprule
+\input{figures/agglom_top_proj}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize 
+This table shows the difference-in-differences estimates for average business counts per plot from the business data.  The estimates are for plots that overlap with projects. \regtextfirst
+\end{tablenotes}
+\end{threeparttable}
+% }
+\end{table}
+
+
+
+\begin{table}[ht!]
+\small
+\centering
+\caption{Spillover Effects on Economic Outcomes}\label{table:agglom_spill}
+\vspace{-2mm}
+% \resizebox{1\linewidth}{!}{
+\begin{threeparttable}
+\begin{tabular}{lCC}
+\toprule
+\input{figures/agglom_top_spill}
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item \footnotesize 
+This table shows the difference-in-differences estimates for average business counts per plot from the business data.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  \regtextfirst
+\end{tablenotes}
+\end{threeparttable}
+% }
+\end{table}
+
 
 
 
@@ -1547,7 +1577,7 @@ Correlation of Building Data and Census Data \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize  This table shows the difference-in-differences coefficients for census measures for plots that overlap with projects.  Age, African, and employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
+\item \footnotesize  This table shows the difference-in-differences coefficients for census measures for plots that overlap with projects.  Age, African, and Employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
 \end{tablenotes}
 \end{threeparttable}
 }
@@ -1571,7 +1601,7 @@ Correlation of Building Data and Census Data \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize  This table shows the difference-in-differences coefficients for census measures for people living in informal housing.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  Age, African, and employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
+\item \footnotesize  This table shows the difference-in-differences coefficients for census measures for people living in informal housing.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  Age, African, and Employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
 \end{tablenotes}
 \end{threeparttable}
 }
@@ -1594,7 +1624,7 @@ Correlation of Building Data and Census Data \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\item \footnotesize  This table shows the difference-in-differences coefficients for census measures for people living in formal housing.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  Age, African, and employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
+\item \footnotesize  This table shows the difference-in-differences coefficients for census measures for people living in formal housing.  The estimates are for plots that are outside of projects, but have at least one .5 km neighborhood ring that overlaps with a project.  Age, African, and Employment are measured for the household head.  Employment is calculated for heads of household between ages 18 to 65.  Log income is measured at the household level.   \regtextfirst The Bonferroni correction is computed separately for columns 1-5 and columns 6-10.
 \end{tablenotes}
 \end{threeparttable}
 }
